@@ -1,6 +1,6 @@
 // ⚡ 初始化 Supabase
 const SUPABASE_URL = "https://ffdrwsemmfvqlqhyjlnb.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmZHJ3c2VtbWZ2cWxxaHlqbG5iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMDI1ODQsImV4cCI6MjA3MTg3ODU4NH0.x7TQHZ2af8O_f9ye__mT6eVstlH9BiyVkNVaOnL3h74";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmZHJ3c2VtbWZ2cWxxaHlqbG5iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMDI1ODQsImV4cCI6MjA3MTg3ODU4NH0.x7TQHZ2af8O_f9ye__mT6eVstlH9BiyVkNVaOnL3h74";  // ⚠️ 建议以后放在 server 端更安全
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // 🌐 翻译字典
@@ -86,7 +86,7 @@ function togglePassword(inputId, eyeIcon) {
 
 // 🔑 登录
 document.getElementById("loginBtn").addEventListener("click", async function () {
-  const username = document.getElementById("loginUsername").value;
+  const username = document.getElementById("loginUsername").value.trim();
   const password = document.getElementById("loginPassword").value;
 
   const { data, error } = await supabaseClient
@@ -105,13 +105,21 @@ document.getElementById("loginBtn").addEventListener("click", async function () 
   }
 });
 
-// 📝 注册
+// 📝 注册（合并后的完整逻辑）
 document.getElementById("registerBtn").addEventListener("click", async function () {
-  const username = document.getElementById("regUsername").value;
+  const username = document.getElementById("regUsername").value.trim();
   const pass = document.getElementById("regPassword").value;
   const confirm = document.getElementById("regConfirmPassword").value;
   const agree = document.getElementById("agreeTerms").checked;
 
+  if (!username || !pass) {
+    alert("Username and password cannot be empty!");
+    return;
+  }
+  if (pass.length < 6) {
+    alert("Password must be at least 6 characters!");
+    return;
+  }
   if (pass !== confirm) {
     alert("Passwords do not match!");
     return;
@@ -121,35 +129,23 @@ document.getElementById("registerBtn").addEventListener("click", async function 
     return;
   }
 
-  const { error } = await supabaseClient
+  // ✅ 检查用户名是否存在
+  const { data: existing, error: checkError } = await supabaseClient
     .from("users")
-    .insert([{ username: username, password: pass }]);
+    .select("id")
+    .eq("username", username);
 
-  if (error) {
-    alert("Registration failed: " + error.message);
-  } else {
-    alert("Registered successfully!");
-  }
-});
-
-// 注册验证 + 存数据库
-document.getElementById("registerBtn").addEventListener("click", async function () {
-  const username = document.getElementById("regUsername").value;
-  const pass = document.getElementById("regPassword").value;
-  const confirm = document.getElementById("regConfirmPassword").value;
-  const agree = document.getElementById("agreeTerms").checked;
-
-  if (pass !== confirm) {
-    alert("Passwords do not match!");
+  if (checkError) {
+    alert("Error checking user: " + checkError.message);
     return;
   }
-  if (!agree) {
-    alert("Please agree to the terms!");
+  if (existing.length > 0) {
+    alert("Username already exists, please choose another!");
     return;
   }
 
-  // ⚡ 写入 Supabase
-  const { data, error } = await supabase
+  // ⚡ 插入新用户
+  const { data, error } = await supabaseClient
     .from("users")
     .insert([{ username: username, password: pass }]);
 
@@ -160,4 +156,3 @@ document.getElementById("registerBtn").addEventListener("click", async function 
     console.log("✅ Inserted:", data);
   }
 });
-
