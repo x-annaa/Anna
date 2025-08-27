@@ -1,4 +1,9 @@
-// 翻译字典
+// ⚡ 初始化 Supabase
+const SUPABASE_URL = "https://ffdrwsemmfvqlqhyjlnb.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmZHJ3c2VtbWZ2cWxxaHlqbG5iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMDI1ODQsImV4cCI6MjA3MTg3ODU4NH0.x7TQHZ2af8O_f9ye__mT6eVstlH9BiyVkNVaOnL3h74";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// 🌐 翻译字典
 const translations = {
   en: {
     title: "Welcome",
@@ -8,7 +13,7 @@ const translations = {
     confirm: "Confirm Password",
     login: "Login",
     register: "Register",
-    agree: "✅ I agree to the terms"
+    agree: "I agree to the terms"
   },
   zh: {
     title: "欢迎",
@@ -18,7 +23,7 @@ const translations = {
     confirm: "确认密码",
     login: "登录",
     register: "注册",
-    agree: "✅ 我已阅读并同意条款"
+    agree: "我已阅读并同意条款"
   },
   jp: {
     title: "ようこそ",
@@ -28,7 +33,7 @@ const translations = {
     confirm: "確認パスワード",
     login: "ログイン",
     register: "登録",
-    agree: "✅ 利用規約に同意します"
+    agree: "利用規約に同意します"
   }
 };
 
@@ -72,21 +77,37 @@ function togglePassword(inputId, eyeIcon) {
   const input = document.getElementById(inputId);
   if (input.type === "password") {
     input.type = "text";
-    eyeIcon.textContent = "🙈"; // 切换图标
+    eyeIcon.textContent = "🙈";
   } else {
     input.type = "password";
     eyeIcon.textContent = "👁️";
   }
 }
 
-// 登录跳转
-document.getElementById("loginBtn").addEventListener("click", function () {
-  alert("Login success! Redirecting...");
-  window.location.href = "frontend/home.html";
+// 🔑 登录
+document.getElementById("loginBtn").addEventListener("click", async function () {
+  const username = document.getElementById("loginUsername").value;
+  const password = document.getElementById("loginPassword").value;
+
+  const { data, error } = await supabaseClient
+    .from("users")
+    .select("*")
+    .eq("username", username)
+    .eq("password", password);
+
+  if (error) {
+    alert("Login failed: " + error.message);
+  } else if (data.length > 0) {
+    alert("Login success! Redirecting...");
+    window.location.href = "frontend/home.html";
+  } else {
+    alert("Invalid username or password!");
+  }
 });
 
-// 注册验证
-document.getElementById("registerBtn").addEventListener("click", function () {
+// 📝 注册
+document.getElementById("registerBtn").addEventListener("click", async function () {
+  const username = document.getElementById("regUsername").value;
   const pass = document.getElementById("regPassword").value;
   const confirm = document.getElementById("regConfirmPassword").value;
   const agree = document.getElementById("agreeTerms").checked;
@@ -100,5 +121,13 @@ document.getElementById("registerBtn").addEventListener("click", function () {
     return;
   }
 
-  alert("Registered successfully (demo, not saved yet).");
+  const { error } = await supabaseClient
+    .from("users")
+    .insert([{ username: username, password: pass }]);
+
+  if (error) {
+    alert("Registration failed: " + error.message);
+  } else {
+    alert("Registered successfully!");
+  }
 });
