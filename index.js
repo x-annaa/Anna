@@ -1,29 +1,22 @@
-// 临时存储在浏览器 localStorage
-function register() {
-  const username = document.getElementById("regUsername").value;
-  const password = document.getElementById("regPassword").value;
-
-  if (username && password) {
-    localStorage.setItem("username", username);
-    localStorage.setItem("password", password);
-    document.getElementById("message").innerText = "✅ Registration successful! Please login.";
-  } else {
-    document.getElementById("message").innerText = "⚠️ Please fill all fields.";
+// 翻译字典
+const translations = {
+  en: {
+    title: "Welcome",
+    description: "Please register or login below:"
+  },
+  zh: {
+    title: "欢迎",
+    description: "请在下方注册或登录："
+  },
+  jp: {
+    title: "ようこそ",
+    description: "以下から登録またはログインしてください："
   }
-}
+};
 
-function login() {
-  const username = document.getElementById("loginUsername").value;
-  const password = document.getElementById("loginPassword").value;
-
-  const savedUser = localStorage.getItem("username");
-  const savedPass = localStorage.getItem("password");
-
-  if (username === savedUser && password === savedPass) {
-    document.getElementById("message").innerText = "✅ Login successful!";
-    // 登录成功 → 跳转
-    window.location.href = "frontend/home.html";
-  } else {
-    document.getElementById("message").innerText = "❌ Invalid credentials.";
-  }
-}
+// 切换语言
+document.getElementById("language").addEventListener("change", function () {
+  const lang = this.value;
+  document.getElementById("title").textContent = translations[lang].title;
+  document.getElementById("description").textContent = translations[lang].description;
+});
