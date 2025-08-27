@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f9;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background: #eee;
+    }
+    #refreshBtn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    #refreshBtn:hover {
+      background: #0056b3;
+    }
+  </style>
+  <!-- Supabase JS -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <h1>Admin Panel</h1>
+  <button id="refreshBtn">🔄 刷新用户数据</button>
+  <table id="usersTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>用户名</th>
+        <th>密码</th>
+        <th>创建时间</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    // ⚡ 管理员简单密码保护
+    const adminPassword = "mySecret123"; // 你自己设定的密码
+    const input = prompt("请输入管理员密码：");
+    if (input !== adminPassword) {
+      alert("密码错误！");
+      window.location.href = "/"; // 跳回首页
+    }
+
+    // ⚡ 初始化 Supabase
+    const SUPABASE_URL = "https://ffdrwsemmfvqlqhyjlnb.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmZHJ3c2VtbWZ2cWxxaHlqbG5iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMDI1ODQsImV4cCI6MjA3MTg3ODU4NH0.x7TQHZ2af8O_f9ye__mT6eVstlH9BiyVkNVaOnL3h74";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function loadUsers() {
+      const { data, error } = await supabaseClient
+        .from("users")
+        .select("*")
+        .order("id", { ascending: true });
+
+      if (error) {
+        alert("加载用户失败: " + error.message);
+        return;
+      }
+
+      const tbody = document.querySelector("#usersTable tbody");
+      tbody.innerHTML = "";
+
+      data.forEach(user => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${user.id}</td>
+          <td>${user.username}</td>
+          <td>${user.password}</td>
+          <td>${user.created_at || ""}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    document.getElementById("refreshBtn").addEventListener("click", loadUsers);
+
+    // 默认进入页面时加载
+    loadUsers();
+  </script>
+</body>
+</html>
