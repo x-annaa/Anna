@@ -15,16 +15,46 @@
     </select>
   </div>
 
-  <!-- 标题 -->
   <h1 id="title">Welcome</h1>
   <p id="description">Please register or login below:</p>
 
-  <!-- 注册 / 登录表单 -->
-  <div class="form-container">
-    <input type="text" id="username" placeholder="Username">
-    <input type="password" id="password" placeholder="Password">
-    <button id="registerBtn">Register</button>
+  <!-- 切换注册 / 登录按钮 -->
+  <div class="tab-container">
+    <button id="showLogin" class="active">Login</button>
+    <button id="showRegister">Register</button>
+  </div>
+
+  <!-- 登录窗口 -->
+  <div id="loginForm" class="form-container">
+    <input type="text" id="loginUsername" placeholder="Username">
+    
+    <div class="password-wrapper">
+      <input type="password" id="loginPassword" placeholder="Password">
+      <span class="toggle-password" onclick="togglePassword('loginPassword', this)">👁️</span>
+    </div>
+
     <button id="loginBtn">Login</button>
+  </div>
+
+  <!-- 注册窗口 -->
+  <div id="registerForm" class="form-container hidden">
+    <input type="text" id="regUsername" placeholder="Username">
+
+    <div class="password-wrapper">
+      <input type="password" id="regPassword" placeholder="Password">
+      <span class="toggle-password" onclick="togglePassword('regPassword', this)">👁️</span>
+    </div>
+
+    <div class="password-wrapper">
+      <input type="password" id="regConfirmPassword" placeholder="Confirm Password">
+      <span class="toggle-password" onclick="togglePassword('regConfirmPassword', this)">👁️</span>
+    </div>
+
+    <label class="agreement">
+      <input type="checkbox" id="agreeTerms"> ✅ I agree to the terms
+    </label>
+
+    <button id="registerBtn">Register</button>
   </div>
 
   <script src="index.js"></script>
