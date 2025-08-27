@@ -131,3 +131,33 @@ document.getElementById("registerBtn").addEventListener("click", async function 
     alert("Registered successfully!");
   }
 });
+
+// 注册验证 + 存数据库
+document.getElementById("registerBtn").addEventListener("click", async function () {
+  const username = document.getElementById("regUsername").value;
+  const pass = document.getElementById("regPassword").value;
+  const confirm = document.getElementById("regConfirmPassword").value;
+  const agree = document.getElementById("agreeTerms").checked;
+
+  if (pass !== confirm) {
+    alert("Passwords do not match!");
+    return;
+  }
+  if (!agree) {
+    alert("Please agree to the terms!");
+    return;
+  }
+
+  // ⚡ 写入 Supabase
+  const { data, error } = await supabase
+    .from("users")
+    .insert([{ username: username, password: pass }]);
+
+  if (error) {
+    alert("Registration failed: " + error.message);
+  } else {
+    alert("Registered successfully!");
+    console.log("✅ Inserted:", data);
+  }
+});
+
