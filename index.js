@@ -84,7 +84,7 @@ function togglePassword(inputId, eyeIcon) {
   }
 }
 
-// 🔑 登录
+// 🔑 登录（保持不变）
 document.getElementById("loginBtn").addEventListener("click", async function () {
   const username = document.getElementById("loginUsername").value.trim();
   const password = document.getElementById("loginPassword").value;
@@ -97,7 +97,7 @@ document.getElementById("loginBtn").addEventListener("click", async function () 
 
   if (error) {
     alert("Login failed: " + error.message);
-  } else if (data.length > 0) {
+  } else if (data && data.length > 0) {
     alert("Login success! Redirecting...");
     window.location.href = "frontend/home.html";
   } else {
@@ -105,7 +105,48 @@ document.getElementById("loginBtn").addEventListener("click", async function () 
   }
 });
 
-// 📝 注册（合并后的完整逻辑）
+
+// =============== 这里开始是新增的“平台账号 + 余额 + 密码长度校验” ===============
+
+// 生成随机平台账号（2位大写字母 + 4位数字，如 AB1234）
+function generatePlatformAccount() {
+  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const numbers = "0123456789";
+  let acc = "";
+  for (let i = 0; i < 2; i++) acc += letters[Math.floor(Math.random() * letters.length)];
+  for (let i = 0; i < 4; i++) acc += numbers[Math.floor(Math.random() * numbers.length)];
+  return acc;
+}
+
+// 尝试创建用户（带唯一平台账号，最多重试 5 次防碰撞）
+async function createUserWithUniqueAccount(username, pass) {
+  const MAX_TRIES = 5;
+  for (let i = 0; i < MAX_TRIES; i++) {
+    const platform_account = generatePlatformAccount();
+    const payload = {
+      username,
+      password: pass,
+      balance: 0,               // 默认余额 0
+      platform_account
+    };
+
+    const { error } = await supabaseClient.from("users").insert([payload]);
+
+    if (!error) {
+      return { platform_account }; // 成功
+    }
+    // 如果是唯一键冲突（Postgres 错误码 23505），则重试生成
+    if (error.code === "23505") {
+      console.warn("平台账号重复，重试生成...", platform_account);
+      continue;
+    }
+    // 其它错误直接返回
+    return { error };
+  }
+  return { error: { message: "生成唯一平台账号失败，请稍后重试。" } };
+}
+
+// 📝 注册（增强后的完整逻辑）
 document.getElementById("registerBtn").addEventListener("click", async function () {
   const username = document.getElementById("regUsername").value.trim();
   const pass = document.getElementById("regPassword").value;
@@ -139,20 +180,18 @@ document.getElementById("registerBtn").addEventListener("click", async function 
     alert("Error checking user: " + checkError.message);
     return;
   }
-  if (existing.length > 0) {
+  if (existing && existing.length > 0) {
     alert("Username already exists, please choose another!");
     return;
   }
 
-  // ⚡ 插入新用户
-  const { data, error } = await supabaseClient
-    .from("users")
-    .insert([{ username: username, password: pass }]);
+  // ⚡ 插入新用户（自动生成唯一平台账号 & 初始余额 0）
+  const { platform_account, error: insertError } = await createUserWithUniqueAccount(username, pass);
 
-  if (error) {
-    alert("Registration failed: " + error.message);
+  if (insertError) {
+    alert("Registration failed: " + (insertError.message || "Unknown error"));
   } else {
-    alert("Registered successfully!");
-    console.log("✅ Inserted:", data);
+    alert("Registered successfully! 🎉\nYour Platform Account: " + platform_account);
+    console.log("✅ Registered with platform_account:", platform_account);
   }
 });
