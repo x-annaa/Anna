@@ -169,6 +169,12 @@ document.getElementById("registerBtn").addEventListener("click", async function 
     alert("Please agree to the terms!");
     return;
   }
+  
+  if (data.length > 0) {
+  alert("Login success! Redirecting...");
+  localStorage.setItem("username", username); // ✅ 保存登录的用户名
+  window.location.href = "home.html";
+}
 
   // ✅ 检查用户名是否存在
   const { data: existing, error: checkError } = await supabaseClient
