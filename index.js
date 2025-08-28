@@ -1,6 +1,6 @@
 // ⚡ 初始化 Supabase
 const SUPABASE_URL = "https://ffdrwsemmfvqlqhyjlnb.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmZHJ3c2VtbWZ2cWxxaHlqbG5iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMDI1ODQsImV4cCI6MjA3MTg3ODU4NH0.x7TQHZ2af8O_f9ye__mT6eVstlH9BiyVkNVaOnL3h74";  
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmZHJ3c2VtbWZ2cWxxaHlqbG5iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMDI1ODQsImV4cCI6MjA3MTg3ODU4NH0.x7TQHZ2af8O_f9ye__mT6eVstlH9BiyVkNVaOnL3h74";  // ⚠️ 建议以后放在 server 端更安全
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // 🌐 翻译字典
@@ -41,11 +41,11 @@ const translations = {
 function updateLanguage(lang) {
   document.getElementById("title").textContent = translations[lang].title;
   document.getElementById("description").textContent = translations[lang].description;
-
+  
   document.getElementById("loginUsername").placeholder = translations[lang].username;
   document.getElementById("loginPassword").placeholder = translations[lang].password;
   document.getElementById("loginBtn").textContent = translations[lang].login;
-
+  
   document.getElementById("regUsername").placeholder = translations[lang].username;
   document.getElementById("regPassword").placeholder = translations[lang].password;
   document.getElementById("regConfirmPassword").placeholder = translations[lang].confirm;
@@ -53,12 +53,11 @@ function updateLanguage(lang) {
   document.querySelector(".agreement").innerHTML = `<input type="checkbox" id="agreeTerms"> ${translations[lang].agree}`;
 }
 
-// 语言切换
 document.getElementById("language").addEventListener("change", function () {
   updateLanguage(this.value);
 });
 
-// 窗口切换
+// 切换窗口
 document.getElementById("showLogin").addEventListener("click", () => {
   document.getElementById("loginForm").classList.remove("hidden");
   document.getElementById("registerForm").classList.add("hidden");
@@ -85,7 +84,29 @@ function togglePassword(inputId, eyeIcon) {
   }
 }
 
-// ====================== 平台账号 & 注册逻辑 ======================
+// 🔑 登录（保持不变）
+document.getElementById("loginBtn").addEventListener("click", async function () {
+  const username = document.getElementById("loginUsername").value.trim();
+  const password = document.getElementById("loginPassword").value;
+
+  const { data, error } = await supabaseClient
+    .from("users")
+    .select("*")
+    .eq("username", username)
+    .eq("password", password);
+
+  if (error) {
+    alert("Login failed: " + error.message);
+  } else if (data && data.length > 0) {
+    alert("Login success! Redirecting...");
+    window.location.href = "frontend/home.html";
+  } else {
+    alert("Invalid username or password!");
+  }
+});
+
+
+// =============== 这里开始是新增的“平台账号 + 余额 + 密码长度校验” ===============
 
 // 生成随机平台账号（2位大写字母 + 4位数字，如 AB1234）
 function generatePlatformAccount() {
@@ -106,8 +127,7 @@ async function createUserWithUniqueAccount(username, pass) {
       username,
       password: pass,
       balance: 0,               // 默认余额 0
-      platform_account,
-      register_time: new Date().toISOString()
+      platform_account
     };
 
     const { error } = await supabaseClient.from("users").insert([payload]);
@@ -115,16 +135,18 @@ async function createUserWithUniqueAccount(username, pass) {
     if (!error) {
       return { platform_account }; // 成功
     }
+    // 如果是唯一键冲突（Postgres 错误码 23505），则重试生成
     if (error.code === "23505") {
       console.warn("平台账号重复，重试生成...", platform_account);
       continue;
     }
+    // 其它错误直接返回
     return { error };
   }
   return { error: { message: "生成唯一平台账号失败，请稍后重试。" } };
 }
 
-// 📝 注册
+// 📝 注册（增强后的完整逻辑）
 document.getElementById("registerBtn").addEventListener("click", async function () {
   const username = document.getElementById("regUsername").value.trim();
   const pass = document.getElementById("regPassword").value;
@@ -148,7 +170,7 @@ document.getElementById("registerBtn").addEventListener("click", async function 
     return;
   }
 
-  // 检查用户名是否存在
+  // ✅ 检查用户名是否存在
   const { data: existing, error: checkError } = await supabaseClient
     .from("users")
     .select("id")
@@ -163,39 +185,13 @@ document.getElementById("registerBtn").addEventListener("click", async function 
     return;
   }
 
-  // 插入新用户
+  // ⚡ 插入新用户（自动生成唯一平台账号 & 初始余额 0）
   const { platform_account, error: insertError } = await createUserWithUniqueAccount(username, pass);
 
   if (insertError) {
     alert("Registration failed: " + (insertError.message || "Unknown error"));
   } else {
-    // 保存 session
-    localStorage.setItem("username", username);
     alert("Registered successfully! 🎉\nYour Platform Account: " + platform_account);
-    window.location.href = "home.html";
-  }
-});
-
-// ====================== 登录逻辑 ======================
-
-document.getElementById("loginBtn").addEventListener("click", async function () {
-  const username = document.getElementById("loginUsername").value.trim();
-  const password = document.getElementById("loginPassword").value;
-
-  const { data, error } = await supabaseClient
-    .from("users")
-    .select("*")
-    .eq("username", username)
-    .eq("password", password);
-
-  if (error) {
-    alert("Login failed: " + error.message);
-  } else if (data && data.length > 0) {
-    // 保存 session
-    localStorage.setItem("username", data[0].username);
-    alert("Login success! Redirecting...");
-    window.location.href = "home.html";
-  } else {
-    alert("Invalid username or password!");
+    console.log("✅ Registered with platform_account:", platform_account);
   }
 });
