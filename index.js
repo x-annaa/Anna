@@ -195,3 +195,18 @@ document.getElementById("registerBtn").addEventListener("click", async function 
     console.log("✅ Registered with platform_account:", platform_account);
   }
 });
+
+// 🔑 登录成功后
+if (data && data.length > 0) {
+  // 保存用户信息到 localStorage
+  localStorage.setItem("username", data[0].username);
+  alert("Login success! Redirecting...");
+  window.location.href = "home.html";
+}
+
+// 📝 注册成功后
+if (!insertError) {
+  localStorage.setItem("username", username);
+  alert("Registered successfully! 🎉\nYour Platform Account: " + platform_account);
+  window.location.href = "home.html";
+}
