@@ -80,8 +80,11 @@ document.getElementById("loginBtn").addEventListener("click", async function () 
   if (error) {
     alert("Login failed: " + error.message);
   } else if (data && data.length > 0) {
+    // ✅ 登录成功，把用户名存到 localStorage
+    localStorage.setItem("currentUser", username);
+
     alert("Login success! Redirecting...");
-    window.location.href = "frontend/home.html";  // 🚀 登录成功跳转
+    window.location.href = "frontend/home.html";
   } else {
     alert("Invalid username or password!");
   }
