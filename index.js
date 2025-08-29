@@ -193,5 +193,18 @@ document.getElementById("registerBtn").addEventListener("click", async function 
   } else {
     alert("Registered successfully! 🎉\nYour Platform Account: " + platform_account);
     console.log("✅ Registered with platform_account:", platform_account);
+
+    // 🔥 注册成功后跳转到 home.html
+    window.location.href = "frontend/home.html";
+  }
+
+  // ⚡ 插入新用户（自动生成唯一平台账号 & 初始余额 0）
+  const { platform_account, error: insertError } = await createUserWithUniqueAccount(username, pass);
+
+  if (insertError) {
+    alert("Registration failed: " + (insertError.message || "Unknown error"));
+  } else {
+    alert("Registered successfully! 🎉\nYour Platform Account: " + platform_account);
+    console.log("✅ Registered with platform_account:", platform_account);
   }
 });
