@@ -1,6 +1,6 @@
 // ⚡ 初始化 Supabase
 const SUPABASE_URL = "https://ffdrwsemmfvqlqhyjlnb.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmZHJ3c2VtbWZ2cWxxaHlqbG5iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMDI1ODQsImV4cCI6MjA3MTg3ODU4NH0.x7TQHZ2af8O_f9ye__mT6eVstlH9BiyVkNVaOnL3h74";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmZHJ3c2VtbWZ2cWxxaHlqbG5iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMDI1ODQsImV4cCI6MjA3MTg3ODU4NH0.x7TQHZ2af8O_f9ye__mT6eVstlH9BiyVkNVaOnL3h74";  
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // 切换窗口
@@ -80,6 +80,9 @@ document.getElementById("loginBtn").addEventListener("click", async function () 
   if (error) {
     alert("Login failed: " + error.message);
   } else if (data && data.length > 0) {
+    // ✅ 登录成功，保存用户名
+    localStorage.setItem("currentUser", username);
+
     alert("Login success! Redirecting...");
     window.location.href = "frontend/home.html";  // 🚀 登录成功跳转
   } else {
@@ -132,6 +135,9 @@ document.getElementById("registerBtn").addEventListener("click", async function 
   if (insertError) {
     alert("Registration failed: " + (insertError.message || "Unknown error"));
   } else {
+    // ✅ 注册成功，保存用户名
+    localStorage.setItem("currentUser", username);
+
     alert("Registered successfully! 🎉\nYour Platform Account: " + platform_account);
     window.location.href = "frontend/home.html";  // 🚀 注册成功跳转
   }
