@@ -134,12 +134,12 @@ document.getElementById("registerBtn").addEventListener("click", async function 
 
   if (insertError) {
     alert("Registration failed: " + (insertError.message || "Unknown error"));
-  } else {
-    // ✅ 插入成功，保存用户名
-    localStorage.setItem("currentUser", username);
-
-    alert("Registered successfully! 🎉\nYour Platform Account: " + platform_account);
-    window.location.href = "frontend/home.html";  // 🚀 注册成功跳转
+    return;
   }
-});
 
+  // ✅ 插入成功
+  localStorage.setItem("currentUser", username);
+
+  alert("Registered successfully! 🎉\nYour Platform Account: " + platform_account);
+  window.location.href = "frontend/home.html";  // 🚀 注册成功跳转
+});
