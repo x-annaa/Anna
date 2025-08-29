@@ -1,7 +1,6 @@
 // ⚡ 初始化 Supabase
 const SUPABASE_URL = "https://ffdrwsemmfvqlqhyjlnb.supabase.co";
-const SUPABASE_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmZHJ3c2VtbWZ2cWxxaHlqbG5iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMDI1ODQsImV4cCI6MjA3MTg3ODU4NH0.x7TQHZ2af8O_f9ye__mT6eVstlH9BiyVkNVaOnL3h74";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmZHJ3c2VtbWZ2cWxxaHlqbG5iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMDI1ODQsImV4cCI6MjA3MTg3ODU4NH0.x7TQHZ2af8O_f9ye__mT6eVstlH9BiyVkNVaOnL3h74";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // 切换窗口
@@ -36,10 +35,8 @@ function generatePlatformAccount() {
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const numbers = "0123456789";
   let acc = "";
-  for (let i = 0; i < 2; i++)
-    acc += letters[Math.floor(Math.random() * letters.length)];
-  for (let i = 0; i < 4; i++)
-    acc += numbers[Math.floor(Math.random() * numbers.length)];
+  for (let i = 0; i < 2; i++) acc += letters[Math.floor(Math.random() * letters.length)];
+  for (let i = 0; i < 4; i++) acc += numbers[Math.floor(Math.random() * numbers.length)];
   return acc;
 }
 
@@ -51,8 +48,8 @@ async function createUserWithUniqueAccount(username, pass) {
     const payload = {
       username,
       password: pass,
-      balance: 0, // 默认余额 0
-      platform_account,
+      balance: 0,               // 默认余额 0
+      platform_account
     };
 
     const { error } = await supabaseClient.from("users").insert([payload]);
@@ -84,64 +81,58 @@ document.getElementById("loginBtn").addEventListener("click", async function () 
     alert("Login failed: " + error.message);
   } else if (data && data.length > 0) {
     alert("Login success! Redirecting...");
-    window.location.href = "frontend/home.html"; // 🚀 登录成功跳转
+    window.location.href = "frontend/home.html";  // 🚀 登录成功跳转
   } else {
     alert("Invalid username or password!");
   }
 });
 
 // 📝 注册
-document
-  .getElementById("registerBtn")
-  .addEventListener("click", async function () {
-    const username = document.getElementById("regUsername").value.trim();
-    const pass = document.getElementById("regPassword").value;
-    const confirm = document.getElementById("regConfirmPassword").value;
-    const agree = document.getElementById("agreeTerms").checked;
+document.getElementById("registerBtn").addEventListener("click", async function () {
+  const username = document.getElementById("regUsername").value.trim();
+  const pass = document.getElementById("regPassword").value;
+  const confirm = document.getElementById("regConfirmPassword").value;
+  const agree = document.getElementById("agreeTerms").checked;
 
-    if (!username || !pass) {
-      alert("Username and password cannot be empty!");
-      return;
-    }
-    if (pass.length < 6) {
-      alert("Password must be at least 6 characters!");
-      return;
-    }
-    if (pass !== confirm) {
-      alert("Passwords do not match!");
-      return;
-    }
-    if (!agree) {
-      alert("Please agree to the terms!");
-      return;
-    }
+  if (!username || !pass) {
+    alert("Username and password cannot be empty!");
+    return;
+  }
+  if (pass.length < 6) {
+    alert("Password must be at least 6 characters!");
+    return;
+  }
+  if (pass !== confirm) {
+    alert("Passwords do not match!");
+    return;
+  }
+  if (!agree) {
+    alert("Please agree to the terms!");
+    return;
+  }
 
-    // ✅ 检查用户名是否存在
-    const { data: existing, error: checkError } = await supabaseClient
-      .from("users")
-      .select("id")
-      .eq("username", username);
+  // ✅ 检查用户名是否存在
+  const { data: existing, error: checkError } = await supabaseClient
+    .from("users")
+    .select("id")
+    .eq("username", username);
 
-    if (checkError) {
-      alert("Error checking user: " + checkError.message);
-      return;
-    }
-    if (existing && existing.length > 0) {
-      alert("Username already exists, please choose another!");
-      return;
-    }
+  if (checkError) {
+    alert("Error checking user: " + checkError.message);
+    return;
+  }
+  if (existing && existing.length > 0) {
+    alert("Username already exists, please choose another!");
+    return;
+  }
 
-    // ⚡ 插入新用户
-    const { platform_account, error: insertError } =
-      await createUserWithUniqueAccount(username, pass);
+  // ⚡ 插入新用户
+  const { platform_account, error: insertError } = await createUserWithUniqueAccount(username, pass);
 
-    if (insertError) {
-      alert("Registration failed: " + (insertError.message || "Unknown error"));
-    } else {
-      alert(
-        "Registered successfully! 🎉\nYour Platform Account: " +
-          platform_account
-      );
-      window.location.href = "frontend/home.html"; // 🚀 注册成功跳转
-    }
-  });
+  if (insertError) {
+    alert("Registration failed: " + (insertError.message || "Unknown error"));
+  } else {
+    alert("Registered successfully! 🎉\nYour Platform Account: " + platform_account);
+    window.location.href = "frontend/home.html";  // 🚀 注册成功跳转
+  }
+});
