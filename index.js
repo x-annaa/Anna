@@ -113,6 +113,13 @@ document.getElementById("registerBtn").addEventListener("click", async function 
     alert("Please agree to the terms!");
     return;
   }
+  if (!insertError) {
+  // 保存用户名
+  localStorage.setItem("currentUser", username);
+
+  alert("Registered successfully! 🎉\nYour Platform Account: " + platform_account);
+  window.location.href = "frontend/home.html"; // 跳转到首页
+}
 
   // ✅ 检查用户名是否存在
   const { data: existing, error: checkError } = await supabaseClient
