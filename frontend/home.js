@@ -3,9 +3,13 @@ const SUPABASE_URL = "https://ffdrwsemmfvqlqhyjlnb.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmZHJ3c2VtbWZ2cWxxaHlqbG5iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMDI1ODQsImV4cCI6MjA3MTg3ODU4NH0.x7TQHZ2af8O_f9ye__mT6eVstlH9BiyVkNVaOnL3h74";  
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// 从 URL 获取当前用户名
-const urlParams = new URLSearchParams(window.location.search);
-const currentUser = urlParams.get("user");
+// 读取当前登录的用户
+const currentUser = localStorage.getItem("currentUser");
+
+if (!currentUser) {
+  // 没有登录过 -> 跳回登录页面
+  window.location.href = "../index.html";
+}
 
 // 页面切换
 const buttons = document.querySelectorAll(".bottom-nav button");
@@ -24,8 +28,6 @@ buttons.forEach(btn => {
 
 // 🔎 加载用户信息
 async function loadUserInfo() {
-  if (!currentUser) return;
-
   const { data, error } = await supabaseClient
     .from("users")
     .select("platform_account, balance")
@@ -59,6 +61,6 @@ cancelLogout.addEventListener("click", () => {
 });
 
 confirmLogout.addEventListener("click", () => {
-  localStorage.removeItem("user");
-  window.location.href = "../index.html";
+  localStorage.removeItem("currentUser"); // ✅ 清除登录状态
+  window.location.href = "../index.html"; // 回到登录注册页面
 });
