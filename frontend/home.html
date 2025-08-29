@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Home</title>
   <link rel="stylesheet" href="home.css">
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -13,8 +14,15 @@
   <div id="infoPage" class="page">ℹ️ 信息内容</div>
   <div id="orderPage" class="page">📦 订单内容</div>
   <div id="msgPage" class="page">💬 消息内容</div>
+
+  <!-- 我的页面 -->
   <div id="myPage" class="page">
-    👤 我的页面
+    <h2>👤 我的页面</h2>
+    <div class="user-info">
+      <p><strong>平台账号：</strong><span id="platformAccount">加载中...</span></p>
+      <p><strong>余额：</strong><span id="balance">加载中...</span></p>
+    </div>
+
     <div class="my-buttons">
       <button>按钮1</button>
       <button>按钮2</button>
