@@ -62,3 +62,30 @@ confirmLogout.addEventListener("click", () => {
   localStorage.removeItem("user");
   window.location.href = "../index.html";
 });
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const username = localStorage.getItem("currentUser");
+
+  // 没有登录信息就回到登录页
+  if (!username) {
+    window.location.href = "../index.html";
+    return;
+  }
+
+  // 查询数据库
+  const { data, error } = await supabaseClient
+    .from("users")
+    .select("platform_account, balance")
+    .eq("username", username)
+    .single();
+
+  if (error || !data) {
+    console.error("加载失败:", error);
+    document.getElementById("platformAccount").textContent = "加载失败";
+    document.getElementById("balance").textContent = "加载失败";
+  } else {
+    document.getElementById("platformAccount").textContent = data.platform_account;
+    document.getElementById("balance").textContent = data.balance;
+  }
+});
+
