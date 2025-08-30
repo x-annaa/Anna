@@ -1,19 +1,13 @@
-// ⚡ Supabase 初始化
-const SUPABASE_URL = "https://ffdrwsemmfvqlqhyjlnb.supabase.co";
-const SUPABASE_KEY = "你的-anon-key"; // ⚠️换成你自己的
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-let currentUserId = null; // 登录后赋值
-
 // ======================
-// 加载余额
+// 加载余额（订单页面）
 // ======================
 async function loadBalanceOrderPage() {
-  if (!currentUserId) return;
+  if (!window.currentUserId) return;
+
   const { data, error } = await supabaseClient
     .from("users")
     .select("balance")
-    .eq("id", currentUserId)
+    .eq("id", window.currentUserId)
     .single();
 
   if (!error && data) {
@@ -25,7 +19,7 @@ async function loadBalanceOrderPage() {
 // 一键刷单
 // ======================
 async function autoOrder() {
-  if (!currentUserId) {
+  if (!window.currentUserId) {
     alert("请先登录！");
     return;
   }
@@ -47,21 +41,22 @@ async function autoOrder() {
   const { data: user } = await supabaseClient
     .from("users")
     .select("balance")
-    .eq("id", currentUserId)
+    .eq("id", window.currentUserId)
     .single();
 
-  if (!user || user.balance < randomProduct.price) {
-    alert("余额不足！");
+  if (!user) {
+    alert("用户不存在！");
     return;
   }
 
+  // 允许负数余额
   const newBalance = user.balance - randomProduct.price;
 
   // 扣余额
   const { error: balanceError } = await supabaseClient
     .from("users")
     .update({ balance: newBalance })
-    .eq("id", currentUserId);
+    .eq("id", window.currentUserId);
 
   if (balanceError) {
     alert("扣款失败：" + balanceError.message);
@@ -72,7 +67,7 @@ async function autoOrder() {
   const { error: orderError } = await supabaseClient
     .from("orders")
     .insert({
-      user_id: currentUserId,
+      user_id: window.currentUserId,
       product_id: randomProduct.id,
       quantity: 1,
       total_price: randomProduct.price,
@@ -91,7 +86,9 @@ async function autoOrder() {
     <p>剩余余额：¥${newBalance}</p>
   `;
 
-  loadBalanceOrderPage();
+  // 更新余额
+  document.getElementById("balance").textContent = newBalance;
+  document.getElementById("orderBalance").textContent = newBalance;
 }
 
 // ======================
