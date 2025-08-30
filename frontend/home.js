@@ -1,11 +1,5 @@
-// ⚡ 初始化 Supabase
-const SUPABASE_URL = "https://ffdrwsemmfvqlqhyjlnb.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmZHJ3c2VtbWZ2cWxxaHlqbG5iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMDI1ODQsImV4cCI6MjA3MTg3ODU4NH0.x7TQHZ2af8O_f9ye__mT6eVstlH9BiyVkNVaOnL3h74";  
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-// 从 URL 获取当前用户名
-const urlParams = new URLSearchParams(window.location.search);
-const currentUser = urlParams.get("user");
+// 当前登录用户
+let currentUser = null;
 
 // 页面切换
 const buttons = document.querySelectorAll(".bottom-nav button");
@@ -23,26 +17,42 @@ buttons.forEach(btn => {
 });
 
 // 🔎 加载用户信息
-async function loadUserInfo() {
-  if (!currentUser) return;
+async function loadUserInfo(username) {
+  if (!username) return;
 
   const { data, error } = await supabaseClient
     .from("users")
-    .select("platform_account, balance")
-    .eq("username", currentUser)
+    .select("id, platform_account, balance")
+    .eq("username", username)
     .single();
 
-  if (error) {
-    console.error("加载用户失败：", error.message);
+  if (error || !data) {
+    console.error("加载用户失败：", error?.message);
     document.getElementById("platformAccount").textContent = "错误";
     document.getElementById("balance").textContent = "错误";
-  } else if (data) {
-    document.getElementById("platformAccount").textContent = data.platform_account;
-    document.getElementById("balance").textContent = data.balance;
+    return;
   }
+
+  currentUser = data; // 保存当前用户对象
+
+  document.getElementById("platformAccount").textContent = data.platform_account;
+  document.getElementById("balance").textContent = data.balance;
+
+  // 同步给订单页面用
+  document.getElementById("orderBalance").textContent = data.balance;
+  window.currentUserId = data.id;
 }
 
-loadUserInfo();
+document.addEventListener("DOMContentLoaded", () => {
+  const username = localStorage.getItem("currentUser");
+
+  if (!username) {
+    window.location.href = "../index.html";
+    return;
+  }
+
+  loadUserInfo(username);
+});
 
 // Logout 弹窗
 const logoutBtn = document.getElementById("logoutBtn");
@@ -59,33 +69,6 @@ cancelLogout.addEventListener("click", () => {
 });
 
 confirmLogout.addEventListener("click", () => {
-  localStorage.removeItem("user");
+  localStorage.removeItem("currentUser");
   window.location.href = "../index.html";
 });
-
-document.addEventListener("DOMContentLoaded", async () => {
-  const username = localStorage.getItem("currentUser");
-
-  // 没有登录信息就回到登录页
-  if (!username) {
-    window.location.href = "../index.html";
-    return;
-  }
-
-  // 查询数据库
-  const { data, error } = await supabaseClient
-    .from("users")
-    .select("platform_account, balance")
-    .eq("username", username)
-    .single();
-
-  if (error || !data) {
-    console.error("加载失败:", error);
-    document.getElementById("platformAccount").textContent = "加载失败";
-    document.getElementById("balance").textContent = "加载失败";
-  } else {
-    document.getElementById("platformAccount").textContent = data.platform_account;
-    document.getElementById("balance").textContent = data.balance;
-  }
-});
-
