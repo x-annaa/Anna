@@ -23,8 +23,8 @@ function setOrderBtnDisabled(disabled, reason = "") {
 function updateBalanceUI(balance) {
   const ob = document.getElementById("orderBalance");
   const mb = document.getElementById("balance");
-  if (ob) ob.textContent = balance;
-  if (mb) mb.textContent = balance;
+  if (ob) ob.textContent = balance.toFixed(2);
+  if (mb) mb.textContent = balance.toFixed(2);
 
   if (balance < 0) {
     setOrderBtnDisabled(true, `余额为负（欠款 ¥${Math.abs(balance)}），请先充值`);
@@ -76,8 +76,9 @@ function renderLastOrder(order, balance) {
     <h3>✅ 最近一次订单</h3>
     <p>商品：${order.products?.name || "未知商品"}</p>
     <p>价格：¥${order.total_price}</p>
+    <p>利润：<span style="color:green;">+¥${order.profit.toFixed(2)}</span></p>
     <p>时间：${new Date(order.created_at).toLocaleString()}</p>
-    <p>剩余余额：¥${balance}</p>
+    <p>当前余额：¥${balance.toFixed(2)}</p>
   `;
   if (balance < 0) {
     html += `<p style="color:red;">⚠️ 您的余额已为负，欠款 ¥${Math.abs(balance)}，请先充值。</p>`;
@@ -96,6 +97,7 @@ async function loadLastOrder() {
     .select(`
       id,
       total_price,
+      profit,
       created_at,
       products ( name )
     `)
@@ -121,7 +123,7 @@ async function loadLastOrder() {
 }
 
 /* ======================
-   一键刷单
+   一键刷单（定金制 + 本金返还 + 10%利润）
    ====================== */
 async function autoOrder() {
   if (!window.currentUserId) {
@@ -134,6 +136,7 @@ async function autoOrder() {
   setOrderBtnDisabled(true, "下单中…");
 
   try {
+    // 查询余额
     const { data: user, error: uErr } = await supabaseClient
       .from("users")
       .select("balance")
@@ -147,8 +150,19 @@ async function autoOrder() {
       return;
     }
 
+    // 获取随机产品
     const product = await getRandomProduct();
 
+    // Step 1: 扣除本金（可能会变负）
+    const tempBalance = user.balance - product.price;
+    const { error: deductErr } = await supabaseClient
+      .from("users")
+      .update({ balance: tempBalance })
+      .eq("id", window.currentUserId);
+    if (deductErr) throw new Error("扣款失败：" + deductErr.message);
+
+    // Step 2: 创建订单
+    const profit = product.price * 0.1;
     const { data: newOrder, error: orderErr } = await supabaseClient
       .from("orders")
       .insert({
@@ -156,29 +170,30 @@ async function autoOrder() {
         product_id: product.id,
         quantity: 1,
         total_price: product.price,
+        profit: profit,
       })
       .select(`
         id,
         total_price,
+        profit,
         created_at,
         products ( name )
       `)
       .single();
-
     if (orderErr) throw new Error("下单失败：" + orderErr.message);
 
-    const newBalance = user.balance - product.price;
-    const { error: balErr } = await supabaseClient
+    // Step 3: 完成订单 → 返还本金 + 利润
+    const finalBalance = tempBalance + product.price + profit;
+    const { error: returnErr } = await supabaseClient
       .from("users")
-      .update({ balance: newBalance })
+      .update({ balance: finalBalance })
       .eq("id", window.currentUserId);
+    if (returnErr) throw new Error("返还本金+利润失败：" + returnErr.message);
 
-    if (balErr) throw new Error("扣款失败：" + balErr.message);
+    // Step 4: 显示结果
+    renderLastOrder(newOrder, finalBalance);
 
-    // 显示最近一单
-    renderLastOrder(newOrder, newBalance);
-
-    updateBalanceUI(newBalance);
+    updateBalanceUI(finalBalance);
     loadRecentOrders();
   } catch (e) {
     alert(e.message || "下单异常");
@@ -198,6 +213,7 @@ async function loadRecentOrders() {
     .select(`
       id,
       total_price,
+      profit,
       created_at,
       products ( name )
     `)
@@ -217,7 +233,8 @@ async function loadRecentOrders() {
         (o) => `
         <li>
           🛒 ${o.products?.name || "未知商品"}  
-          ¥${o.total_price}  
+          价格：¥${o.total_price}  
+          利润：<span style="color:green;">+¥${o.profit.toFixed(2)}</span>  
           <small>${new Date(o.created_at).toLocaleString()}</small>
         </li>`
       )
@@ -259,6 +276,7 @@ async function rechargeBalance() {
 
   alert(`✅ 充值成功！已充值 ¥${amount}`);
   updateBalanceUI(newBalance);
+  loadLastOrder();
 }
 
 /* ======================
