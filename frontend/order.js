@@ -98,14 +98,21 @@ async function autoOrder() {
     const product = await getRandomProduct();
 
     // 创建订单
-    const { error: orderErr } = await supabaseClient
+    const { data: newOrder, error: orderErr } = await supabaseClient
       .from("orders")
       .insert({
         user_id: window.currentUserId,
         product_id: product.id,
         quantity: 1,
         total_price: product.price,
-      });
+      })
+      .select(`
+        id,
+        total_price,
+        created_at,
+        products ( name )
+      `)
+      .single();
 
     if (orderErr) throw new Error("下单失败：" + orderErr.message);
 
@@ -118,13 +125,14 @@ async function autoOrder() {
 
     if (balErr) throw new Error("扣款失败：" + balErr.message);
 
-    // 显示结果
+    // 显示结果（只显示最新一单）
     const el = document.getElementById("orderResult");
     if (el) {
       let html = `
         <h3>✅ 下单成功！</h3>
-        <p>商品：${product.name}</p>
-        <p>价格：¥${product.price}</p>
+        <p>商品：${newOrder.products?.name || product.name}</p>
+        <p>价格：¥${newOrder.total_price}</p>
+        <p>时间：${new Date(newOrder.created_at).toLocaleString()}</p>
         <p>剩余余额：¥${newBalance}</p>
       `;
       if (newBalance < 0) {
