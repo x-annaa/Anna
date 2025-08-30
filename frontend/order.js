@@ -26,7 +26,6 @@ function updateBalanceUI(balance) {
   if (ob) ob.textContent = balance;
   if (mb) mb.textContent = balance;
 
-  // 如果余额为负 → 禁止继续下单
   if (balance < 0) {
     setOrderBtnDisabled(true, `余额为负（欠款 ¥${Math.abs(balance)}），请先充值`);
   } else {
@@ -67,6 +66,61 @@ async function getRandomProduct() {
 }
 
 /* ======================
+   渲染最近一单到 orderResult
+   ====================== */
+function renderLastOrder(order, balance) {
+  const el = document.getElementById("orderResult");
+  if (!el || !order) return;
+
+  let html = `
+    <h3>✅ 最近一次订单</h3>
+    <p>商品：${order.products?.name || "未知商品"}</p>
+    <p>价格：¥${order.total_price}</p>
+    <p>时间：${new Date(order.created_at).toLocaleString()}</p>
+    <p>剩余余额：¥${balance}</p>
+  `;
+  if (balance < 0) {
+    html += `<p style="color:red;">⚠️ 您的余额已为负，欠款 ¥${Math.abs(balance)}，请先充值。</p>`;
+  }
+  el.innerHTML = html;
+}
+
+/* ======================
+   加载最近 1 个订单
+   ====================== */
+async function loadLastOrder() {
+  if (!window.currentUserId) return;
+
+  const { data: orders, error } = await supabaseClient
+    .from("orders")
+    .select(`
+      id,
+      total_price,
+      created_at,
+      products ( name )
+    `)
+    .eq("user_id", window.currentUserId)
+    .order("created_at", { ascending: false })
+    .limit(1);
+
+  if (error) {
+    console.error("获取最近一单失败：", error.message);
+    return;
+  }
+
+  // 获取当前余额
+  const { data: user } = await supabaseClient
+    .from("users")
+    .select("balance")
+    .eq("id", window.currentUserId)
+    .single();
+
+  if (orders && orders.length > 0) {
+    renderLastOrder(orders[0], user?.balance ?? 0);
+  }
+}
+
+/* ======================
    一键刷单
    ====================== */
 async function autoOrder() {
@@ -80,7 +134,6 @@ async function autoOrder() {
   setOrderBtnDisabled(true, "下单中…");
 
   try {
-    // 查余额
     const { data: user, error: uErr } = await supabaseClient
       .from("users")
       .select("balance")
@@ -94,10 +147,8 @@ async function autoOrder() {
       return;
     }
 
-    // 随机选产品
     const product = await getRandomProduct();
 
-    // 创建订单
     const { data: newOrder, error: orderErr } = await supabaseClient
       .from("orders")
       .insert({
@@ -116,7 +167,6 @@ async function autoOrder() {
 
     if (orderErr) throw new Error("下单失败：" + orderErr.message);
 
-    // 扣余额
     const newBalance = user.balance - product.price;
     const { error: balErr } = await supabaseClient
       .from("users")
@@ -125,23 +175,9 @@ async function autoOrder() {
 
     if (balErr) throw new Error("扣款失败：" + balErr.message);
 
-    // 显示结果（只显示最新一单）
-    const el = document.getElementById("orderResult");
-    if (el) {
-      let html = `
-        <h3>✅ 下单成功！</h3>
-        <p>商品：${newOrder.products?.name || product.name}</p>
-        <p>价格：¥${newOrder.total_price}</p>
-        <p>时间：${new Date(newOrder.created_at).toLocaleString()}</p>
-        <p>剩余余额：¥${newBalance}</p>
-      `;
-      if (newBalance < 0) {
-        html += `<p style="color:red;">⚠️ 您的余额已为负，欠款 ¥${Math.abs(newBalance)}，请先充值。</p>`;
-      }
-      el.innerHTML = html;
-    }
+    // 显示最近一单
+    renderLastOrder(newOrder, newBalance);
 
-    // 更新余额 + 历史
     updateBalanceUI(newBalance);
     loadRecentOrders();
   } catch (e) {
@@ -236,5 +272,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (rechargeBtn) rechargeBtn.addEventListener("click", rechargeBalance);
 
   loadBalanceOrderPage();
+  loadLastOrder();   // 页面加载时，显示最近一单
   loadRecentOrders();
 });
