@@ -32,6 +32,28 @@
     </div>
   </div>
 
+<!-- 订单页面 -->
+<div id="orderPage" class="page">
+  <div class="order-header">
+    <h2>📦 订单中心</h2>
+    <div class="balance-box">
+      💰 Balance: <span id="orderBalance">0</span>
+    </div>
+  </div>
+
+  <div class="order-actions">
+    <button id="autoOrderBtn">🎲 一键刷单</button>
+  </div>
+
+  <div id="orderResult" class="order-result">
+    <!-- 显示本次刷单结果 -->
+  </div>
+</div>
+
+<!-- 引入独立文件 -->
+<link rel="stylesheet" href="order.css">
+<script src="order.js"></script>
+
   <!-- 底部导航栏 -->
   <div class="bottom-nav">
     <button data-page="homePage" class="active">首页</button>
