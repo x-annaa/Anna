@@ -1,4 +1,10 @@
 // ======================
+// 初始化用户信息
+// ======================
+window.currentUserId = localStorage.getItem("currentUserId");
+window.currentUsername = localStorage.getItem("currentUser");
+
+// ======================
 // 加载余额（订单页面）
 // ======================
 async function loadBalanceOrderPage() {
@@ -11,7 +17,12 @@ async function loadBalanceOrderPage() {
     .single();
 
   if (!error && data) {
-    document.getElementById("orderBalance").textContent = data.balance;
+    if (document.getElementById("orderBalance")) {
+      document.getElementById("orderBalance").textContent = data.balance;
+    }
+    if (document.getElementById("balance")) {
+      document.getElementById("balance").textContent = data.balance;
+    }
   }
 }
 
@@ -79,24 +90,34 @@ async function autoOrder() {
   }
 
   // 显示结果
-  document.getElementById("orderResult").innerHTML = `
-    <h3>✅ 下单成功！</h3>
-    <p>商品：${randomProduct.name}</p>
-    <p>价格：¥${randomProduct.price}</p>
-    <p>剩余余额：¥${newBalance}</p>
-  `;
+  if (document.getElementById("orderResult")) {
+    document.getElementById("orderResult").innerHTML = `
+      <h3>✅ 下单成功！</h3>
+      <p>商品：${randomProduct.name}</p>
+      <p>价格：¥${randomProduct.price}</p>
+      <p>剩余余额：¥${newBalance}</p>
+    `;
+  }
 
   // 更新余额
-  document.getElementById("balance").textContent = newBalance;
-  document.getElementById("orderBalance").textContent = newBalance;
+  if (document.getElementById("balance")) {
+    document.getElementById("balance").textContent = newBalance;
+  }
+  if (document.getElementById("orderBalance")) {
+    document.getElementById("orderBalance").textContent = newBalance;
+  }
 }
 
 // ======================
-// 绑定按钮
+// 绑定按钮 & 初始加载
 // ======================
 document.addEventListener("DOMContentLoaded", () => {
+  // 绑定刷单按钮
   const btn = document.getElementById("autoOrderBtn");
   if (btn) {
     btn.addEventListener("click", autoOrder);
   }
+
+  // 加载余额
+  loadBalanceOrderPage();
 });
