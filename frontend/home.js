@@ -35,19 +35,23 @@ async function loadUserInfo(username) {
 
   currentUser = data; // 保存当前用户对象
 
+  // 更新页面显示
   document.getElementById("platformAccount").textContent = data.platform_account;
   document.getElementById("balance").textContent = data.balance;
-
-  // 同步给订单页面用
   document.getElementById("orderBalance").textContent = data.balance;
+
+  // 同步 ID 给订单页用
   window.currentUserId = data.id;
+
+  // ✅ 同时存到 localStorage，方便 order.js 直接用
+  localStorage.setItem("currentUserId", data.id);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   const username = localStorage.getItem("currentUser");
 
   if (!username) {
-    window.location.href = "../index.html";
+    window.location.href = "../index.html"; // 没有登录过 -> 回登录页
     return;
   }
 
@@ -69,6 +73,8 @@ cancelLogout.addEventListener("click", () => {
 });
 
 confirmLogout.addEventListener("click", () => {
+  // ✅ 清理账号信息
   localStorage.removeItem("currentUser");
+  localStorage.removeItem("currentUserId");
   window.location.href = "../index.html";
 });
