@@ -77,6 +77,7 @@ function renderLastOrder(order, balance) {
     <p>商品：${order.products?.name || "未知商品"}</p>
     <p>价格：¥${order.total_price}</p>
     <p>利润：<span style="color:green;">+¥${order.profit?.toFixed(2) || "0.00"}</span></p>
+    <p>状态：${order.status === "completed" ? "✅ 已完成" : "⏳ 待充值"}</p>
     <p>时间：${new Date(order.created_at).toLocaleString()}</p>
     <p>当前余额：¥${balance.toFixed(2)}</p>
   `;
@@ -98,6 +99,7 @@ async function loadLastOrder() {
       id,
       total_price,
       profit,
+      status,
       created_at,
       products ( name )
     `)
@@ -123,7 +125,30 @@ async function loadLastOrder() {
 }
 
 /* ======================
-   一键刷单（定金制 + 欠款 + 本金返还 + 10%利润）
+   完成订单
+   ====================== */
+async function completeOrder(order, currentBalance) {
+  const finalBalance = currentBalance + order.total_price + order.profit;
+
+  // 更新用户余额
+  await supabaseClient
+    .from("users")
+    .update({ balance: finalBalance })
+    .eq("id", window.currentUserId);
+
+  // 更新订单状态
+  await supabaseClient
+    .from("orders")
+    .update({ status: "completed" })
+    .eq("id", order.id);
+
+  renderLastOrder(order, finalBalance);
+  updateBalanceUI(finalBalance);
+  loadRecentOrders();
+}
+
+/* ======================
+   一键刷单（定金制 + 欠款 + 待充值完成）
    ====================== */
 async function autoOrder() {
   if (!window.currentUserId) {
@@ -150,21 +175,12 @@ async function autoOrder() {
 
     // Step 1: 扣除本金（允许负数）
     const tempBalance = user.balance - product.price;
-    const { error: deductErr } = await supabaseClient
+    await supabaseClient
       .from("users")
       .update({ balance: tempBalance })
       .eq("id", window.currentUserId);
-    if (deductErr) throw new Error("扣款失败：" + deductErr.message);
 
-    // 如果扣完后余额为负数 → 暂停订单，提示充值
-    if (tempBalance < 0) {
-      alert(`⚠️ 您的余额不足，本次下单已进入欠款状态 (余额：¥${tempBalance})，请充值后再继续完成订单！`);
-      updateBalanceUI(tempBalance);
-      ordering = false;
-      return;
-    }
-
-    // Step 2: 创建订单
+    // Step 2: 创建订单（初始状态 pending）
     const profit = product.price * 0.1;
     const { data: newOrder, error: orderErr } = await supabaseClient
       .from("orders")
@@ -174,33 +190,33 @@ async function autoOrder() {
         quantity: 1,
         total_price: product.price,
         profit: profit,
+        status: "pending"
       })
       .select(`
         id,
         total_price,
         profit,
+        status,
         created_at,
         products ( name )
       `)
       .single();
     if (orderErr) throw new Error("下单失败：" + orderErr.message);
 
-    // Step 3: 完成订单 → 返还本金 + 利润
-    const finalBalance = tempBalance + product.price + profit;
-    const { error: returnErr } = await supabaseClient
-      .from("users")
-      .update({ balance: finalBalance })
-      .eq("id", window.currentUserId);
-    if (returnErr) throw new Error("返还本金+利润失败：" + returnErr.message);
+    // Step 3: 如果余额足够 → 立即完成订单
+    if (tempBalance >= 0) {
+      await completeOrder(newOrder, tempBalance);
+    } else {
+      alert(`⚠️ 您的余额不足，本次订单已进入欠款状态 (余额：¥${tempBalance})，请充值后完成订单！`);
+      renderLastOrder(newOrder, tempBalance);
+      updateBalanceUI(tempBalance);
+    }
 
-    // Step 4: 显示结果
-    renderLastOrder(newOrder, finalBalance);
-    updateBalanceUI(finalBalance);
-    loadRecentOrders();
   } catch (e) {
     alert(e.message || "下单异常");
   } finally {
     ordering = false;
+    setOrderBtnDisabled(false);
   }
 }
 
@@ -216,6 +232,7 @@ async function loadRecentOrders() {
       id,
       total_price,
       profit,
+      status,
       created_at,
       products ( name )
     `)
@@ -237,6 +254,7 @@ async function loadRecentOrders() {
           🛒 ${o.products?.name || "未知商品"}  
           价格：¥${o.total_price}  
           利润：<span style="color:green;">+¥${o.profit?.toFixed(2) || "0.00"}</span>  
+          状态：${o.status === "completed" ? "✅ 已完成" : "⏳ 待充值"}  
           <small>${new Date(o.created_at).toLocaleString()}</small>
         </li>`
       )
@@ -245,7 +263,7 @@ async function loadRecentOrders() {
 }
 
 /* ======================
-   充值
+   充值（自动检测 pending 订单）
    ====================== */
 async function rechargeBalance() {
   const amount = parseFloat(prompt("请输入充值金额：", "100"));
@@ -266,19 +284,29 @@ async function rechargeBalance() {
   }
 
   const newBalance = user.balance + amount;
-  const { error: upErr } = await supabaseClient
+  await supabaseClient
     .from("users")
     .update({ balance: newBalance })
     .eq("id", window.currentUserId);
 
-  if (upErr) {
-    alert("充值失败：" + upErr.message);
-    return;
-  }
-
   alert(`✅ 充值成功！已充值 ¥${amount}`);
   updateBalanceUI(newBalance);
+
+  // 检查是否有 pending 订单
+  const { data: pendingOrders } = await supabaseClient
+    .from("orders")
+    .select("*")
+    .eq("user_id", window.currentUserId)
+    .eq("status", "pending");
+
+  if (pendingOrders && pendingOrders.length > 0 && newBalance >= 0) {
+    for (const order of pendingOrders) {
+      await completeOrder(order, newBalance);
+    }
+  }
+
   loadLastOrder();
+  loadRecentOrders();
 }
 
 /* ======================
