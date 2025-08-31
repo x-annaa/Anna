@@ -139,7 +139,7 @@ async function autoOrder() {
     const tempBalance = user.balance - product.price;
     await supabaseClient.from("users").update({ balance: tempBalance }).eq("id", window.currentUserId);
 
-    // 建立 pending 订单
+    // 建立订单
     const profit = product.price * 0.1;
     const { data: newOrder } = await supabaseClient.from("orders")
       .insert({
@@ -152,17 +152,18 @@ async function autoOrder() {
       .select(`id, total_price, profit, status, created_at, products ( name )`)
       .single();
 
-    if (tempBalance >= 0) await completeOrder(newOrder, tempBalance);
-    else {
-      alert(`余额不足，已进入欠款（¥${tempBalance}），请充值完成订单。`);
+    if (tempBalance >= 0) {
+      await completeOrder(newOrder, tempBalance);
+    } else {
+      alert(`⚠️ 余额不足，本次下单已进入欠款状态 (余额：¥${tempBalance})，请充值后完成订单！`);
       renderLastOrder(newOrder, tempBalance);
-      updateBalanceUI(tempBalance);
+      updateBalanceUI(tempBalance); // 这里会自动锁定按钮
     }
   } catch (e) {
     alert(e.message || "下单失败");
   } finally {
     ordering = false;
-    setOrderBtnDisabled(false);
+    // 不要强制解锁按钮！交给 updateBalanceUI 处理
     loadRecentOrders();
   }
 }
