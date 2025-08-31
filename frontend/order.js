@@ -76,7 +76,7 @@ function renderLastOrder(order, balance) {
     <h3>✅ 最近一次订单</h3>
     <p>商品：${order.products?.name || "未知商品"}</p>
     <p>价格：¥${order.total_price}</p>
-    <p>利润：<span style="color:green;">+¥${order.profit.toFixed(2)}</span></p>
+    <p>利润：<span style="color:green;">+¥${order.profit?.toFixed(2) || "0.00"}</span></p>
     <p>时间：${new Date(order.created_at).toLocaleString()}</p>
     <p>当前余额：¥${balance.toFixed(2)}</p>
   `;
@@ -123,7 +123,7 @@ async function loadLastOrder() {
 }
 
 /* ======================
-   一键刷单（定金制 + 本金返还 + 10%利润）
+   一键刷单（定金制 + 欠款 + 本金返还 + 10%利润）
    ====================== */
 async function autoOrder() {
   if (!window.currentUserId) {
@@ -144,22 +144,25 @@ async function autoOrder() {
       .single();
 
     if (uErr || !user) throw new Error("读取余额失败！");
-    if (user.balance < 0) {
-      alert(`⚠️ 欠款 ¥${Math.abs(user.balance)}，请充值后再下单！`);
-      updateBalanceUI(user.balance);
-      return;
-    }
 
     // 获取随机产品
     const product = await getRandomProduct();
 
-    // Step 1: 扣除本金（可能会变负）
+    // Step 1: 扣除本金（允许负数）
     const tempBalance = user.balance - product.price;
     const { error: deductErr } = await supabaseClient
       .from("users")
       .update({ balance: tempBalance })
       .eq("id", window.currentUserId);
     if (deductErr) throw new Error("扣款失败：" + deductErr.message);
+
+    // 如果扣完后余额为负数 → 暂停订单，提示充值
+    if (tempBalance < 0) {
+      alert(`⚠️ 您的余额不足，本次下单已进入欠款状态 (余额：¥${tempBalance})，请充值后再继续完成订单！`);
+      updateBalanceUI(tempBalance);
+      ordering = false;
+      return;
+    }
 
     // Step 2: 创建订单
     const profit = product.price * 0.1;
@@ -192,7 +195,6 @@ async function autoOrder() {
 
     // Step 4: 显示结果
     renderLastOrder(newOrder, finalBalance);
-
     updateBalanceUI(finalBalance);
     loadRecentOrders();
   } catch (e) {
@@ -234,7 +236,7 @@ async function loadRecentOrders() {
         <li>
           🛒 ${o.products?.name || "未知商品"}  
           价格：¥${o.total_price}  
-          利润：<span style="color:green;">+¥${o.profit.toFixed(2)}</span>  
+          利润：<span style="color:green;">+¥${o.profit?.toFixed(2) || "0.00"}</span>  
           <small>${new Date(o.created_at).toLocaleString()}</small>
         </li>`
       )
@@ -290,6 +292,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (rechargeBtn) rechargeBtn.addEventListener("click", rechargeBalance);
 
   loadBalanceOrderPage();
-  loadLastOrder();   // 页面加载时，显示最近一单
+  loadLastOrder();
   loadRecentOrders();
 });
