@@ -120,7 +120,7 @@ async function loadLastOrder() {
    完成订单（返还本金+利润）
    ====================== */
 async function completeOrder(order, currentBalance) {
-  // 防止重复完成
+  // 后端保险机制：防止重复完成
   if (order.status === "completed") {
     alert("订单已完成，不能重复操作！");
     return;
@@ -137,14 +137,11 @@ async function completeOrder(order, currentBalance) {
   await supabaseClient.from("orders")
     .update({ status: "completed" })
     .eq("id", order.id)
-    .eq("status", "pending");
+    .eq("status", "pending"); // 保证只从 pending → completed
 
   renderLastOrder({ ...order, status: "completed" }, finalBalance);
   updateBalanceUI(finalBalance);
   loadRecentOrders();
-
-  // ✅ 完成订单后恢复刷单按钮
-  setOrderBtnDisabled(false);
 }
 
 /* ======================
@@ -243,7 +240,7 @@ async function rechargeBalance() {
   alert(`充值成功 ¥${amount}`);
   updateBalanceUI(newBalance);
 
-  // 自动完成待充值订单
+  // 如果有待充值订单且余额足够 → 自动完成
   const { data: pending } = await supabaseClient.from("orders")
     .select(`id, total_price, profit, status, created_at, products ( name )`)
     .eq("user_id", window.currentUserId)
