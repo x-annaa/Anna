@@ -61,33 +61,39 @@ async function getRandomProduct() {
 }
 
 /* ======================
-   渲染最近订单并加入完成按钮
+   渲染最近订单（含完成按钮）
    ====================== */
 function renderLastOrder(order, balance) {
   const el = document.getElementById("orderResult");
   if (!el || !order) return;
 
   let html = `
-    <h3>最近一次订单</h3>
+    <h3>✅ 最近一次订单</h3>
     <p>商品：${order.products?.name || "未知商品"}</p>
     <p>价格：¥${order.total_price}</p>
     <p>利润：<span style="color:green;">+¥${order.profit?.toFixed(2) || "0.00"}</span></p>
-    <p>状态：${order.status === "completed" ? "已完成" : "待充值"}</p>
+    <p>状态：${order.status === "completed" ? "已完成" : "⏳ 待充值"}</p>
     <p>时间：${new Date(order.created_at).toLocaleString()}</p>
     <p>当前余额：¥${balance.toFixed(2)}</p>
   `;
+
   if (order.status === "pending" && balance >= 0) {
     html += `<button id="completeOrderBtn">完成订单</button>`;
   }
   if (balance < 0) {
-    html += `<p style="color:red;">欠款金额：¥${Math.abs(balance)}</p>`;
+    html += `<p style="color:red;">⚠️ 您的余额已为负，欠款 ¥${Math.abs(balance)}，请先充值。</p>`;
   }
 
   el.innerHTML = html;
 
   // 完成按钮点击绑定
   const compBtn = document.getElementById("completeOrderBtn");
-  if (compBtn) compBtn.addEventListener("click", () => completeOrder(order, balance));
+  if (compBtn) {
+    compBtn.addEventListener("click", async () => {
+      compBtn.remove(); // 点击一次后按钮消失
+      await completeOrder(order, balance);
+    });
+  }
 }
 
 /* ======================
@@ -114,10 +120,26 @@ async function loadLastOrder() {
    完成订单（返还本金+利润）
    ====================== */
 async function completeOrder(order, currentBalance) {
+  // 后端保险机制：防止重复完成
+  if (order.status === "completed") {
+    alert("订单已完成，不能重复操作！");
+    return;
+  }
+
   const finalBalance = currentBalance + order.total_price + order.profit;
-  await supabaseClient.from("users").update({ balance: finalBalance }).eq("id", window.currentUserId);
-  await supabaseClient.from("orders").update({ status: "completed" }).eq("id", order.id);
-  renderLastOrder(order, finalBalance);
+
+  // 更新用户余额
+  await supabaseClient.from("users")
+    .update({ balance: finalBalance })
+    .eq("id", window.currentUserId);
+
+  // 更新订单状态
+  await supabaseClient.from("orders")
+    .update({ status: "completed" })
+    .eq("id", order.id)
+    .eq("status", "pending"); // 保证只从 pending → completed
+
+  renderLastOrder({ ...order, status: "completed" }, finalBalance);
   updateBalanceUI(finalBalance);
   loadRecentOrders();
 }
@@ -132,14 +154,20 @@ async function autoOrder() {
   setOrderBtnDisabled(true, "下单中…");
 
   try {
-    const { data: user } = await supabaseClient.from("users").select("balance").eq("id", window.currentUserId).single();
+    const { data: user } = await supabaseClient.from("users")
+      .select("balance")
+      .eq("id", window.currentUserId)
+      .single();
+
     const product = await getRandomProduct();
+    const tempBalance = user.balance - product.price;
 
     // 扣本金
-    const tempBalance = user.balance - product.price;
-    await supabaseClient.from("users").update({ balance: tempBalance }).eq("id", window.currentUserId);
+    await supabaseClient.from("users")
+      .update({ balance: tempBalance })
+      .eq("id", window.currentUserId);
 
-    // 建立订单
+    // 新订单
     const profit = product.price * 0.1;
     const { data: newOrder } = await supabaseClient.from("orders")
       .insert({
@@ -157,13 +185,12 @@ async function autoOrder() {
     } else {
       alert(`⚠️ 余额不足，本次下单已进入欠款状态 (余额：¥${tempBalance})，请充值后完成订单！`);
       renderLastOrder(newOrder, tempBalance);
-      updateBalanceUI(tempBalance); // 这里会自动锁定按钮
+      updateBalanceUI(tempBalance);
     }
   } catch (e) {
     alert(e.message || "下单失败");
   } finally {
     ordering = false;
-    // 不要强制解锁按钮！交给 updateBalanceUI 处理
     loadRecentOrders();
   }
 }
@@ -194,19 +221,26 @@ async function loadRecentOrders() {
 }
 
 /* ======================
-   充值功能（触发未完成订单自动完成）
+   充值功能
    ====================== */
 async function rechargeBalance() {
   const amount = parseFloat(prompt("充值金额", "0"));
   if (isNaN(amount) || amount <= 0) { alert("金额无效"); return; }
 
-  const { data: user } = await supabaseClient.from("users").select("balance").eq("id", window.currentUserId).single();
+  const { data: user } = await supabaseClient.from("users")
+    .select("balance")
+    .eq("id", window.currentUserId)
+    .single();
+
   const newBalance = user.balance + amount;
-  await supabaseClient.from("users").update({ balance: newBalance }).eq("id", window.currentUserId);
+  await supabaseClient.from("users")
+    .update({ balance: newBalance })
+    .eq("id", window.currentUserId);
 
   alert(`充值成功 ¥${amount}`);
   updateBalanceUI(newBalance);
 
+  // 如果有待充值订单且余额足够 → 自动完成
   const { data: pending } = await supabaseClient.from("orders")
     .select(`id, total_price, profit, status, created_at, products ( name )`)
     .eq("user_id", window.currentUserId)
