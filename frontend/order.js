@@ -107,6 +107,7 @@ async function loadLastOrder() {
     .eq("user_id", window.currentUserId)
     .order("created_at", { ascending: false })
     .limit(1);
+
   const { data: user } = await supabaseClient
     .from("users")
     .select("balance")
@@ -122,7 +123,7 @@ async function loadLastOrder() {
 async function completeOrder(order, currentBalance) {
   // 防止重复完成
   if (order.status === "completed") {
-    alert("订单已完成，不能重复操作！");
+    console.log("订单已完成，忽略重复操作。");
     return;
   }
 
