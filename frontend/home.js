@@ -22,14 +22,14 @@ async function loadUserInfo(username) {
 
   const { data, error } = await supabaseClient
     .from("users")
-    .select("id, platform_account, balance")
+    .select("id, platform_account, coins")
     .eq("username", username)
     .single();
 
   if (error || !data) {
     console.error("加载用户失败：", error?.message);
     document.getElementById("platformAccount").textContent = "错误";
-    document.getElementById("balance").textContent = "错误";
+    document.getElementById("coins").textContent = "错误";
     return;
   }
 
@@ -37,8 +37,8 @@ async function loadUserInfo(username) {
 
   // 更新页面显示
   document.getElementById("platformAccount").textContent = data.platform_account;
-  document.getElementById("balance").textContent = data.balance;
-  document.getElementById("orderBalance").textContent = data.balance;
+  document.getElementById("coins").textContent = data.coins;
+  document.getElementById("ordercoins").textContent = data.coins;
 
   // 同步 ID 给订单页用
   window.currentUserId = data.id;
