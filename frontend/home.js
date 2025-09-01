@@ -38,7 +38,6 @@ async function loadUserInfo(username) {
   // 更新页面显示
   document.getElementById("platformAccount").textContent = data.platform_account;
   document.getElementById("coins").textContent = data.coins;
-  document.getElementById("ordercoins").textContent = data.coins;
 
   // 同步 ID 给订单页用
   window.currentUserId = data.id;
