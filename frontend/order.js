@@ -20,14 +20,21 @@ function setOrderBtnDisabled(disabled, reason = "") {
 }
 
 /* ======================
-   更新余额 UI（只控制“余额<0”时的禁用）
+   更新余额 UI（balance + balance2）
    ====================== */
-function updateBalanceUI(balanceRaw) {
+function updateBalanceUI(balanceRaw, balance2Raw) {
   const balance = Number(balanceRaw) || 0;
+  const balance2 = Number(balance2Raw) || 0;
+
   const ob = document.getElementById("orderBalance");
+  const ob2 = document.getElementById("orderBalance2");
   const mb = document.getElementById("balance");
+  const mb2 = document.getElementById("balance2");
+
   if (ob) ob.textContent = balance.toFixed(2);
+  if (ob2) ob2.textContent = balance2.toFixed(2);
   if (mb) mb.textContent = balance.toFixed(2);
+  if (mb2) mb2.textContent = balance2.toFixed(2);
 
   if (balance < 0) {
     setOrderBtnDisabled(true, `余额为负（欠款 ¥${Math.abs(balance).toFixed(2)}），请先充值`);
@@ -61,12 +68,12 @@ async function loadBalanceOrderPage() {
   if (!window.currentUserId) return;
   const { data, error } = await supabaseClient
     .from("users")
-    .select("balance")
+    .select("balance, balance2")
     .eq("id", window.currentUserId)
     .single();
 
   if (!error && data) {
-    updateBalanceUI(data.balance);
+    updateBalanceUI(data.balance, data.balance2);
     await checkPendingLock();
   }
 }
@@ -87,11 +94,12 @@ async function getRandomProduct() {
 /* ======================
    渲染最近订单（含“完成订单”按钮）
    ====================== */
-function renderLastOrder(order, balanceRaw) {
+function renderLastOrder(order, balanceRaw, balance2Raw) {
   const el = document.getElementById("orderResult");
   if (!el || !order) return;
 
   const balance = Number(balanceRaw) || 0;
+  const balance2 = Number(balance2Raw) || 0;
   const price = Number(order.total_price) || 0;
   const profit = Number(order.profit) || 0;
 
@@ -102,10 +110,9 @@ function renderLastOrder(order, balanceRaw) {
     <p>利润：<span style="color:green;">+¥${profit.toFixed(2)}</span></p>
     <p>状态：${order.status === "completed" ? "✅ 已完成" : "⏳ 待充值"}</p>
     <p>时间：${new Date(order.created_at).toLocaleString()}</p>
-    <p>当前余额：¥${balance.toFixed(2)}</p>
+    <p>当前余额：¥${balance.toFixed(2)} / 余额2：¥${balance2.toFixed(2)}</p>
   `;
 
-  // 只有“待充值”且余额 >= 0 时，才显示“完成订单”按钮
   if (order.status === "pending" && balance >= 0) {
     html += `<button id="completeOrderBtn">完成订单</button>`;
   }
@@ -115,12 +122,11 @@ function renderLastOrder(order, balanceRaw) {
 
   el.innerHTML = html;
 
-  // 绑定完成按钮（点击一次后即刻移除，防重复）
   const compBtn = document.getElementById("completeOrderBtn");
   if (compBtn) {
     compBtn.addEventListener("click", async () => {
-      compBtn.remove();  // 先移除按钮，避免重复点击
-      await completeOrder(order, balance);
+      compBtn.remove();
+      await completeOrder(order, balance, balance2);
     });
   }
 }
@@ -140,26 +146,24 @@ async function loadLastOrder() {
 
   const { data: user } = await supabaseClient
     .from("users")
-    .select("balance")
+    .select("balance, balance2")
     .eq("id", window.currentUserId)
     .single();
 
   if (orders?.length) {
-    renderLastOrder(orders[0], user?.balance ?? 0);
+    renderLastOrder(orders[0], user?.balance ?? 0, user?.balance2 ?? 0);
   }
 }
 
 /* ======================
    完成订单（返还本金+利润）
    ====================== */
-async function completeOrder(order, currentBalanceRaw) {
+async function completeOrder(order, currentBalanceRaw, currentBalance2Raw) {
   if (completing) return;
   completing = true;
 
   try {
-    // 防重复：只有 pending → completed
     if (order.status === "completed") {
-      // 已经完成则直接刷新控件
       await loadBalanceOrderPage();
       await loadLastOrder();
       await loadRecentOrders();
@@ -167,11 +171,12 @@ async function completeOrder(order, currentBalanceRaw) {
     }
 
     const currentBalance = Number(currentBalanceRaw) || 0;
+    const currentBalance2 = Number(currentBalance2Raw) || 0;
     const price = Number(order.total_price) || 0;
     const profit = Number(order.profit) || 0;
     const finalBalance = currentBalance + price + profit;
+    const finalBalance2 = currentBalance2; // balance2 暂时不动
 
-    // 先更新订单状态（加条件，只有 pending 才能更新）
     const { error: orderErr } = await supabaseClient
       .from("orders")
       .update({ status: "completed" })
@@ -179,16 +184,14 @@ async function completeOrder(order, currentBalanceRaw) {
       .eq("status", "pending");
     if (orderErr) throw new Error(orderErr.message);
 
-    // 再返还本金+利润
     const { error: balErr } = await supabaseClient
       .from("users")
-      .update({ balance: finalBalance })
+      .update({ balance: finalBalance, balance2: finalBalance2 })
       .eq("id", window.currentUserId);
     if (balErr) throw new Error(balErr.message);
 
-    // 更新 UI：订单完成 → 解锁（若余额≥0且无 pending）
-    renderLastOrder({ ...order, status: "completed" }, finalBalance);
-    updateBalanceUI(finalBalance);
+    renderLastOrder({ ...order, status: "completed" }, finalBalance, finalBalance2);
+    updateBalanceUI(finalBalance, finalBalance2);
     await checkPendingLock();
     await loadRecentOrders();
   } catch (e) {
@@ -199,7 +202,7 @@ async function completeOrder(order, currentBalanceRaw) {
 }
 
 /* ======================
-   随机下单逻辑（定金制 + 可能欠款）
+   随机下单逻辑
    ====================== */
 async function autoOrder() {
   if (!window.currentUserId) { alert("请先登录！"); return; }
@@ -209,7 +212,6 @@ async function autoOrder() {
   setOrderBtnDisabled(true, "下单中…");
 
   try {
-    // 规则：如果存在待充值订单，必须先完成
     const { data: pend } = await supabaseClient
       .from("orders")
       .select("id")
@@ -222,10 +224,9 @@ async function autoOrder() {
       return;
     }
 
-    // 读取余额 + 随机产品
     const { data: user } = await supabaseClient
       .from("users")
-      .select("balance")
+      .select("balance, balance2")
       .eq("id", window.currentUserId)
       .single();
     const product = await getRandomProduct();
@@ -233,15 +234,15 @@ async function autoOrder() {
     const price = Number(product.price) || 0;
     const profit = +(price * 0.1).toFixed(2);
 
-    // 扣本金（允许变负）
     const tempBalance = (Number(user.balance) || 0) - price;
+    const tempBalance2 = Number(user.balance2) || 0; // balance2 暂时不动
+
     await supabaseClient
       .from("users")
-      .update({ balance: tempBalance })
+      .update({ balance: tempBalance, balance2: tempBalance2 })
       .eq("id", window.currentUserId);
 
-    // 建立订单：若扣完仍 ≥0，则后续允许“完成订单”按钮立即出现并可点
-    const status = tempBalance >= 0 ? "pending" : "pending";
+    const status = "pending";
     const { data: newOrder, error: orderErr } = await supabaseClient
       .from("orders")
       .insert({
@@ -259,9 +260,8 @@ async function autoOrder() {
       alert(`⚠️ 余额不足，本次下单已进入欠款状态（余额：¥${tempBalance.toFixed(2)}），请充值后完成订单！`);
     }
 
-    // 展示最近一单 + 刷新 UI/锁定规则
-    renderLastOrder(newOrder, tempBalance);
-    updateBalanceUI(tempBalance);
+    renderLastOrder(newOrder, tempBalance, tempBalance2);
+    updateBalanceUI(tempBalance, tempBalance2);
     await checkPendingLock();
     await loadRecentOrders();
   } catch (e) {
@@ -301,7 +301,7 @@ async function loadRecentOrders() {
 }
 
 /* ======================
-   充值功能（自动完成待充值订单）
+   充值功能（balance 和 balance2 一起加）
    ====================== */
 async function rechargeBalance() {
   const amount = parseFloat(prompt("充值金额", "0"));
@@ -309,20 +309,21 @@ async function rechargeBalance() {
 
   const { data: user } = await supabaseClient
     .from("users")
-    .select("balance")
+    .select("balance, balance2")
     .eq("id", window.currentUserId)
     .single();
 
   const newBalance = (Number(user.balance) || 0) + amount;
+  const newBalance2 = (Number(user.balance2) || 0) + amount; // balance2 同步增加
+
   await supabaseClient
     .from("users")
-    .update({ balance: newBalance })
+    .update({ balance: newBalance, balance2: newBalance2 })
     .eq("id", window.currentUserId);
 
   alert(`充值成功 ¥${amount.toFixed(2)}`);
-  updateBalanceUI(newBalance);
+  updateBalanceUI(newBalance, newBalance2);
 
-  // 若存在待充值订单，且余额已非负 → 自动完成最近的一笔
   const { data: pending } = await supabaseClient
     .from("orders")
     .select(`id, total_price, profit, status, created_at, products ( name )`)
@@ -332,9 +333,8 @@ async function rechargeBalance() {
     .limit(1);
 
   if (pending?.length && newBalance >= 0) {
-    await completeOrder(pending[0], newBalance);
+    await completeOrder(pending[0], newBalance, newBalance2);
   } else {
-    // 没有可完成的 pending 或余额仍负数 → 仅刷新展示/锁定
     await loadLastOrder();
     await checkPendingLock();
   }
@@ -349,7 +349,6 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
   document.getElementById("rechargeBtn")?.addEventListener("click", rechargeBalance);
 
-  // 初次加载
   loadBalanceOrderPage();
   loadLastOrder();
   loadRecentOrders();
