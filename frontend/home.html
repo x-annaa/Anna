@@ -9,7 +9,6 @@
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <!-- 全局 Supabase 初始化 -->
   <script src="../supabaseClient.js"></script>
-  <link rel="stylesheet" href="order.css">
 </head>
 <body>
 
@@ -24,7 +23,6 @@
     <div class="user-info">
       <p><strong>平台账号：</strong><span id="platformAccount">加载中...</span></p>
       <p><strong>余额：</strong><span id="balance">加载中...</span></p>
-      <p><strong>刷单余额：</strong><span id="balance2">加载中...</span></p>
     </div>
 
     <div class="my-buttons">
@@ -47,19 +45,7 @@
 
     <div class="order-actions">
       <button id="autoOrderBtn">🎲 一键刷单</button>
-      <div class="balance2-box">
-        💎 Balance2: <span id="orderBalance2">0</span>
-      </div>
-      <div class="limit-box">
-        📊 今日进度: <span id="dailyProgress">0/10</span>
-      </div>
-    </div>
-
-    <!-- ✅ 已完成订单统计 -->
-    <div id="completedOrdersBox" class="order-completed-box">
-      <h3>📊 已完成订单</h3>
-      <p>已完成：<span id="completedOrdersCount">0</span> 单</p>
-      <button id="refreshCompletedBtn">🔄 刷新</button>
+      <button id="rechargeBtn">💳 充值</button>
     </div>
 
     <!-- 显示本次下单结果 -->
@@ -73,6 +59,10 @@
       </ul>
     </div>
   </div>
+
+  <!-- 引入独立文件 -->
+  <link rel="stylesheet" href="order.css">
+  <script src="order.js"></script>
 
   <!-- 底部导航栏 -->
   <div class="bottom-nav">
@@ -94,6 +84,5 @@
 
   <!-- 业务逻辑 -->
   <script src="home.js"></script>
-  <script src="order.js"></script>
 </body>
 </html>
