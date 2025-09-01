@@ -85,6 +85,36 @@ async function getRandomProduct() {
 }
 
 /* ======================
+   ✅ 已完成订单数（新增模块）
+   ====================== */
+async function loadCompletedOrdersCount() {
+  if (!window.currentUserId) return;
+
+  const { count, error } = await supabaseClient
+    .from("orders")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", window.currentUserId)
+    .eq("status", "completed");
+
+  const container = document.getElementById("completedOrdersBox");
+  if (!container) return;
+
+  if (error) {
+    container.innerHTML = `<p style="color:red;">加载已完成订单失败: ${error.message}</p>`;
+    return;
+  }
+
+  container.innerHTML = `
+    <h3>📦 已完成订单统计</h3>
+    <p>已完成：<strong>${count}</strong> 单</p>
+    <button id="refreshCompletedBtn">🔄 刷新</button>
+  `;
+
+  // 绑定刷新按钮
+  document.getElementById("refreshCompletedBtn")?.addEventListener("click", loadCompletedOrdersCount);
+}
+
+/* ======================
    渲染最近订单（含“完成订单”按钮）
    ====================== */
 function renderLastOrder(order, balanceRaw) {
@@ -105,7 +135,6 @@ function renderLastOrder(order, balanceRaw) {
     <p>当前余额：¥${balance.toFixed(2)}</p>
   `;
 
-  // 只有“待充值”且余额 >= 0 时，才显示“完成订单”按钮
   if (order.status === "pending" && balance >= 0) {
     html += `<button id="completeOrderBtn">完成订单</button>`;
   }
@@ -115,7 +144,6 @@ function renderLastOrder(order, balanceRaw) {
 
   el.innerHTML = html;
 
-  // 绑定完成按钮
   const compBtn = document.getElementById("completeOrderBtn");
   if (compBtn) {
     compBtn.addEventListener("click", async () => {
@@ -161,6 +189,7 @@ async function completeOrder(order, currentBalanceRaw) {
       await loadBalanceOrderPage();
       await loadLastOrder();
       await loadRecentOrders();
+      await loadCompletedOrdersCount();  // ✅ 刷新已完成统计
       return;
     }
 
@@ -186,6 +215,7 @@ async function completeOrder(order, currentBalanceRaw) {
     updateBalanceUI(finalBalance);
     await checkPendingLock();
     await loadRecentOrders();
+    await loadCompletedOrdersCount();  // ✅ 刷新已完成统计
   } catch (e) {
     alert(e.message || "完成订单失败");
   } finally {
@@ -254,6 +284,7 @@ async function autoOrder() {
     updateBalanceUI(tempBalance);
     await checkPendingLock();
     await loadRecentOrders();
+    await loadCompletedOrdersCount();  // ✅ 刷新已完成统计
   } catch (e) {
     alert(e.message || "下单失败");
   } finally {
@@ -297,6 +328,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
 
   loadBalanceOrderPage();
+  loadCompletedOrdersCount();  // ✅ 页面加载时初始化已完成统计
   loadLastOrder();
   loadRecentOrders();
 });
