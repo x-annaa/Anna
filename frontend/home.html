@@ -9,6 +9,7 @@
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <!-- 全局 Supabase 初始化 -->
   <script src="../supabaseClient.js"></script>
+  <link rel="stylesheet" href="order.css">
 </head>
 <body>
 
@@ -47,6 +48,13 @@
       <button id="autoOrderBtn">🎲 一键刷单</button>
     </div>
 
+    <!-- ✅ 新增：订单完成统计 -->
+    <div id="completedOrdersBox" class="order-completed-box">
+      <h3>📊 已完成订单</h3>
+      <p>已完成：<span id="completedOrdersCount">0</span> 单</p>
+      <button id="refreshCompletedBtn">🔄 刷新</button>
+    </div>
+
     <!-- 显示本次下单结果 -->
     <div id="orderResult" class="order-result"></div>
 
@@ -58,10 +66,6 @@
       </ul>
     </div>
   </div>
-
-  <!-- 引入独立文件 -->
-  <link rel="stylesheet" href="order.css">
-  <script src="order.js"></script>
 
   <!-- 底部导航栏 -->
   <div class="bottom-nav">
@@ -83,5 +87,6 @@
 
   <!-- 业务逻辑 -->
   <script src="home.js"></script>
+  <script src="order.js"></script>
 </body>
 </html>
