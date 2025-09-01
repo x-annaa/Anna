@@ -38,3 +38,13 @@
   background: #fafafa;
   text-align: center;
 }
+
+.completed-box {
+  background: #e8ffe8;
+  border: 1px solid #8bc34a;
+  padding: 10px;
+  margin: 10px 0;
+  font-weight: bold;
+  color: #2e7d32;
+  border-radius: 5px;
+}
