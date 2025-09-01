@@ -13,13 +13,9 @@
 </head>
 <body>
 
-  <!-- 首页 -->
+  <!-- 页面内容 -->
   <div id="homePage" class="page active">🏠 首页内容</div>
-
-  <!-- 信息页 -->
   <div id="infoPage" class="page">ℹ️ 信息内容</div>
-
-  <!-- 消息页 -->
   <div id="msgPage" class="page">💬 消息内容</div>
 
   <!-- 我的页面 -->
@@ -28,6 +24,7 @@
     <div class="user-info">
       <p><strong>平台账号：</strong><span id="platformAccount">加载中...</span></p>
       <p><strong>余额：</strong><span id="balance">加载中...</span></p>
+      <p><strong>刷单余额：</strong><span id="balance2">加载中...</span></p>
     </div>
 
     <div class="my-buttons">
@@ -50,6 +47,12 @@
 
     <div class="order-actions">
       <button id="autoOrderBtn">🎲 一键刷单</button>
+      <div class="balance2-box">
+        💎 Balance2: <span id="orderBalance2">0</span>
+      </div>
+      <div class="limit-box">
+        📊 今日进度: <span id="dailyProgress">0/10</span>
+      </div>
     </div>
 
     <!-- ✅ 已完成订单统计 -->
@@ -59,7 +62,7 @@
       <button id="refreshCompletedBtn">🔄 刷新</button>
     </div>
 
-    <!-- ✅ 最近一次订单 -->
+    <!-- 显示本次下单结果 -->
     <div id="orderResult" class="order-result"></div>
 
     <!-- 最近 5 个订单历史 -->
