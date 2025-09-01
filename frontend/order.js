@@ -115,11 +115,11 @@ function renderLastOrder(order, balanceRaw) {
 
   el.innerHTML = html;
 
-  // 绑定完成按钮（点击一次后即刻移除，防重复）
+  // 绑定完成按钮
   const compBtn = document.getElementById("completeOrderBtn");
   if (compBtn) {
     compBtn.addEventListener("click", async () => {
-      compBtn.remove();  // 先移除按钮，避免重复点击
+      compBtn.remove();
       await completeOrder(order, balance);
     });
   }
@@ -150,16 +150,14 @@ async function loadLastOrder() {
 }
 
 /* ======================
-   完成订单（返还本金+利润）
+   完成订单
    ====================== */
 async function completeOrder(order, currentBalanceRaw) {
   if (completing) return;
   completing = true;
 
   try {
-    // 防重复：只有 pending → completed
     if (order.status === "completed") {
-      // 已经完成则直接刷新控件
       await loadBalanceOrderPage();
       await loadLastOrder();
       await loadRecentOrders();
@@ -171,7 +169,6 @@ async function completeOrder(order, currentBalanceRaw) {
     const profit = Number(order.profit) || 0;
     const finalBalance = currentBalance + price + profit;
 
-    // 先更新订单状态（加条件，只有 pending 才能更新）
     const { error: orderErr } = await supabaseClient
       .from("orders")
       .update({ status: "completed" })
@@ -179,14 +176,12 @@ async function completeOrder(order, currentBalanceRaw) {
       .eq("status", "pending");
     if (orderErr) throw new Error(orderErr.message);
 
-    // 再返还本金+利润
     const { error: balErr } = await supabaseClient
       .from("users")
       .update({ balance: finalBalance })
       .eq("id", window.currentUserId);
     if (balErr) throw new Error(balErr.message);
 
-    // 更新 UI：订单完成 → 解锁（若余额≥0且无 pending）
     renderLastOrder({ ...order, status: "completed" }, finalBalance);
     updateBalanceUI(finalBalance);
     await checkPendingLock();
@@ -199,7 +194,7 @@ async function completeOrder(order, currentBalanceRaw) {
 }
 
 /* ======================
-   随机下单逻辑（定金制 + 可能欠款）
+   随机下单逻辑
    ====================== */
 async function autoOrder() {
   if (!window.currentUserId) { alert("请先登录！"); return; }
@@ -209,7 +204,6 @@ async function autoOrder() {
   setOrderBtnDisabled(true, "下单中…");
 
   try {
-    // 规则：如果存在待充值订单，必须先完成
     const { data: pend } = await supabaseClient
       .from("orders")
       .select("id")
@@ -222,7 +216,6 @@ async function autoOrder() {
       return;
     }
 
-    // 读取余额 + 随机产品
     const { data: user } = await supabaseClient
       .from("users")
       .select("balance")
@@ -233,15 +226,13 @@ async function autoOrder() {
     const price = Number(product.price) || 0;
     const profit = +(price * 0.1).toFixed(2);
 
-    // 扣本金（允许变负）
     const tempBalance = (Number(user.balance) || 0) - price;
     await supabaseClient
       .from("users")
       .update({ balance: tempBalance })
       .eq("id", window.currentUserId);
 
-    // 建立订单：若扣完仍 ≥0，则后续允许“完成订单”按钮立即出现并可点
-    const status = tempBalance >= 0 ? "pending" : "pending";
+    const status = "pending";
     const { data: newOrder, error: orderErr } = await supabaseClient
       .from("orders")
       .insert({
@@ -259,7 +250,6 @@ async function autoOrder() {
       alert(`⚠️ 余额不足，本次下单已进入欠款状态（余额：¥${tempBalance.toFixed(2)}），请充值后完成订单！`);
     }
 
-    // 展示最近一单 + 刷新 UI/锁定规则
     renderLastOrder(newOrder, tempBalance);
     updateBalanceUI(tempBalance);
     await checkPendingLock();
@@ -301,55 +291,11 @@ async function loadRecentOrders() {
 }
 
 /* ======================
-   充值功能（自动完成待充值订单）
-   ====================== */
-async function rechargeBalance() {
-  const amount = parseFloat(prompt("充值金额", "0"));
-  if (isNaN(amount) || amount <= 0) { alert("金额无效"); return; }
-
-  const { data: user } = await supabaseClient
-    .from("users")
-    .select("balance")
-    .eq("id", window.currentUserId)
-    .single();
-
-  const newBalance = (Number(user.balance) || 0) + amount;
-  await supabaseClient
-    .from("users")
-    .update({ balance: newBalance })
-    .eq("id", window.currentUserId);
-
-  alert(`充值成功 ¥${amount.toFixed(2)}`);
-  updateBalanceUI(newBalance);
-
-  // 若存在待充值订单，且余额已非负 → 自动完成最近的一笔
-  const { data: pending } = await supabaseClient
-    .from("orders")
-    .select(`id, total_price, profit, status, created_at, products ( name )`)
-    .eq("user_id", window.currentUserId)
-    .eq("status", "pending")
-    .order("created_at", { ascending: false })
-    .limit(1);
-
-  if (pending?.length && newBalance >= 0) {
-    await completeOrder(pending[0], newBalance);
-  } else {
-    // 没有可完成的 pending 或余额仍负数 → 仅刷新展示/锁定
-    await loadLastOrder();
-    await checkPendingLock();
-  }
-
-  await loadRecentOrders();
-}
-
-/* ======================
    页面初始化
    ====================== */
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
-  document.getElementById("rechargeBtn")?.addEventListener("click", rechargeBalance);
 
-  // 初次加载
   loadBalanceOrderPage();
   loadLastOrder();
   loadRecentOrders();
