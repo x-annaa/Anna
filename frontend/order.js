@@ -105,6 +105,7 @@ function renderLastOrder(order, balanceRaw) {
     <p>当前余额：¥${balance.toFixed(2)}</p>
   `;
 
+  // 只有“待充值”且余额 >= 0 时，才显示“完成订单”按钮
   if (order.status === "pending" && balance >= 0) {
     html += `<button id="completeOrderBtn">完成订单</button>`;
   }
@@ -114,6 +115,7 @@ function renderLastOrder(order, balanceRaw) {
 
   el.innerHTML = html;
 
+  // 绑定完成按钮
   const compBtn = document.getElementById("completeOrderBtn");
   if (compBtn) {
     compBtn.addEventListener("click", async () => {
@@ -159,7 +161,6 @@ async function completeOrder(order, currentBalanceRaw) {
       await loadBalanceOrderPage();
       await loadLastOrder();
       await loadRecentOrders();
-      await loadCompletedCount();
       return;
     }
 
@@ -185,7 +186,6 @@ async function completeOrder(order, currentBalanceRaw) {
     updateBalanceUI(finalBalance);
     await checkPendingLock();
     await loadRecentOrders();
-    await loadCompletedCount();
   } catch (e) {
     alert(e.message || "完成订单失败");
   } finally {
@@ -254,7 +254,6 @@ async function autoOrder() {
     updateBalanceUI(tempBalance);
     await checkPendingLock();
     await loadRecentOrders();
-    await loadCompletedCount();
   } catch (e) {
     alert(e.message || "下单失败");
   } finally {
@@ -292,23 +291,6 @@ async function loadRecentOrders() {
 }
 
 /* ======================
-   ✅ 已完成订单总数
-   ====================== */
-async function loadCompletedCount() {
-  if (!window.currentUserId) return;
-  const { count, error } = await supabaseClient
-    .from("orders")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", window.currentUserId)
-    .eq("status", "completed");
-
-  if (!error) {
-    const span = document.getElementById("completedCount");
-    if (span) span.textContent = count || 0;
-  }
-}
-
-/* ======================
    页面初始化
    ====================== */
 document.addEventListener("DOMContentLoaded", () => {
@@ -317,5 +299,4 @@ document.addEventListener("DOMContentLoaded", () => {
   loadBalanceOrderPage();
   loadLastOrder();
   loadRecentOrders();
-  loadCompletedCount();
 });
