@@ -35,34 +35,29 @@
   </div>
 
   <!-- 订单页面 -->
-<div id="orderPage" class="page">
-  <div class="order-header">
-    <h2>📦 订单中心</h2>
-    <div class="balance-box">
-      💰 Balance: <span id="orderBalance">0</span>
+  <div id="orderPage" class="page">
+    <div class="order-header">
+      <h2>📦 订单中心</h2>
+      <div class="balance-box">
+        💰 Balance: <span id="orderBalance">0</span>
+      </div>
+    </div>
+
+    <div class="order-actions">
+      <button id="autoOrderBtn">🎲 一键刷单</button>
+    </div>
+
+    <!-- 显示本次下单结果 -->
+    <div id="orderResult" class="order-result"></div>
+
+    <!-- 最近 5 个订单历史 -->
+    <div class="order-history">
+      <h3>🕘 最近 5 个订单</h3>
+      <ul id="recentOrders">
+        <li>暂无订单</li>
+      </ul>
     </div>
   </div>
-
-  <div class="order-actions">
-    <button id="autoOrderBtn">🎲 一键刷单</button>
-  </div>
-
-  <!-- 显示本次下单结果 -->
-  <div id="orderResult" class="order-result"></div>
-
-  <!-- ✅ 新增：完成订单统计 -->
-  <div class="completed-box">
-    ✅ 已完成订单: <span id="completedCount">0</span> 单
-  </div>
-
-  <!-- 最近 5 个订单历史 -->
-  <div class="order-history">
-    <h3>🕘 最近 5 个订单</h3>
-    <ul id="recentOrders">
-      <li>暂无订单</li>
-    </ul>
-  </div>
-</div>
 
   <!-- 引入独立文件 -->
   <link rel="stylesheet" href="order.css">
