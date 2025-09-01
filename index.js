@@ -48,7 +48,7 @@ async function createUserWithUniqueAccount(username, pass) {
     const payload = {
       username,
       password: pass,
-      balance: 0,               // 默认余额 0
+      coins: 0,               // 默认余额 0
       platform_account
     };
 
