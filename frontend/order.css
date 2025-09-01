@@ -30,6 +30,13 @@
   background: #1565c0;
 }
 
+.balance2-box,
+.limit-box {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #333;
+}
+
 .order-result {
   margin-top: 20px;
   padding: 15px;
