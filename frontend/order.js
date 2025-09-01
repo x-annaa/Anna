@@ -24,7 +24,7 @@ function setOrderBtnDisabled(disabled, reason = "") {
    ====================== */
 function updateCoinsUI(coinsRaw) {
   const coins = Number(coinsRaw) || 0;
-  const ob = document.getElementById("orderCoins");
+  const ob = document.getElementById("ordercoins");
   const mb = document.getElementById("coins");
   if (ob) ob.textContent = coins.toFixed(2);
   if (mb) mb.textContent = coins.toFixed(2);
