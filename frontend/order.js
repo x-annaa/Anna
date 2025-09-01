@@ -4,8 +4,8 @@
 window.currentUserId = localStorage.getItem("currentUserId");
 window.currentUsername = localStorage.getItem("currentUser");
 
-let ordering = false;
-let completing = false;
+let ordering = false;      // 下单中的并发保护
+let completing = false;    // 完成订单中的并发保护
 
 /* ======================
    工具：更新按钮状态
@@ -20,8 +20,14 @@ function setOrderBtnDisabled(disabled, reason = "") {
 }
 
 /* ======================
-   更新 balance2 UI
+   更新 balance & balance2 UI
    ====================== */
+function updateBalanceUI(balanceRaw) {
+  const balance = Number(balanceRaw) || 0;
+  document.getElementById("orderBalance").textContent = balance.toFixed(2);
+  document.getElementById("balance").textContent = balance.toFixed(2);
+}
+
 function updateBalance2UI(balance2Raw, dailyOrders, dailyLimit) {
   const balance2 = Number(balance2Raw) || 0;
   document.getElementById("orderBalance2").textContent = balance2.toFixed(2);
@@ -32,7 +38,7 @@ function updateBalance2UI(balance2Raw, dailyOrders, dailyLimit) {
 }
 
 /* ======================
-   加载余额
+   加载余额 + 刷单额度
    ====================== */
 async function loadBalanceOrderPage() {
   if (!window.currentUserId) return;
@@ -44,9 +50,7 @@ async function loadBalanceOrderPage() {
 
   if (error || !data) return;
 
-  // 普通余额
-  document.getElementById("orderBalance").textContent = Number(data.balance).toFixed(2);
-  document.getElementById("balance").textContent = Number(data.balance).toFixed(2);
+  updateBalanceUI(data.balance);
 
   // 检查每日是否需要重置
   const today = new Date().toISOString().split("T")[0];
@@ -73,6 +77,128 @@ async function getRandomProduct() {
     throw new Error("产品列表为空或读取失败！");
   }
   return products[Math.floor(Math.random() * products.length)];
+}
+
+/* ======================
+   ✅ 已完成订单数统计
+   ====================== */
+async function loadCompletedOrdersCount() {
+  if (!window.currentUserId) return;
+
+  const { count, error } = await supabaseClient
+    .from("orders")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", window.currentUserId)
+    .eq("status", "completed");
+
+  const container = document.getElementById("completedOrdersBox");
+  if (!container) return;
+
+  if (error) {
+    container.innerHTML = `<p style="color:red;">加载已完成订单失败: ${error.message}</p>`;
+    return;
+  }
+
+  container.innerHTML = `
+    <h3>📦 已完成订单统计</h3>
+    <p>已完成：<strong>${count}</strong> 单</p>
+    <button id="refreshCompletedBtn">🔄 刷新</button>
+  `;
+
+  document.getElementById("refreshCompletedBtn")
+    ?.addEventListener("click", loadCompletedOrdersCount);
+}
+
+/* ======================
+   渲染最近一次订单
+   ====================== */
+function renderLastOrder(order, balance2Raw) {
+  const el = document.getElementById("orderResult");
+  if (!el || !order) return;
+
+  const balance2 = Number(balance2Raw) || 0;
+  const price = Number(order.total_price) || 0;
+  const profit = Number(order.profit) || 0;
+
+  let html = `
+    <h3>✅ 最近一次订单</h3>
+    <p>商品：${order.products?.name || "未知商品"}</p>
+    <p>价格：¥${price.toFixed(2)}</p>
+    <p>利润：<span style="color:green;">+¥${profit.toFixed(2)}</span></p>
+    <p>状态：${order.status === "completed" ? "✅ 已完成" : "⏳ 待充值"}</p>
+    <p>时间：${new Date(order.created_at).toLocaleString()}</p>
+    <p>当前刷单余额：¥${balance2.toFixed(2)}</p>
+  `;
+
+  if (order.status === "pending") {
+    html += `<button id="completeOrderBtn">完成订单</button>`;
+  }
+
+  el.innerHTML = html;
+
+  const compBtn = document.getElementById("completeOrderBtn");
+  if (compBtn) {
+    compBtn.addEventListener("click", async () => {
+      compBtn.remove();
+      await completeOrder(order, balance2);
+    });
+  }
+}
+
+/* ======================
+   加载最近 1 单
+   ====================== */
+async function loadLastOrder() {
+  if (!window.currentUserId) return;
+
+  const { data: orders } = await supabaseClient
+    .from("orders")
+    .select(`id, total_price, profit, status, created_at, products ( name )`)
+    .eq("user_id", window.currentUserId)
+    .order("created_at", { ascending: false })
+    .limit(1);
+
+  const { data: user } = await supabaseClient
+    .from("users")
+    .select("balance2")
+    .eq("id", window.currentUserId)
+    .single();
+
+  if (orders?.length) {
+    renderLastOrder(orders[0], user?.balance2 ?? 0);
+  }
+}
+
+/* ======================
+   完成订单（返到 balance2）
+   ====================== */
+async function completeOrder(order, currentBalance2) {
+  if (completing) return;
+  completing = true;
+
+  try {
+    const price = Number(order.total_price) || 0;
+    const profit = Number(order.profit) || 0;
+    const finalBalance2 = currentBalance2 + price + profit;
+
+    await supabaseClient.from("orders")
+      .update({ status: "completed" })
+      .eq("id", order.id)
+      .eq("status", "pending");
+
+    await supabaseClient.from("users")
+      .update({ balance2: finalBalance2 })
+      .eq("id", window.currentUserId);
+
+    renderLastOrder({ ...order, status: "completed" }, finalBalance2);
+    await loadBalanceOrderPage();
+    await loadRecentOrders();
+    await loadCompletedOrdersCount();
+  } catch (e) {
+    alert(e.message || "完成订单失败");
+  } finally {
+    completing = false;
+  }
 }
 
 /* ======================
@@ -143,34 +269,31 @@ async function autoOrder() {
 }
 
 /* ======================
-   完成订单（返到 balance2）
+   最近 5 笔订单历史
    ====================== */
-async function completeOrder(order, currentBalance2) {
-  if (completing) return;
-  completing = true;
+async function loadRecentOrders() {
+  if (!window.currentUserId) return;
+  const { data: orders } = await supabaseClient
+    .from("orders")
+    .select(`id, total_price, profit, status, created_at, products ( name )`)
+    .eq("user_id", window.currentUserId)
+    .order("created_at", { ascending: false })
+    .limit(5);
 
-  try {
-    const price = Number(order.total_price) || 0;
-    const profit = Number(order.profit) || 0;
-    const finalBalance2 = currentBalance2 + price + profit;
-
-    await supabaseClient.from("orders")
-      .update({ status: "completed" })
-      .eq("id", order.id)
-      .eq("status", "pending");
-
-    await supabaseClient.from("users")
-      .update({ balance2: finalBalance2 })
-      .eq("id", window.currentUserId);
-
-    renderLastOrder({ ...order, status: "completed" }, finalBalance2);
-    await loadBalanceOrderPage();
-    await loadRecentOrders();
-    await loadCompletedOrdersCount();
-  } catch (e) {
-    alert(e.message || "完成订单失败");
-  } finally {
-    completing = false;
+  const list = document.getElementById("recentOrders");
+  if (list) {
+    list.innerHTML = (orders || []).map(o => {
+      const price = Number(o.total_price) || 0;
+      const profit = Number(o.profit) || 0;
+      return `
+        <li>
+          🛒 ${o.products?.name || "未知商品"} /
+          ¥${price.toFixed(2)} /
+          利润 +¥${profit.toFixed(2)} /
+          状态：${o.status === "completed" ? "已完成" : "待充值"} /
+          <small>${new Date(o.created_at).toLocaleString()}</small>
+        </li>`;
+    }).join("");
   }
 }
 
