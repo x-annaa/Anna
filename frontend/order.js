@@ -319,6 +319,7 @@ async function rechargeCoins() {
     .eq("status", "pending")
     .order("created_at", { ascending: false })
     .limit(1);
+   }
 
   if (pending?.length && newCoins >= 0) {
     await completeOrder(pending[0], newCoins);
@@ -340,4 +341,63 @@ document.addEventListener("DOMContentLoaded", () => {
   loadCoinsOrderPage();
   loadLastOrder();
   loadRecentOrders();
+
+/* ======================
+   从 Balance 转换到 Coins
+   ====================== */
+async function addCoinsFromBalance() {
+  if (!window.currentUserId) return;
+
+  const amount = parseFloat(prompt("请输入要兑换的 Coins 数量", "0"));
+  if (isNaN(amount) || amount <= 0) {
+    alert("输入无效");
+    return;
+  }
+
+  // 获取当前用户数据
+  const { data: user, error } = await supabaseClient
+    .from("users")
+    .select("coins, balance")
+    .eq("id", window.currentUserId)
+    .single();
+
+  if (error || !user) {
+    alert("加载用户信息失败");
+    return;
+  }
+
+  const coins = Number(user.coins) || 0;
+  const balance = Number(user.balance) || 0;
+
+  if (balance < amount) {
+    alert(`❌ 余额不足，当前 Balance：¥${balance.toFixed(2)}`);
+    return;
+  }
+
+  const newCoins = coins + amount;
+  const newBalance = balance - amount;
+
+  // 更新数据库
+  const { error: updateErr } = await supabaseClient
+    .from("users")
+    .update({ coins: newCoins, balance: newBalance })
+    .eq("id", window.currentUserId);
+
+  if (updateErr) {
+    alert("兑换失败：" + updateErr.message);
+    return;
+  }
+
+  alert(`✅ 成功兑换 ${amount.toFixed(2)} Coins`);
+
+  // 更新前端 UI
+  document.getElementById("ordercoins").textContent = newCoins.toFixed(2);
+  document.getElementById("coins").textContent = newCoins.toFixed(2);
+  document.getElementById("balance").textContent = newBalance.toFixed(2);
+
+  updateCoinsUI(newCoins);
+  await checkPendingLock();
+  await loadLastOrder();
+  await loadRecentOrders();
 });
+
