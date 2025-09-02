@@ -28,7 +28,7 @@ async function loadUserInfo(username) {
 
   const { data, error } = await supabaseClient
     .from("users")
-    .select("id, platform_account, coins, balance, level") // 👈 加上 id 和 level
+    .select("id, platform_account, coins, balance, level") // ✅ 加 level
     .eq("username", username)
     .single();
 
@@ -37,7 +37,7 @@ async function loadUserInfo(username) {
     document.getElementById("platformAccount").textContent = "错误";
     document.getElementById("coins").textContent = "错误";
     document.getElementById("balance").textContent = "错误";
-    document.getElementById("level").textContent = "错误"; // 👈 显示错误
+    document.getElementById("level").textContent = "错误";
     return;
   }
 
@@ -53,12 +53,10 @@ async function loadUserInfo(username) {
   document.getElementById("balance").textContent =
     (Number(data.balance) || 0).toFixed(2);
   document.getElementById("level").textContent =
-    data.level ? `Lv.${data.level}` : "未设置"; // 👈 显示等级
+    data.level ? `Lv.${data.level}` : "未设置";
 
-  // 同步 ID 给订单页用
+  // ✅ 同步 ID 给订单页用（前端不显示）
   window.currentUserId = data.id;
-
-  // ✅ 存到 localStorage，方便其他页面用
   localStorage.setItem("currentUserId", data.id);
 }
 
