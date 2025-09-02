@@ -1,40 +1,25 @@
-.order-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-}
-
 .coins-box {
   font-weight: bold;
   color: #2e7d32;
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Coins 数字和 + 按钮之间的间距 */
 }
 
-.order-actions {
-  text-align: center;
-  margin: 20px 0;
-}
-
-.order-actions button {
-  padding: 10px 20px;
+.add-coins-btn {
+  background: #43a047; /* 绿色按钮 */
   border: none;
-  border-radius: 10px;
-  background: #1976d2;
+  border-radius: 50%;
   color: white;
-  font-size: 16px;
+  width: 28px;
+  height: 28px;
   cursor: pointer;
+  font-size: 18px;
+  line-height: 28px;
+  text-align: center;
   transition: 0.3s;
 }
 
-.order-actions button:hover {
-  background: #1565c0;
-}
-
-.order-result {
-  margin-top: 20px;
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  background: #fafafa;
-  text-align: center;
+.add-coins-btn:hover {
+  background: #2e7d32;
 }
