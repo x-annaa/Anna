@@ -40,3 +40,32 @@
   background: #fafafa;
   text-align: center;
 }
+
+.coins-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1em;
+  font-weight: bold;
+}
+
+#addCoinsBtn {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+#addCoinsBtn:hover {
+  background-color: #45a049;
+  transform: scale(1.1);
+}
+
+#addCoinsBtn:active {
+  transform: scale(0.95);
+}
