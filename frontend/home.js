@@ -1,7 +1,11 @@
+// ======================
 // 当前登录用户
+// ======================
 let currentUser = null;
 
+// ======================
 // 页面切换
+// ======================
 const buttons = document.querySelectorAll(".bottom-nav button");
 const pages = document.querySelectorAll(".page");
 
@@ -16,13 +20,15 @@ buttons.forEach(btn => {
   });
 });
 
-// 🔎 加载用户信息
+// ======================
+// 加载用户信息
+// ======================
 async function loadUserInfo(username) {
   if (!username) return;
 
   const { data, error } = await supabaseClient
     .from("users")
-    .select("id, platform_account, coins")
+    .select("id, platform_account, coins, balance")
     .eq("username", username)
     .single();
 
@@ -30,16 +36,22 @@ async function loadUserInfo(username) {
     console.error("加载用户失败：", error?.message);
     document.getElementById("platformAccount").textContent = "错误";
     document.getElementById("coins").textContent = "错误";
+    document.getElementById("balance").textContent = "错误";
     return;
   }
 
   currentUser = data; // 保存当前用户对象
 
   // 更新页面显示
-  document.getElementById("platformAccount").textContent = data.platform_account;
-  document.getElementById("coins").textContent = data.coins;
-  document.getElementById("ordercoins").textContent = data.coins;
-  
+  document.getElementById("platformAccount").textContent =
+    data.platform_account || "未知";
+  document.getElementById("coins").textContent =
+    (Number(data.coins) || 0).toFixed(2);
+  document.getElementById("ordercoins").textContent =
+    (Number(data.coins) || 0).toFixed(2);
+  document.getElementById("balance").textContent =
+    (Number(data.balance) || 0).toFixed(2);
+
   // 同步 ID 给订单页用
   window.currentUserId = data.id;
 
@@ -47,6 +59,9 @@ async function loadUserInfo(username) {
   localStorage.setItem("currentUserId", data.id);
 }
 
+// ======================
+// 页面初始化
+// ======================
 document.addEventListener("DOMContentLoaded", () => {
   const username = localStorage.getItem("currentUser");
 
@@ -58,7 +73,9 @@ document.addEventListener("DOMContentLoaded", () => {
   loadUserInfo(username);
 });
 
+// ======================
 // Logout 弹窗
+// ======================
 const logoutBtn = document.getElementById("logoutBtn");
 const logoutModal = document.getElementById("logoutModal");
 const cancelLogout = document.getElementById("cancelLogout");
