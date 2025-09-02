@@ -1,5 +1,3 @@
-还有我的 order css 
-
 .order-header {
   display: flex;
   justify-content: space-between;
@@ -8,8 +6,33 @@
 }
 
 .coins-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1em;
   font-weight: bold;
   color: #2e7d32;
+}
+
+#addCoinsBtn {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+#addCoinsBtn:hover {
+  background-color: #45a049;
+  transform: scale(1.1);
+}
+
+#addCoinsBtn:active {
+  transform: scale(0.95);
 }
 
 .order-actions {
@@ -41,31 +64,64 @@
   text-align: center;
 }
 
-.coins-box {
-  display: flex;
+/* ========= 通用 Modal 样式 ========= */
+.modal {
+  display: none; /* 默认隐藏 */
+  position: fixed;
+  z-index: 999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.4);
+  justify-content: center;
   align-items: center;
-  gap: 8px;
-  font-size: 1.1em;
-  font-weight: bold;
 }
 
-#addCoinsBtn {
+.modal-content {
+  background-color: #fff;
+  padding: 20px 25px;
+  border-radius: 12px;
+  text-align: center;
+  width: 280px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  font-size: 1.2em;
+}
+
+.modal-content input {
+  width: 100%;
+  padding: 8px;
+  margin: 12px 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1em;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.modal-actions button {
+  flex: 1;
+  padding: 8px 0;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1em;
+}
+
+#cancelAddCoins {
+  background-color: #ccc;
+  color: #333;
+}
+
+#confirmAddCoins {
   background-color: #4caf50;
   color: white;
-  border: none;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-}
-
-#addCoinsBtn:hover {
-  background-color: #45a049;
-  transform: scale(1.1);
-}
-
-#addCoinsBtn:active {
-  transform: scale(0.95);
 }
