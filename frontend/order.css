@@ -1,6 +1,6 @@
 /* ========= 通用 Modal 样式 ========= */
 .modal {
-  display: none;              /* 默认隐藏 */
+  display: none;              /* 默认隐藏，点击按钮再显示 */
   position: fixed;
   z-index: 999;
   top: 0;
@@ -12,9 +12,12 @@
   background-color: rgba(0,0,0,0.5);
 
   /* 居中内容 */
-  display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.modal.show {
+  display: flex; /* JS 切换时添加 .show 来显示 */
 }
 
 .modal-content {
