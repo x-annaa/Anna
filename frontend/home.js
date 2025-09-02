@@ -28,7 +28,7 @@ async function loadUserInfo(username) {
 
   const { data, error } = await supabaseClient
     .from("users")
-    .select("id, platform_account, coins, balance")
+    .select("platform_account, coins, balance, level")
     .eq("username", username)
     .single();
 
