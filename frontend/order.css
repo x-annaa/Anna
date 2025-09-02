@@ -143,7 +143,7 @@ button:disabled {
 
 /* ========= 通用 Modal 样式 ========= */
 .modal {
-  display: none;              /* 默认隐藏 */
+  display: none;              /* 默认隐藏，JS 控制时用 flex */
   position: fixed;
   z-index: 999;
   top: 0;
@@ -154,8 +154,7 @@ button:disabled {
   /* 半透明背景 */
   background-color: rgba(0,0,0,0.5);
 
-  /* 居中内容 */
-  display: flex;
+  /* 居中内容（等 JS 设置 display:flex 时生效） */
   justify-content: center;
   align-items: center;
 }
@@ -236,7 +235,7 @@ button:disabled {
   background-color: #45a049;
 }
 
-/* 弹窗渐显动画 */
+/* ========= 弹窗渐显动画 ========= */
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.9); }
   to { opacity: 1; transform: scale(1); }
