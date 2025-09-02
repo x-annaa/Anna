@@ -55,7 +55,7 @@ async function loadUserInfo(username) {
   // 同步 ID 给订单页用
   window.currentUserId = data.id;
 
-  // ✅ 同时存到 localStorage，方便 order.js 直接用
+  // ✅ 存到 localStorage，方便其他页面用
   localStorage.setItem("currentUserId", data.id);
 }
 
@@ -94,4 +94,49 @@ confirmLogout.addEventListener("click", () => {
   localStorage.removeItem("currentUser");
   localStorage.removeItem("currentUserId");
   window.location.href = "../index.html";
+});
+
+// ======================
+// Coins 兑换弹窗
+// ======================
+const addCoinsBtn = document.getElementById("addCoinsBtn");
+const addCoinsModal = document.getElementById("addCoinsModal");
+const cancelAddCoins = document.getElementById("cancelAddCoins");
+const confirmAddCoins = document.getElementById("confirmAddCoins");
+
+if (addCoinsBtn) {
+  addCoinsBtn.addEventListener("click", () => {
+    addCoinsModal.style.display = "flex";
+  });
+}
+
+if (cancelAddCoins) {
+  cancelAddCoins.addEventListener("click", () => {
+    addCoinsModal.style.display = "none";
+  });
+}
+
+if (confirmAddCoins) {
+  confirmAddCoins.addEventListener("click", () => {
+    // TODO: 写兑换逻辑（balance 扣钱，coins 增加）
+    addCoinsModal.style.display = "none";
+  });
+}
+
+// ======================
+// 点击遮罩层关闭弹窗
+// ======================
+window.addEventListener("click", (e) => {
+  if (e.target === logoutModal) logoutModal.style.display = "none";
+  if (e.target === addCoinsModal) addCoinsModal.style.display = "none";
+});
+
+// ======================
+// 按 ESC 键关闭弹窗
+// ======================
+window.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    logoutModal.style.display = "none";
+    addCoinsModal.style.display = "none";
+  }
 });
