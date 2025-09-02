@@ -61,12 +61,14 @@ async function loadCoinsOrderPage() {
   if (!window.currentUserId) return;
   const { data, error } = await supabaseClient
     .from("users")
-    .select("coins")
+    .select("coins, balance")
     .eq("id", window.currentUserId)
     .single();
 
   if (!error && data) {
     updateCoinsUI(data.coins);
+    const balEl = document.getElementById("balance");
+    if (balEl) balEl.textContent = (Number(data.balance) || 0).toFixed(2);
     await checkPendingLock();
   }
 }
@@ -303,11 +305,16 @@ async function rechargeCoins() {
     .eq("id", window.currentUserId)
     .single();
 
-  const newCoins = (Number(user.coins) || 0) + amount;
-  await supabaseClient
+  const newCoins = (Number(user?.coins) || 0) + amount;
+
+  const { error: updErr } = await supabaseClient
     .from("users")
     .update({ coins: newCoins })
     .eq("id", window.currentUserId);
+  if (updErr) {
+    alert("充值失败：" + updErr.message);
+    return;
+  }
 
   alert(`充值成功 ¥${amount.toFixed(2)}`);
   updateCoinsUI(newCoins);
@@ -319,7 +326,6 @@ async function rechargeCoins() {
     .eq("status", "pending")
     .order("created_at", { ascending: false })
     .limit(1);
-   }
 
   if (pending?.length && newCoins >= 0) {
     await completeOrder(pending[0], newCoins);
@@ -332,18 +338,7 @@ async function rechargeCoins() {
 }
 
 /* ======================
-   页面初始化
-   ====================== */
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
-  document.getElementById("rechargeBtn")?.addEventListener("click", rechargeCoins);
-
-  loadCoinsOrderPage();
-  loadLastOrder();
-  loadRecentOrders();
-
-/* ======================
-   从 Balance 转换到 Coins
+   从 Balance 转换到 Coins（(+) 按钮）
    ====================== */
 async function addCoinsFromBalance() {
   if (!window.currentUserId) return;
@@ -391,13 +386,28 @@ async function addCoinsFromBalance() {
   alert(`✅ 成功兑换 ${amount.toFixed(2)} Coins`);
 
   // 更新前端 UI
-  document.getElementById("ordercoins").textContent = newCoins.toFixed(2);
-  document.getElementById("coins").textContent = newCoins.toFixed(2);
-  document.getElementById("balance").textContent = newBalance.toFixed(2);
+  const oc = document.getElementById("ordercoins");
+  const mc = document.getElementById("coins");
+  const bal = document.getElementById("balance");
+  if (oc) oc.textContent = newCoins.toFixed(2);
+  if (mc) mc.textContent = newCoins.toFixed(2);
+  if (bal) bal.textContent = newBalance.toFixed(2);
 
   updateCoinsUI(newCoins);
   await checkPendingLock();
   await loadLastOrder();
   await loadRecentOrders();
-});
+}
 
+/* ======================
+   页面初始化
+   ====================== */
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
+  document.getElementById("rechargeBtn")?.addEventListener("click", rechargeCoins);
+  document.getElementById("addCoinsBtn")?.addEventListener("click", addCoinsFromBalance);
+
+  loadCoinsOrderPage();
+  loadLastOrder();
+  loadRecentOrders();
+});
