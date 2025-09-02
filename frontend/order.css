@@ -1,25 +1,42 @@
+还有我的 order css 
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
 .coins-box {
   font-weight: bold;
   color: #2e7d32;
-  display: flex;
-  align-items: center;
-  gap: 8px; /* Coins 数字和 + 按钮之间的间距 */
 }
 
-.add-coins-btn {
-  background: #43a047; /* 绿色按钮 */
-  border: none;
-  border-radius: 50%;
-  color: white;
-  width: 28px;
-  height: 28px;
-  cursor: pointer;
-  font-size: 18px;
-  line-height: 28px;
+.order-actions {
   text-align: center;
+  margin: 20px 0;
+}
+
+.order-actions button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  background: #1976d2;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
   transition: 0.3s;
 }
 
-.add-coins-btn:hover {
-  background: #2e7d32;
+.order-actions button:hover {
+  background: #1565c0;
+}
+
+.order-result {
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #fafafa;
+  text-align: center;
 }
