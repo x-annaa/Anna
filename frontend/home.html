@@ -1,19 +1,17 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>U9</title>
 
-  <!-- 公共样式 -->
-  <link rel="stylesheet" href="home.css">
-  <link rel="stylesheet" href="order.css">
-  <link rel="stylesheet" href="message.css"> 
+  <!-- 样式 -->
+  <link rel="stylesheet" href="home.css" />
+  <link rel="stylesheet" href="order.css" />
+  <link rel="stylesheet" href="message.css" /> 
 
-  <!-- Supabase SDK -->
+  <!-- Supabase SDK（非模块，引入全局 supabase 变量，供模块使用） -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <!-- 全局 Supabase 初始化 -->
-  <script src="../supabaseClient.js"></script>
 </head>
 <body>
 
@@ -98,7 +96,7 @@
     <button data-page="homePage" class="active">首页</button>
     <button data-page="infoPage">信息</button>
     <button data-page="orderPage">订单</button>
-    <button data-page="msgPage">消息</button> <!-- 对应 id 改好了 -->
+    <button data-page="msgPage">消息</button>
     <button data-page="myPage">我的</button>
   </div>
 
@@ -111,9 +109,10 @@
     </div>
   </div>
 
-  <!-- 公共逻辑 -->
-  <script src="home.js"></script>
-  <script src="order.js"></script>
-  <script type="module" src="message.js"></script> <!-- 消息逻辑 -->
+  <!-- 模块化脚本（注意：不需要单独 <script> 引入 supabaseClient.js，模块里会 import） -->
+  <script type="module" src="../supabaseClient.js"></script> <!-- 可选：如果想提早初始化 -->
+  <script type="module" src="home.js"></script>
+  <script type="module" src="order.js"></script>
+  <script type="module" src="message.js"></script>
 </body>
 </html>
