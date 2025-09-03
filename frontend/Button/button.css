@@ -1,0 +1,22 @@
+/* 底部导航 */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  display: flex;
+  background: #fff;
+  border-top: 1px solid #ddd;
+}
+.bottom-nav button {
+  flex: 1;
+  border: none;
+  background: none;
+  font-size: 14px;
+  color: #666;
+}
+.bottom-nav button.active { 
+  color: #007bff; 
+  font-weight: bold; 
+}
