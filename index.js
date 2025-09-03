@@ -57,41 +57,43 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  // 检查是否已有用户
-  const { data: exist } = await supabaseClient
-    .from("users")
-    .select("id")
-    .eq("username", username)
-    .maybeSingle();
+  try {
+    // 检查是否已有用户
+    const { data: exist, error: existErr } = await supabaseClient
+      .from("users")
+      .select("id")
+      .eq("username", username)
+      .maybeSingle();
 
-  if (exist) {
-    alert("该用户名已存在，请换一个");
-    return;
+    if (existErr) throw existErr;
+    if (exist) {
+      alert("该用户名已存在，请换一个");
+      return;
+    }
+
+    // 插入新用户
+    const { data, error } = await supabaseClient
+      .from("users")
+      .insert({
+        username,
+        password, // ⚠️ 明文存储不安全，生产环境请 hash
+        coins: 0,
+        balance: 0,
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    // 保存到 localStorage
+    localStorage.setItem("currentUserId", data.id);
+    localStorage.setItem("currentUser", data.username);
+
+    alert("注册成功！");
+    window.location.href = "frontend/home.html";
+  } catch (err) {
+    alert("注册失败: " + err.message);
   }
-
-  // 插入新用户
-  const { data, error } = await supabaseClient
-    .from("users")
-    .insert({
-      username,
-      password, // ⚠️ 明文存储不安全，建议 hash
-      coins: 0,
-      balance: 0
-    })
-    .select()
-    .single();
-
-  if (error) {
-    alert("注册失败: " + error.message);
-    return;
-  }
-
-  // 保存到 localStorage
-  localStorage.setItem("currentUserId", data.id);
-  localStorage.setItem("currentUser", data.username);
-
-  alert("注册成功！");
-  window.location.href = "frontend/home.html";
 });
 
 // =======================
@@ -106,29 +108,30 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     return;
   }
 
-  const { data, error } = await supabaseClient
-    .from("users")
-    .select("id, username, password")
-    .eq("username", username)
-    .maybeSingle();
+  try {
+    const { data, error } = await supabaseClient
+      .from("users")
+      .select("id, username, password")
+      .eq("username", username)
+      .maybeSingle();
 
-  if (error) {
-    alert("登录失败: " + error.message);
-    return;
-  }
-  if (!data) {
-    alert("用户不存在");
-    return;
-  }
-  if (data.password !== password) {
-    alert("密码错误");
-    return;
-  }
+    if (error) throw error;
+    if (!data) {
+      alert("用户不存在");
+      return;
+    }
+    if (data.password !== password) {
+      alert("密码错误");
+      return;
+    }
 
-  // 保存到 localStorage
-  localStorage.setItem("currentUserId", data.id);
-  localStorage.setItem("currentUser", data.username);
+    // 保存到 localStorage
+    localStorage.setItem("currentUserId", data.id);
+    localStorage.setItem("currentUser", data.username);
 
-  alert("登录成功！");
-  window.location.href = "frontend/home.html";
+    alert("登录成功！");
+    window.location.href = "frontend/home.html";
+  } catch (err) {
+    alert("登录失败: " + err.message);
+  }
 });
