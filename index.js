@@ -91,7 +91,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   localStorage.setItem("currentUser", data.username);
 
   alert("注册成功！");
-  window.location.href = "home.html";
+  window.location.href = "frontend/home.html";
 });
 
 // =======================
@@ -130,5 +130,5 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   localStorage.setItem("currentUser", data.username);
 
   alert("登录成功！");
-  window.location.href = "home.html";
+  window.location.href = "frontend/home.html";
 });
