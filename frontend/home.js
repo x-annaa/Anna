@@ -1,3 +1,5 @@
+import { supabaseClient } from "../supabaseClient.js";
+
 // ======================
 // 当前登录用户
 // ======================
@@ -40,7 +42,7 @@ async function loadUserInfo(username) {
     return;
   }
 
-  currentUser = data; // 保存当前用户对象
+  currentUser = data;
 
   // 更新页面显示
   document.getElementById("platformAccount").textContent =
@@ -54,21 +56,23 @@ async function loadUserInfo(username) {
 
   // 同步 ID 给订单页用
   window.currentUserId = data.id;
-
-  // ✅ 存到 localStorage，方便其他页面用
   localStorage.setItem("currentUserId", data.id);
 }
 
 // ======================
 // 页面初始化
 // ======================
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const username = localStorage.getItem("currentUser");
 
   if (!username) {
     window.location.href = "../index.html"; // 没有登录过 -> 回登录页
     return;
   }
+
+  // 如果你用的是 Supabase Auth，确保有会话（可选）
+  // const { data: { user } } = await supabaseClient.auth.getUser();
+  // if (!user) window.location.href = "../index.html";
 
   loadUserInfo(username);
 });
@@ -89,8 +93,10 @@ cancelLogout.addEventListener("click", () => {
   logoutModal.style.display = "none";
 });
 
-confirmLogout.addEventListener("click", () => {
-  // ✅ 清理账号信息
+confirmLogout.addEventListener("click", async () => {
+  // 可选：退出 Supabase Auth 会话
+  // await supabaseClient.auth.signOut();
+
   localStorage.removeItem("currentUser");
   localStorage.removeItem("currentUserId");
   window.location.href = "../index.html";
