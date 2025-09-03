@@ -8,6 +8,11 @@ let ordering = false;      // 下单中的并发保护
 let completing = false;    // 完成订单中的并发保护
 let exchanging = false;    // 兑换中的并发保护（Balance -> Coins）
 
+// 确认 Supabase 已加载
+if (!window.supabaseClient) {
+  console.error("❌ supabaseClient 未初始化，请检查 supabaseClient.js 是否正确加载！");
+}
+
 /* ======================
    小工具
    ====================== */
@@ -30,7 +35,6 @@ function updateCoinsUI(coinsRaw) {
   if (coins < 0) {
     setOrderBtnDisabled(true, `金币为负（欠款 ¥${Math.abs(coins).toFixed(2)}），请先充值`);
   } else {
-    // 不直接放开按钮，交给 checkPendingLock 综合判断
     setOrderBtnDisabled(false);
   }
 }
@@ -42,7 +46,7 @@ async function refreshAll() {
 }
 
 /* ======================
-   附加规则：存在待充值订单时也要锁定下单按钮
+   附加规则：存在待充值订单时锁定下单按钮
    ====================== */
 async function checkPendingLock() {
   if (!window.currentUserId) return;
@@ -59,13 +63,12 @@ async function checkPendingLock() {
   if (pend && pend.length > 0) {
     setOrderBtnDisabled(true, "存在未完成订单，请先完成该订单");
   } else {
-    // 若无 pending，按钮状态根据 coins 决定（updateCoinsUI 已处理 <0 的情况）
     setOrderBtnDisabled(false);
   }
 }
 
 /* ======================
-   加载金币与余额（并套用 pending 锁）
+   加载金币与余额
    ====================== */
 async function loadCoinsOrderPage() {
   if (!window.currentUserId) return;
@@ -97,7 +100,7 @@ async function getRandomProduct() {
 }
 
 /* ======================
-   渲染最近订单（含“完成订单”按钮）
+   渲染最近订单
    ====================== */
 function renderLastOrder(order, coinsRaw) {
   const el = document.getElementById("orderResult");
@@ -117,7 +120,6 @@ function renderLastOrder(order, coinsRaw) {
     <p>当前金币：¥${coins.toFixed(2)}</p>
   `;
 
-  // 只有“待充值”且金币 >= 0 时，才显示“完成订单”按钮
   if (order.status === "pending" && coins >= 0) {
     html += `<button id="completeOrderBtn">完成订单</button>`;
   }
@@ -127,7 +129,6 @@ function renderLastOrder(order, coinsRaw) {
 
   el.innerHTML = html;
 
-  // 绑定完成按钮
   const compBtn = document.getElementById("completeOrderBtn");
   if (compBtn) {
     compBtn.addEventListener("click", async () => {
@@ -165,7 +166,7 @@ async function loadLastOrder() {
 }
 
 /* ======================
-   完成订单（返还本金+利润）
+   完成订单
    ====================== */
 async function completeOrder(order, currentCoinsRaw) {
   if (completing) return;
@@ -239,14 +240,12 @@ async function autoOrder() {
     const price = Number(product.price) || 0;
     const profit = +(price * 0.1).toFixed(2);
 
-    // 暂扣 coins
     const tempCoins = (Number(user.coins) || 0) - price;
     await supabaseClient
       .from("users")
       .update({ coins: tempCoins })
       .eq("id", window.currentUserId);
 
-    // 创建订单（pending）
     const { data: newOrder, error: orderErr } = await supabaseClient
       .from("orders")
       .insert({
@@ -272,7 +271,6 @@ async function autoOrder() {
     alert(e.message || "下单失败");
   } finally {
     ordering = false;
-    // 交给 loadCoinsOrderPage / checkPendingLock 统一管理按钮状态
     await loadCoinsOrderPage();
   }
 }
@@ -307,7 +305,7 @@ async function loadRecentOrders() {
 }
 
 /* ======================
-   充值功能（自动完成待充值订单）
+   充值功能
    ====================== */
 async function rechargeCoins() {
   const amount = parseFloat(prompt("充值金额", "0"));
@@ -352,7 +350,7 @@ async function rechargeCoins() {
 }
 
 /* ======================
-   从 Balance 转 Coins（通过弹窗）
+   从 Balance 转 Coins
    ====================== */
 async function confirmExchange() {
   if (exchanging) return;
@@ -373,7 +371,6 @@ async function confirmExchange() {
   if (confirmBtn) confirmBtn.disabled = true;
 
   try {
-    // 拉取最新余额
     const { data: user, error } = await supabaseClient
       .from("users")
       .select("coins, balance")
@@ -395,7 +392,6 @@ async function confirmExchange() {
     const newCoins = coins + amount;
     const newBalance = balance - amount;
 
-    // 更新数据库
     const { error: updateErr } = await supabaseClient
       .from("users")
       .update({ coins: newCoins, balance: newBalance })
@@ -405,13 +401,9 @@ async function confirmExchange() {
 
     alert(`✅ 成功兑换 ${amount.toFixed(2)} Coins`);
 
-    // 更新前端 UI
-    const oc = document.getElementById("ordercoins");
-    const mc = document.getElementById("coins");
-    const bal = document.getElementById("balance");
-    if (oc) oc.textContent = newCoins.toFixed(2);
-    if (mc) mc.textContent = newCoins.toFixed(2);
-    if (bal) bal.textContent = newBalance.toFixed(2);
+    document.getElementById("ordercoins").textContent = newCoins.toFixed(2);
+    document.getElementById("coins").textContent = newCoins.toFixed(2);
+    document.getElementById("balance").textContent = newBalance.toFixed(2);
 
     updateCoinsUI(newCoins);
     await checkPendingLock();
@@ -431,7 +423,7 @@ function openExchangeModal() {
   const modal = document.getElementById("addCoinsModal");
   const input = document.getElementById("addCoinsInput");
   if (modal) {
-    modal.style.display = "flex"; // 只在点击 + 时显示
+    modal.style.display = "flex";
     if (input) {
       input.value = "";
       setTimeout(() => input.focus(), 50);
@@ -448,27 +440,20 @@ function closeExchangeModal() {
    页面初始化 & 事件绑定
    ====================== */
 document.addEventListener("DOMContentLoaded", () => {
-  // 业务按钮
   document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
   document.getElementById("rechargeBtn")?.addEventListener("click", rechargeCoins);
 
-  // 兑换按钮（+）
   document.getElementById("addCoinsBtn")?.addEventListener("click", openExchangeModal);
-
-  // Modal 事件
   document.getElementById("cancelAddCoins")?.addEventListener("click", closeExchangeModal);
   document.getElementById("confirmAddCoins")?.addEventListener("click", confirmExchange);
 
-  // 点击遮罩关闭
   document.getElementById("addCoinsModal")?.addEventListener("click", (e) => {
     if (e.target.id === "addCoinsModal") closeExchangeModal();
   });
 
-  // Esc 关闭
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeExchangeModal();
   });
 
-  // 初始加载
   refreshAll();
 });
