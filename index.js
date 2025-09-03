@@ -109,7 +109,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   localStorage.setItem("platformAccount", data.platform_account);
 
   alert("注册成功！");
-  window.location.href = "frontend/home.html";
+  window.location.href = "frontend/HOME.html";
 });
 
 // =======================
@@ -149,5 +149,5 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   localStorage.setItem("platformAccount", data.platform_account);
 
   alert("登录成功！");
-  window.location.href = "frontend/home.html";
+  window.location.href = "frontend/HOME.html";
 });
