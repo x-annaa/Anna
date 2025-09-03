@@ -1,4 +1,5 @@
-import { supabaseClient } from "../supabaseClient.js";
+// 直接用全局的
+const supabaseClient = window.supabaseClient;
 
 // ======================
 // 当前登录用户
