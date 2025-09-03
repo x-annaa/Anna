@@ -63,7 +63,9 @@ async function getUserRuleProduct(userId, orderNumber) {
 async function getRandomProduct() {
   const { data: products, error } = await supabaseClient
     .from("products")
-    .select("*");
+    .select("*")
+    .eq("enabled", true)
+    .eq("manual_only", false);  // 仅随机可选产品
   if (error || !products || products.length === 0) {
     throw new Error("产品列表为空或读取失败！");
   }
