@@ -1,4 +1,5 @@
-import { supabaseClient } from "../supabaseClient.js";
+// 直接用全局的
+const supabaseClient = window.supabaseClient;
 
 const chatForm = document.getElementById("chat-form");
 const chatInput = document.getElementById("chat-input");
