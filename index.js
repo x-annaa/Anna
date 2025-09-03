@@ -1,180 +1,134 @@
-// ============= 小工具 =============
-const $ = (sel) => document.querySelector(sel);
-
-function showMsg(id, text, isError = true) {
-  const el = $(id);
-  if (!el) return;
-  el.style.color = isError ? "#d00" : "#0a7b22";
-  el.textContent = text || "";
-}
-
-function togglePasswordByTarget(targetId, btnEl) {
-  const input = document.getElementById(targetId);
+// =======================
+// 密码可见切换
+// =======================
+window.togglePassword = function (id, el) {
+  const input = document.getElementById(id);
   if (!input) return;
   if (input.type === "password") {
     input.type = "text";
-    btnEl.textContent = "🙈";
+    el.textContent = "🙈";
   } else {
     input.type = "password";
-    btnEl.textContent = "👁️";
+    el.textContent = "👁️";
   }
-}
+};
 
-function ensureSupabase() {
-  if (!window.supabaseClient) {
-    console.error("❌ supabaseClient 未初始化。请确认 supabaseClient.js 是否正确加载且在 index.js 之前引入。");
-    alert("系统初始化失败，请刷新页面重试。");
-    return false;
+// =======================
+// 登录 / 注册 Tab 切换
+// =======================
+const loginForm = document.getElementById("loginForm");
+const registerForm = document.getElementById("registerForm");
+const showLoginBtn = document.getElementById("showLogin");
+const showRegisterBtn = document.getElementById("showRegister");
+
+showLoginBtn.addEventListener("click", () => {
+  loginForm.classList.remove("hidden");
+  registerForm.classList.add("hidden");
+  showLoginBtn.classList.add("active");
+  showRegisterBtn.classList.remove("active");
+});
+
+showRegisterBtn.addEventListener("click", () => {
+  loginForm.classList.add("hidden");
+  registerForm.classList.remove("hidden");
+  showLoginBtn.classList.remove("active");
+  showRegisterBtn.classList.add("active");
+});
+
+// =======================
+// 注册逻辑
+// =======================
+document.getElementById("registerBtn").addEventListener("click", async () => {
+  const username = document.getElementById("regUsername").value.trim();
+  const password = document.getElementById("regPassword").value;
+  const confirm = document.getElementById("regConfirmPassword").value;
+  const agree = document.getElementById("agreeTerms").checked;
+
+  if (!username || !password) {
+    alert("请输入用户名和密码");
+    return;
   }
-  return true;
-}
+  if (password !== confirm) {
+    alert("两次输入的密码不一致");
+    return;
+  }
+  if (!agree) {
+    alert("请先勾选同意条款");
+    return;
+  }
 
-// ============= 事件绑定 & 逻辑 =============
-document.addEventListener("DOMContentLoaded", () => {
-  if (!ensureSupabase()) return;
+  // 检查是否已有用户
+  const { data: exist } = await supabaseClient
+    .from("users")
+    .select("id")
+    .eq("username", username)
+    .maybeSingle();
 
-  // Tab 切换
-  $("#showLogin").addEventListener("click", () => {
-    $("#showLogin").classList.add("active");
-    $("#showRegister").classList.remove("active");
-    $("#loginForm").classList.remove("hidden");
-    $("#registerForm").classList.add("hidden");
-    showMsg("#loginMsg", "");
-    showMsg("#registerMsg", "");
-  });
+  if (exist) {
+    alert("该用户名已存在，请换一个");
+    return;
+  }
 
-  $("#showRegister").addEventListener("click", () => {
-    $("#showRegister").classList.add("active");
-    $("#showLogin").classList.remove("active");
-    $("#registerForm").classList.remove("hidden");
-    $("#loginForm").classList.add("hidden");
-    showMsg("#loginMsg", "");
-    showMsg("#registerMsg", "");
-  });
+  // 插入新用户
+  const { data, error } = await supabaseClient
+    .from("users")
+    .insert({
+      username,
+      password, // ⚠️ 明文存储不安全，建议 hash
+      coins: 0,
+      balance: 0
+    })
+    .select()
+    .single();
 
-  // 密码可见（委托）
-  document.body.addEventListener("click", (e) => {
-    if (e.target.classList.contains("toggle-password")) {
-      const target = e.target.getAttribute("data-target");
-      if (target) togglePasswordByTarget(target, e.target);
-    }
-  });
+  if (error) {
+    alert("注册失败: " + error.message);
+    return;
+  }
 
-  // Enter 提交（登录）
-  $("#loginPassword").addEventListener("keydown", (e) => {
-    if (e.key === "Enter") $("#loginBtn").click();
-  });
-  // Enter 提交（注册确认密码）
-  $("#regConfirmPassword").addEventListener("keydown", (e) => {
-    if (e.key === "Enter") $("#registerBtn").click();
-  });
+  // 保存到 localStorage
+  localStorage.setItem("currentUserId", data.id);
+  localStorage.setItem("currentUser", data.username);
 
-  // 登录
-  $("#loginBtn").addEventListener("click", async () => {
-    const btn = $("#loginBtn");
-    const username = $("#loginUsername").value.trim();
-    const password = $("#loginPassword").value.trim();
+  alert("注册成功！");
+  window.location.href = "home.html";
+});
 
-    showMsg("#loginMsg", "");
-    if (!username || !password) {
-      showMsg("#loginMsg", "请输入用户名和密码");
-      return;
-    }
+// =======================
+// 登录逻辑
+// =======================
+document.getElementById("loginBtn").addEventListener("click", async () => {
+  const username = document.getElementById("loginUsername").value.trim();
+  const password = document.getElementById("loginPassword").value;
 
-    btn.disabled = true;
-    try {
-      const { data, error } = await supabaseClient
-        .from("users")
-        .select("id, username, password")
-        .eq("username", username)
-        .eq("password", password)   // ⚠️ 明文密码仅用于演示
-        .single();
+  if (!username || !password) {
+    alert("请输入用户名和密码");
+    return;
+  }
 
-      if (error || !data) {
-        showMsg("#loginMsg", "用户名或密码错误");
-        return;
-      }
+  const { data, error } = await supabaseClient
+    .from("users")
+    .select("id, username, password")
+    .eq("username", username)
+    .maybeSingle();
 
-      // 保存本地状态并跳转
-      localStorage.setItem("currentUserId", data.id);
-      localStorage.setItem("currentUser", data.username);
-      showMsg("#loginMsg", "登录成功，正在进入…", false);
+  if (error) {
+    alert("登录失败: " + error.message);
+    return;
+  }
+  if (!data) {
+    alert("用户不存在");
+    return;
+  }
+  if (data.password !== password) {
+    alert("密码错误");
+    return;
+  }
 
-      // 延迟 300ms 让用户看到提示
-      setTimeout(() => (window.location.href = "home.html"), 300);
-    } catch (err) {
-      showMsg("#loginMsg", "登录失败，请稍后重试");
-      console.error(err);
-    } finally {
-      btn.disabled = false;
-    }
-  });
+  // 保存到 localStorage
+  localStorage.setItem("currentUserId", data.id);
+  localStorage.setItem("currentUser", data.username);
 
-  // 注册
-  $("#registerBtn").addEventListener("click", async () => {
-    const btn = $("#registerBtn");
-    const username = $("#regUsername").value.trim();
-    const password = $("#regPassword").value.trim();
-    const confirm = $("#regConfirmPassword").value.trim();
-    const agree = $("#agreeTerms").checked;
-
-    showMsg("#registerMsg", "");
-    if (!username || !password || !confirm) {
-      showMsg("#registerMsg", "请完整填写信息");
-      return;
-    }
-    if (password !== confirm) {
-      showMsg("#registerMsg", "两次密码不一致");
-      return;
-    }
-    if (!agree) {
-      showMsg("#registerMsg", "请先勾选同意条款");
-      return;
-    }
-
-    btn.disabled = true;
-    try {
-      // 用户名查重
-      const { data: existing } = await supabaseClient
-        .from("users")
-        .select("id")
-        .eq("username", username)
-        .maybeSingle();
-      if (existing) {
-        showMsg("#registerMsg", "用户名已存在");
-        return;
-      }
-
-      // 插入
-      const { data, error } = await supabaseClient
-        .from("users")
-        .insert({
-          username,
-          password,           // ⚠️ 明文密码仅用于演示
-          coins: 0,
-          balance: 0,
-          platform_account: username,
-          created_at: new Date().toISOString()
-        })
-        .select("id, username")
-        .single();
-
-      if (error) {
-        showMsg("#registerMsg", "注册失败：" + error.message);
-        return;
-      }
-
-      // 保存并跳转
-      localStorage.setItem("currentUserId", data.id);
-      localStorage.setItem("currentUser", data.username);
-      showMsg("#registerMsg", "注册成功，正在进入…", false);
-
-      setTimeout(() => (window.location.href = "home.html"), 300);
-    } catch (err) {
-      showMsg("#registerMsg", "注册异常，请稍后再试");
-      console.error(err);
-    } finally {
-      btn.disabled = false;
-    }
-  });
+  alert("登录成功！");
+  window.location.href = "home.html";
 });
