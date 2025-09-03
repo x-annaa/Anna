@@ -1,64 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>U9</title>
-  <link rel="stylesheet" href="index.css">
-  <!-- Supabase SDK -->
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="index.css" />
+
+  <!-- Supabase SDK（必须在 supabaseClient.js 之前） -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- 全局 Supabase 初始化 -->
+  <!-- 全局 Supabase 初始化（把 supabaseClient 挂到 window） -->
   <script src="supabaseClient.js"></script>
 </head>
 <body>
-  <!-- 🌐 语言选择 -->
-  <div class="lang-switch">
-    <select id="language">
-      <option value="en">English</option>
-      <option value="zh">中文</option>
-      <option value="jp">日本語</option>
-    </select>
-  </div>
+  <div class="container">
+    <h1 class="title">Welcome</h1>
+    <p class="desc">Please register or login below:</p>
 
-  <h1 id="title">Welcome</h1>
-  <p id="description">Please register or login below:</p>
-
-  <!-- 切换注册 / 登录按钮 -->
-  <div class="tab-container">
-    <button id="showLogin" class="active">Login</button>
-    <button id="showRegister">Register</button>
-  </div>
-
-  <!-- 登录窗口 -->
-  <div id="loginForm" class="form-container">
-    <input type="text" id="loginUsername" placeholder="Username">
-    
-    <div class="password-wrapper">
-      <input type="password" id="loginPassword" placeholder="Password">
-      <span class="toggle-password" onclick="togglePassword('loginPassword', this)">👁️</span>
+    <!-- Tab -->
+    <div class="tab-container">
+      <button id="showLogin" class="tab-btn active">Login</button>
+      <button id="showRegister" class="tab-btn">Register</button>
     </div>
 
-    <button id="loginBtn">Login</button>
-  </div>
+    <!-- 登录 -->
+    <div id="loginForm" class="form-container">
+      <div class="field">
+        <input type="text" id="loginUsername" placeholder="Username" autocomplete="username" />
+      </div>
 
-  <!-- 注册窗口 -->
-  <div id="registerForm" class="form-container hidden">
-    <input type="text" id="regUsername" placeholder="Username">
+      <div class="field password-wrapper">
+        <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" />
+        <button type="button" class="toggle-password" data-target="loginPassword" aria-label="toggle password">👁️</button>
+      </div>
 
-    <div class="password-wrapper">
-      <input type="password" id="regPassword" placeholder="Password">
-      <span class="toggle-password" onclick="togglePassword('regPassword', this)">👁️</span>
+      <div id="loginMsg" class="form-msg"></div>
+      <button id="loginBtn" class="primary-btn">Login</button>
     </div>
 
-    <div class="password-wrapper">
-      <input type="password" id="regConfirmPassword" placeholder="Confirm Password">
-      <span class="toggle-password" onclick="togglePassword('regConfirmPassword', this)">👁️</span>
+    <!-- 注册 -->
+    <div id="registerForm" class="form-container hidden">
+      <div class="field">
+        <input type="text" id="regUsername" placeholder="Username" autocomplete="username" />
+      </div>
+
+      <div class="field password-wrapper">
+        <input type="password" id="regPassword" placeholder="Password" autocomplete="new-password" />
+        <button type="button" class="toggle-password" data-target="regPassword" aria-label="toggle password">👁️</button>
+      </div>
+
+      <div class="field password-wrapper">
+        <input type="password" id="regConfirmPassword" placeholder="Confirm Password" autocomplete="new-password" />
+        <button type="button" class="toggle-password" data-target="regConfirmPassword" aria-label="toggle password">👁️</button>
+      </div>
+
+      <label class="agreement">
+        <input type="checkbox" id="agreeTerms" />
+        <span>✅ I agree to the terms</span>
+      </label>
+
+      <div id="registerMsg" class="form-msg"></div>
+      <button id="registerBtn" class="primary-btn">Register</button>
     </div>
-
-    <label class="agreement">
-      <input type="checkbox" id="agreeTerms"> ✅ I agree to the terms
-    </label>
-
-    <button id="registerBtn">Register</button>
   </div>
 
   <!-- 业务逻辑 -->
