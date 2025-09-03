@@ -1,63 +1,94 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { supabaseClient } from "../supabaseClient.js";
 
-const supabase = createClient("https://YOUR-PROJECT.supabase.co", "YOUR-ANON-KEY");
+const chatForm = document.getElementById("chat-form");
+const chatInput = document.getElementById("chat-input");
+const chatMessages = document.getElementById("chat-messages");
 
-let user = null;
+let currentChat = null;
 
-// 获取登录用户
-const { data: userData } = await supabase.auth.getUser();
-if (!userData.user) {
-  alert("请先登录");
-  throw new Error("用户未登录");
+// ========== 初始化会话 ==========
+async function initChat() {
+  const { data, error } = await supabaseClient.rpc("start_chat");
+  if (error) {
+    console.error("启动会话失败：", error.message);
+    return;
+  }
+  currentChat = data;
+  console.log("当前会话：", currentChat);
+
+  // 加载历史消息
+  loadMessages();
+  // 监听新消息
+  subscribeMessages();
 }
-user = userData.user;
 
-// 1. 获取/创建会话
-const { data: chat } = await supabase.rpc("start_chat");
-const chatId = chat.id;
+// ========== 加载历史消息 ==========
+async function loadMessages() {
+  if (!currentChat) return;
+  const { data, error } = await supabaseClient
+    .from("chat_messages")
+    .select("*")
+    .eq("chat_id", currentChat.id)
+    .order("created_at", { ascending: true });
 
-// 2. 渲染消息
-const chatBox = document.getElementById("chat-messages");
-function renderMessage(msg) {
+  if (error) {
+    console.error("加载消息失败：", error.message);
+    return;
+  }
+
+  chatMessages.innerHTML = "";
+  data.forEach(addMessageToUI);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// ========== 显示消息 ==========
+function addMessageToUI(msg) {
   const div = document.createElement("div");
-  div.classList.add("msg", msg.sender_role);
+  div.className = `chat-message ${msg.sender_role}`;
   div.textContent = msg.content;
-  chatBox.appendChild(div);
-  chatBox.scrollTop = chatBox.scrollHeight;
+  chatMessages.appendChild(div);
 }
 
-// 3. 加载历史消息
-const { data: history } = await supabase
-  .from("chat_messages")
-  .select("*")
-  .eq("chat_id", chatId)
-  .order("created_at", { ascending: true });
+// ========== 订阅新消息 ==========
+function subscribeMessages() {
+  supabaseClient
+    .channel("chat:" + currentChat.id)
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "chat_messages",
+        filter: `chat_id=eq.${currentChat.id}`,
+      },
+      (payload) => {
+        addMessageToUI(payload.new);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+    )
+    .subscribe();
+}
 
-(history || []).forEach(renderMessage);
-
-// 4. 订阅新消息
-supabase.channel("chat:" + chatId)
-  .on("postgres_changes", {
-    event: "INSERT",
-    schema: "public",
-    table: "chat_messages",
-    filter: `chat_id=eq.${chatId}`
-  }, (payload) => {
-    renderMessage(payload.new);
-  })
-  .subscribe();
-
-// 5. 发送消息
-document.getElementById("chat-form").addEventListener("submit", async (e) => {
+// ========== 发送消息 ==========
+chatForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const input = document.getElementById("chat-input");
-  const text = input.value.trim();
-  if (!text) return;
-  await supabase.from("chat_messages").insert([{
-    chat_id: chatId,
-    sender_id: user.id,
+  const text = chatInput.value.trim();
+  if (!text || !currentChat) return;
+
+  const { error } = await supabaseClient.from("chat_messages").insert({
+    chat_id: currentChat.id,
+    sender_id: (await supabaseClient.auth.getUser()).data.user.id,
     sender_role: "user",
-    content: text
-  }]);
-  input.value = "";
+    content: text,
+  });
+
+  if (error) {
+    console.error("发送失败：", error.message);
+    return;
+  }
+
+  chatInput.value = "";
 });
+
+// 初始化
+initChat();
