@@ -22,7 +22,16 @@
   <div id="infoPage" class="page">ℹ️ 信息内容</div>
 
   <!-- 消息页面 -->
-  <div id="msgPage" class="page">💬 消息内容</div>
+  <link rel="stylesheet" href="massage.css">
+<div id="chat-widget">
+  <div class="chat-header">💬 在线客服</div>
+  <div id="chat-messages" class="chat-messages"></div>
+  <form id="chat-form" class="chat-form">
+    <input id="chat-input" type="text" placeholder="输入消息…" />
+    <button type="submit">发送</button>
+  </form>
+</div>
+<script type="module" src="massage.js"></script>
 
   <!-- 我的页面 -->
   <div id="myPage" class="page">
