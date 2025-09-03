@@ -5,20 +5,30 @@ const chatInput = document.getElementById("chat-input");
 const chatMessages = document.getElementById("chat-messages");
 
 let currentChat = null;
+let subscription = null;
 
 // ========== 初始化会话 ==========
 async function initChat() {
+  // 确保已登录（如果你启用了 Supabase Auth + RLS）
+  const { data: authData, error: authErr } = await supabaseClient.auth.getUser();
+  if (authErr) console.warn("auth.getUser 警告：", authErr.message);
+  if (!authData?.user) {
+    // 这里按你的登录体系处理（localStorage 或 Supabase Auth）
+    // 没登录也可以让后端策略放行匿名，但你当前 RLS 需要 auth.uid()
+    console.error("未登录：start_chat 需要身份。");
+    // 可选：跳转登录
+    // window.location.href = "../index.html";
+    // return;
+  }
+
   const { data, error } = await supabaseClient.rpc("start_chat");
   if (error) {
     console.error("启动会话失败：", error.message);
     return;
   }
   currentChat = data;
-  console.log("当前会话：", currentChat);
 
-  // 加载历史消息
-  loadMessages();
-  // 监听新消息
+  await loadMessages();
   subscribeMessages();
 }
 
@@ -51,7 +61,10 @@ function addMessageToUI(msg) {
 
 // ========== 订阅新消息 ==========
 function subscribeMessages() {
-  supabaseClient
+  if (!currentChat) return;
+  if (subscription) supabaseClient.removeChannel(subscription);
+
+  subscription = supabaseClient
     .channel("chat:" + currentChat.id)
     .on(
       "postgres_changes",
@@ -75,9 +88,17 @@ chatForm.addEventListener("submit", async (e) => {
   const text = chatInput.value.trim();
   if (!text || !currentChat) return;
 
+  const { data: userData, error: userErr } = await supabaseClient.auth.getUser();
+  if (userErr) {
+    console.error("获取用户失败：", userErr.message);
+    return;
+  }
+
+  const senderId = userData?.user?.id || null; // 如果没用 Supabase Auth，这里需要你自己传你系统的 user_id（不推荐）
+
   const { error } = await supabaseClient.from("chat_messages").insert({
     chat_id: currentChat.id,
-    sender_id: (await supabaseClient.auth.getUser()).data.user.id,
+    sender_id: senderId,        // RLS 里要求 sender_id = auth.uid()
     sender_role: "user",
     content: text,
   });
@@ -90,5 +111,5 @@ chatForm.addEventListener("submit", async (e) => {
   chatInput.value = "";
 });
 
-// 初始化
+// 页面加载后启动
 initChat();
