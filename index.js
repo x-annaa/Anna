@@ -36,6 +36,18 @@ showRegisterBtn.addEventListener("click", () => {
 });
 
 // =======================
+// 生成随机平台账号（2位大写字母 + 4位数字，如 AB1234）
+// =======================
+function generatePlatformAccount() {
+  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const numbers = "0123456789";
+  let acc = "";
+  for (let i = 0; i < 2; i++) acc += letters[Math.floor(Math.random() * letters.length)];
+  for (let i = 0; i < 4; i++) acc += numbers[Math.floor(Math.random() * numbers.length)];
+  return acc;
+}
+
+// =======================
 // 注册逻辑
 // =======================
 document.getElementById("registerBtn").addEventListener("click", async () => {
@@ -57,43 +69,47 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  try {
-    // 检查是否已有用户
-    const { data: exist, error: existErr } = await supabaseClient
-      .from("users")
-      .select("id")
-      .eq("username", username)
-      .maybeSingle();
+  // 检查是否已有用户
+  const { data: exist } = await supabaseClient
+    .from("users")
+    .select("id")
+    .eq("username", username)
+    .maybeSingle();
 
-    if (existErr) throw existErr;
-    if (exist) {
-      alert("该用户名已存在，请换一个");
-      return;
-    }
-
-    // 插入新用户
-    const { data, error } = await supabaseClient
-      .from("users")
-      .insert({
-        username,
-        password, // ⚠️ 明文存储不安全，生产环境请 hash
-        coins: 0,
-        balance: 0,
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    // 保存到 localStorage
-    localStorage.setItem("currentUserId", data.id);
-    localStorage.setItem("currentUser", data.username);
-
-    alert("注册成功！");
-    window.location.href = "frontend/home.html";
-  } catch (err) {
-    alert("注册失败: " + err.message);
+  if (exist) {
+    alert("该用户名已存在，请换一个");
+    return;
   }
+
+  // 生成平台账号
+  const platformAccount = generatePlatformAccount();
+
+  // 插入新用户
+  const { data, error } = await supabaseClient
+    .from("users")
+    .insert({
+      username,
+      password, // ⚠️ 明文存储不安全，建议 hash
+      coins: 0,
+      balance: 0,
+      traffic: 0,
+      platform_account: platformAccount
+    })
+    .select()
+    .single();
+
+  if (error) {
+    alert("注册失败: " + error.message);
+    return;
+  }
+
+  // 保存到 localStorage
+  localStorage.setItem("currentUserId", data.id);
+  localStorage.setItem("currentUser", data.username);
+  localStorage.setItem("platformAccount", data.platform_account);
+
+  alert("注册成功！");
+  window.location.href = "frontend/home.html";
 });
 
 // =======================
@@ -108,30 +124,30 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     return;
   }
 
-  try {
-    const { data, error } = await supabaseClient
-      .from("users")
-      .select("id, username, password")
-      .eq("username", username)
-      .maybeSingle();
+  const { data, error } = await supabaseClient
+    .from("users")
+    .select("id, username, password, platform_account")
+    .eq("username", username)
+    .maybeSingle();
 
-    if (error) throw error;
-    if (!data) {
-      alert("用户不存在");
-      return;
-    }
-    if (data.password !== password) {
-      alert("密码错误");
-      return;
-    }
-
-    // 保存到 localStorage
-    localStorage.setItem("currentUserId", data.id);
-    localStorage.setItem("currentUser", data.username);
-
-    alert("登录成功！");
-    window.location.href = "frontend/home.html";
-  } catch (err) {
-    alert("登录失败: " + err.message);
+  if (error) {
+    alert("登录失败: " + error.message);
+    return;
   }
+  if (!data) {
+    alert("用户不存在");
+    return;
+  }
+  if (data.password !== password) {
+    alert("密码错误");
+    return;
+  }
+
+  // 保存到 localStorage
+  localStorage.setItem("currentUserId", data.id);
+  localStorage.setItem("currentUser", data.username);
+  localStorage.setItem("platformAccount", data.platform_account);
+
+  alert("登录成功！");
+  window.location.href = "frontend/home.html";
 });
