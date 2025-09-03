@@ -5,8 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>U9</title>
 
-  <!-- 公共样式 -->
-  <link rel="stylesheet" href="home.css">
+  <!-- css 部分 -->
+  <link rel="stylesheet" href="Home/home.css">
+  <link rel="stylesheet" href="About/about.css">
+  <link rel="stylesheet" href="Order/order.css">
+  <link rel="stylesheet" href="Message/message.css">
+  <link rel="stylesheet" href="Me/me.css">
+
 
   <!-- Supabase SDK -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -15,37 +20,16 @@
 </head>
 <body>
 
-  <!-- 首页 -->
-  <div id="homePage" class="page active">🏠 首页内容</div>
+  <!-- 首页 --> <!-- 首页 --> <!-- 首页 --> <!-- 首页 --> <!-- 首页 --> <!-- 首页 -->
+  <div id="homePage" class="page active">🏠 HOME</div>
 
-  <!-- 信息页面 -->
-  <div id="infoPage" class="page">ℹ️ 信息内容</div>
+  <!-- 信息页面 --> <!-- 信息页面 --> <!-- 信息页面 --> <!-- 信息页面 --> <!-- 信息页面 -->
+  <div id="infoPage" class="page">💬 MESSAGE</div>
 
-  <!-- 消息页面 -->
-  <div id="msgPage" class="page">💬 消息内容</div>
-
-  <!-- 我的页面 -->
-  <div id="myPage" class="page">
-    <h2>👤 我的页面</h2>
-    <div class="user-info">
-      <p><strong>平台账号：</strong><span id="platformAccount">加载中...</span></p>
-      <p><strong>Coins：</strong><span id="coins">加载中...</span></p>
-      <p><strong>Balance：</strong><span id="balance">加载中...</span></p>
-    </div>
-
-    <div class="my-buttons">
-      <button>按钮1</button>
-      <button>按钮2</button>
-      <button>按钮3</button>
-      <button>按钮4</button>
-      <button id="logoutBtn">🚪 Logout</button>
-    </div>
-  </div>
-
-  <!-- 📦 订单页面 -->
+  <!-- 订单页面 --> <!-- 订单页面 --> <!-- 订单页面 --> <!-- 订单页面 --> <!-- 订单页面 -->
   <div id="orderPage" class="page">
     <div class="order-header">
-      <h2>📦 订单中心</h2>
+      <h2>📦 ORDER</h2>
       <div class="coins-box">
         💰 Coins: <span id="ordercoins">0</span>
         <button id="addCoinsBtn" title="从余额兑换Coins">+</button>
@@ -62,9 +46,9 @@
 
     <!-- 最近 5 个订单历史 -->
     <div class="order-history">
-      <h3>🕘 最近 5 个订单</h3>
+      <h3>🕘 最近订单</h3>
       <ul id="recentOrders">
-        <li>暂无订单</li>
+        <li>暂无订单！</li>
       </ul>
     </div>
 
@@ -79,6 +63,27 @@
           <button id="confirmAddCoins">确认</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- 消息页面 --> <!-- 消息页面 --> <!-- 消息页面 --> <!-- 消息页面 --> <!-- 消息页面 -->
+  <div id="msgPage" class="page">ℹ️ 关于我们</div>
+
+  <!-- 我的页面 --> <!-- 我的页面 --> <!-- 我的页面 --> <!-- 我的页面 --> <!-- 我的页面 -->
+  <div id="myPage" class="page">
+    <h2>👤 我的页面</h2>
+    <div class="user-info">
+      <p><strong>平台账号：</strong><span id="platformAccount">加载中...</span></p>
+      <p><strong>Coins：</strong><span id="coins">加载中...</span></p>
+      <p><strong>Balance：</strong><span id="balance">加载中...</span></p>
+    </div>
+
+    <div class="my-buttons">
+      <button>按钮1</button>
+      <button>按钮2</button>
+      <button>按钮3</button>
+      <button>按钮4</button>
+      <button id="logoutBtn">Logout</button>
     </div>
   </div>
 
@@ -100,11 +105,11 @@
     </div>
   </div>
 
-  <!-- 公共逻辑 -->
-  <script src="home.js"></script>
-
-  <!-- 📦 订单页面专属样式和逻辑 -->
-  <link rel="stylesheet" href="order.css">
-  <script src="order.js"></script>
+  <!-- JS 部分 -->
+  <script src="Home/home.js"></script>
+  <script src="Message/message.js"></script>
+  <script src="Order/order.js"></script>
+  <script src="About/about.js"></script>
+  <script src="Me/me.js"></script>
 </body>
 </html>
