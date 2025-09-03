@@ -3,23 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>U9</title>
+  <title>U9 - 首页</title>
 
   <!-- 样式 -->
   <link rel="stylesheet" href="home.css" />
   <link rel="stylesheet" href="order.css" />
-  <link rel="stylesheet" href="message.css" /> 
+  <link rel="stylesheet" href="message.css" />
 
-  <!-- Supabase SDK（非模块，引入全局 supabase 变量，供模块使用） -->
+  <!-- Supabase SDK（非模块，挂载全局 supabase 变量） -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
-
   <!-- 首页 -->
-  <div id="homePage" class="page active">🏠 首页内容</div>
+  <div id="homePage" class="page active">
+    <h2>🏠 欢迎回来</h2>
+    <p>这里是你的首页，可以在下方导航切换功能。</p>
+  </div>
 
   <!-- 信息页面 -->
-  <div id="infoPage" class="page">ℹ️ 信息内容</div>
+  <div id="infoPage" class="page">
+    <h2>ℹ️ 信息中心</h2>
+    <p>在这里展示平台公告或帮助文档。</p>
+  </div>
 
   <!-- 消息页面 -->
   <div id="msgPage" class="page">
@@ -51,7 +56,7 @@
     </div>
   </div>
 
-  <!-- 📦 订单页面 -->
+  <!-- 订单页面 -->
   <div id="orderPage" class="page">
     <div class="order-header">
       <h2>📦 订单中心</h2>
@@ -66,10 +71,10 @@
       <button id="rechargeBtn">💳 充值</button>
     </div>
 
-    <!-- 显示本次下单结果 -->
+    <!-- 本次下单结果 -->
     <div id="orderResult" class="order-result"></div>
 
-    <!-- 最近 5 个订单历史 -->
+    <!-- 最近订单历史 -->
     <div class="order-history">
       <h3>🕘 最近 5 个订单</h3>
       <ul id="recentOrders">
@@ -109,8 +114,8 @@
     </div>
   </div>
 
-  <!-- 模块化脚本（注意：不需要单独 <script> 引入 supabaseClient.js，模块里会 import） -->
-  <script type="module" src="../supabaseClient.js"></script> <!-- 可选：如果想提早初始化 -->
+  <!-- 模块化脚本 -->
+  <script type="module" src="../supabaseClient.js"></script>
   <script type="module" src="home.js"></script>
   <script type="module" src="order.js"></script>
   <script type="module" src="message.js"></script>
