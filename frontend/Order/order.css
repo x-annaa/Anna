@@ -114,6 +114,19 @@ h2, h3 {
   margin-top: 25px;
 }
 
+.order-history h3 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.order-count {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1976d2;
+  margin-left: 10px;
+}
+
 .order-history ul {
   list-style: none;
   padding: 0;
@@ -233,6 +246,26 @@ button:disabled {
 
 #confirmAddCoins:hover {
   background-color: #45a049;
+}
+
+/* ========= 余额不足弹窗 ========= */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-close-x {
+  background: none;
+  border: none;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #666;
+}
+
+.modal-close-x:hover {
+  color: #000;
 }
 
 /* ========= 弹窗渐显动画 ========= */
