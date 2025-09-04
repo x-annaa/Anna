@@ -3,26 +3,55 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>U9</title>
+  <title>U9 - 首页</title>
 
-  <!-- css 部分 --> 
+  <!-- css 部分 -->
   <link rel="stylesheet" href="Home/home.css">
   <link rel="stylesheet" href="About/about.css">
   <link rel="stylesheet" href="Order/order.css">
   <link rel="stylesheet" href="Message/message.css">
   <link rel="stylesheet" href="Me/me.css">
-  <!-- css 底部按钮部分 --> 
   <link rel="stylesheet" href="Button/button.css">
 
   <!-- Supabase SDK -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <!-- 全局 Supabase 初始化 -->
   <script src="../supabaseClient.js"></script>
 </head>
 <body>
 
   <!-- 首页 -->
-  <div id="homePage" class="page active">🏠 HOME</div>
+  <div id="homePage" class="page active">
+    <div class="home-header">
+      <h2>🏠 HOME</h2>
+      <p>欢迎回来，<span id="homeUsername">用户</span> 👋</p>
+    </div>
+
+    <!-- 概览 -->
+    <div class="home-overview">
+      <div class="overview-item">
+        💰 Coins：<span id="homeCoins">0</span>
+      </div>
+      <div class="overview-item">
+        💳 Balance：<span id="homeBalance">0</span>
+      </div>
+      <div class="overview-item">
+        📊 今日进度：<span id="homeProgress">0/10 单</span>
+      </div>
+    </div>
+
+    <!-- 快速操作 -->
+    <div class="home-actions">
+      <button data-page="orderPage">📦 去下单</button>
+      <button data-page="infoPage">💬 消息</button>
+      <button data-page="myPage">👤 我的</button>
+    </div>
+
+    <!-- 公告/提示 -->
+    <div class="home-announcement">
+      <h3>📢 公告</h3>
+      <p>这里可以显示最新的活动、系统更新或通知。</p>
+    </div>
+  </div>
 
   <!-- 信息页面 -->
   <div id="infoPage" class="page">💬 MESSAGE</div>
@@ -61,7 +90,11 @@
     <!-- 💰 兑换 Coins 弹窗（只属于订单页面） -->
     <div id="addCoinsModal" class="modal">
       <div class="modal-content">
-        <h3>兑换 Coins</h3>
+        <h3>兑换 Coins / Balance</h3>
+        <div class="exchange-type">
+          <button id="selectCoins">余额兑换 Coins</button>
+          <button id="selectBalance">Coins 兑换余额</button>
+        </div>
         <p>请输入要兑换的数量：</p>
         <input type="number" id="addCoinsInput" min="1" placeholder="输入数量" />
         <div class="modal-actions">
@@ -117,7 +150,6 @@
   <script src="Order/order.js"></script>
   <script src="About/about.js"></script>
   <script src="Me/me.js"></script>
-  <!-- JS 底部按钮部分 -->
   <script src="Button/button.js"></script>
 
 </body>
