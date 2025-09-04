@@ -5,48 +5,50 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>U9</title>
 
-  <!-- css 部分 --> 
+  <!-- 各页面 CSS -->
   <link rel="stylesheet" href="Home/home.css">
   <link rel="stylesheet" href="About/about.css">
   <link rel="stylesheet" href="Order/order.css">
   <link rel="stylesheet" href="Message/message.css">
   <link rel="stylesheet" href="Me/me.css">
-  <!-- css 底部按钮部分 --> 
+  <!-- 底部导航 CSS -->
   <link rel="stylesheet" href="Button/button.css">
-
 
   <!-- Supabase SDK -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <!-- 全局 Supabase 初始化 -->
   <script src="../supabaseClient.js"></script>
 </head>
 <body>
 
-  <!-- 首页 --> <!-- 首页 --> <!-- 首页 --> <!-- 首页 --> <!-- 首页 --> <!-- 首页 -->
+  <!-- 首页 -->
   <div id="homePage" class="page active">🏠 HOME</div>
 
-  <!-- 信息页面 --> <!-- 信息页面 --> <!-- 信息页面 --> <!-- 信息页面 --> <!-- 信息页面 -->
+  <!-- 信息 -->
   <div id="infoPage" class="page">💬 MESSAGE</div>
 
-  <!-- 订单页面 --> <!-- 订单页面 --> <!-- 订单页面 --> <!-- 订单页面 --> <!-- 订单页面 -->
+  <!-- 订单 -->
   <div id="orderPage" class="page">
     <div class="order-header">
       <h2>📦 ORDER</h2>
       <div class="coins-box">
         💰 Coins: <span id="ordercoins">0</span>
-        <button id="addCoinsBtn" title="从余额兑换Coins">+</button>
+        <button id="addCoinsBtn" title="从余额兑换 Coins">+</button>
+      </div>
+      <div class="limit-box">
+        📊 今日订单进度: <span id="orderProgress">0/0 单</span>
       </div>
     </div>
 
     <div class="order-actions">
       <button id="autoOrderBtn">🎲 一键刷单</button>
       <button id="rechargeBtn">💳 充值</button>
+      <button id="exchangeBtn" disabled>🔄 Coins → Balance</button>
     </div>
 
-    <!-- 显示本次下单结果 -->
+    <!-- 下单结果 -->
     <div id="orderResult" class="order-result"></div>
 
-    <!-- 最近 5 个订单历史 -->
+    <!-- 最近订单 -->
     <div class="order-history">
       <h3>🕘 最近订单</h3>
       <ul id="recentOrders">
@@ -54,7 +56,7 @@
       </ul>
     </div>
 
-    <!-- 💰 兑换 Coins 弹窗（只属于订单页面） -->
+    <!-- 余额兑换 Coins 弹窗 -->
     <div id="addCoinsModal" class="modal">
       <div class="modal-content">
         <h3>兑换 Coins</h3>
@@ -68,10 +70,10 @@
     </div>
   </div>
 
-  <!-- 消息页面 --> <!-- 消息页面 --> <!-- 消息页面 --> <!-- 消息页面 --> <!-- 消息页面 -->
+  <!-- 关于 -->
   <div id="msgPage" class="page">ℹ️ 关于我们</div>
 
-  <!-- 我的页面 --> <!-- 我的页面 --> <!-- 我的页面 --> <!-- 我的页面 --> <!-- 我的页面 -->
+  <!-- 我的 -->
   <div id="myPage" class="page">
     <h2>👤 我的页面</h2>
     <div class="user-info">
@@ -89,7 +91,7 @@
     </div>
   </div>
 
-  <!-- Logout 确认弹窗 -->
+  <!-- Logout 弹窗 -->
   <div id="logoutModal" class="modal">
     <div class="modal-content">
       <p>确定要退出吗？</p>
@@ -98,7 +100,7 @@
     </div>
   </div>
 
-  <!-- 底部导航栏 -->
+  <!-- 底部导航 -->
   <div class="bottom-nav">
     <button data-page="homePage" class="active">Home</button>
     <button data-page="infoPage">Message</button>
@@ -107,14 +109,14 @@
     <button data-page="myPage">Me</button>
   </div>
 
-  <!-- JS 部分 --> 
+  <!-- 各页面 JS -->
   <script src="Home/home.js"></script>
   <script src="Message/message.js"></script>
   <script src="Order/order.js"></script>
   <script src="About/about.js"></script>
   <script src="Me/me.js"></script>
-  <!-- JS 底部按钮部分 --> 
+  <!-- 底部按钮 JS -->
   <script src="Button/button.js"></script>
-  
+
 </body>
 </html>
