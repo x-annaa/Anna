@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>U9</title>
 
-  <!-- css 部分 --> 
+  <!-- css 部分 -->
   <link rel="stylesheet" href="Home/home.css">
   <link rel="stylesheet" href="About/about.css">
   <link rel="stylesheet" href="Order/order.css">
   <link rel="stylesheet" href="Message/message.css">
   <link rel="stylesheet" href="Me/me.css">
-  <!-- css 底部按钮部分 --> 
+  <!-- css 底部按钮部分 -->
   <link rel="stylesheet" href="Button/button.css">
 
   <!-- Supabase SDK -->
@@ -33,7 +33,7 @@
       <h2>📦 ORDER</h2>
       <div class="coins-box">
         💰 Coins: <span id="ordercoins">0</span>
-        <button id="addCoinsBtn" title="从余额兑换Coins">+</button>
+        <button id="addCoinsBtn" title="从余额兑换 Coins">+</button>
       </div>
     </div>
 
@@ -53,10 +53,10 @@
       </ul>
     </div>
 
-    <!-- 💰 兑换 Coins 弹窗 -->
-    <div id="addCoinsModal" class="modal">
-      <div class="modal-content">
-        <h3>兑换 Coins</h3>
+    <!-- 💰 兑换 Coins 弹窗（仅订单页） -->
+    <div id="addCoinsModal" class="modal" aria-hidden="true">
+      <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="addCoinsTitle">
+        <h3 id="addCoinsTitle">兑换 Coins</h3>
         <p>请输入要兑换的数量：</p>
         <input type="number" id="addCoinsInput" min="1" placeholder="输入数量" />
         <div class="modal-actions">
@@ -65,9 +65,26 @@
         </div>
       </div>
     </div>
+
+    <!-- ⚠️ 最少 50 Coins 提示弹窗 -->
+    <div id="insufficientCoinsModal" class="modal" aria-hidden="true">
+      <div class="modal-content" role="alertdialog" aria-modal="true" aria-labelledby="insufficientTitle">
+        <div class="modal-header">
+          <h3 id="insufficientTitle">余额不足</h3>
+          <!-- 右上角关闭 X -->
+          <button id="insufficientCloseX" class="modal-close-x" aria-label="Close">×</button>
+        </div>
+        <div class="modal-body">
+          <p>你的余额不足，最少 <strong>50 Coins</strong> 或以上才能下单。</p>
+        </div>
+        <div class="modal-actions">
+          <button id="closeInsufficientCoinsModal">知道了</button>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- 消息页面 -->
+  <!-- 关于页面 -->
   <div id="msgPage" class="page">ℹ️ 关于我们</div>
 
   <!-- 我的页面 -->
@@ -89,11 +106,13 @@
   </div>
 
   <!-- Logout 确认弹窗 -->
-  <div id="logoutModal" class="modal">
-    <div class="modal-content">
-      <p>确定要退出吗？</p>
-      <button id="cancelLogout">否</button>
-      <button id="confirmLogout">确定</button>
+  <div id="logoutModal" class="modal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="logoutTitle">
+      <p id="logoutTitle">确定要退出吗？</p>
+      <div class="modal-actions">
+        <button id="cancelLogout">否</button>
+        <button id="confirmLogout">确定</button>
+      </div>
     </div>
   </div>
 
@@ -106,13 +125,13 @@
     <button data-page="myPage">Me</button>
   </div>
 
-  <!-- JS 部分 --> 
+  <!-- JS 部分 -->
   <script src="Home/home.js"></script>
   <script src="Message/message.js"></script>
   <script src="Order/order.js"></script>
   <script src="About/about.js"></script>
   <script src="Me/me.js"></script>
   <script src="Button/button.js"></script>
-  
+
 </body>
 </html>
