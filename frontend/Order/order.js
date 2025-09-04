@@ -7,7 +7,6 @@ window.currentUsername = localStorage.getItem("currentUser");
 let ordering = false;      // 下单中的并发保护
 let completing = false;    // 完成订单中的并发保护
 let exchanging = false;    // Balance -> Coins 兑换中的并发保护
-let userLevel = 1;         // 用户等级
 
 if (!window.supabaseClient) {
   console.error("❌ supabaseClient 未初始化！");
@@ -170,6 +169,36 @@ async function checkPendingLock() {
 }
 
 /* ======================
+   通用 Modal 管理
+   ====================== */
+function showModal(contentHtml) {
+  const modal = document.createElement("div");
+  modal.className = "modal";
+  modal.style.display = "flex";
+  modal.innerHTML = `
+    <div class="modal-content">
+      ${contentHtml}
+      <div class="modal-actions">
+        <button id="closeModalBtn">关闭</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  document.getElementById("closeModalBtn").addEventListener("click", () => {
+    modal.remove();
+  });
+
+  // ESC 关闭
+  document.addEventListener("keydown", function escHandler(e) {
+    if (e.key === "Escape") {
+      modal.remove();
+      document.removeEventListener("keydown", escHandler);
+    }
+  });
+}
+
+/* ======================
    自动下单
    ====================== */
 async function autoOrder() {
@@ -179,6 +208,7 @@ async function autoOrder() {
   setOrderBtnDisabled(true, "下单中…");
 
   try {
+    // 用户信息
     const { data: user } = await supabaseClient
       .from("users")
       .select("coins")
@@ -186,6 +216,7 @@ async function autoOrder() {
       .single();
     const coins = Number(user?.coins || 0);
 
+    // 检查最少 50 coins
     if (coins < 50) {
       showModal(`<p>你的余额不足，最少需要 50 coins</p>`);
       setOrderBtnDisabled(false);
@@ -193,6 +224,7 @@ async function autoOrder() {
       return;
     }
 
+    // 检查 pending
     const { data: pend } = await supabaseClient
       .from("orders")
       .select("id")
@@ -205,12 +237,14 @@ async function autoOrder() {
       return;
     }
 
+    // 当前订单号
     const { data: orders } = await supabaseClient
       .from("orders")
       .select("id")
       .eq("user_id", window.currentUserId);
     const orderNumber = (orders?.length || 0) + 1;
 
+    // 检查手动规则
     let product;
     const ruleProductId = await getUserRuleProduct(window.currentUserId, orderNumber);
     if (ruleProductId) {
@@ -228,11 +262,13 @@ async function autoOrder() {
     const profit = +(price * 0.1).toFixed(2);
     const tempCoins = coins - price;
 
+    // 扣除金币
     await supabaseClient
       .from("users")
       .update({ coins: tempCoins })
       .eq("id", window.currentUserId);
 
+    // 下单
     const { data: newOrder, error: orderErr } = await supabaseClient
       .from("orders")
       .insert({
@@ -272,6 +308,16 @@ async function loadRecentOrders() {
       .order("created_at", { ascending: false })
       .limit(5);
 
+    const { count: totalCount } = await supabaseClient
+      .from("orders")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", window.currentUserId);
+
+    const historyTitle = document.querySelector(".order-history h3");
+    if (historyTitle) {
+      historyTitle.textContent = `🕘 最近订单 订单数：${totalCount || 0}单`;
+    }
+
     const list = document.getElementById("recentOrders");
     if (list) {
       if (!recentOrders || recentOrders.length === 0) {
@@ -297,34 +343,66 @@ async function loadRecentOrders() {
 }
 
 /* ======================
-   用户 Level 显示
+   页面初始化
    ====================== */
-function updateUserLevel() {
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
+  document.getElementById("addCoinsBtn")?.addEventListener("click", openExchangeModal);
+  document.getElementById("cancelAddCoins")?.addEventListener("click", closeExchangeModal);
+  document.getElementById("confirmAddCoins")?.addEventListener("click", confirmExchange);
+
+  document.getElementById("addCoinsModal")?.addEventListener("click", (e) => {
+    if (e.target.id === "addCoinsModal") closeExchangeModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeExchangeModal();
+  });
+
+  refreshAll();
+});
+
+/* ======================
+   页面刷新工具
+   ====================== */
+async function refreshAll() {
+  await loadCoinsOrderPage();
+  await loadLastOrder();
+  await loadRecentOrders();
+}
+
+async function loadCoinsOrderPage() {
+  if (!window.currentUserId) return;
+  const { data, error } = await supabaseClient
+    .from("users")
+    .select("coins, balance")
+    .eq("id", window.currentUserId)
+    .single();
+  if (!error && data) {
+    updateCoinsUI(data.coins);
+    const balEl = document.getElementById("balance");
+    if (balEl) balEl.textContent = (Number(data.balance) || 0).toFixed(2);
+    await checkPendingLock();
+  }
+}
+
+async function loadLastOrder() {
   if (!window.currentUserId) return;
 
-  supabaseClient
-    .from("users")
-    .select("level")
-    .eq("id", window.currentUserId)
-    .single()
-    .then(({ data: user }) => {
-      userLevel = Number(user?.level || 1);
+  const { data: orders } = await supabaseClient
+    .from("orders")
+    .select(`id, total_price, profit, status, created_at, products ( name )`)
+    .eq("user_id", window.currentUserId)
+    .order("created_at", { ascending: false })
+    .limit(1);
 
-      const btn = document.getElementById("autoOrderBtn");
-      if (btn) {
-        let levelSpan = document.getElementById("userLevelSpan");
-        if (!levelSpan) {
-          levelSpan = document.createElement("span");
-          levelSpan.id = "userLevelSpan";
-          levelSpan.style.marginLeft = "10px";
-          levelSpan.style.fontWeight = "bold";
-          levelSpan.style.float = "right";
-          btn.parentNode.appendChild(levelSpan);
-        }
-        levelSpan.textContent = `Level ${userLevel}`;
-      }
-    })
-    .catch(e => console.error("读取用户等级失败：", e));
+  const { data: user } = await supabaseClient
+    .from("users")
+    .select("coins")
+    .eq("id", window.currentUserId)
+    .single();
+
+  if (orders?.length) renderLastOrder(orders[0], user?.coins ?? 0);
+  else document.getElementById("orderResult").innerHTML = "";
 }
 
 /* ======================
@@ -395,97 +473,4 @@ async function confirmExchange() {
     exchanging = false;
     if (confirmBtn) confirmBtn.disabled = false;
   }
-}
-
-/* ======================
-   页面刷新工具
-   ====================== */
-async function loadCoinsOrderPage() {
-  if (!window.currentUserId) return;
-  const { data, error } = await supabaseClient
-    .from("users")
-    .select("coins, balance")
-    .eq("id", window.currentUserId)
-    .single();
-  if (!error && data) {
-    updateCoinsUI(data.coins);
-    const balEl = document.getElementById("balance");
-    if (balEl) balEl.textContent = (Number(data.balance) || 0).toFixed(2);
-    await checkPendingLock();
-    updateUserLevel();
-  }
-}
-
-async function loadLastOrder() {
-  if (!window.currentUserId) return;
-
-  const { data: orders } = await supabaseClient
-    .from("orders")
-    .select(`id, total_price, profit, status, created_at, products ( name )`)
-    .eq("user_id", window.currentUserId)
-    .order("created_at", { ascending: false })
-    .limit(1);
-
-  const { data: user } = await supabaseClient
-    .from("users")
-    .select("coins")
-    .eq("id", window.currentUserId)
-    .single();
-
-  if (orders?.length) renderLastOrder(orders[0], user?.coins ?? 0);
-  else document.getElementById("orderResult").innerHTML = "";
-}
-
-async function refreshAll() {
-  await loadCoinsOrderPage();
-  await loadLastOrder();
-  await loadRecentOrders();
-}
-
-/* ======================
-   页面初始化
-   ====================== */
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
-  document.getElementById("addCoinsBtn")?.addEventListener("click", openExchangeModal);
-  document.getElementById("cancelAddCoins")?.addEventListener("click", closeExchangeModal);
-  document.getElementById("confirmAddCoins")?.addEventListener("click", confirmExchange);
-
-  document.getElementById("addCoinsModal")?.addEventListener("click", (e) => {
-    if (e.target.id === "addCoinsModal") closeExchangeModal();
-  });
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeExchangeModal();
-  });
-
-  refreshAll();
-});
-
-/* ======================
-   通用 Modal
-   ====================== */
-function showModal(contentHtml) {
-  const modal = document.createElement("div");
-  modal.className = "modal";
-  modal.style.display = "flex";
-  modal.innerHTML = `
-    <div class="modal-content">
-      ${contentHtml}
-      <div class="modal-actions">
-        <button id="closeModalBtn">关闭</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(modal);
-
-  document.getElementById("closeModalBtn").addEventListener("click", () => {
-    modal.remove();
-  });
-
-  document.addEventListener("keydown", function escHandler(e) {
-    if (e.key === "Escape") {
-      modal.remove();
-      document.removeEventListener("keydown", escHandler);
-    }
-  });
 }
