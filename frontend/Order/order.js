@@ -169,26 +169,37 @@ async function checkPendingLock() {
 }
 
 /* ======================
-   最少 50 coins 弹窗提示
+   通用 Modal 管理
    ====================== */
-function showInsufficientCoinsModal() {
+function showModal(contentHtml) {
   const modal = document.createElement("div");
-  modal.id = "insufficientCoinsModal";
+  modal.className = "modal";
+  modal.style.display = "flex";
   modal.innerHTML = `
-    <div>
-      <p>你的余额不足，最少 50 coins 或以上</p>
-      <button id="closeInsufficientCoinsModal">×</button>
+    <div class="modal-content">
+      ${contentHtml}
+      <div class="modal-actions">
+        <button id="closeModalBtn">关闭</button>
+      </div>
     </div>
   `;
   document.body.appendChild(modal);
 
-  document.getElementById("closeInsufficientCoinsModal").addEventListener("click", () => {
+  document.getElementById("closeModalBtn").addEventListener("click", () => {
     modal.remove();
+  });
+
+  // ESC 关闭
+  document.addEventListener("keydown", function escHandler(e) {
+    if (e.key === "Escape") {
+      modal.remove();
+      document.removeEventListener("keydown", escHandler);
+    }
   });
 }
 
 /* ======================
-   自动下单（支持手动规则）
+   自动下单
    ====================== */
 async function autoOrder() {
   if (!window.currentUserId) { alert("请先登录！"); return; }
@@ -207,7 +218,7 @@ async function autoOrder() {
 
     // 检查最少 50 coins
     if (coins < 50) {
-      showInsufficientCoinsModal();
+      showModal(`<p>你的余额不足，最少需要 50 coins</p>`);
       return;
     }
 
@@ -282,7 +293,7 @@ async function autoOrder() {
 }
 
 /* ======================
-   最近 5 笔订单
+   最近订单
    ====================== */
 async function loadRecentOrders() {
   if (!window.currentUserId) return;
@@ -318,7 +329,7 @@ async function loadRecentOrders() {
               🛒 ${o.products?.name || "未知商品"} /
               ¥${price.toFixed(2)} /
               利润 +¥${profit.toFixed(2)} /
-              状态：${o.status === "completed" ? "已完成" : "待充值"} /
+              状态：${o.status === "completed" ? "已完成" : "待完成"} /
               <small>${new Date(o.created_at).toLocaleString()}</small>
             </li>`;
         }).join("");
@@ -330,7 +341,7 @@ async function loadRecentOrders() {
 }
 
 /* ======================
-   页面初始化 & 事件绑定
+   页面初始化
    ====================== */
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
@@ -393,7 +404,7 @@ async function loadLastOrder() {
 }
 
 /* ======================
-   Coins 弹窗（仅订单页）
+   Coins 弹窗
    ====================== */
 function openExchangeModal() {
   const modal = document.getElementById("addCoinsModal");
