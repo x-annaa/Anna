@@ -169,6 +169,25 @@ async function checkPendingLock() {
 }
 
 /* ======================
+   最少 50 coins 弹窗提示
+   ====================== */
+function showInsufficientCoinsModal() {
+  const modal = document.createElement("div");
+  modal.id = "insufficientCoinsModal";
+  modal.innerHTML = `
+    <div>
+      <p>你的余额不足，最少 50 coins 或以上</p>
+      <button id="closeInsufficientCoinsModal">×</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  document.getElementById("closeInsufficientCoinsModal").addEventListener("click", () => {
+    modal.remove();
+  });
+}
+
+/* ======================
    自动下单（支持手动规则）
    ====================== */
 async function autoOrder() {
@@ -178,6 +197,20 @@ async function autoOrder() {
   setOrderBtnDisabled(true, "下单中…");
 
   try {
+    // 用户信息
+    const { data: user } = await supabaseClient
+      .from("users")
+      .select("coins")
+      .eq("id", window.currentUserId)
+      .single();
+    const coins = Number(user?.coins || 0);
+
+    // 检查最少 50 coins
+    if (coins < 50) {
+      showInsufficientCoinsModal();
+      return;
+    }
+
     // 检查 pending
     const { data: pend } = await supabaseClient
       .from("orders")
@@ -190,13 +223,6 @@ async function autoOrder() {
       await checkPendingLock();
       return;
     }
-
-    // 用户信息
-    const { data: user } = await supabaseClient
-      .from("users")
-      .select("coins")
-      .eq("id", window.currentUserId)
-      .single();
 
     // 当前订单号
     const { data: orders } = await supabaseClient
@@ -221,7 +247,7 @@ async function autoOrder() {
 
     const price = Number(product.price) || 0;
     const profit = +(price * 0.1).toFixed(2);
-    const tempCoins = (Number(user.coins) || 0) - price;
+    const tempCoins = coins - price;
 
     // 扣除金币
     await supabaseClient
@@ -243,10 +269,6 @@ async function autoOrder() {
       .single();
     if (orderErr) throw new Error(orderErr.message);
 
-    if (tempCoins < 0) {
-      alert(`⚠️ 金币不足，本次下单进入欠款状态（余额：¥${tempCoins.toFixed(2)}）`);
-    }
-
     renderLastOrder(newOrder, tempCoins);
     updateCoinsUI(tempCoins);
     await checkPendingLock();
@@ -266,7 +288,6 @@ async function loadRecentOrders() {
   if (!window.currentUserId) return;
 
   try {
-    // 查询最近 5 笔订单
     const { data: recentOrders } = await supabaseClient
       .from("orders")
       .select(`id, total_price, profit, status, created_at, products ( name )`)
@@ -274,19 +295,16 @@ async function loadRecentOrders() {
       .order("created_at", { ascending: false })
       .limit(5);
 
-    // 查询用户总订单数
     const { count: totalCount } = await supabaseClient
       .from("orders")
       .select("id", { count: "exact", head: true })
       .eq("user_id", window.currentUserId);
 
-    // 更新标题
     const historyTitle = document.querySelector(".order-history h3");
     if (historyTitle) {
       historyTitle.textContent = `🕘 最近订单 订单数：${totalCount || 0}单`;
     }
 
-    // 渲染最近订单列表
     const list = document.getElementById("recentOrders");
     if (list) {
       if (!recentOrders || recentOrders.length === 0) {
@@ -316,7 +334,6 @@ async function loadRecentOrders() {
    ====================== */
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
-
   document.getElementById("addCoinsBtn")?.addEventListener("click", openExchangeModal);
   document.getElementById("cancelAddCoins")?.addEventListener("click", closeExchangeModal);
   document.getElementById("confirmAddCoins")?.addEventListener("click", confirmExchange);
@@ -328,7 +345,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.key === "Escape") closeExchangeModal();
   });
 
-  // 首次刷新
   refreshAll();
 });
 
