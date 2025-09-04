@@ -1,93 +1,96 @@
 /* ======================
-   全局状态
+   order2.js - 用户等级 & 今日订单限制
    ====================== */
-let userLevel = 1;
-let todayOrdersCount = 0;
-let maxOrdersPerLevel = {
-  1: 10,
-  2: 15,
-  3: 20,
-  4: 25,
-  5: 30
-};
 
-/* ======================
-   获取用户等级和今日订单
-   ====================== */
-async function loadUserLevelAndOrders() {
+async function loadUserLevelAndDailyLimit() {
   if (!window.currentUserId) return;
 
   try {
-    // 获取用户 level
+    // 获取用户等级
     const { data: user, error: userErr } = await supabaseClient
       .from("users")
       .select("level")
       .eq("id", Number(window.currentUserId))
       .single();
-    if (userErr) throw userErr;
 
-    userLevel = Number(user.level) || 1;
+    if (userErr || !user) throw new Error(userErr?.message || "加载用户等级失败");
 
-    // 获取今天订单数
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // 今天凌晨
-    const { data: orders, error: orderErr } = await supabaseClient
+    const userLevel = Number(user.level) || 1;
+    const levelLimits = { 1: 10, 2: 15, 3: 20, 4: 25, 5: 30 };
+    const maxOrders = levelLimits[userLevel] || 10;
+
+    // 获取今日订单数量
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const { data: todayOrders, error: ordersErr } = await supabaseClient
       .from("orders")
       .select("id")
       .eq("user_id", Number(window.currentUserId))
-      .gte("created_at", today.toISOString());
-    if (orderErr) throw orderErr;
+      .gte("created_at", todayStart.toISOString());
 
-    todayOrdersCount = orders?.length || 0;
+    if (ordersErr) throw new Error(ordersErr.message);
 
-    renderOrderLevelUI();
+    const todayCount = todayOrders?.length || 0;
+
+    // 更新 UI
+    showLevelAndDailyLimit(userLevel, todayCount, maxOrders);
+
+    return { userLevel, todayCount, maxOrders };
   } catch (e) {
     console.error("加载用户等级或今日订单失败：", e.message);
   }
 }
 
-/* ======================
-   渲染 level 和 今日订单
-   ====================== */
-function renderOrderLevelUI() {
-  let container = document.getElementById("orderLevelContainer");
-
+function showLevelAndDailyLimit(level, todayCount, maxOrders) {
+  // 确保只创建一次
+  let container = document.getElementById("dailyLimitDisplay");
   if (!container) {
-    // 创建显示区域放在 🎲 一键刷单旁边
-    const autoBtn = document.getElementById("autoOrderBtn");
     container = document.createElement("span");
-    container.id = "orderLevelContainer";
+    container.id = "dailyLimitDisplay";
     container.style.marginLeft = "12px";
-    container.style.fontSize = "0.9em";
-    container.style.color = "#1976d2";
-    if (autoBtn && autoBtn.parentNode) {
-      autoBtn.parentNode.insertBefore(container, autoBtn.nextSibling);
+    container.style.fontSize = "14px";
+    container.style.color = "#555";
+
+    const btn = document.getElementById("autoOrderBtn");
+    if (btn && btn.parentNode) {
+      btn.parentNode.appendChild(container);
     }
   }
 
-  container.textContent = `Level ${userLevel} | 今日订单：${todayOrdersCount}/${maxOrdersPerLevel[userLevel]}`;
+  container.textContent = `Level ${level} / 今日订单：${todayCount}/${maxOrders}`;
 }
 
 /* ======================
-   自动刷新今日订单数量
+   点击自动刷单前检查今日数量
    ====================== */
-async function refreshTodayOrdersCount() {
-  await loadUserLevelAndOrders();
+async function checkDailyLimitBeforeOrder() {
+  const info = await loadUserLevelAndDailyLimit();
+  if (!info) return true; // 默认允许
+
+  if (info.todayCount >= info.maxOrders) {
+    alert(`今日订单已达上限（${info.maxOrders} 单），请明日再试`);
+    return false;
+  }
+  return true;
 }
 
 /* ======================
-   页面加载时初始化
+   绑定事件
    ====================== */
-document.addEventListener("DOMContentLoaded", async () => {
-  await loadUserLevelAndOrders();
-
-  // 每次点击一键刷单后刷新今日订单数量
+document.addEventListener("DOMContentLoaded", () => {
+  // 在 order.js 的 autoOrder 前加一层检查
   const autoBtn = document.getElementById("autoOrderBtn");
   if (autoBtn) {
-    autoBtn.addEventListener("click", async () => {
-      setTimeout(() => {
-        refreshTodayOrdersCount();
-      }, 500); // 延迟刷新，确保订单写入数据库后刷新
+    autoBtn.addEventListener("click", async (e) => {
+      const canOrder = await checkDailyLimitBeforeOrder();
+      if (!canOrder) return;
+
+      // 调用 order.js 的 autoOrder 函数
+      if (typeof autoOrder === "function") autoOrder();
     });
   }
+
+  // 页面加载时显示等级 & 今日订单
+  loadUserLevelAndDailyLimit();
 });
