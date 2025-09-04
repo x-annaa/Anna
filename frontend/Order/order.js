@@ -7,6 +7,9 @@ window.currentUsername = localStorage.getItem("currentUser");
 let ordering = false;      // 下单中的并发保护
 let completing = false;    // 完成订单中的并发保护
 let exchanging = false;    // Balance -> Coins 兑换中的并发保护
+let dailyLimit = 10;       // 每天订单上限
+let dailyCount = 0;        // 今日已下单数
+let startedToday = false;  // 今天是否已开始刷单
 
 if (!window.supabaseClient) {
   console.error("❌ supabaseClient 未初始化！");
@@ -33,9 +36,19 @@ function updateCoinsUI(coinsRaw) {
 
   if (coins < 0) {
     setOrderBtnDisabled(true, `金币为负（欠款 ¥${Math.abs(coins).toFixed(2)}）`);
+  } else if (coins < 50) {
+    setOrderBtnDisabled(true, "至少需要 50 Coins 才能下单");
   } else {
     setOrderBtnDisabled(false);
   }
+}
+
+/* ======================
+   更新今日进度
+   ====================== */
+function updateDailyProgressUI() {
+  const el = document.getElementById("dailyProgress");
+  if (el) el.textContent = `${dailyCount}/${dailyLimit} 单`;
 }
 
 /* ======================
@@ -65,7 +78,7 @@ async function getRandomProduct() {
     .from("products")
     .select("*")
     .eq("enabled", true)
-    .eq("manual_only", false);  // 仅随机可选产品
+    .eq("manual_only", false);
   if (error || !products || products.length === 0) {
     throw new Error("产品列表为空或读取失败！");
   }
@@ -143,6 +156,7 @@ async function completeOrder(order, currentCoinsRaw) {
     updateCoinsUI(finalCoins);
     await checkPendingLock();
     await loadRecentOrders();
+
   } catch (e) {
     alert(e.message || "完成订单失败");
   } finally {
@@ -171,11 +185,29 @@ async function checkPendingLock() {
 }
 
 /* ======================
-   自动下单（支持手动规则）
+   自动下单（支持手动规则 + 限制）
    ====================== */
 async function autoOrder() {
   if (!window.currentUserId) { alert("请先登录！"); return; }
   if (ordering) return;
+
+  // 限制检查
+  if (dailyCount >= dailyLimit) {
+    alert(`今日已达 ${dailyLimit} 单上限，请明天再来。`);
+    return;
+  }
+
+  // 至少需要 50 Coins
+  const { data: user } = await supabaseClient
+    .from("users")
+    .select("coins")
+    .eq("id", window.currentUserId)
+    .single();
+  if (!user || user.coins < 50) {
+    alert("下单失败：至少需要 50 Coins");
+    return;
+  }
+
   ordering = true;
   setOrderBtnDisabled(true, "下单中…");
 
@@ -192,13 +224,6 @@ async function autoOrder() {
       await checkPendingLock();
       return;
     }
-
-    // 用户信息
-    const { data: user } = await supabaseClient
-      .from("users")
-      .select("coins")
-      .eq("id", window.currentUserId)
-      .single();
 
     // 当前订单号
     const { data: orders } = await supabaseClient
@@ -218,7 +243,6 @@ async function autoOrder() {
         .single();
       if (!error && pData) product = pData;
     }
-
     if (!product) product = await getRandomProduct();
 
     const price = Number(product.price) || 0;
@@ -244,6 +268,10 @@ async function autoOrder() {
       .select(`id, total_price, profit, status, created_at, products ( name )`)
       .single();
     if (orderErr) throw new Error(orderErr.message);
+
+    dailyCount++;
+    startedToday = true;
+    updateDailyProgressUI();
 
     if (tempCoins < 0) {
       alert(`⚠️ 金币不足，本次下单进入欠款状态（余额：¥${tempCoins.toFixed(2)}）`);
@@ -293,7 +321,7 @@ async function loadRecentOrders() {
 }
 
 /* ======================
-   Balance -> Coins 兑换
+   Balance -> Coins 兑换（限制：必须完成 10 单）
    ====================== */
 async function confirmExchange() {
   if (exchanging) return;
@@ -305,6 +333,13 @@ async function confirmExchange() {
 
   if (isNaN(amount) || amount <= 0) { alert("输入无效"); exchanging = false; return; }
   if (!window.currentUserId) { alert("请先登录！"); exchanging = false; return; }
+
+  // 限制：必须完成 10 单
+  if (!startedToday || dailyCount < dailyLimit) {
+    alert(`必须完成今日 ${dailyLimit} 单后才能兑换 Balance`);
+    exchanging = false;
+    return;
+  }
 
   if (confirmBtn) confirmBtn.disabled = true;
 
@@ -348,6 +383,9 @@ async function confirmExchange() {
   }
 }
 
+/* ======================
+   弹窗控制
+   ====================== */
 function openExchangeModal() {
   const modal = document.getElementById("addCoinsModal");
   const input = document.getElementById("addCoinsInput");
@@ -356,7 +394,6 @@ function openExchangeModal() {
     if (input) { input.value = ""; setTimeout(() => input.focus(), 50); }
   }
 }
-
 function closeExchangeModal() {
   const modal = document.getElementById("addCoinsModal");
   if (modal) modal.style.display = "none";
@@ -379,9 +416,26 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.key === "Escape") closeExchangeModal();
   });
 
+  // 每日刷新重置
+  resetDailyLimit();
+
   // 首次刷新
   refreshAll();
 });
+
+/* ======================
+   每日重置订单限制
+   ====================== */
+function resetDailyLimit() {
+  const today = new Date().toDateString();
+  const lastDate = localStorage.getItem("lastOrderDate");
+  if (today !== lastDate) {
+    dailyCount = 0;
+    startedToday = false;
+    localStorage.setItem("lastOrderDate", today);
+  }
+  updateDailyProgressUI();
+}
 
 /* ======================
    页面刷新工具
@@ -425,114 +479,4 @@ async function loadLastOrder() {
 
   if (orders?.length) renderLastOrder(orders[0], user?.coins ?? 0);
   else document.getElementById("orderResult").innerHTML = "";
-}
-
-/* ======================
-   配置
-   ====================== */
-const DAILY_LIMIT = 10;       // 每日订单上限
-const MIN_COINS = 50;         // 最少 coins 才能下单
-
-/* ======================
-   检查 & 重置每日订单
-   ====================== */
-async function checkDailyLimit() {
-  const { data: user, error } = await supabaseClient
-    .from("users")
-    .select("id, coins, balance, daily_limit, daily_orders, last_order_date")
-    .eq("id", window.currentUserId)
-    .single();
-
-  if (error || !user) {
-    console.error("获取用户信息失败", error);
-    return;
-  }
-
-  const today = new Date().toISOString().split("T")[0];
-
-  // 如果 last_order_date 不是今天，重置 daily_orders
-  if (user.last_order_date !== today) {
-    await supabaseClient
-      .from("users")
-      .update({ 
-        daily_orders: 0,
-        last_order_date: today 
-      })
-      .eq("id", user.id);
-    user.daily_orders = 0;
-  }
-
-  // 更新 UI 显示
-  document.getElementById("dailyProgress").textContent =
-    `${user.daily_orders}/${DAILY_LIMIT} 单`;
-
-  // 检查条件：coins 足够 & 订单未超额
-  if (user.coins < MIN_COINS) {
-    setOrderBtnDisabled(true, "至少需要 50 Coins 才能下单");
-  } else if (user.daily_orders >= DAILY_LIMIT) {
-    setOrderBtnDisabled(true, "今日下单次数已达上限");
-  } else {
-    setOrderBtnDisabled(false);
-  }
-}
-
-/* ======================
-   下单逻辑
-   ====================== */
-async function autoOrder() {
-  const { data: user, error } = await supabaseClient
-    .from("users")
-    .select("id, coins, daily_orders, last_order_date")
-    .eq("id", window.currentUserId)
-    .single();
-
-  if (error || !user) return alert("获取用户信息失败");
-
-  if (user.coins < MIN_COINS) return alert("需要至少 50 Coins 才能下单");
-  if (user.daily_orders >= DAILY_LIMIT) return alert("今日订单已满");
-
-  // 下单成功 → 更新 daily_orders +1
-  await supabaseClient
-    .from("users")
-    .update({
-      daily_orders: user.daily_orders + 1,
-      last_order_date: new Date().toISOString().split("T")[0]
-    })
-    .eq("id", user.id);
-
-  alert("✅ 下单成功！");
-  checkDailyLimit(); // 刷新限制显示
-}
-
-/* ======================
-   Coins → Balance 兑换
-   ====================== */
-async function exchangeToBalance() {
-  const { data: user, error } = await supabaseClient
-    .from("users")
-    .select("id, coins, balance, daily_orders")
-    .eq("id", window.currentUserId)
-    .single();
-
-  if (error || !user) return alert("获取用户失败");
-
-  // 限制：必须完成当日所有订单
-  if (user.daily_orders < DAILY_LIMIT) {
-    return alert(`必须完成 ${DAILY_LIMIT}/${DAILY_LIMIT} 单，才能兑换`);
-  }
-
-  if (user.coins <= 0) return alert("没有可兑换的 Coins");
-
-  const { error: updateErr } = await supabaseClient
-    .from("users")
-    .update({
-      balance: user.balance + user.coins,
-      coins: 0
-    })
-    .eq("id", user.id);
-
-  if (updateErr) return alert("兑换失败：" + updateErr.message);
-
-  alert("✅ 已成功把 Coins 转换为 Balance");
-  checkDailyLimit();
 }
