@@ -1,5 +1,5 @@
 /* ======================
-   order2.js - 用户等级 & 今日订单限制
+   order2.js - 用户等级 & 今日订单限制（带自动刷新）
    ====================== */
 
 async function loadUserLevelAndDailyLimit() {
@@ -43,7 +43,6 @@ async function loadUserLevelAndDailyLimit() {
 }
 
 function showLevelAndDailyLimit(level, todayCount, maxOrders) {
-  // 确保只创建一次
   let container = document.getElementById("dailyLimitDisplay");
   if (!container) {
     container = document.createElement("span");
@@ -66,7 +65,7 @@ function showLevelAndDailyLimit(level, todayCount, maxOrders) {
    ====================== */
 async function checkDailyLimitBeforeOrder() {
   const info = await loadUserLevelAndDailyLimit();
-  if (!info) return true; // 默认允许
+  if (!info) return true;
 
   if (info.todayCount >= info.maxOrders) {
     alert(`今日订单已达上限（${info.maxOrders} 单），请明日再试`);
@@ -76,10 +75,16 @@ async function checkDailyLimitBeforeOrder() {
 }
 
 /* ======================
+   自动刷新今日订单数
+   ====================== */
+async function refreshDailyLimitAfterOrder() {
+  await loadUserLevelAndDailyLimit();
+}
+
+/* ======================
    绑定事件
    ====================== */
 document.addEventListener("DOMContentLoaded", () => {
-  // 在 order.js 的 autoOrder 前加一层检查
   const autoBtn = document.getElementById("autoOrderBtn");
   if (autoBtn) {
     autoBtn.addEventListener("click", async (e) => {
@@ -87,7 +92,19 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!canOrder) return;
 
       // 调用 order.js 的 autoOrder 函数
-      if (typeof autoOrder === "function") autoOrder();
+      if (typeof autoOrder === "function") {
+        await autoOrder();
+        // 自动刷新今日订单数
+        await refreshDailyLimitAfterOrder();
+      }
+    });
+  }
+
+  // Coins 兑换完成后也刷新今日订单数显示（可选）
+  const confirmBtn = document.getElementById("confirmAddCoins");
+  if (confirmBtn) {
+    confirmBtn.addEventListener("click", async () => {
+      setTimeout(refreshDailyLimitAfterOrder, 500);
     });
   }
 
