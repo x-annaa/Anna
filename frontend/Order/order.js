@@ -219,6 +219,8 @@ async function autoOrder() {
     // 检查最少 50 coins
     if (coins < 50) {
       showModal(`<p>你的余额不足，最少需要 50 coins</p>`);
+      setOrderBtnDisabled(false);
+      ordering = false;
       return;
     }
 
