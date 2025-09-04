@@ -21,27 +21,30 @@
 </head>
 <body>
 
-  <!-- 首页 --> 
+  <!-- 首页 -->
   <div id="homePage" class="page active">🏠 HOME</div>
 
-  <!-- 信息页面 --> 
+  <!-- 信息页面 -->
   <div id="infoPage" class="page">💬 MESSAGE</div>
 
-  <!-- 订单页面 --> 
-  <div class="order-header">
-  <h2>📦 ORDER</h2>
-  <div class="coins-box">
-    💰 Coins: <span id="ordercoins">0</span>
-    <button id="addCoinsBtn" title="从余额兑换Coins">+</button>
-  </div>
-</div>
-<div class="order-progress">
-  📊 今日进度: <span id="dailyProgress">0/10 单</span>
-</div>
+  <!-- 订单页面 -->
+  <div id="orderPage" class="page">
+    <div class="order-header">
+      <h2>📦 ORDER</h2>
+      <div class="coins-box">
+        💰 Coins: <span id="ordercoins">0</span>
+        <button id="addCoinsBtn" title="从余额兑换Coins">+</button>
+      </div>
+    </div>
 
+    <!-- 今日进度 -->
+    <div class="order-progress">
+      📊 今日进度: <span id="dailyProgress">0/10 单</span>
+    </div>
 
     <div class="order-actions">
       <button id="autoOrderBtn">🎲 一键刷单</button>
+      <button id="exchangeBtn">💱 兑换 Balance</button>
     </div>
 
     <!-- 显示本次下单结果 -->
@@ -55,7 +58,7 @@
       </ul>
     </div>
 
-    <!-- 💰 兑换 Coins 弹窗 -->
+    <!-- 💰 兑换 Coins 弹窗（只属于订单页面） -->
     <div id="addCoinsModal" class="modal">
       <div class="modal-content">
         <h3>兑换 Coins</h3>
@@ -69,7 +72,7 @@
     </div>
   </div>
 
-  <!-- 关于页面 -->
+  <!-- 关于我们 -->
   <div id="msgPage" class="page">ℹ️ 关于我们</div>
 
   <!-- 我的页面 -->
@@ -108,14 +111,14 @@
     <button data-page="myPage">Me</button>
   </div>
 
-  <!-- JS 部分 --> 
+  <!-- JS 部分 -->
   <script src="Home/home.js"></script>
   <script src="Message/message.js"></script>
   <script src="Order/order.js"></script>
   <script src="About/about.js"></script>
   <script src="Me/me.js"></script>
-  <!-- JS 底部按钮部分 --> 
+  <!-- JS 底部按钮部分 -->
   <script src="Button/button.js"></script>
-  
+
 </body>
 </html>
