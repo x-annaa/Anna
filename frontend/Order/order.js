@@ -265,27 +265,49 @@ async function autoOrder() {
 async function loadRecentOrders() {
   if (!window.currentUserId) return;
 
-  const { data: orders } = await supabaseClient
-    .from("orders")
-    .select(`id, total_price, profit, status, created_at, products ( name )`)
-    .eq("user_id", window.currentUserId)
-    .order("created_at", { ascending: false })
-    .limit(5);
+  try {
+    // 查询最近 5 笔订单
+    const { data: recentOrders } = await supabaseClient
+      .from("orders")
+      .select(`id, total_price, profit, status, created_at, products ( name )`)
+      .eq("user_id", window.currentUserId)
+      .order("created_at", { ascending: false })
+      .limit(5);
 
-  const list = document.getElementById("recentOrders");
-  if (list) {
-    list.innerHTML = (orders || []).map(o => {
-      const price = Number(o.total_price) || 0;
-      const profit = Number(o.profit) || 0;
-      return `
-        <li>
-          🛒 ${o.products?.name || "未知商品"} /
-          ¥${price.toFixed(2)} /
-          利润 +¥${profit.toFixed(2)} /
-          状态：${o.status === "completed" ? "已完成" : "待完成"} /
-          <small>${new Date(o.created_at).toLocaleString()}</small>
-        </li>`;
-    }).join("");
+    // 查询用户总订单数
+    const { count: totalCount } = await supabaseClient
+      .from("orders")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", window.currentUserId);
+
+    // 更新标题
+    const historyTitle = document.querySelector(".order-history h3");
+    if (historyTitle) {
+      historyTitle.textContent = `🕘 最近订单 订单数：${totalCount || 0}单`;
+    }
+
+    // 渲染最近订单列表
+    const list = document.getElementById("recentOrders");
+    if (list) {
+      if (!recentOrders || recentOrders.length === 0) {
+        list.innerHTML = `<li>暂无订单！</li>`;
+      } else {
+        list.innerHTML = recentOrders.map(o => {
+          const price = Number(o.total_price) || 0;
+          const profit = Number(o.profit) || 0;
+          return `
+            <li>
+              🛒 ${o.products?.name || "未知商品"} /
+              ¥${price.toFixed(2)} /
+              利润 +¥${profit.toFixed(2)} /
+              状态：${o.status === "completed" ? "已完成" : "待充值"} /
+              <small>${new Date(o.created_at).toLocaleString()}</small>
+            </li>`;
+        }).join("");
+      }
+    }
+  } catch (e) {
+    console.error("加载最近订单失败：", e);
   }
 }
 
