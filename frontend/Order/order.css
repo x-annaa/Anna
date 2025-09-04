@@ -1,66 +1,43 @@
-/* ========= 全局基础 ========= */
-body {
-  margin: 0;
-  font-family: "Segoe UI", Arial, sans-serif;
-  background: #f5f7fa;
-  color: #333;
-}
-
-h2, h3 {
-  margin: 10px 0;
-  font-weight: 600;
-}
-
-.page {
-  display: none;
+/* ========= 页面基础 ========= */
+#orderPage {
   padding: 20px;
+  background: #f5f7fa;
+  min-height: calc(100vh - 60px); /* 留出底部导航高度 */
+  box-sizing: border-box;
 }
 
-.page.active {
-  display: block;
-}
-
-/* ========= 底部导航 ========= */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  display: flex;
-  justify-content: space-around;
-  border-top: 1px solid #ddd;
-  background: #fff;
-  padding: 8px 0;
-}
-
-.bottom-nav button {
-  flex: 1;
-  border: none;
-  background: none;
-  padding: 8px;
-  font-size: 15px;
-  cursor: pointer;
-  transition: color 0.3s;
-}
-
-.bottom-nav button.active {
-  color: #1976d2;
-  font-weight: bold;
-}
-
-/* ========= 订单中心 ========= */
+/* ========= 标题 & 头部信息 ========= */
 .order-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 10px;
   margin-bottom: 15px;
 }
 
-.coins-box {
+.order-header h2 {
+  margin: 0;
+  font-size: 1.4em;
+  font-weight: 600;
+  color: #1976d2;
+}
+
+.coins-box,
+.limit-box {
   font-weight: bold;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+}
+
+.coins-box {
   color: #2e7d32;
 }
 
+.limit-box {
+  color: #333;
+}
+
+/* ========= Coins 操作 ========= */
 .coins-box button {
   margin-left: 8px;
   padding: 2px 8px;
@@ -77,6 +54,7 @@ h2, h3 {
   background: #388e3c;
 }
 
+/* ========= 操作按钮 ========= */
 .order-actions {
   text-align: center;
   margin: 20px 0;
@@ -90,7 +68,7 @@ h2, h3 {
   color: white;
   font-size: 16px;
   cursor: pointer;
-  transition: 0.3s;
+  transition: background 0.3s;
   margin: 0 6px;
 }
 
@@ -98,15 +76,21 @@ h2, h3 {
   background: #1565c0;
 }
 
+.order-actions button:disabled {
+  background: #ccc !important;
+  cursor: not-allowed;
+}
+
+/* ========= 下单结果 ========= */
 .order-result {
   margin-top: 20px;
   padding: 15px;
   border: 1px solid #ddd;
   border-radius: 10px;
   background: #fafafa;
-  text-align: center;
   font-size: 15px;
   color: #555;
+  line-height: 1.5;
 }
 
 /* ========= 最近订单历史 ========= */
@@ -114,47 +98,44 @@ h2, h3 {
   margin-top: 25px;
 }
 
+.order-history h3 {
+  font-size: 1.2em;
+  margin-bottom: 10px;
+  color: #1976d2;
+}
+
 .order-history ul {
   list-style: none;
   padding: 0;
   margin: 0;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background: #fff;
 }
 
 .order-history li {
   padding: 10px 12px;
   border-bottom: 1px solid #eee;
   font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .order-history li:last-child {
   border-bottom: none;
 }
 
-/* ========= 通用按钮 ========= */
-button {
-  font-family: inherit;
-  outline: none;
-}
-
-button:disabled {
-  background: #ccc !important;
-  cursor: not-allowed;
-}
-
-/* ========= 通用 Modal 样式 ========= */
+/* ========= 弹窗 ========= */
 .modal {
-  display: none;              /* 默认隐藏，JS 控制时用 flex */
+  display: none; /* JS 控制显示 */
   position: fixed;
   z-index: 999;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-
-  /* 半透明背景 */
+  top: 0; left: 0;
+  width: 100%; height: 100%;
   background-color: rgba(0,0,0,0.5);
 
-  /* 居中内容（等 JS 设置 display:flex 时生效） */
+  display: flex;
   justify-content: center;
   align-items: center;
 }
@@ -171,8 +152,7 @@ button:disabled {
 }
 
 .modal-content h3 {
-  margin-top: 0;
-  margin-bottom: 12px;
+  margin: 0 0 12px;
   font-size: 1.3em;
   color: #333;
 }
@@ -186,7 +166,7 @@ button:disabled {
 .modal-content input {
   width: 80%;
   padding: 10px 12px;
-  margin: 12px 0 18px 0;
+  margin: 12px 0 18px;
   border: 1px solid #ccc;
   border-radius: 8px;
   font-size: 1em;
@@ -200,6 +180,7 @@ button:disabled {
   box-shadow: 0 0 5px rgba(25,118,210,0.3);
 }
 
+/* ========= 弹窗按钮 ========= */
 .modal-actions {
   display: flex;
   justify-content: space-between;
@@ -235,7 +216,7 @@ button:disabled {
   background-color: #45a049;
 }
 
-/* ========= 弹窗渐显动画 ========= */
+/* ========= 动画 ========= */
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.9); }
   to { opacity: 1; transform: scale(1); }
