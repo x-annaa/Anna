@@ -27,9 +27,7 @@ function setOrderBtnDisabled(disabled, reason = "") {
 function updateCoinsUI(coinsRaw) {
   const coins = Number(coinsRaw) || 0;
   const ob = document.getElementById("ordercoins");
-  const mb = document.getElementById("coins");
   if (ob) ob.textContent = coins.toFixed(2);
-  if (mb) mb.textContent = coins.toFixed(2);
 
   if (coins < 0) {
     setOrderBtnDisabled(true, `金币为负（欠款 ¥${Math.abs(coins).toFixed(2)}）`);
@@ -65,7 +63,7 @@ async function getRandomProduct() {
     .from("products")
     .select("*")
     .eq("enabled", true)
-    .eq("manual_only", false);  // 仅随机可选产品
+    .eq("manual_only", false);
   if (error || !products || products.length === 0) {
     throw new Error("产品列表为空或读取失败！");
   }
@@ -88,7 +86,7 @@ function renderLastOrder(order, coinsRaw) {
     <p>商品：${order.products?.name || "未知商品"}</p>
     <p>价格：¥${price.toFixed(2)}</p>
     <p>利润：<span style="color:green;">+¥${profit.toFixed(2)}</span></p>
-    <p>状态：${order.status === "completed" ? "✅ 已完成" : "⏳ 待充值"}</p>
+    <p>状态：${order.status === "completed" ? "✅ 已完成" : "⏳ 待完成"}</p>
     <p>时间：${new Date(order.created_at).toLocaleString()}</p>
     <p>当前金币：¥${coins.toFixed(2)}</p>
   `;
@@ -258,7 +256,6 @@ async function autoOrder() {
     alert(e.message || "下单失败");
   } finally {
     ordering = false;
-    await loadCoinsOrderPage();
   }
 }
 
@@ -285,7 +282,7 @@ async function loadRecentOrders() {
           🛒 ${o.products?.name || "未知商品"} /
           ¥${price.toFixed(2)} /
           利润 +¥${profit.toFixed(2)} /
-          状态：${o.status === "completed" ? "已完成" : "待充值"} /
+          状态：${o.status === "completed" ? "已完成" : "待完成"} /
           <small>${new Date(o.created_at).toLocaleString()}</small>
         </li>`;
     }).join("");
@@ -293,124 +290,10 @@ async function loadRecentOrders() {
 }
 
 /* ======================
-   充值
-   ====================== */
-async function rechargeCoins() {
-  const amount = parseFloat(prompt("充值金额", "0"));
-  if (isNaN(amount) || amount <= 0) { alert("金额无效"); return; }
-
-  const { data: user } = await supabaseClient
-    .from("users")
-    .select("coins")
-    .eq("id", window.currentUserId)
-    .single();
-
-  const newCoins = (Number(user?.coins) || 0) + amount;
-
-  const { error: updErr } = await supabaseClient
-    .from("users")
-    .update({ coins: newCoins })
-    .eq("id", window.currentUserId);
-  if (updErr) { alert("充值失败：" + updErr.message); return; }
-
-  alert(`充值成功 ¥${amount.toFixed(2)}`);
-  updateCoinsUI(newCoins);
-
-  // 如果有 pending 订单，尝试完成
-  const { data: pending } = await supabaseClient
-    .from("orders")
-    .select(`id, total_price, profit, status, created_at, products ( name )`)
-    .eq("user_id", window.currentUserId)
-    .eq("status", "pending")
-    .order("created_at", { ascending: false })
-    .limit(1);
-
-  if (pending?.length && newCoins >= 0) {
-    await completeOrder(pending[0], newCoins);
-  } else {
-    await checkPendingLock();
-    await loadLastOrder();
-  }
-
-  await loadRecentOrders();
-}
-
-/* ======================
-   Balance -> Coins 兑换
-   ====================== */
-async function confirmExchange() {
-  if (exchanging) return;
-  exchanging = true;
-
-  const inputEl = document.getElementById("addCoinsInput");
-  const confirmBtn = document.getElementById("confirmAddCoins");
-  const amount = parseFloat(inputEl?.value || "0");
-
-  if (isNaN(amount) || amount <= 0) { alert("输入无效"); exchanging = false; return; }
-  if (!window.currentUserId) { alert("请先登录！"); exchanging = false; return; }
-
-  if (confirmBtn) confirmBtn.disabled = true;
-
-  try {
-    const { data: user, error } = await supabaseClient
-      .from("users")
-      .select("coins, balance")
-      .eq("id", window.currentUserId)
-      .single();
-    if (error || !user) throw new Error("加载用户信息失败");
-
-    const coins = Number(user.coins) || 0;
-    const balance = Number(user.balance) || 0;
-    if (balance < amount) { alert(`余额不足，当前 Balance：¥${balance.toFixed(2)}`); return; }
-
-    const newCoins = coins + amount;
-    const newBalance = balance - amount;
-
-    const { error: updateErr } = await supabaseClient
-      .from("users")
-      .update({ coins: newCoins, balance: newBalance })
-      .eq("id", window.currentUserId);
-    if (updateErr) throw new Error("兑换失败：" + updateErr.message);
-
-    alert(`✅ 成功兑换 ${amount.toFixed(2)} Coins`);
-    document.getElementById("ordercoins").textContent = newCoins.toFixed(2);
-    document.getElementById("coins").textContent = newCoins.toFixed(2);
-    document.getElementById("balance").textContent = newBalance.toFixed(2);
-
-    updateCoinsUI(newCoins);
-    await checkPendingLock();
-    await loadLastOrder();
-    await loadRecentOrders();
-    closeExchangeModal();
-
-  } catch (e) {
-    alert(e.message || "兑换失败");
-  } finally {
-    exchanging = false;
-    if (confirmBtn) confirmBtn.disabled = false;
-  }
-}
-
-function openExchangeModal() {
-  const modal = document.getElementById("addCoinsModal");
-  const input = document.getElementById("addCoinsInput");
-  if (modal) {
-    modal.style.display = "flex";
-    if (input) { input.value = ""; setTimeout(() => input.focus(), 50); }
-  }
-}
-
-function closeExchangeModal() {
-  const modal = document.getElementById("addCoinsModal");
-  if (modal) modal.style.display = "none";
-}
-
-/* ======================
    页面初始化 & 事件绑定
    ====================== */
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
-  document.getElementById("rechargeBtn")?.addEventListener("click", rechargeCoins);
 
   document.getElementById("addCoinsBtn")?.addEventListener("click", openExchangeModal);
   document.getElementById("cancelAddCoins")?.addEventListener("click", closeExchangeModal);
@@ -469,4 +352,74 @@ async function loadLastOrder() {
 
   if (orders?.length) renderLastOrder(orders[0], user?.coins ?? 0);
   else document.getElementById("orderResult").innerHTML = "";
+}
+
+/* ======================
+   Coins 弹窗（仅订单页）
+   ====================== */
+function openExchangeModal() {
+  const modal = document.getElementById("addCoinsModal");
+  const input = document.getElementById("addCoinsInput");
+  if (modal) {
+    modal.style.display = "flex";
+    if (input) { input.value = ""; setTimeout(() => input.focus(), 50); }
+  }
+}
+
+function closeExchangeModal() {
+  const modal = document.getElementById("addCoinsModal");
+  if (modal) modal.style.display = "none";
+}
+
+async function confirmExchange() {
+  if (exchanging) return;
+  exchanging = true;
+
+  const inputEl = document.getElementById("addCoinsInput");
+  const confirmBtn = document.getElementById("confirmAddCoins");
+  const amount = parseFloat(inputEl?.value || "0");
+
+  if (isNaN(amount) || amount <= 0) { alert("输入无效"); exchanging = false; return; }
+  if (!window.currentUserId) { alert("请先登录！"); exchanging = false; return; }
+
+  if (confirmBtn) confirmBtn.disabled = true;
+
+  try {
+    const { data: user, error } = await supabaseClient
+      .from("users")
+      .select("coins, balance")
+      .eq("id", window.currentUserId)
+      .single();
+    if (error || !user) throw new Error("加载用户信息失败");
+
+    const coins = Number(user.coins) || 0;
+    const balance = Number(user.balance) || 0;
+    if (balance < amount) { alert(`余额不足，当前 Balance：¥${balance.toFixed(2)}`); return; }
+
+    const newCoins = coins + amount;
+    const newBalance = balance - amount;
+
+    const { error: updateErr } = await supabaseClient
+      .from("users")
+      .update({ coins: newCoins, balance: newBalance })
+      .eq("id", window.currentUserId);
+    if (updateErr) throw new Error("兑换失败：" + updateErr.message);
+
+    alert(`✅ 成功兑换 ${amount.toFixed(2)} Coins`);
+    document.getElementById("ordercoins").textContent = newCoins.toFixed(2);
+    const balEl = document.getElementById("balance");
+    if (balEl) balEl.textContent = newBalance.toFixed(2);
+
+    updateCoinsUI(newCoins);
+    await checkPendingLock();
+    await loadLastOrder();
+    await loadRecentOrders();
+    closeExchangeModal();
+
+  } catch (e) {
+    alert(e.message || "兑换失败");
+  } finally {
+    exchanging = false;
+    if (confirmBtn) confirmBtn.disabled = false;
+  }
 }
