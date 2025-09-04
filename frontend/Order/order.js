@@ -426,3 +426,113 @@ async function loadLastOrder() {
   if (orders?.length) renderLastOrder(orders[0], user?.coins ?? 0);
   else document.getElementById("orderResult").innerHTML = "";
 }
+
+/* ======================
+   配置
+   ====================== */
+const DAILY_LIMIT = 10;       // 每日订单上限
+const MIN_COINS = 50;         // 最少 coins 才能下单
+
+/* ======================
+   检查 & 重置每日订单
+   ====================== */
+async function checkDailyLimit() {
+  const { data: user, error } = await supabaseClient
+    .from("users")
+    .select("id, coins, balance, daily_limit, daily_orders, last_order_date")
+    .eq("id", window.currentUserId)
+    .single();
+
+  if (error || !user) {
+    console.error("获取用户信息失败", error);
+    return;
+  }
+
+  const today = new Date().toISOString().split("T")[0];
+
+  // 如果 last_order_date 不是今天，重置 daily_orders
+  if (user.last_order_date !== today) {
+    await supabaseClient
+      .from("users")
+      .update({ 
+        daily_orders: 0,
+        last_order_date: today 
+      })
+      .eq("id", user.id);
+    user.daily_orders = 0;
+  }
+
+  // 更新 UI 显示
+  document.getElementById("dailyProgress").textContent =
+    `${user.daily_orders}/${DAILY_LIMIT} 单`;
+
+  // 检查条件：coins 足够 & 订单未超额
+  if (user.coins < MIN_COINS) {
+    setOrderBtnDisabled(true, "至少需要 50 Coins 才能下单");
+  } else if (user.daily_orders >= DAILY_LIMIT) {
+    setOrderBtnDisabled(true, "今日下单次数已达上限");
+  } else {
+    setOrderBtnDisabled(false);
+  }
+}
+
+/* ======================
+   下单逻辑
+   ====================== */
+async function autoOrder() {
+  const { data: user, error } = await supabaseClient
+    .from("users")
+    .select("id, coins, daily_orders, last_order_date")
+    .eq("id", window.currentUserId)
+    .single();
+
+  if (error || !user) return alert("获取用户信息失败");
+
+  if (user.coins < MIN_COINS) return alert("需要至少 50 Coins 才能下单");
+  if (user.daily_orders >= DAILY_LIMIT) return alert("今日订单已满");
+
+  // 下单成功 → 更新 daily_orders +1
+  await supabaseClient
+    .from("users")
+    .update({
+      daily_orders: user.daily_orders + 1,
+      last_order_date: new Date().toISOString().split("T")[0]
+    })
+    .eq("id", user.id);
+
+  alert("✅ 下单成功！");
+  checkDailyLimit(); // 刷新限制显示
+}
+
+/* ======================
+   Coins → Balance 兑换
+   ====================== */
+async function exchangeToBalance() {
+  const { data: user, error } = await supabaseClient
+    .from("users")
+    .select("id, coins, balance, daily_orders")
+    .eq("id", window.currentUserId)
+    .single();
+
+  if (error || !user) return alert("获取用户失败");
+
+  // 限制：必须完成当日所有订单
+  if (user.daily_orders < DAILY_LIMIT) {
+    return alert(`必须完成 ${DAILY_LIMIT}/${DAILY_LIMIT} 单，才能兑换`);
+  }
+
+  if (user.coins <= 0) return alert("没有可兑换的 Coins");
+
+  const { error: updateErr } = await supabaseClient
+    .from("users")
+    .update({
+      balance: user.balance + user.coins,
+      coins: 0
+    })
+    .eq("id", user.id);
+
+  if (updateErr) return alert("兑换失败：" + updateErr.message);
+
+  alert("✅ 已成功把 Coins 转换为 Balance");
+  checkDailyLimit();
+}
