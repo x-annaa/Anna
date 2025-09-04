@@ -293,49 +293,6 @@ async function loadRecentOrders() {
 }
 
 /* ======================
-   充值
-   ====================== */
-async function rechargeCoins() {
-  const amount = parseFloat(prompt("充值金额", "0"));
-  if (isNaN(amount) || amount <= 0) { alert("金额无效"); return; }
-
-  const { data: user } = await supabaseClient
-    .from("users")
-    .select("coins")
-    .eq("id", window.currentUserId)
-    .single();
-
-  const newCoins = (Number(user?.coins) || 0) + amount;
-
-  const { error: updErr } = await supabaseClient
-    .from("users")
-    .update({ coins: newCoins })
-    .eq("id", window.currentUserId);
-  if (updErr) { alert("充值失败：" + updErr.message); return; }
-
-  alert(`充值成功 ¥${amount.toFixed(2)}`);
-  updateCoinsUI(newCoins);
-
-  // 如果有 pending 订单，尝试完成
-  const { data: pending } = await supabaseClient
-    .from("orders")
-    .select(`id, total_price, profit, status, created_at, products ( name )`)
-    .eq("user_id", window.currentUserId)
-    .eq("status", "pending")
-    .order("created_at", { ascending: false })
-    .limit(1);
-
-  if (pending?.length && newCoins >= 0) {
-    await completeOrder(pending[0], newCoins);
-  } else {
-    await checkPendingLock();
-    await loadLastOrder();
-  }
-
-  await loadRecentOrders();
-}
-
-/* ======================
    Balance -> Coins 兑换
    ====================== */
 async function confirmExchange() {
@@ -410,7 +367,6 @@ function closeExchangeModal() {
    ====================== */
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
-  document.getElementById("rechargeBtn")?.addEventListener("click", rechargeCoins);
 
   document.getElementById("addCoinsBtn")?.addEventListener("click", openExchangeModal);
   document.getElementById("cancelAddCoins")?.addEventListener("click", closeExchangeModal);
