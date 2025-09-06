@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="Me/me.css">
   <!-- css 底部按钮部分 --> 
   <link rel="stylesheet" href="Button/button.css">
-  <!-- 充值提现 CSS -->
+  <!-- 充值 / 提现 css -->
   <link rel="stylesheet" href="WR/recharge.css">
   <link rel="stylesheet" href="WR/withdraw.css">
 
@@ -44,8 +44,10 @@
       <button id="autoOrderBtn">🎲 一键刷单</button>
     </div>
 
+    <!-- 显示本次下单结果 -->
     <div id="orderResult" class="order-result"></div>
 
+    <!-- 最近 5 个订单历史 -->
     <div class="order-history">
       <h3>🕘 最近订单</h3>
       <ul id="recentOrders">
@@ -79,9 +81,9 @@
     </div>
 
     <div class="my-buttons">
+      <!-- 改成充值 + 提现 -->
       <button id="rechargeBtn">充值</button>
       <button id="withdrawBtn">提现</button>
-      <button>按钮2</button>
       <button>按钮3</button>
       <button>按钮4</button>
       <button id="logoutBtn">Logout</button>
@@ -97,6 +99,53 @@
     </div>
   </div>
 
+  <!-- 充值 Modal -->
+  <div id="rechargeModal" class="modal">
+    <div class="modal-content">
+      <h3>充值</h3>
+      <div class="recharge-options">
+        <button class="recharge-method" data-method="USDT">USDT</button>
+        <button class="recharge-method" data-method="BNB">BNB</button>
+        <button class="recharge-method" data-method="Telegram">Telegram</button>
+      </div>
+      <div id="rechargeDetails"></div>
+      <div class="modal-actions">
+        <button id="cancelRecharge">取消</button>
+        <button id="submitRecharge">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 提交充值确认窗口 -->
+  <div id="rechargeConfirmModal" class="modal">
+    <div class="modal-content">
+      <h3>提交充值信息</h3>
+      <p><strong>用户名：</strong><span id="confirmUsername">加载中...</span></p>
+      <p><strong>平台账号：</strong><span id="confirmAccount">加载中...</span></p>
+      <p><strong>充值方式：</strong><span id="confirmMethod">加载中...</span></p>
+      <p>转账截图：<input type="file" id="transferScreenshot" accept="image/*"></p>
+      <div class="modal-actions">
+        <button id="cancelConfirmRecharge">取消</button>
+        <button id="finishConfirmRecharge" disabled>完成</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 提现 Modal -->
+  <div id="withdrawModal" class="modal">
+    <div class="modal-content">
+      <h3>提现</h3>
+      <p>请输入提现金额：</p>
+      <input type="number" id="withdrawAmount" min="10" placeholder="最小提现 10 USDT" />
+      <p>请输入提现地址：</p>
+      <input type="text" id="withdrawAddress" placeholder="请输入钱包地址" />
+      <div class="modal-actions">
+        <button id="cancelWithdraw">取消</button>
+        <button id="confirmWithdraw">提交</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 底部导航栏 -->
   <div class="bottom-nav">
     <button data-page="homePage" class="active">Home</button>
@@ -106,15 +155,16 @@
     <button data-page="myPage">Me</button>
   </div>
 
-  <!-- ====== JS 部分 ====== --> 
+  <!-- JS 部分 --> 
   <script src="Home/home.js"></script>
   <script src="Message/message.js"></script>
   <script src="Order/order.js"></script>
   <script src="About/about.js"></script>
   <script src="Me/me.js"></script>
   <script src="Button/button.js"></script>
-  <!-- 充值提现 JS -->
+  <!-- 充值 / 提现 JS -->
   <script src="WR/recharge.js"></script>
   <script src="WR/withdraw.js"></script>
+  
 </body>
 </html>
