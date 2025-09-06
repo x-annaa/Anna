@@ -1,17 +1,25 @@
 // =======================
 // 密码可见切换
 // =======================
-window.togglePassword = function (id, el) {
-  const input = document.getElementById(id);
-  if (!input) return;
-  if (input.type === "password") {
-    input.type = "text";
-    el.textContent = "🙈";
-  } else {
-    input.type = "password";
-    el.textContent = "👁️";
-  }
-};
+document.addEventListener("DOMContentLoaded", () => {
+  const toggleButtons = document.querySelectorAll(".toggle-password");
+  toggleButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const targetId = btn.getAttribute("data-target");
+      const input = document.getElementById(targetId);
+      if (!input) return;
+
+      if (input.type === "password") {
+        input.type = "text";
+        btn.textContent = "🙈";
+      } else {
+        input.type = "password";
+        btn.textContent = "👁️";
+      }
+    });
+  });
+});
+
 
 // =======================
 // 登录 / 注册 Tab 切换
