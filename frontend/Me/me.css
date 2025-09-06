@@ -1,36 +1,11 @@
-body { 
-  margin: 0; 
-  font-family: Arial, sans-serif; 
-  background: #f5f5f5; 
-}
-.page { 
-  display: none; 
-  padding: 20px; 
-}
-.page.active { 
-  display: block; 
-}
-
-
-/* 我的页面 */
-.user-info {
-  background: #fff;
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-.user-info p {
-  margin: 8px 0;
-  font-size: 16px;
-}
-
 /* 我的页面按钮 */
 .my-buttons {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
+
+/* 普通按钮 */
 .my-buttons button {
   padding: 10px;
   font-size: 16px;
@@ -40,22 +15,12 @@ body {
   border-radius: 8px;
 }
 
-/* Logout 弹窗 */
-.modal {
-  display: none;
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.5);
-  justify-content: center;
-  align-items: center;
+/* 横向按钮组：Withdraw + Recharge */
+.horizontal-buttons {
+  display: flex;
+  gap: 10px;        /* 按钮间距 */
 }
-.modal-content {
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
+.horizontal-buttons button {
+  flex: 1;           /* 平分宽度 */
   text-align: center;
-}
-.modal-content button {
-  margin: 10px;
-  padding: 8px 16px;
 }
