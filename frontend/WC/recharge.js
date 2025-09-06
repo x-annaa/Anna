@@ -1,145 +1,131 @@
-// 元素
-const withdrawBtn = document.getElementById("withdrawBtn");
-const withdrawModal = document.getElementById("withdrawModal");
-const cancelWithdraw = document.getElementById("cancelWithdraw");
-const confirmWithdraw = document.getElementById("confirmWithdraw");
-const withdrawAmount = document.getElementById("withdrawAmount");
+// frontend/WC/recharge.js
+(() => {
+  console.log("✅ recharge.js loaded");
 
-const addWithdrawPwd = document.getElementById("addWithdrawPwd");
-const setPwdModal = document.getElementById("setPwdModal");
-const cancelSetPwd = document.getElementById("cancelSetPwd");
-const saveSetPwd = document.getElementById("saveSetPwd");
-const newWithdrawPwd = document.getElementById("newWithdrawPwd");
-const confirmWithdrawPwd = document.getElementById("confirmWithdrawPwd");
+  // ======================
+  // 元素获取
+  // ======================
+  const rechargeBtn = document.getElementById("rechargeBtn");
+  const rechargeModal = document.getElementById("rechargeModal");
+  const cancelRecharge = document.getElementById("cancelRecharge");
+  const submitRecharge = document.getElementById("submitRecharge");
 
-const checkPwdModal = document.getElementById("checkPwdModal");
-const cancelCheckPwd = document.getElementById("cancelCheckPwd");
-const confirmCheckPwd = document.getElementById("confirmCheckPwd");
-const inputWithdrawPwd = document.getElementById("inputWithdrawPwd");
+  const rechargeOptions = document.querySelectorAll(".recharge-options button");
+  const selectedMethodEl = document.getElementById("selectedMethod");
+  const networkProtocolEl = document.getElementById("networkProtocol");
+  const walletAddressEl = document.getElementById("walletAddress");
+  const copyWalletBtn = document.getElementById("copyWallet");
 
-let hasWithdrawPwd = false; // 从数据库加载
-let withdrawAmountValue = 0;
+  // ======================
+  // 充值配置
+  // ======================
+  const rechargeConfig = {
+    USDT: {
+      protocols: {
+        TRC20: {
+          address: "TX6aSYyGVTf1NsXWzY3kUC9pTQPJPagJH",
+          qr: "images/trc20_qr.png"
+        },
+        ERC20: {
+          address: "0x1234567890abcdef1234567890abcdef12345678",
+          qr: "images/erc20_qr.png"
+        }
+      }
+    },
+    BNB: {
+      protocols: {
+        BEP20: {
+          address: "bnb1abcdef1234567890abcdef1234567890abc",
+          qr: "images/bnb_qr.png"
+        }
+      }
+    },
+    Telegram: {
+      protocols: {
+        Default: {
+          address: "@YourTelegramBot",
+          qr: "images/telegram_qr.png"
+        }
+      }
+    }
+  };
 
-// ======================
-// 1. 打开提现窗口
-// ======================
-withdrawBtn.addEventListener("click", () => {
-  withdrawModal.style.display = "flex";
-});
+  let currentMethod = "USDT";
+  let currentProtocol = "TRC20";
 
-// ======================
-// 2. 设置提现密码
-// ======================
-addWithdrawPwd.addEventListener("click", (e) => {
-  e.preventDefault();
-  withdrawModal.style.display = "none";
-  setPwdModal.style.display = "flex";
-});
+  // ======================
+  // 打开充值窗口
+  // ======================
+  rechargeBtn?.addEventListener("click", () => {
+    rechargeModal.style.display = "flex";
+    updateRechargeUI();
+  });
 
-cancelSetPwd.addEventListener("click", () => {
-  setPwdModal.style.display = "none";
-});
+  // ======================
+  // 取消关闭
+  // ======================
+  cancelRecharge?.addEventListener("click", () => {
+    rechargeModal.style.display = "none";
+  });
 
-saveSetPwd.addEventListener("click", async () => {
-  const pwd1 = newWithdrawPwd.value.trim();
-  const pwd2 = confirmWithdrawPwd.value.trim();
-
-  if (!pwd1 || pwd1 !== pwd2) {
-    alert("两次输入的密码不一致！");
-    return;
-  }
-
-  // 存到数据库 (简单存明文，推荐存 hash)
-  const { error } = await supabaseClient
-    .from("users")
-    .update({ withdraw_password: pwd1 })
-    .eq("id", window.currentUserId);
-
-  if (error) {
-    alert("设置提现密码失败：" + error.message);
-    return;
-  }
-
-  hasWithdrawPwd = true;
-  alert("提现密码设置成功！");
-  setPwdModal.style.display = "none";
-});
-
-// ======================
-// 3. 提交提现
-// ======================
-confirmWithdraw.addEventListener("click", async () => {
-  withdrawAmountValue = parseFloat(withdrawAmount.value);
-
-  if (!withdrawAmountValue || withdrawAmountValue <= 0) {
-    alert("请输入有效的提现金额！");
-    return;
-  }
-
-  if (hasWithdrawPwd) {
-    withdrawModal.style.display = "none";
-    checkPwdModal.style.display = "flex";
-  } else {
-    await submitWithdraw(null);
-  }
-});
-
-// ======================
-// 4. 输入提现密码确认
-// ======================
-cancelCheckPwd.addEventListener("click", () => {
-  checkPwdModal.style.display = "none";
-});
-
-confirmCheckPwd.addEventListener("click", async () => {
-  const pwd = inputWithdrawPwd.value.trim();
-
-  // 校验密码
-  const { data, error } = await supabaseClient
-    .from("users")
-    .select("withdraw_password, balance")
-    .eq("id", window.currentUserId)
-    .single();
-
-  if (error || !data) {
-    alert("查询用户失败！");
-    return;
-  }
-
-  if (pwd !== data.withdraw_password) {
-    alert("提现密码错误！");
-    return;
-  }
-
-  await submitWithdraw(pwd);
-});
-
-// ======================
-// 5. 提交提现到数据库
-// ======================
-async function submitWithdraw(password) {
-  // 扣减余额 + 写提现记录
-  const { error } = await supabaseClient
-    .from("withdrawals")
-    .insert({
-      user_id: window.currentUserId,
-      amount: withdrawAmountValue,
-      status: "pending", // 等后台审核
-      created_at: new Date().toISOString(),
+  // ======================
+  // 切换充值方式
+  // ======================
+  rechargeOptions.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      currentMethod = btn.dataset.method;
+      // 默认取第一个协议
+      const protocols = Object.keys(rechargeConfig[currentMethod].protocols);
+      currentProtocol = protocols[0];
+      updateRechargeUI();
     });
+  });
 
-  if (error) {
-    alert("提现申请失败：" + error.message);
-    return;
+  // ======================
+  // 更新充值详情
+  // ======================
+  function updateRechargeUI() {
+    selectedMethodEl.textContent = currentMethod;
+    networkProtocolEl.textContent = currentProtocol;
+    walletAddressEl.textContent =
+      rechargeConfig[currentMethod].protocols[currentProtocol].address;
   }
 
-  // 扣除余额（只是前端演示，后台要二次校验！）
-  await supabaseClient
-    .from("users")
-    .update({ balance: supabaseClient.rpc('decrement_balance', { uid: window.currentUserId, amt: withdrawAmountValue }) })
-    .eq("id", window.currentUserId);
+  // ======================
+  // 复制钱包地址
+  // ======================
+  copyWalletBtn?.addEventListener("click", () => {
+    const address = walletAddressEl.textContent;
+    navigator.clipboard.writeText(address).then(() => {
+      alert("钱包地址已复制: " + address);
+    });
+  });
 
-  alert("提现申请已提交，等待审核！");
-  checkPwdModal.style.display = "none";
-  withdrawModal.style.display = "none";
-}
+  // ======================
+  // 提交充值（只是前端提示，后台要人工审核）
+  // ======================
+  submitRecharge?.addEventListener("click", () => {
+    alert(
+      `充值申请已提交\n方式: ${currentMethod}\n网络: ${currentProtocol}\n地址: ${walletAddressEl.textContent}\n\n后台会人工审核`
+    );
+    rechargeModal.style.display = "none";
+  });
+
+  // ======================
+  // 点击遮罩层关闭
+  // ======================
+  window.addEventListener("click", (e) => {
+    if (e.target === rechargeModal) {
+      rechargeModal.style.display = "none";
+    }
+  });
+
+  // ======================
+  // 按 ESC 键关闭
+  // ======================
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      rechargeModal.style.display = "none";
+    }
+  });
+})();
