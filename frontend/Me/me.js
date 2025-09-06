@@ -1,7 +1,7 @@
 // ======================
-// 当前登录用户
+// 当前登录用户（全局）
 // ======================
-let currentUser = null;
+window.currentUser = window.currentUser || null;
 
 // ======================
 // 页面初始化
@@ -37,7 +37,7 @@ async function loadUserInfo(username) {
       return;
     }
 
-    currentUser = data;
+    window.currentUser = data;
     document.getElementById("username").textContent = data.username || "未知";
     document.getElementById("platformAccount").textContent = data.platform_account || "未知";
     document.getElementById("balance").textContent = (Number(data.balance) || 0).toFixed(2);
@@ -94,12 +94,10 @@ function setupWithdraw() {
     withdrawModal.style.display = "flex";
   });
 
-  // 取消按钮
   document.getElementById("cancelWithdraw").addEventListener("click", () => {
     withdrawModal.style.display = "none";
   });
 
-  // 提交提现 -> 输入提现密码
   document.getElementById("confirmWithdraw").addEventListener("click", () => {
     const amount = document.getElementById("withdrawAmount").value;
     const address = document.getElementById("walletAddress").value;
@@ -116,13 +114,12 @@ function setupWithdraw() {
     }
   });
 
-  // 输入提现密码 -> 提交数据库
   document.getElementById("submitWithdrawFinal").addEventListener("click", async () => {
     const inputPwd = document.getElementById("inputWithdrawPwd").value;
     const amount = parseFloat(document.getElementById("withdrawAmount").value);
     const address = document.getElementById("walletAddress").value;
 
-    if (inputPwd !== currentUser.withdraw_password) {
+    if (inputPwd !== window.currentUser.withdraw_password) {
       alert("密码错误！");
       return;
     }
@@ -134,7 +131,7 @@ function setupWithdraw() {
       alert("请输入钱包地址");
       return;
     }
-    if (amount > Number(currentUser.balance)) {
+    if (amount > Number(window.currentUser.balance)) {
       alert("余额不足");
       return;
     }
@@ -144,7 +141,7 @@ function setupWithdraw() {
       const { error } = await supabaseClient
         .from("withdrawals")
         .insert([{
-          user_id: Number(currentUser.id),
+          user_id: Number(window.currentUser.id),
           amount: amount,
           wallet_address: address,
           status: "pending"
@@ -153,16 +150,16 @@ function setupWithdraw() {
 
       // 插入系统消息到 messages 表
       if (window.addWithdrawMessage) {
-        window.addWithdrawMessage(amount); // 调用 message.js 的函数
+        window.addWithdrawMessage(amount);
       }
 
       alert("提现申请已提交，等待后台审核！");
 
-      // 前端体验更新余额
-      currentUser.balance -= amount;
-      document.getElementById("balance").textContent = currentUser.balance.toFixed(2);
+      // 前端更新余额
+      window.currentUser.balance -= amount;
+      document.getElementById("balance").textContent = window.currentUser.balance.toFixed(2);
 
-      // 关闭 modal
+      // 清理并关闭
       withdrawModal.style.display = "none";
       document.getElementById("confirmPwdModal").style.display = "none";
       document.getElementById("withdrawAmount").value = "";
@@ -174,12 +171,11 @@ function setupWithdraw() {
     }
   });
 
-  // 取消输入提现密码
   document.getElementById("cancelConfirmPwd").addEventListener("click", () => {
     document.getElementById("confirmPwdModal").style.display = "none";
   });
 
-  // ESC / 遮罩层关闭
+  // ESC / 点击遮罩层关闭
   window.addEventListener("click", (e) => {
     if (e.target.classList.contains("modal")) e.target.style.display = "none";
   });
@@ -206,7 +202,7 @@ function setupWithdrawPassword() {
     }
   });
 
-  // ---- 设置密码 ----
+  // 设置密码
   document.getElementById("saveWithdrawPwd").addEventListener("click", async () => {
     const pwd = document.getElementById("withdrawPwd").value;
     const confirmPwd = document.getElementById("confirmWithdrawPwd").value;
@@ -216,7 +212,7 @@ function setupWithdrawPassword() {
       return;
     }
     if (pwd !== confirmPwd) {
-      alert("两次输入的密码不一致");
+      alert("两次输入密码不一致");
       return;
     }
 
@@ -224,12 +220,12 @@ function setupWithdrawPassword() {
       const { error } = await supabaseClient
         .from("users")
         .update({ withdraw_password: pwd })
-        .eq("id", currentUser.id);
+        .eq("id", window.currentUser.id);
       if (error) throw error;
 
       localStorage.setItem("hasWithdrawPwd", "true");
       setPasswordBtn.textContent = "更新密码";
-      currentUser.withdraw_password = pwd;
+      window.currentUser.withdraw_password = pwd;
       alert("提现密码设置成功！");
       setPasswordModal.style.display = "none";
       document.getElementById("withdrawPwd").value = "";
@@ -244,13 +240,13 @@ function setupWithdrawPassword() {
     setPasswordModal.style.display = "none";
   });
 
-  // ---- 更新密码 ----
+  // 更新密码
   document.getElementById("saveUpdatePwd").addEventListener("click", async () => {
     const oldPwd = document.getElementById("oldWithdrawPwd").value;
     const newPwd = document.getElementById("newWithdrawPwd").value;
     const confirmNewPwd = document.getElementById("confirmNewWithdrawPwd").value;
 
-    if (oldPwd !== currentUser.withdraw_password) {
+    if (oldPwd !== window.currentUser.withdraw_password) {
       alert("原密码错误！");
       return;
     }
@@ -267,10 +263,10 @@ function setupWithdrawPassword() {
       const { error } = await supabaseClient
         .from("users")
         .update({ withdraw_password: newPwd })
-        .eq("id", currentUser.id);
+        .eq("id", window.currentUser.id);
       if (error) throw error;
 
-      currentUser.withdraw_password = newPwd;
+      window.currentUser.withdraw_password = newPwd;
       alert("提现密码更新成功！");
       updatePasswordModal.style.display = "none";
       document.getElementById("oldWithdrawPwd").value = "";
