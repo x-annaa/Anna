@@ -13,6 +13,9 @@
   <link rel="stylesheet" href="Me/me.css">
   <!-- css 底部按钮部分 --> 
   <link rel="stylesheet" href="Button/button.css">
+  <!-- 充值提现 CSS -->
+  <link rel="stylesheet" href="WR/recharge.css">
+  <link rel="stylesheet" href="WR/withdraw.css">
 
   <!-- Supabase SDK -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -39,13 +42,10 @@
 
     <div class="order-actions">
       <button id="autoOrderBtn">🎲 一键刷单</button>
-      <!-- 充值按钮已删除 -->
     </div>
 
-    <!-- 显示本次下单结果 -->
     <div id="orderResult" class="order-result"></div>
 
-    <!-- 最近 5 个订单历史 -->
     <div class="order-history">
       <h3>🕘 最近订单</h3>
       <ul id="recentOrders">
@@ -75,12 +75,12 @@
     <h2>👤 我的页面</h2>
     <div class="user-info">
       <p><strong>平台账号：</strong><span id="platformAccount">加载中...</span></p>
-      <!-- Coins 不显示 -->
       <p><strong>Balance：</strong><span id="balance">加载中...</span></p>
     </div>
 
     <div class="my-buttons">
-      <button>按钮1</button>
+      <button id="rechargeBtn">充值</button>
+      <button id="withdrawBtn">提现</button>
       <button>按钮2</button>
       <button>按钮3</button>
       <button>按钮4</button>
@@ -106,13 +106,15 @@
     <button data-page="myPage">Me</button>
   </div>
 
-  <!-- JS 部分 --> 
+  <!-- ====== JS 部分 ====== --> 
   <script src="Home/home.js"></script>
   <script src="Message/message.js"></script>
   <script src="Order/order.js"></script>
   <script src="About/about.js"></script>
   <script src="Me/me.js"></script>
   <script src="Button/button.js"></script>
-  
+  <!-- 充值提现 JS -->
+  <script src="WR/recharge.js"></script>
+  <script src="WR/withdraw.js"></script>
 </body>
 </html>
