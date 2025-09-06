@@ -106,10 +106,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     setPasswordModal.style.display = "none";
   });
 
-  document.getElementById("cancelSetPwd").addEventListener("click", () => {
-    setPasswordModal.style.display = "none";
-  });
-
   // ---- 更新密码 ----
   document.getElementById("saveUpdatePwd").addEventListener("click", async () => {
     const oldPwd = document.getElementById("oldWithdrawPwd").value;
@@ -141,10 +137,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     currentUser.withdraw_password = newPwd;
     alert("提现密码更新成功！");
-    updatePasswordModal.style.display = "none";
-  });
-
-  document.getElementById("cancelUpdatePwd").addEventListener("click", () => {
     updatePasswordModal.style.display = "none";
   });
 
@@ -196,16 +188,31 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("balance").textContent = currentUser.balance.toFixed(2);
   });
 
-  // ====== 事件代理：点击遮罩层或取消按钮关闭弹窗 ======
+  // ====== 事件代理：点击取消按钮或遮罩层关闭弹窗 ======
   window.addEventListener("click", (e) => {
     if (e.target.classList.contains("modal")) {
       e.target.style.display = "none";
     }
-    if (e.target.id === "cancelConfirmPwd") {
-      document.getElementById("confirmPwdModal").style.display = "none";
+
+    // 取消按钮统一处理
+    const cancelIds = [
+      "cancelWithdraw",
+      "cancelConfirmPwd",
+      "cancelSetPwd",
+      "cancelUpdatePwd"
+    ];
+    if (cancelIds.includes(e.target.id)) {
+      const modalMap = {
+        "cancelWithdraw": "withdrawModal",
+        "cancelConfirmPwd": "confirmPwdModal",
+        "cancelSetPwd": "setPasswordModal",
+        "cancelUpdatePwd": "updatePasswordModal"
+      };
+      document.getElementById(modalMap[e.target.id]).style.display = "none";
     }
   });
 
+  // ESC 键关闭所有弹窗
   window.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       document.querySelectorAll(".modal").forEach((m) => (m.style.display = "none"));
