@@ -1,52 +1,23 @@
 // ======================
 // 当前用户 ID
 // ======================
-let currentUserId = localStorage.getItem("currentUserId");
-
-// ======================
-// 获取容器
-// ======================
+const currentUserId = localStorage.getItem("currentUserId");
 const messageList = document.getElementById("messageList");
-const chatMessages = document.createElement("div");
-chatMessages.className = "chat-list";
-messageList.parentNode.insertBefore(chatMessages, messageList.nextSibling);
-
-const chatInput = document.getElementById("chatInput");
-const sendChatBtn = document.getElementById("sendChatBtn");
 
 // ======================
-// 添加系统消息
+// 页面初始化
 // ======================
-function addSystemMessage(msg) {
-  const card = document.createElement("div");
-  card.className = "message-card";
-  card.innerHTML = `
-    <h4>提交信息</h4>
-    <p>提交审核中。。。</p>
-    <p>提交余额：${msg.amount.toFixed(2)}</p>
-    <p>提交时间：${new Date(msg.created_at).toLocaleString()}</p>
-    <p style="font-weight:bold; color:#f00;">${msg.content}</p>
-  `;
-  messageList.prepend(card);
-}
+document.addEventListener("DOMContentLoaded", () => {
+  if (!currentUserId) return;
 
-// ======================
-// 添加聊天消息
-// ======================
-function addChatMessage(msg) {
-  const chat = document.createElement("div");
-  chat.className = `chat-message ${msg.sender === 'user' ? 'user' : 'support'}`;
-  chat.textContent = msg.content;
-  chatMessages.appendChild(chat);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-}
+  loadMessages();        // 加载历史消息
+  setupChatListener();   // 监听新消息
+});
 
 // ======================
 // 加载历史消息
 // ======================
 async function loadMessages() {
-  if (!currentUserId) return;
-
   const { data, error } = await supabaseClient
     .from("messages")
     .select("*")
@@ -58,42 +29,44 @@ async function loadMessages() {
     return;
   }
 
-  data.forEach(msg => {
-    if (msg.type === "withdraw") addSystemMessage(msg);
-    if (msg.type === "chat") addChatMessage(msg);
-  });
+  messageList.innerHTML = ""; // 清空
+  data.forEach(msg => addMessageCard(msg));
 }
 
 // ======================
-// 发送聊天消息
+// 添加单条消息
 // ======================
-sendChatBtn.addEventListener("click", async () => {
-  const text = chatInput.value.trim();
-  if (!text) return;
+function addMessageCard(msg) {
+  const div = document.createElement("div");
+  div.classList.add("message-card");
 
-  const { data, error } = await supabaseClient
-    .from("messages")
-    .insert([{
-      user_id: currentUserId,
-      sender: "user",
-      type: "chat",
-      content: text
-    }]);
-
-  if (error) {
-    alert("发送消息失败：" + error.message);
-    return;
+  // 系统消息（提现）
+  if (msg.type === "withdraw") {
+    div.innerHTML = `
+      <div class="message-system">
+        <p class="withdraw-text">💬 ${msg.content}</p>
+        <p>提交余额：${msg.amount.toFixed(2)}</p>
+        <p>提交时间：${new Date(msg.created_at).toLocaleString()}</p>
+      </div>
+    `;
+  } 
+  // 用户/客服聊天
+  else {
+    div.classList.add(msg.sender === "user" ? "message-user" : "message-cs");
+    div.innerHTML = `<p>${msg.content}</p>
+                     <span class="msg-time">${new Date(msg.created_at).toLocaleTimeString()}</span>`;
   }
 
-  addChatMessage({ sender: "user", content: text });
-  chatInput.value = "";
-});
+  messageList.appendChild(div);
+  messageList.scrollTop = messageList.scrollHeight; // 自动滚动到底
+}
 
 // ======================
-// 前端监听提交提现消息
+// 提供给 me.js 调用：提现消息
 // ======================
-// 可以在 me.js 提交提现成功后调用：
 window.addMessageCard = async function(amount) {
+  if (!currentUserId) return;
+
   const { data, error } = await supabaseClient
     .from("messages")
     .insert([{
@@ -104,19 +77,60 @@ window.addMessageCard = async function(amount) {
       amount: amount,
       status: "pending"
     }])
-    .select(); // 返回插入数据
+    .select(); // 返回插入的数据
 
   if (error) {
     console.error("生成提现消息失败：", error.message);
     return;
   }
 
-  addSystemMessage(data[0]);
+  addMessageCard(data[0]);
 }
 
 // ======================
-// 初始化
+// 用户聊天功能
 // ======================
-document.addEventListener("DOMContentLoaded", () => {
-  loadMessages();
+const chatInput = document.createElement("input");
+chatInput.id = "chatInput";
+chatInput.placeholder = "输入消息...";
+const chatSendBtn = document.createElement("button");
+chatSendBtn.id = "chatSendBtn";
+chatSendBtn.textContent = "发送";
+messageList.parentNode.appendChild(chatInput);
+messageList.parentNode.appendChild(chatSendBtn);
+
+chatSendBtn.addEventListener("click", async () => {
+  const content = chatInput.value.trim();
+  if (!content) return;
+
+  const { data, error } = await supabaseClient
+    .from("messages")
+    .insert([{
+      user_id: currentUserId,
+      sender: "user",
+      content: content,
+      type: "chat"
+    }])
+    .select();
+
+  if (error) return console.error("发送消息失败：", error.message);
+
+  addMessageCard(data[0]);
+  chatInput.value = "";
 });
+
+// ======================
+// 监听客服或系统推送消息（可用 supabase Realtime）
+// ======================
+function setupChatListener() {
+  supabaseClient
+    .channel(`public:messages:user_id=eq.${currentUserId}`)
+    .on(
+      "postgres_changes",
+      { event: "INSERT", schema: "public", table: "messages", filter: `user_id=eq.${currentUserId}` },
+      (payload) => {
+        addMessageCard(payload.new);
+      }
+    )
+    .subscribe();
+}
