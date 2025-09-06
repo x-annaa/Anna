@@ -36,31 +36,14 @@ showRegisterBtn.addEventListener("click", () => {
 });
 
 // =======================
-// 生成随机唯一平台账号（6位大写字母+数字）
+// 生成随机平台账号（2位大写字母 + 4位数字，如 AB1234）
 // =======================
-async function generateUniquePlatformAccount() {
+function generatePlatformAccount() {
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const numbers = "0123456789";
   let acc = "";
-  let exists = true;
-
-  while (exists) {
-    acc = "";
-    for (let i = 0; i < 6; i++) {
-      const chars = letters + numbers;
-      acc += chars[Math.floor(Math.random() * chars.length)];
-    }
-
-    // 检查数据库是否已有该平台账号
-    const { data } = await supabaseClient
-      .from("users")
-      .select("id")
-      .eq("platform_account", acc)
-      .maybeSingle();
-
-    if (!data) exists = false; // 不存在才算唯一
-  }
-
+  for (let i = 0; i < 2; i++) acc += letters[Math.floor(Math.random() * letters.length)];
+  for (let i = 0; i < 4; i++) acc += numbers[Math.floor(Math.random() * numbers.length)];
   return acc;
 }
 
@@ -86,7 +69,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  // 检查是否已有用户名
+  // 检查是否已有用户
   const { data: exist } = await supabaseClient
     .from("users")
     .select("id")
@@ -98,8 +81,8 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  // 生成唯一平台账号
-  const platformAccount = await generateUniquePlatformAccount();
+  // 生成平台账号
+  const platformAccount = generatePlatformAccount();
 
   // 插入新用户
   const { data, error } = await supabaseClient
