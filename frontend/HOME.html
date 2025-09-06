@@ -39,13 +39,10 @@
 
     <div class="order-actions">
       <button id="autoOrderBtn">🎲 一键刷单</button>
-      <!-- 充值按钮已删除 -->
     </div>
 
-    <!-- 显示本次下单结果 -->
     <div id="orderResult" class="order-result"></div>
 
-    <!-- 最近 5 个订单历史 -->
     <div class="order-history">
       <h3>🕘 最近订单</h3>
       <ul id="recentOrders">
@@ -53,7 +50,6 @@
       </ul>
     </div>
 
-    <!-- 💰 兑换 Coins 弹窗 -->
     <div id="addCoinsModal" class="modal">
       <div class="modal-content">
         <h3>兑换 Coins</h3>
@@ -67,23 +63,29 @@
     </div>
   </div>
 
-  <!-- 消息页面 -->
+  <!-- 关于我们 -->
   <div id="msgPage" class="page">ℹ️ 关于我们</div>
 
   <!-- 我的页面 -->
   <div id="myPage" class="page">
     <h2>👤 我的页面</h2>
+
+    <!-- 用户信息 -->
     <div class="user-info">
-      <p><strong>平台账号：</strong><span id="platformAccount">加载中...</span></p>
-      <!-- Coins 不显示 -->
-      <p><strong>Balance：</strong><span id="balance">加载中...</span></p>
+      <p class="username"><strong>用户名：</strong><span id="username">加载中...</span></p>
+      <p class="platform"><strong>平台账号：</strong><span id="platformAccount">加载中...</span></p>
+    </div>
+
+    <!-- 余额和提现区域 -->
+    <div class="balance-box">
+      <p><strong>Balance：</strong><span id="balance">0.00</span></p>
+      <div class="balance-actions">
+        <button id="depositBtn">充值</button>
+        <button id="withdrawBtn">提现</button>
+      </div>
     </div>
 
     <div class="my-buttons">
-      <button>按钮1</button>
-      <button>按钮2</button>
-      <button>按钮3</button>
-      <button>按钮4</button>
       <button id="logoutBtn">Logout</button>
     </div>
   </div>
@@ -94,6 +96,46 @@
       <p>确定要退出吗？</p>
       <button id="cancelLogout">否</button>
       <button id="confirmLogout">确定</button>
+    </div>
+  </div>
+
+  <!-- 提现窗口 -->
+  <div id="withdrawModal" class="modal">
+    <div class="modal-content">
+      <h3>提现</h3>
+      <p>当前余额：<span id="withdrawBalance">0.00</span></p>
+      <input type="number" id="withdrawAmount" placeholder="输入提现金额" />
+      <input type="text" id="walletAddress" placeholder="粘贴钱包地址" />
+      <button id="setPasswordBtn">添加提现密码</button>
+      <div class="modal-actions">
+        <button id="cancelWithdraw">取消</button>
+        <button id="confirmWithdraw">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 设置密码窗口 -->
+  <div id="setPasswordModal" class="modal">
+    <div class="modal-content">
+      <h3>设置提现密码</h3>
+      <input type="password" id="withdrawPwd" maxlength="6" placeholder="输入6位数字密码" />
+      <input type="password" id="confirmWithdrawPwd" maxlength="6" placeholder="确认密码" />
+      <div class="modal-actions">
+        <button id="cancelSetPwd">取消</button>
+        <button id="saveWithdrawPwd">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 确认提现密码窗口 -->
+  <div id="confirmPwdModal" class="modal">
+    <div class="modal-content">
+      <h3>输入提现密码</h3>
+      <input type="password" id="inputWithdrawPwd" maxlength="6" placeholder="请输入密码" />
+      <div class="modal-actions">
+        <button id="cancelConfirmPwd">取消</button>
+        <button id="submitWithdrawFinal">提交</button>
+      </div>
     </div>
   </div>
 
