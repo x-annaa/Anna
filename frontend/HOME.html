@@ -118,11 +118,25 @@
   <div id="setPasswordModal" class="modal">
     <div class="modal-content">
       <h3>设置提现密码</h3>
-      <input type="password" id="withdrawPwd" maxlength="6" placeholder="输入6位数字密码" />
-      <input type="password" id="confirmWithdrawPwd" maxlength="6" placeholder="确认密码" />
+      <input type="text" id="withdrawPwd" maxlength="6" placeholder="输入6位数字密码" />
+      <input type="text" id="confirmWithdrawPwd" maxlength="6" placeholder="确认密码" />
       <div class="modal-actions">
         <button id="cancelSetPwd">取消</button>
         <button id="saveWithdrawPwd">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 更新密码窗口 -->
+  <div id="updatePasswordModal" class="modal">
+    <div class="modal-content">
+      <h3>更改提现密码</h3>
+      <input type="text" id="oldWithdrawPwd" maxlength="6" placeholder="输入原密码" />
+      <input type="text" id="newWithdrawPwd" maxlength="6" placeholder="输入新密码" />
+      <input type="text" id="confirmNewWithdrawPwd" maxlength="6" placeholder="确认新密码" />
+      <div class="modal-actions">
+        <button id="cancelUpdatePwd">取消</button>
+        <button id="saveUpdatePwd">保存</button>
       </div>
     </div>
   </div>
@@ -131,7 +145,7 @@
   <div id="confirmPwdModal" class="modal">
     <div class="modal-content">
       <h3>输入提现密码</h3>
-      <input type="password" id="inputWithdrawPwd" maxlength="6" placeholder="请输入密码" />
+      <input type="text" id="inputWithdrawPwd" maxlength="6" placeholder="请输入密码" />
       <div class="modal-actions">
         <button id="cancelConfirmPwd">取消</button>
         <button id="submitWithdrawFinal">提交</button>
