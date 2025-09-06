@@ -1,1 +1,54 @@
-
+/* 基础弹窗 */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+}
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+button {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.tab {
+  flex: 1;
+  padding: 8px;
+  background: #eee;
+}
+.tab.active {
+  background: #4285f4;
+  color: white;
+}
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.qrcode {
+  width: 150px;
+  margin: 10px 0;
+}
+.wallet {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  word-break: break-all;
+}
