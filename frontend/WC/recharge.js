@@ -1,70 +1,109 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const rechargeBtn = document.getElementById("rechargeBtn");
-  const rechargeModal = document.getElementById("rechargeModal");
-  const cancelRecharge = document.getElementById("cancelRecharge");
-  const submitRecharge = document.getElementById("submitRecharge");
-  const confirmRechargeModal = document.getElementById("confirmRechargeModal");
+  const methodBtns = document.querySelectorAll(".method-btn");
+  const methodContent = document.getElementById("methodContent");
+  const copyWalletBtn = document.getElementById("copyWalletBtn");
+  const walletAddress = document.getElementById("walletAddress");
+  const backBtn = document.getElementById("backBtn");
+  const submitBtn = document.getElementById("submitBtn");
+
+  const confirmModal = document.getElementById("confirmModal");
   const cancelConfirm = document.getElementById("cancelConfirm");
   const finishConfirm = document.getElementById("finishConfirm");
   const screenshotInput = document.getElementById("screenshotInput");
 
-  // 打开充值窗口
-  rechargeBtn.addEventListener("click", () => {
-    rechargeModal.style.display = "flex";
-  });
+  const confirmMethod = document.getElementById("confirmMethod");
+  const confirmUsername = document.getElementById("confirmUsername");
+  const confirmAccount = document.getElementById("confirmAccount");
 
-  // 关闭充值窗口
-  cancelRecharge.addEventListener("click", () => {
-    rechargeModal.style.display = "none";
-  });
+  // ====== 切换充值方式 ======
+  methodBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      methodBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
 
-  // 切换 tab
-  document.querySelectorAll(".tab").forEach(tab => {
-    tab.addEventListener("click", () => {
-      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-      tab.classList.add("active");
-      const method = tab.dataset.method;
-      document.querySelectorAll(".tab-content").forEach(tc => tc.classList.remove("active"));
-      if (method === "USDT") document.getElementById("usdtTab").classList.add("active");
-      if (method === "BNB") document.getElementById("bnbTab").classList.add("active");
-      if (method === "TG") document.getElementById("tgTab").classList.add("active");
+      const method = btn.dataset.method;
+      confirmMethod.textContent = method;
+
+      if (method === "USDT") {
+        methodContent.innerHTML = `
+          <h3>USDT 充值</h3>
+          <p><strong>网络协议：</strong> TRC20 (默认) / ERC20</p>
+          <p><strong>充值币种：</strong> USDT（默认） / USDC</p>
+          <p>扫码或使用以下地址完成存款：</p>
+          <img src="your-usdt-qrcode.png" alt="USDT收款二维码" class="qr">
+          <p><strong>最小充值金额：</strong> 10.00 USDT</p>
+          <div class="wallet-box">
+            <input type="text" id="walletAddress" value="TX6aSYyGVTf1NsXWzY3kUC9pTQPJPagJHh" readonly>
+            <button id="copyWalletBtn">复制</button>
+          </div>
+        `;
+      } else if (method === "BNB") {
+        methodContent.innerHTML = `
+          <h3>BNB 充值</h3>
+          <p>使用 BSC 网络转账</p>
+          <img src="your-bnb-qrcode.png" alt="BNB收款二维码" class="qr">
+          <p><strong>最小充值金额：</strong> 0.05 BNB</p>
+          <div class="wallet-box">
+            <input type="text" id="walletAddress" value="bnb1xxxxxxxyyyyyzzzzz" readonly>
+            <button id="copyWalletBtn">复制</button>
+          </div>
+        `;
+      } else {
+        methodContent.innerHTML = `
+          <h3>Telegram 联系客服</h3>
+          <p>请联系客服完成充值：</p>
+          <p><a href="https://t.me/yourTelegram" target="_blank">📩 点击联系</a></p>
+        `;
+      }
     });
   });
 
-  // 点击提交 → 打开确认窗口
-  submitRecharge.addEventListener("click", () => {
-    const method = document.querySelector(".tab.active").dataset.method;
-    document.getElementById("confirmMethod").textContent = method;
-    document.getElementById("confirmUsername").textContent = localStorage.getItem("currentUsername") || "未知";
-    document.getElementById("confirmAccount").textContent = localStorage.getItem("platformAccount") || "未知";
-
-    rechargeModal.style.display = "none";
-    confirmRechargeModal.style.display = "flex";
+  // ====== 复制钱包地址 ======
+  document.body.addEventListener("click", (e) => {
+    if (e.target.id === "copyWalletBtn") {
+      const addr = document.getElementById("walletAddress");
+      navigator.clipboard.writeText(addr.value).then(() => {
+        alert("钱包地址已复制！");
+      });
+    }
   });
 
-  // 关闭确认窗口
-  cancelConfirm.addEventListener("click", () => {
-    confirmRechargeModal.style.display = "none";
+  // ====== 返回按钮 ======
+  backBtn.addEventListener("click", () => {
+    window.location.href = "../HOME.html";
   });
 
-  // 检查是否上传截图
+  // ====== 提交按钮 ======
+  submitBtn.addEventListener("click", async () => {
+    // 获取当前用户
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      confirmUsername.textContent = user.user_metadata?.username || user.email;
+      confirmAccount.textContent = user.id;
+    } else {
+      confirmUsername.textContent = "未登录";
+      confirmAccount.textContent = "-";
+    }
+
+    confirmModal.style.display = "block";
+  });
+
+  // ====== 上传截图后启用完成按钮 ======
   screenshotInput.addEventListener("change", () => {
-    finishConfirm.disabled = screenshotInput.files.length === 0;
+    if (screenshotInput.files.length > 0) {
+      finishConfirm.disabled = false;
+    }
   });
 
-  // 完成提交
+  // ====== 取消提交 ======
+  cancelConfirm.addEventListener("click", () => {
+    confirmModal.style.display = "none";
+  });
+
+  // ====== 完成提交 ======
   finishConfirm.addEventListener("click", () => {
-    alert("提交成功！请等待后台审核。");
-    confirmRechargeModal.style.display = "none";
-    screenshotInput.value = "";
-    finishConfirm.disabled = true;
+    alert("充值申请已提交，等待审核！");
+    confirmModal.style.display = "none";
+    window.location.href = "../HOME.html";
   });
 });
-
-// 复制钱包地址
-function copyWallet(id) {
-  const text = document.getElementById(id).textContent;
-  navigator.clipboard.writeText(text).then(() => {
-    alert("钱包地址已复制！");
-  });
-}
