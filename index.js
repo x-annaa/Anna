@@ -1,9 +1,31 @@
 // =======================
-// 密码可见切换
+// 页面初始化
 // =======================
 document.addEventListener("DOMContentLoaded", () => {
+
+  // ====== Tab 登录/注册切换 ======
+  const loginForm = document.getElementById("loginForm");
+  const registerForm = document.getElementById("registerForm");
+  const showLoginBtn = document.getElementById("showLogin");
+  const showRegisterBtn = document.getElementById("showRegister");
+
+  showLoginBtn.addEventListener("click", () => {
+    loginForm.classList.remove("hidden");
+    registerForm.classList.add("hidden");
+    showLoginBtn.classList.add("active");
+    showRegisterBtn.classList.remove("active");
+  });
+
+  showRegisterBtn.addEventListener("click", () => {
+    loginForm.classList.add("hidden");
+    registerForm.classList.remove("hidden");
+    showLoginBtn.classList.remove("active");
+    showRegisterBtn.classList.add("active");
+  });
+
+  // ====== 密码可见切换 ======
   const toggleButtons = document.querySelectorAll(".toggle-password");
-  toggleButtons.forEach((btn) => {
+  toggleButtons.forEach(btn => {
     btn.addEventListener("click", () => {
       const targetId = btn.getAttribute("data-target");
       const input = document.getElementById(targetId);
@@ -18,43 +40,35 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   });
-});
 
-
-// =======================
-// 登录 / 注册 Tab 切换
-// =======================
-const loginForm = document.getElementById("loginForm");
-const registerForm = document.getElementById("registerForm");
-const showLoginBtn = document.getElementById("showLogin");
-const showRegisterBtn = document.getElementById("showRegister");
-
-showLoginBtn.addEventListener("click", () => {
-  loginForm.classList.remove("hidden");
-  registerForm.classList.add("hidden");
-  showLoginBtn.classList.add("active");
-  showRegisterBtn.classList.remove("active");
-});
-
-showRegisterBtn.addEventListener("click", () => {
-  loginForm.classList.add("hidden");
-  registerForm.classList.remove("hidden");
-  showLoginBtn.classList.remove("active");
-  showRegisterBtn.classList.add("active");
 });
 
 // =======================
-// 生成随机平台账号（2位大写字母 + 4位数字，如 AB1234）
+// 生成唯一平台账号（6位随机大写字母+数字）
 // =======================
-function generatePlatformAccount() {
-  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  const numbers = "0123456789";
-  let acc = "";
-  for (let i = 0; i < 2; i++) acc += letters[Math.floor(Math.random() * letters.length)];
-  for (let i = 0; i < 4; i++) acc += numbers[Math.floor(Math.random() * numbers.length)];
-  return acc;
+async function generateUniquePlatformAccount() {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+  while (true) {
+    let acc = "";
+    for (let i = 0; i < 6; i++) {
+      acc += chars[Math.floor(Math.random() * chars.length)];
+    }
+
+    // 检查数据库是否存在
+    const { data } = await supabaseClient
+      .from("users")
+      .select("id")
+      .eq("platform_account", acc)
+      .maybeSingle();
+
+    if (!data) return acc; // 没有重复就返回
+  }
 }
 
+// =======================
+// 注册逻辑
+// =======================
 document.getElementById("registerBtn").addEventListener("click", async () => {
   const username = document.getElementById("regUsername").value.trim();
   const password = document.getElementById("regPassword").value;
@@ -80,7 +94,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  // 检查是否已有用户名
+  // 检查是否已有用户
   const { data: exist } = await supabaseClient
     .from("users")
     .select("id")
@@ -124,12 +138,10 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   msgDiv.textContent = "注册成功！";
   msgDiv.style.color = "green";
 
-  // 可以延迟跳转，让用户看到提示
   setTimeout(() => {
     window.location.href = "frontend/HOME.html";
   }, 800);
 });
-
 
 // =======================
 // 登录逻辑
