@@ -1,1 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>充值 - U9</title>
 
+  <!-- 充值 CSS -->
+  <link rel="stylesheet" href="recharge.css">
+
+  <!-- Supabase SDK -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="../../supabaseClient.js"></script>
+</head>
+<body>
+  <div class="recharge-page">
+    <h2>💰 充值中心</h2>
+
+    <!-- 充值方式选择 -->
+    <div class="method-tabs">
+      <button class="method-btn active" data-method="USDT">USDT</button>
+      <button class="method-btn" data-method="BNB">BNB</button>
+      <button class="method-btn" data-method="Telegram">Telegram</button>
+    </div>
+
+    <!-- 充值详情 -->
+    <div id="methodContent" class="method-content">
+      <!-- 默认加载 USDT -->
+      <h3>USDT 充值</h3>
+      <p><strong>网络协议：</strong> TRC20 (默认) / ERC20</p>
+      <p><strong>充值币种：</strong> USDT（默认） / USDC</p>
+      <p>扫码或使用以下地址完成存款：</p>
+      <img src="your-usdt-qrcode.png" alt="USDT收款二维码" class="qr">
+      <p><strong>最小充值金额：</strong> 10.00 USDT</p>
+      <div class="wallet-box">
+        <input type="text" id="walletAddress" value="TX6aSYyGVTf1NsXWzY3kUC9pTQPJPagJHh" readonly>
+        <button id="copyWalletBtn">复制</button>
+      </div>
+    </div>
+
+    <!-- 底部按钮 -->
+    <div class="actions">
+      <button id="backBtn">返回</button>
+      <button id="submitBtn">提交</button>
+    </div>
+  </div>
+
+  <!-- 提交确认弹窗 -->
+  <div id="confirmModal" class="modal">
+    <div class="modal-content">
+      <h3>提交充值申请</h3>
+      <p><strong>用户名：</strong><span id="confirmUsername">加载中...</span></p>
+      <p><strong>平台账号：</strong><span id="confirmAccount">加载中...</span></p>
+      <p><strong>充值方式：</strong><span id="confirmMethod">USDT</span></p>
+      <p>上传转账截图：</p>
+      <input type="file" id="screenshotInput" accept="image/*">
+      <div class="modal-actions">
+        <button id="cancelConfirm">取消</button>
+        <button id="finishConfirm" disabled>完成</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="recharge.js"></script>
+</body>
+</html>
