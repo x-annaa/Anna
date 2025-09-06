@@ -14,7 +14,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   await loadUserInfo(username);
-
   setupLogout();
   setupWithdraw();
   setupWithdrawPassword();
@@ -95,13 +94,14 @@ function setupWithdraw() {
     withdrawModal.style.display = "flex";
   });
 
+  // 取消按钮
   document.getElementById("cancelWithdraw").addEventListener("click", () => {
     withdrawModal.style.display = "none";
   });
 
   // 提交提现 -> 输入提现密码
   document.getElementById("confirmWithdraw").addEventListener("click", () => {
-    const amount = parseFloat(document.getElementById("withdrawAmount").value);
+    const amount = document.getElementById("withdrawAmount").value;
     const address = document.getElementById("walletAddress").value;
 
     if (!amount || !address) {
@@ -116,7 +116,7 @@ function setupWithdraw() {
     }
   });
 
-  // 输入提现密码 -> 提交数据库 & 消息
+  // 输入提现密码 -> 提交数据库
   document.getElementById("submitWithdrawFinal").addEventListener("click", async () => {
     const inputPwd = document.getElementById("inputWithdrawPwd").value;
     const amount = parseFloat(document.getElementById("withdrawAmount").value);
@@ -139,61 +139,42 @@ function setupWithdraw() {
       return;
     }
 
-    // 插入 withdrawals 表
-    const { error } = await supabaseClient
-      .from("withdrawals")
-      .insert([{
-        user_id: Number(currentUser.id),
-        amount: amount,
-        wallet_address: address,
-        status: "pending"
-      }]);
-
-    if (error) {
-      alert("提现申请失败：" + error.message);
-      return;
-    }
-
-    // 插入系统消息到 messages 表
     try {
-      await supabaseClient
-        .from("messages")
+      // 插入 withdrawals 表
+      const { error } = await supabaseClient
+        .from("withdrawals")
         .insert([{
           user_id: Number(currentUser.id),
-          sender: "system",
-          type: "withdraw",
-          content: "您的提现正在进行中。。。。请稍等",
           amount: amount,
+          wallet_address: address,
           status: "pending"
         }]);
+      if (error) throw error;
+
+      // 插入系统消息到 messages 表
+      if (window.addWithdrawMessage) {
+        window.addWithdrawMessage(amount); // 调用 message.js 的函数
+      }
+
+      alert("提现申请已提交，等待后台审核！");
+
+      // 前端体验更新余额
+      currentUser.balance -= amount;
+      document.getElementById("balance").textContent = currentUser.balance.toFixed(2);
+
+      // 关闭 modal
+      withdrawModal.style.display = "none";
+      document.getElementById("confirmPwdModal").style.display = "none";
+      document.getElementById("withdrawAmount").value = "";
+      document.getElementById("walletAddress").value = "";
+      document.getElementById("inputWithdrawPwd").value = "";
     } catch (e) {
-      console.error("生成提现消息失败：", e);
+      console.error("提现申请失败：", e.message);
+      alert("提现申请失败：" + e.message);
     }
-
-    // 调用前端渲染函数（message.js）
-    if (window.addMessageCard) {
-      window.addMessageCard({
-        type: "withdraw",
-        content: "您的提现正在进行中。。。。请稍等",
-        amount: amount,
-        created_at: new Date().toISOString()
-      });
-    }
-
-    alert("提现申请已提交，等待后台审核！");
-
-    // 前端体验更新余额
-    currentUser.balance -= amount;
-    document.getElementById("balance").textContent = currentUser.balance.toFixed(2);
-
-    // 关闭 modal
-    withdrawModal.style.display = "none";
-    document.getElementById("confirmPwdModal").style.display = "none";
-    document.getElementById("withdrawAmount").value = "";
-    document.getElementById("walletAddress").value = "";
-    document.getElementById("inputWithdrawPwd").value = "";
   });
 
+  // 取消输入提现密码
   document.getElementById("cancelConfirmPwd").addEventListener("click", () => {
     document.getElementById("confirmPwdModal").style.display = "none";
   });
@@ -239,23 +220,24 @@ function setupWithdrawPassword() {
       return;
     }
 
-    const { error } = await supabaseClient
-      .from("users")
-      .update({ withdraw_password: pwd })
-      .eq("id", currentUser.id);
+    try {
+      const { error } = await supabaseClient
+        .from("users")
+        .update({ withdraw_password: pwd })
+        .eq("id", currentUser.id);
+      if (error) throw error;
 
-    if (error) {
-      alert("保存密码失败：" + error.message);
-      return;
+      localStorage.setItem("hasWithdrawPwd", "true");
+      setPasswordBtn.textContent = "更新密码";
+      currentUser.withdraw_password = pwd;
+      alert("提现密码设置成功！");
+      setPasswordModal.style.display = "none";
+      document.getElementById("withdrawPwd").value = "";
+      document.getElementById("confirmWithdrawPwd").value = "";
+    } catch (e) {
+      console.error("保存密码失败：", e.message);
+      alert("保存密码失败：" + e.message);
     }
-
-    localStorage.setItem("hasWithdrawPwd", "true");
-    setPasswordBtn.textContent = "更新密码";
-    currentUser.withdraw_password = pwd;
-    alert("提现密码设置成功！");
-    setPasswordModal.style.display = "none";
-    document.getElementById("withdrawPwd").value = "";
-    document.getElementById("confirmWithdrawPwd").value = "";
   });
 
   document.getElementById("cancelSetPwd").addEventListener("click", () => {
@@ -281,22 +263,23 @@ function setupWithdrawPassword() {
       return;
     }
 
-    const { error } = await supabaseClient
-      .from("users")
-      .update({ withdraw_password: newPwd })
-      .eq("id", currentUser.id);
+    try {
+      const { error } = await supabaseClient
+        .from("users")
+        .update({ withdraw_password: newPwd })
+        .eq("id", currentUser.id);
+      if (error) throw error;
 
-    if (error) {
-      alert("更新密码失败：" + error.message);
-      return;
+      currentUser.withdraw_password = newPwd;
+      alert("提现密码更新成功！");
+      updatePasswordModal.style.display = "none";
+      document.getElementById("oldWithdrawPwd").value = "";
+      document.getElementById("newWithdrawPwd").value = "";
+      document.getElementById("confirmNewWithdrawPwd").value = "";
+    } catch (e) {
+      console.error("更新密码失败：", e.message);
+      alert("更新密码失败：" + e.message);
     }
-
-    currentUser.withdraw_password = newPwd;
-    alert("提现密码更新成功！");
-    updatePasswordModal.style.display = "none";
-    document.getElementById("oldWithdrawPwd").value = "";
-    document.getElementById("newWithdrawPwd").value = "";
-    document.getElementById("confirmNewWithdrawPwd").value = "";
   });
 
   document.getElementById("cancelUpdatePwd").addEventListener("click", () => {
