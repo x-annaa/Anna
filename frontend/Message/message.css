@@ -1,91 +1,48 @@
-/* 消息列表容器 */
 .message-list {
-  max-height: 400px;
+  max-height: 70vh;
   overflow-y: auto;
   padding: 10px;
-  margin-bottom: 10px;
-  background-color: #f5f5f5;
-  border-radius: 8px;
 }
 
-/* 系统消息 / 提现消息 */
 .message-card {
+  margin-bottom: 10px;
+  padding: 8px;
   border-radius: 8px;
-  background-color: #fff3cd;
-  border: 1px solid #ffeeba;
-  padding: 10px 15px;
-  margin-bottom: 8px;
-  font-family: "Microsoft YaHei", sans-serif;
 }
 
-.message-card h4 {
-  margin: 0 0 5px 0;
-  font-size: 14px;
-  color: #856404;
+.message-system {
+  background-color: #f0f0f0;
+  color: #333;
+  font-style: italic;
 }
 
-.message-card p {
-  margin: 2px 0;
-  font-size: 16px;
-  color: #856404;
-}
-
-/* 聊天消息 */
-.chat-list {
-  max-height: 300px;
-  overflow-y: auto;
-  margin-top: 10px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background-color: #f8f9fa;
-}
-
-.chat-message {
-  padding: 8px 12px;
-  border-radius: 6px;
-  margin-bottom: 6px;
-  max-width: 70%;
-  word-break: break-word;
-}
-
-.chat-message.user {
-  background-color: #cce5ff;
-  color: #004085;
-  margin-left: auto;
+.message-user {
+  background-color: #d1f0ff;
   text-align: right;
 }
 
-.chat-message.support {
-  background-color: #e2e3e5;
-  color: #383d41;
-  margin-right: auto;
+.message-cs {
+  background-color: #fff1d6;
   text-align: left;
 }
 
-/* 聊天输入框 */
-.chat-box {
-  display: flex;
-  margin-top: 10px;
+.msg-time {
+  display: block;
+  font-size: 10px;
+  color: #999;
+  margin-top: 2px;
 }
 
-.chat-box input {
-  flex: 1;
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+#chatInput {
+  width: 70%;
+  padding: 5px;
+  margin: 5px;
+  border-radius: 5px;
 }
 
-.chat-box button {
-  margin-left: 6px;
-  padding: 8px 12px;
-  border-radius: 6px;
-  border: none;
-  background-color: #007bff;
-  color: #fff;
+#chatSendBtn {
+  padding: 5px 10px;
+  margin: 5px;
+  border-radius: 5px;
   cursor: pointer;
-}
-
-.chat-box button:hover {
-  background-color: #0069d9;
 }
