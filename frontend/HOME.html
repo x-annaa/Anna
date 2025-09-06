@@ -5,18 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>U9</title>
 
-  <!-- css 部分 --> 
+  <!-- CSS -->
   <link rel="stylesheet" href="Home/home.css">
   <link rel="stylesheet" href="About/about.css">
   <link rel="stylesheet" href="Order/order.css">
   <link rel="stylesheet" href="Message/message.css">
   <link rel="stylesheet" href="Me/me.css">
-  <!-- css 底部按钮部分 --> 
   <link rel="stylesheet" href="Button/button.css">
 
   <!-- Supabase SDK -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <!-- 全局 Supabase 初始化 -->
   <script src="../supabaseClient.js"></script>
 </head>
 <body>
@@ -24,10 +22,16 @@
   <!-- 首页 -->
   <div id="homePage" class="page active">🏠 HOME</div>
 
-  <!-- 信息页面 -->
-  <div id="infoPage" class="page">💬 MESSAGE</div>
+  <!-- 信息页面 MESSAGE -->
+  <div id="infoPage" class="page">
+    💬 MESSAGE
     <div id="messageList" class="message-list">
-  <!-- 消息会动态插入到这里 -->
+      <!-- 消息会动态插入到这里 -->
+    </div>
+    <div class="chat-box">
+      <input type="text" id="chatInput" placeholder="输入消息..." />
+      <button id="sendChatBtn">发送</button>
+    </div>
   </div>
 
   <!-- 订单页面 -->
@@ -117,7 +121,7 @@
     </div>
   </div>
 
-  <!-- 设置密码窗口 -->
+  <!-- 设置提现密码窗口 -->
   <div id="setPasswordModal" class="modal">
     <div class="modal-content">
       <h3>设置提现密码</h3>
@@ -130,7 +134,7 @@
     </div>
   </div>
 
-  <!-- 更新密码窗口 -->
+  <!-- 更新提现密码窗口 -->
   <div id="updatePasswordModal" class="modal">
     <div class="modal-content">
       <h3>更改提现密码</h3>
@@ -165,13 +169,13 @@
     <button data-page="myPage">Me</button>
   </div>
 
-  <!-- JS 部分 --> 
+  <!-- JS -->
   <script src="Home/home.js"></script>
   <script src="Message/message.js"></script>
   <script src="Order/order.js"></script>
   <script src="About/about.js"></script>
   <script src="Me/me.js"></script>
   <script src="Button/button.js"></script>
-  
+
 </body>
 </html>
