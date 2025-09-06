@@ -5,17 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>U9</title>
 
-  <!-- 页面 CSS -->
+  <!-- css 部分 --> 
   <link rel="stylesheet" href="Home/home.css">
   <link rel="stylesheet" href="About/about.css">
   <link rel="stylesheet" href="Order/order.css">
   <link rel="stylesheet" href="Message/message.css">
   <link rel="stylesheet" href="Me/me.css">
+  <!-- css 底部按钮部分 --> 
   <link rel="stylesheet" href="Button/button.css">
-
-  <!-- 充值 / 提现 CSS -->
-  <link rel="stylesheet" href="WC/recharge.css">
-  <link rel="stylesheet" href="WC/withdraw.css">
 
   <!-- Supabase SDK -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -42,6 +39,7 @@
 
     <div class="order-actions">
       <button id="autoOrderBtn">🎲 一键刷单</button>
+      <!-- 充值按钮已删除 -->
     </div>
 
     <!-- 显示本次下单结果 -->
@@ -69,7 +67,7 @@
     </div>
   </div>
 
-  <!-- 关于页面 -->
+  <!-- 消息页面 -->
   <div id="msgPage" class="page">ℹ️ 关于我们</div>
 
   <!-- 我的页面 -->
@@ -77,12 +75,13 @@
     <h2>👤 我的页面</h2>
     <div class="user-info">
       <p><strong>平台账号：</strong><span id="platformAccount">加载中...</span></p>
+      <!-- Coins 不显示 -->
       <p><strong>Balance：</strong><span id="balance">加载中...</span></p>
     </div>
 
     <div class="my-buttons">
-      <button id="rechargeBtn">充值</button>
-      <button id="withdrawBtn">提现</button>
+      <button>按钮1</button>
+      <button>按钮2</button>
       <button>按钮3</button>
       <button>按钮4</button>
       <button id="logoutBtn">Logout</button>
@@ -98,53 +97,6 @@
     </div>
   </div>
 
-  <!-- 充值 Modal -->
-  <div id="rechargeModal" class="modal">
-    <div class="modal-content">
-      <h3>充值</h3>
-      <div class="recharge-options">
-        <button class="recharge-method" data-method="USDT">USDT</button>
-        <button class="recharge-method" data-method="BNB">BNB</button>
-        <button class="recharge-method" data-method="Telegram">Telegram</button>
-      </div>
-      <div id="rechargeDetails"></div>
-      <div class="modal-actions">
-        <button id="cancelRecharge">取消</button>
-        <button id="submitRecharge">提交</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 提交充值确认窗口 -->
-  <div id="rechargeConfirmModal" class="modal">
-    <div class="modal-content">
-      <h3>提交充值信息</h3>
-      <p><strong>用户名：</strong><span id="confirmUsername">加载中...</span></p>
-      <p><strong>平台账号：</strong><span id="confirmAccount">加载中...</span></p>
-      <p><strong>充值方式：</strong><span id="confirmMethod">加载中...</span></p>
-      <p>转账截图：<input type="file" id="transferScreenshot" accept="image/*"></p>
-      <div class="modal-actions">
-        <button id="cancelConfirmRecharge">取消</button>
-        <button id="finishConfirmRecharge" disabled>完成</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 提现 Modal -->
-  <div id="withdrawModal" class="modal">
-    <div class="modal-content">
-      <h3>提现</h3>
-      <p>请输入提现金额：</p>
-      <input type="number" id="withdrawAmount" min="10" placeholder="最小提现 10 USDT" />
-      <p>请输入提现地址：</p>
-      <input type="text" id="withdrawAddress" placeholder="请输入钱包地址" />
-      <div class="modal-actions">
-        <button id="cancelWithdraw">取消</button>
-        <button id="confirmWithdraw">提交</button>
-      </div>
-    </div>
-  </div>
-
   <!-- 底部导航栏 -->
   <div class="bottom-nav">
     <button data-page="homePage" class="active">Home</button>
@@ -154,17 +106,13 @@
     <button data-page="myPage">Me</button>
   </div>
 
-  <!-- 页面 JS -->
+  <!-- JS 部分 --> 
   <script src="Home/home.js"></script>
   <script src="Message/message.js"></script>
   <script src="Order/order.js"></script>
   <script src="About/about.js"></script>
   <script src="Me/me.js"></script>
   <script src="Button/button.js"></script>
-
-  <!-- 充值 / 提现 JS -->
-  <script src="WC/recharge.js"></script>
-  <script src="WC/withdraw.js"></script>
   
 </body>
 </html>
