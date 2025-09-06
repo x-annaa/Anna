@@ -123,8 +123,8 @@ function setupChatSend() {
         .insert([{
           user_id: currentUserId,
           sender: "user",
-          content: content,
-          type: "chat"
+          type: "chat",
+          content: content
         }])
         .select();
 
@@ -135,6 +135,11 @@ function setupChatSend() {
     } catch (e) {
       console.error("发送消息异常：", e);
     }
+  });
+
+  // 支持回车发送
+  chatInput.addEventListener("keydown", async (e) => {
+    if (e.key === "Enter") chatSendBtn.click();
   });
 }
 
