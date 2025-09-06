@@ -95,14 +95,13 @@ function setupWithdraw() {
     withdrawModal.style.display = "flex";
   });
 
-  // 取消按钮
   document.getElementById("cancelWithdraw").addEventListener("click", () => {
     withdrawModal.style.display = "none";
   });
 
   // 提交提现 -> 输入提现密码
   document.getElementById("confirmWithdraw").addEventListener("click", () => {
-    const amount = document.getElementById("withdrawAmount").value;
+    const amount = parseFloat(document.getElementById("withdrawAmount").value);
     const address = document.getElementById("walletAddress").value;
 
     if (!amount || !address) {
@@ -117,7 +116,7 @@ function setupWithdraw() {
     }
   });
 
-  // 输入提现密码 -> 提交数据库
+  // 输入提现密码 -> 提交数据库 & 消息
   document.getElementById("submitWithdrawFinal").addEventListener("click", async () => {
     const inputPwd = document.getElementById("inputWithdrawPwd").value;
     const amount = parseFloat(document.getElementById("withdrawAmount").value);
@@ -156,8 +155,29 @@ function setupWithdraw() {
     }
 
     // 插入系统消息到 messages 表
+    try {
+      await supabaseClient
+        .from("messages")
+        .insert([{
+          user_id: Number(currentUser.id),
+          sender: "system",
+          type: "withdraw",
+          content: "您的提现正在进行中。。。。请稍等",
+          amount: amount,
+          status: "pending"
+        }]);
+    } catch (e) {
+      console.error("生成提现消息失败：", e);
+    }
+
+    // 调用前端渲染函数（message.js）
     if (window.addMessageCard) {
-      window.addMessageCard(amount); // 调用 message.js 的函数
+      window.addMessageCard({
+        type: "withdraw",
+        content: "您的提现正在进行中。。。。请稍等",
+        amount: amount,
+        created_at: new Date().toISOString()
+      });
     }
 
     alert("提现申请已提交，等待后台审核！");
@@ -167,14 +187,13 @@ function setupWithdraw() {
     document.getElementById("balance").textContent = currentUser.balance.toFixed(2);
 
     // 关闭 modal
-    document.getElementById("withdrawModal").style.display = "none";
+    withdrawModal.style.display = "none";
     document.getElementById("confirmPwdModal").style.display = "none";
     document.getElementById("withdrawAmount").value = "";
     document.getElementById("walletAddress").value = "";
     document.getElementById("inputWithdrawPwd").value = "";
   });
 
-  // 取消输入提现密码
   document.getElementById("cancelConfirmPwd").addEventListener("click", () => {
     document.getElementById("confirmPwdModal").style.display = "none";
   });
