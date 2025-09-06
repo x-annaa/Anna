@@ -39,13 +39,10 @@
 
     <div class="order-actions">
       <button id="autoOrderBtn">🎲 一键刷单</button>
-      <!-- 充值按钮已删除 -->
     </div>
 
-    <!-- 显示本次下单结果 -->
     <div id="orderResult" class="order-result"></div>
 
-    <!-- 最近 5 个订单历史 -->
     <div class="order-history">
       <h3>🕘 最近订单</h3>
       <ul id="recentOrders">
@@ -53,7 +50,6 @@
       </ul>
     </div>
 
-    <!-- 💰 兑换 Coins 弹窗 -->
     <div id="addCoinsModal" class="modal">
       <div class="modal-content">
         <h3>兑换 Coins</h3>
@@ -73,22 +69,69 @@
   <!-- 我的页面 -->
   <div id="myPage" class="page">
     <h2>👤 我的页面</h2>
+
     <div class="user-info">
       <p><strong>平台账号：</strong><span id="platformAccount">加载中...</span></p>
-      <!-- Coins 不显示 -->
       <p><strong>Balance：</strong><span id="balance">加载中...</span></p>
     </div>
 
     <div class="my-buttons">
-  <div class="horizontal-buttons">
-    <button id="withdrawBtn">Withdraw</button>
-    <button id="rechargeBtn">Recharge</button>
+      <!-- 横向按钮组 -->
+      <div class="horizontal-buttons">
+        <button id="withdrawBtn">Withdraw</button>
+        <button id="rechargeBtn">Recharge</button>
+      </div>
+
+      <!-- 下面垂直排列的按钮 -->
+      <button>按钮2</button>
+      <button>按钮3</button>
+      <button>按钮4</button>
+      <button id="logoutBtn">Logout</button>
+    </div>
+
+    <!-- Recharge 弹窗 -->
+    <div id="rechargeModal" class="modal">
+      <div class="modal-content">
+        <h3>充值</h3>
+        <p>请选择充值方式：</p>
+        <div class="recharge-options">
+          <button data-method="USDT">USDT</button>
+          <button data-method="BNB">BNB</button>
+          <button data-method="Telegram">Telegram</button>
+        </div>
+
+        <div id="rechargeDetails" style="margin-top:15px;">
+          <p><strong>充值方式：</strong><span id="selectedMethod">USDT</span></p>
+          <p><strong>网络协议：</strong><span id="networkProtocol">TRC20</span></p>
+          <p><strong>最小充值金额：</strong>10.00 USDT</p>
+          <p><strong>钱包地址：</strong>
+            <span id="walletAddress">TX6aSYyGVTf1NsXWzY3kUC9pTQPJPagJH</span>
+            <button id="copyWallet">复制</button>
+          </p>
+        </div>
+
+        <div class="modal-actions">
+          <button id="cancelRecharge">取消</button>
+          <button id="submitRecharge">提交</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Withdraw 弹窗 -->
+    <div id="withdrawModal" class="modal">
+      <div class="modal-content">
+        <h3>提现</h3>
+        <p>请输入提现金额：</p>
+        <input type="number" id="withdrawAmount" placeholder="输入金额" min="1" />
+
+        <div class="modal-actions">
+          <button id="cancelWithdraw">取消</button>
+          <button id="confirmWithdraw">提交</button>
+        </div>
+      </div>
+    </div>
+
   </div>
-  <button>按钮2</button>
-  <button>按钮3</button>
-  <button>按钮4</button>
-  <button id="logoutBtn">Logout</button>
-</div>
 
   <!-- Logout 确认弹窗 -->
   <div id="logoutModal" class="modal">
