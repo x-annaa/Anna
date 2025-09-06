@@ -5,35 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>U9</title>
 
-  <!-- CSS -->
+  <!-- css 部分 --> 
   <link rel="stylesheet" href="Home/home.css">
   <link rel="stylesheet" href="About/about.css">
   <link rel="stylesheet" href="Order/order.css">
   <link rel="stylesheet" href="Message/message.css">
   <link rel="stylesheet" href="Me/me.css">
+  <!-- css 底部按钮部分 --> 
   <link rel="stylesheet" href="Button/button.css">
 
   <!-- Supabase SDK -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <!-- 全局 Supabase 初始化 -->
   <script src="../supabaseClient.js"></script>
 </head>
 <body>
 
   <!-- 首页 -->
-  <div id="homePage" class="page active">
-    <h2>🏠 HOME</h2>
-    <!-- 首页内容 -->
-  </div>
+  <div id="homePage" class="page active">🏠 HOME</div>
 
-  <!-- MESSAGE 页面 -->
-  <div id="infoPage" class="page">
-    <h2>💬 MESSAGE</h2>
-    <div id="messageList" class="message-list"></div>
-    <div class="chat-box">
-      <input type="text" id="chatInput" placeholder="输入消息..." />
-      <button id="chatSendBtn">发送</button>
-    </div>
-  </div>
+  <!-- 信息页面 -->
+  <div id="infoPage" class="page">💬 MESSAGE</div>
 
   <!-- 订单页面 -->
   <div id="orderPage" class="page">
@@ -72,10 +64,7 @@
   </div>
 
   <!-- 关于我们 -->
-  <div id="msgPage" class="page">
-    <h2>ℹ️ 关于我们</h2>
-    <p>这里可以放公司介绍、联系方式等内容</p>
-  </div>
+  <div id="msgPage" class="page">ℹ️ 关于我们</div>
 
   <!-- 我的页面 -->
   <div id="myPage" class="page">
@@ -101,7 +90,7 @@
     </div>
   </div>
 
-  <!-- Logout 弹窗 -->
+  <!-- Logout 确认弹窗 -->
   <div id="logoutModal" class="modal">
     <div class="modal-content">
       <p>确定要退出吗？</p>
@@ -125,7 +114,7 @@
     </div>
   </div>
 
-  <!-- 设置提现密码窗口 -->
+  <!-- 设置密码窗口 -->
   <div id="setPasswordModal" class="modal">
     <div class="modal-content">
       <h3>设置提现密码</h3>
@@ -138,7 +127,7 @@
     </div>
   </div>
 
-  <!-- 更新提现密码窗口 -->
+  <!-- 更新密码窗口 -->
   <div id="updatePasswordModal" class="modal">
     <div class="modal-content">
       <h3>更改提现密码</h3>
@@ -173,13 +162,13 @@
     <button data-page="myPage">Me</button>
   </div>
 
-  <!-- JS -->
+  <!-- JS 部分 --> 
   <script src="Home/home.js"></script>
   <script src="Message/message.js"></script>
   <script src="Order/order.js"></script>
   <script src="About/about.js"></script>
   <script src="Me/me.js"></script>
   <script src="Button/button.js"></script>
-
+  
 </body>
 </html>
