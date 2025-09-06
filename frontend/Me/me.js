@@ -229,16 +229,8 @@ document.getElementById("saveUpdatePwd").addEventListener("click", async () => {
 });
 
 // ======================
-// 确认提现密码
+// 确认提现密码 -> 提交数据库
 // ======================
-const confirmPwdModal = document.getElementById("confirmPwdModal");
-const cancelConfirmPwd = document.getElementById("cancelConfirmPwd");
-const submitWithdrawFinal = document.getElementById("submitWithdrawFinal");
-
-cancelConfirmPwd.addEventListener("click", () => {
-  confirmPwdModal.style.display = "none";
-});
-
 submitWithdrawFinal.addEventListener("click", async () => {
   const inputPwd = document.getElementById("inputWithdrawPwd").value;
 
@@ -247,17 +239,44 @@ submitWithdrawFinal.addEventListener("click", async () => {
     return;
   }
 
-  // 模拟保存提现申请，实际在后端审核
-  const amount = document.getElementById("withdrawAmount").value;
+  const amount = parseFloat(document.getElementById("withdrawAmount").value);
   const address = document.getElementById("walletAddress").value;
 
-  console.log("提现申请：", {
-    userId: currentUser.id,
-    amount,
-    address,
-  });
+  if (!amount || amount < 10) {
+    alert("提现金额必须 ≥ 10");
+    return;
+  }
+  if (!address) {
+    alert("请输入钱包地址");
+    return;
+  }
+  if (amount > Number(currentUser.balance)) {
+    alert("余额不足");
+    return;
+  }
+
+  // ✅ 插入提现申请到数据库
+  const { error } = await supabaseClient
+    .from("withdrawals")
+    .insert([{
+      user_id: currentUser.id,
+      amount: amount,
+      wallet_address: address,
+      status: "pending"
+    }]);
+
+  if (error) {
+    alert("提现申请失败：" + error.message);
+    return;
+  }
 
   alert("提现申请已提交，等待后台审核！");
-  withdrawModal.style.display = "none";
-  confirmPwdModal.style.display = "none";
+
+  // 关闭窗口
+  document.getElementById("withdrawModal").style.display = "none";
+  document.getElementById("confirmPwdModal").style.display = "none";
+
+  // ✅ 本地 balance 更新（前端体验用，实际应后台审核成功后更新 balance）
+  currentUser.balance -= amount;
+  document.getElementById("balance").textContent = currentUser.balance.toFixed(2);
 });
