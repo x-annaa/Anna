@@ -36,10 +36,15 @@ async function loadUserInfo(username) {
     // 保存 ID 和是否设置过提现密码
     window.currentUserId = data.id;
     localStorage.setItem("currentUserId", data.id);
-    localStorage.setItem(
-      "hasWithdrawPwd",
-      data.withdraw_password ? "true" : "false"
-    );
+
+    const setPasswordBtn = document.getElementById("setPasswordBtn");
+    if (data.withdraw_password) {
+      localStorage.setItem("hasWithdrawPwd", "true");
+      setPasswordBtn.textContent = "更新密码";
+    } else {
+      localStorage.setItem("hasWithdrawPwd", "false");
+      setPasswordBtn.textContent = "添加提现密码";
+    }
   } catch (e) {
     console.error("加载用户信息异常：", e);
   }
@@ -135,26 +140,31 @@ confirmWithdraw.addEventListener("click", () => {
 });
 
 // ======================
-// 设置提现密码
+// 设置 / 更新提现密码
 // ======================
 const setPasswordBtn = document.getElementById("setPasswordBtn");
 const setPasswordModal = document.getElementById("setPasswordModal");
-const cancelSetPwd = document.getElementById("cancelSetPwd");
-const saveWithdrawPwd = document.getElementById("saveWithdrawPwd");
+const updatePasswordModal = document.getElementById("updatePasswordModal");
 
+// 点击按钮 → 判断是添加还是更新
 setPasswordBtn.addEventListener("click", () => {
-  setPasswordModal.style.display = "flex";
+  if (localStorage.getItem("hasWithdrawPwd") === "true") {
+    updatePasswordModal.style.display = "flex";
+  } else {
+    setPasswordModal.style.display = "flex";
+  }
 });
 
-cancelSetPwd.addEventListener("click", () => {
+// ---- 设置密码 ----
+document.getElementById("cancelSetPwd").addEventListener("click", () => {
   setPasswordModal.style.display = "none";
 });
 
-saveWithdrawPwd.addEventListener("click", async () => {
+document.getElementById("saveWithdrawPwd").addEventListener("click", async () => {
   const pwd = document.getElementById("withdrawPwd").value;
   const confirmPwd = document.getElementById("confirmWithdrawPwd").value;
 
-  if (pwd.length !== 6 || isNaN(pwd)) {
+  if (!/^\d{6}$/.test(pwd)) {
     alert("请输入6位数字密码");
     return;
   }
@@ -174,8 +184,48 @@ saveWithdrawPwd.addEventListener("click", async () => {
   }
 
   localStorage.setItem("hasWithdrawPwd", "true");
+  setPasswordBtn.textContent = "更新密码";
+  currentUser.withdraw_password = pwd;
   alert("提现密码设置成功！");
   setPasswordModal.style.display = "none";
+});
+
+// ---- 更新密码 ----
+document.getElementById("cancelUpdatePwd").addEventListener("click", () => {
+  updatePasswordModal.style.display = "none";
+});
+
+document.getElementById("saveUpdatePwd").addEventListener("click", async () => {
+  const oldPwd = document.getElementById("oldWithdrawPwd").value;
+  const newPwd = document.getElementById("newWithdrawPwd").value;
+  const confirmNewPwd = document.getElementById("confirmNewWithdrawPwd").value;
+
+  if (oldPwd !== currentUser.withdraw_password) {
+    alert("原密码错误！");
+    return;
+  }
+  if (!/^\d{6}$/.test(newPwd)) {
+    alert("新密码必须是6位数字");
+    return;
+  }
+  if (newPwd !== confirmNewPwd) {
+    alert("两次新密码不一致");
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from("users")
+    .update({ withdraw_password: newPwd })
+    .eq("id", currentUser.id);
+
+  if (error) {
+    alert("更新密码失败：" + error.message);
+    return;
+  }
+
+  currentUser.withdraw_password = newPwd;
+  alert("提现密码更新成功！");
+  updatePasswordModal.style.display = "none";
 });
 
 // ======================
@@ -197,7 +247,7 @@ submitWithdrawFinal.addEventListener("click", async () => {
     return;
   }
 
-  // 模拟保存提现申请，实际你在后端审核
+  // 模拟保存提现申请，实际在后端审核
   const amount = document.getElementById("withdrawAmount").value;
   const address = document.getElementById("walletAddress").value;
 
