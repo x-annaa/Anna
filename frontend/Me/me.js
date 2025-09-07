@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     withdrawModal.style.display = "flex";
   });
 
-  document.getElementById("cancelWithdraw").addEventListener("click", () => withdrawModal.style.display = "none"));
+  document.getElementById("cancelWithdraw").addEventListener("click", () => withdrawModal.style.display = "none");
 
   document.getElementById("confirmWithdraw").addEventListener("click", () => {
     const amount = document.getElementById("withdrawAmount").value;
@@ -187,18 +187,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("cancelDeposit").addEventListener("click", () => depositModal.style.display = "none");
   document.getElementById("cancelTransfer").addEventListener("click", () => transferModal.style.display = "none");
 
-  document.getElementById("submitDepositBtn").addEventListener("click", () => {
+  document.getElementById("submitDepositBtn").addEventListener("click", async () => {
     const amount = parseFloat(document.getElementById("depositAmount").value);
     const fileInput = document.getElementById("proofFile");
+    const desc = document.getElementById("depositDesc").value || "";
 
     if (!amount || amount < 10) return alert("充值金额必须 ≥ 10");
     if (!fileInput.files.length) return alert("请上传转账截图！");
 
-    // 调用后端接口提交充值申请
-    alert("前端验证完成，文件上传和充值申请将由后端处理。");
+    const file = fileInput.files[0];
+    const fileNameSafe = file.name.replace(/\s+/g, "_");
+    const filePath = `User-recharge/proofs/${currentUser.id}_${Date.now()}_${fileNameSafe}`;
+
+    // 这里暂时留给后端接口上传
+    alert("前端上传完成后，将调用后端接口提交充值申请（后端实现后）");
   });
 
-  // ====== 弹窗统一关闭 ======
+  // ====== 事件代理：点击遮罩层或取消按钮关闭弹窗 ======
   window.addEventListener("click", (e) => {
     if (e.target.classList.contains("modal")) e.target.style.display = "none";
     if (e.target.id === "cancelConfirmPwd") document.getElementById("confirmPwdModal").style.display = "none";
