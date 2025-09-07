@@ -11,21 +11,23 @@
   <link rel="stylesheet" href="Order/order.css">
   <link rel="stylesheet" href="Message/message.css">
   <link rel="stylesheet" href="Me/me.css">
+  <!-- css 底部按钮部分 --> 
   <link rel="stylesheet" href="Button/button.css">
 
   <!-- Supabase SDK -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <!-- 全局 Supabase 初始化 -->
   <script src="../supabaseClient.js"></script>
 </head>
 <body>
 
-  <!-- ====================== 首页 ====================== -->
+  <!-- 首页 -->
   <div id="homePage" class="page active">🏠 HOME</div>
 
-  <!-- ====================== 信息页面 ====================== -->
+  <!-- 信息页面 -->
   <div id="infoPage" class="page">💬 MESSAGE</div>
 
-  <!-- ====================== 订单页面 ====================== -->
+  <!-- 订单页面 -->
   <div id="orderPage" class="page">
     <div class="order-header">
       <h2>📦 ORDER</h2>
@@ -61,10 +63,10 @@
     </div>
   </div>
 
-  <!-- ====================== 关于我们 ====================== -->
+  <!-- 关于我们 -->
   <div id="msgPage" class="page">ℹ️ 关于我们</div>
 
-  <!-- ====================== 我的页面 ====================== -->
+  <!-- 我的页面 -->
   <div id="myPage" class="page">
     <h2>👤 我的页面</h2>
 
@@ -88,9 +90,7 @@
     </div>
   </div>
 
-  <!-- ====================== 弹窗部分 ====================== -->
-
-  <!-- Logout -->
+  <!-- Logout 确认弹窗 -->
   <div id="logoutModal" class="modal">
     <div class="modal-content">
       <p>确定要退出吗？</p>
@@ -114,7 +114,7 @@
     </div>
   </div>
 
-  <!-- 设置/更新提现密码 -->
+  <!-- 设置密码窗口 -->
   <div id="setPasswordModal" class="modal">
     <div class="modal-content">
       <h3>设置提现密码</h3>
@@ -127,6 +127,7 @@
     </div>
   </div>
 
+  <!-- 更新密码窗口 -->
   <div id="updatePasswordModal" class="modal">
     <div class="modal-content">
       <h3>更改提现密码</h3>
@@ -140,6 +141,7 @@
     </div>
   </div>
 
+  <!-- 确认提现密码窗口 -->
   <div id="confirmPwdModal" class="modal">
     <div class="modal-content">
       <h3>输入提现密码</h3>
@@ -151,46 +153,7 @@
     </div>
   </div>
 
-  <!-- 充值窗口 -->
-  <div id="depositModal" class="modal">
-    <div class="modal-content">
-      <h3>充值（USDT-Payment）</h3>
-
-      <p><strong>网络协议：</strong></p>
-      <button class="network-btn" data-network="TRC20">TRC20</button>
-      <button class="network-btn" data-network="ERC20">ERC20</button>
-
-      <div class="deposit-info">
-        <img id="depositQr" src="" alt="收款二维码" style="width:150px;height:150px;" />
-        <p>最小充值金额：10.00 USDT</p>
-        <p>钱包地址：<span id="depositAddress">请选择网络</span></p>
-        <button id="copyAddressBtn">复制钱包地址</button>
-        <button id="downloadQrBtn">下载二维码</button>
-      </div>
-
-      <div class="modal-actions">
-        <button id="cancelDeposit">取消</button>
-        <button id="goTransferBtn">转账</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 转账提交窗口 -->
-  <div id="transferModal" class="modal">
-    <div class="modal-content">
-      <h3>提交充值申请</h3>
-      <input type="number" id="depositAmount" min="10" placeholder="输入充值金额 (≥10 USDT)" />
-      <input type="file" id="proofFile" accept="image/*" />
-      <textarea id="depositDesc" placeholder="备注（可选）"></textarea>
-
-      <div class="modal-actions">
-        <button id="cancelTransfer">取消</button>
-        <button id="submitDepositBtn">提交</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ====================== 底部导航栏 ====================== -->
+  <!-- 底部导航栏 -->
   <div class="bottom-nav">
     <button data-page="homePage" class="active">Home</button>
     <button data-page="infoPage">Message</button>
@@ -199,13 +162,13 @@
     <button data-page="myPage">Me</button>
   </div>
 
-  <!-- ====================== JS 部分 ====================== -->
+  <!-- JS 部分 --> 
   <script src="Home/home.js"></script>
   <script src="Message/message.js"></script>
   <script src="Order/order.js"></script>
   <script src="About/about.js"></script>
   <script src="Me/me.js"></script>
   <script src="Button/button.js"></script>
-
+  
 </body>
 </html>
