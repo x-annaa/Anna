@@ -350,7 +350,7 @@ document.getElementById("submitDepositBtn").addEventListener("click", async () =
   }
 
   const { data: publicUrl } = supabaseClient.storage
-    .from("deposits")
+    .from("Photos/User-recharge")
     .getPublicUrl(filePath);
 
   // 插入数据库
