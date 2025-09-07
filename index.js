@@ -6,12 +6,46 @@ window.togglePassword = function (id, el) {
   if (!input) return;
   if (input.type === "password") {
     input.type = "text";
-    el.textContent = "🙈"; // 显示密码时的图标
+    el.textContent = "🙈";
   } else {
     input.type = "password";
-    el.textContent = "👁️"; // 隐藏密码时的图标
+    el.textContent = "👁️";
   }
 };
+
+// =======================
+// 登录 / 注册 Tab 切换
+// =======================
+const loginForm = document.getElementById("loginForm");
+const registerForm = document.getElementById("registerForm");
+const showLoginBtn = document.getElementById("showLogin");
+const showRegisterBtn = document.getElementById("showRegister");
+
+showLoginBtn.addEventListener("click", () => {
+  loginForm.classList.remove("hidden");
+  registerForm.classList.add("hidden");
+  showLoginBtn.classList.add("active");
+  showRegisterBtn.classList.remove("active");
+});
+
+showRegisterBtn.addEventListener("click", () => {
+  loginForm.classList.add("hidden");
+  registerForm.classList.remove("hidden");
+  showLoginBtn.classList.remove("active");
+  showRegisterBtn.classList.add("active");
+});
+
+// =======================
+// 生成随机平台账号（2位大写字母 + 4位数字，如 AB1234）
+// =======================
+function generatePlatformAccount() {
+  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const numbers = "0123456789";
+  let acc = "";
+  for (let i = 0; i < 2; i++) acc += letters[Math.floor(Math.random() * letters.length)];
+  for (let i = 0; i < 4; i++) acc += numbers[Math.floor(Math.random() * numbers.length)];
+  return acc;
+}
 
 // =======================
 // 注册逻辑
@@ -22,14 +56,8 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   const confirm = document.getElementById("regConfirmPassword").value;
   const agree = document.getElementById("agreeTerms").checked;
 
-  // 用户名长度限制
-  if (!username || username.length < 3 || username.length > 15) {
-    alert("用户名必须为3到15个字符");
-    return;
-  }
-
-  if (!password) {
-    alert("请输入密码");
+  if (!username || !password) {
+    alert("请输入用户名和密码");
     return;
   }
   if (password !== confirm) {
@@ -53,7 +81,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  // 生成平台账号（随机字母+数字混合6位）
+  // 生成平台账号
   const platformAccount = generatePlatformAccount();
 
   // 插入新用户
@@ -83,18 +111,6 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   alert("注册成功！");
   window.location.href = "frontend/HOME.html";
 });
-
-// =======================
-// 生成随机平台账号（6位字母+数字混合）
-// =======================
-function generatePlatformAccount() {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let acc = "";
-  for (let i = 0; i < 6; i++) {
-    acc += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return acc;
-}
 
 // =======================
 // 登录逻辑
