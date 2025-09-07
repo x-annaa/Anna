@@ -265,11 +265,11 @@ const transferModal = document.getElementById("transferModal");
 let currentNetwork = null;
 const networkConfig = {
   TRC20: {
-    qr: "你的TRC20收款二维码URL",
+    qr: "https://ffdrwsemmfvqlqhyjlnb.supabase.co/storage/v1/object/public/Photos/USDTQR/images%20(1).png",
     address: "TX6aSYyGVTf1NsXWzY3kUC9pTQP111111"
   },
   ERC20: {
-    qr: "你的ERC20收款二维码URL",
+    qr: "https://ffdrwsemmfvqlqhyjlnb.supabase.co/storage/v1/object/public/Photos/USDTQR/images%20(2).png",
     address: "0x1111111111111111111111111111111111111111"
   }
 };
