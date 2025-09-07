@@ -153,6 +153,54 @@
     </div>
   </div>
 
+  <!-- 充值窗口 -->
+  <div id="depositModal" class="modal">
+    <div class="modal-content">
+      <h3>充值</h3>
+      <p><strong>充值方式：</strong>USDT-Payment</p>
+      <p><strong>网络协议：</strong>TRC20 / ERC20</p>
+      <p><strong>扫码或使用以下地址完成存款：</strong></p>
+      
+      <!-- 收款二维码 -->
+      <img src="你的收款二维码URL" alt="收款二维码" class="qr-code" />
+      <a id="downloadQr" href="你的收款二维码URL" download="usdt_qr.png">下载二维码</a>
+      
+      <p><strong>最小充值金额：</strong>10.00 USDT</p>
+      <p>
+        <strong>钱包地址：</strong>
+        <span id="depositWallet">TX6aSYyGVTf1NsXWzY3kUC9pTQP111111</span>
+        <button id="copyWallet">复制</button>
+      </p>
+
+      <div class="modal-actions">
+        <button id="cancelDeposit">取消</button>
+        <button id="confirmDeposit">转账</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 转账窗口 -->
+  <div id="transferModal" class="modal">
+    <div class="modal-content">
+      <h3>提交转账信息</h3>
+      <input type="number" id="transferAmount" min="10" placeholder="输入充值金额 (≥10 USDT)" />
+      
+      <!-- 上传转账截图 -->
+      <div class="upload-box">
+        <label for="transferProof" class="upload-label">+ 上传转账截图</label>
+        <input type="file" id="transferProof" accept="image/*" style="display:none;" />
+      </div>
+      
+      <!-- 可选描述 -->
+      <textarea id="transferDesc" placeholder="备注（可选）"></textarea>
+
+      <div class="modal-actions">
+        <button id="cancelTransfer">取消</button>
+        <button id="submitTransfer">提交</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 底部导航栏 -->
   <div class="bottom-nav">
     <button data-page="homePage" class="active">Home</button>
