@@ -1,6 +1,4 @@
-// =======================
-// 密码可见切换
-// =======================
+// 密码可见切换 // 
 window.togglePassword = function (id, el) {
   const input = document.getElementById(id);
   if (!input) return;
@@ -13,9 +11,8 @@ window.togglePassword = function (id, el) {
   }
 };
 
-// =======================
-// 登录 / 注册 Tab 切换
-// =======================
+
+// 登录 / 注册 Tab 切换 // 
 const loginForm = document.getElementById("loginForm");
 const registerForm = document.getElementById("registerForm");
 const showLoginBtn = document.getElementById("showLogin");
@@ -35,21 +32,28 @@ showRegisterBtn.addEventListener("click", () => {
   showRegisterBtn.classList.add("active");
 });
 
-// =======================
-// 生成随机平台账号（2位大写字母 + 4位数字，如 AB1234）
-// =======================
-function generatePlatformAccount() {
-  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  const numbers = "0123456789";
-  let acc = "";
-  for (let i = 0; i < 2; i++) acc += letters[Math.floor(Math.random() * letters.length)];
-  for (let i = 0; i < 4; i++) acc += numbers[Math.floor(Math.random() * numbers.length)];
-  return acc;
+// 生成唯一随机平台账号（6位字母+数字混合）// 
+async function generateUniquePlatformAccount() {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+  while (true) {
+    let acc = "";
+    for (let i = 0; i < 6; i++) {
+      acc += chars[Math.floor(Math.random() * chars.length)];
+    }
+
+    // 检查数据库是否已有该平台账号
+    const { data: exist } = await supabaseClient
+      .from("users")
+      .select("id")
+      .eq("platform_account", acc)
+      .maybeSingle();
+
+    if (!exist) return acc;
+  }
 }
 
-// =======================
-// 注册逻辑
-// =======================
+// 注册逻辑 // 
 document.getElementById("registerBtn").addEventListener("click", async () => {
   const username = document.getElementById("regUsername").value.trim();
   const password = document.getElementById("regPassword").value;
@@ -69,7 +73,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  // 检查是否已有用户
+  // 检查是否已有用户 // 
   const { data: exist } = await supabaseClient
     .from("users")
     .select("id")
@@ -81,10 +85,10 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  // 生成平台账号
-  const platformAccount = generatePlatformAccount();
+  // 生成唯一平台账号 // 
+  const platformAccount = await generateUniquePlatformAccount();
 
-  // 插入新用户
+  // 插入新用户 // 
   const { data, error } = await supabaseClient
     .from("users")
     .insert({
@@ -103,7 +107,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  // 保存到 localStorage
+  // 保存到 localStorage // 
   localStorage.setItem("currentUserId", data.id);
   localStorage.setItem("currentUser", data.username);
   localStorage.setItem("platformAccount", data.platform_account);
@@ -112,9 +116,8 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   window.location.href = "frontend/HOME.html";
 });
 
-// =======================
-// 登录逻辑
-// =======================
+
+// 登录逻辑 // 
 document.getElementById("loginBtn").addEventListener("click", async () => {
   const username = document.getElementById("loginUsername").value.trim();
   const password = document.getElementById("loginPassword").value;
@@ -143,7 +146,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     return;
   }
 
-  // 保存到 localStorage
+  // 保存到 localStorage // 
   localStorage.setItem("currentUserId", data.id);
   localStorage.setItem("currentUser", data.username);
   localStorage.setItem("platformAccount", data.platform_account);
