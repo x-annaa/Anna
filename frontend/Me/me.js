@@ -264,7 +264,6 @@ const transferModal = document.getElementById("transferModal");
 
 let currentNetwork = null;
 
-// 配置二维码和钱包地址
 const networkConfig = {
   TRC20: {
     qr: "https://ffdrwsemmfvqlqhyjlnb.supabase.co/storage/v1/object/public/Photos/USDTQR/images%20(1).png",
@@ -277,9 +276,7 @@ const networkConfig = {
 };
 
 // 打开充值窗口
-depositBtn.addEventListener("click", () => {
-  depositModal.style.display = "flex";
-});
+depositBtn.addEventListener("click", () => depositModal.style.display = "flex");
 
 // 切换网络协议
 document.querySelectorAll(".network-btn").forEach(btn => {
@@ -291,7 +288,7 @@ document.querySelectorAll(".network-btn").forEach(btn => {
   });
 });
 
-// 复制钱包地址
+// 复制地址
 document.getElementById("copyAddressBtn").addEventListener("click", () => {
   const addr = document.getElementById("depositAddress").textContent;
   navigator.clipboard.writeText(addr).then(() => alert("已复制钱包地址"));
@@ -306,23 +303,16 @@ document.getElementById("downloadQrBtn").addEventListener("click", () => {
   link.click();
 });
 
-// 点击转账 → 打开提交窗口
+// 打开转账上传窗口
 document.getElementById("goTransferBtn").addEventListener("click", () => {
-  if (!currentNetwork) {
-    alert("请先选择网络协议");
-    return;
-  }
+  if (!currentNetwork) return alert("请先选择网络协议");
   depositModal.style.display = "none";
   transferModal.style.display = "flex";
 });
 
 // 取消按钮
-document.getElementById("cancelDeposit").addEventListener("click", () => {
-  depositModal.style.display = "none";
-});
-document.getElementById("cancelTransfer").addEventListener("click", () => {
-  transferModal.style.display = "none";
-});
+document.getElementById("cancelDeposit").addEventListener("click", () => depositModal.style.display = "none");
+document.getElementById("cancelTransfer").addEventListener("click", () => transferModal.style.display = "none");
 
 // 提交充值申请
 document.getElementById("submitDepositBtn").addEventListener("click", async () => {
@@ -330,28 +320,21 @@ document.getElementById("submitDepositBtn").addEventListener("click", async () =
   const fileInput = document.getElementById("proofFile");
   const desc = document.getElementById("depositDesc").value || "";
 
-  if (!amount || amount < 10) {
-    alert("充值金额必须 ≥ 10");
-    return;
-  }
-  if (!fileInput.files.length) {
-    alert("请上传转账截图！");
-    return;
-  }
+  if (!amount || amount < 10) return alert("充值金额必须 ≥ 10");
+  if (!fileInput.files.length) return alert("请上传转账截图！");
 
   const file = fileInput.files[0];
   const filePath = `proofs/${currentUser.id}_${Date.now()}_${file.name}`;
 
   try {
-    // 上传到 Supabase Storage
+    // 上传到 Supabase Storage (Public bucket)
     const { data, error: uploadError } = await supabaseClient.storage
-      .from("Photos/User-recharge")   // bucket 名必须一致
+      .from("Photos/User-recharge")
       .upload(filePath, file, { upsert: false });
 
     if (uploadError) {
       console.error(uploadError);
-      alert("图片上传失败：" + uploadError.message);
-      return;
+      return alert("图片上传失败：" + uploadError.message);
     }
 
     // 获取公开 URL
@@ -364,16 +347,13 @@ document.getElementById("submitDepositBtn").addEventListener("click", async () =
       .from("deposits")
       .insert([{
         user_id: currentUser.id,
-        amount: amount,
+        amount,
         proof_url: publicUrl.publicUrl,
         description: desc,
         status: "pending"
       }]);
 
-    if (error) {
-      alert("提交充值申请失败：" + error.message);
-      return;
-    }
+    if (error) return alert("提交充值申请失败：" + error.message);
 
     alert("充值申请已提交，等待后台审核！");
     transferModal.style.display = "none";
@@ -387,3 +367,5 @@ document.getElementById("submitDepositBtn").addEventListener("click", async () =
     alert("充值操作异常，请稍后再试！");
   }
 });
+
+
