@@ -188,6 +188,85 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("balance").textContent = currentUser.balance.toFixed(2);
   });
 
+  // ====== 充值逻辑 ======
+  const depositBtn = document.getElementById("depositBtn");
+  const depositModal = document.getElementById("depositModal");
+  const transferModal = document.getElementById("transferModal");
+
+  depositBtn.addEventListener("click", () => {
+    depositModal.style.display = "flex";
+  });
+
+  document.getElementById("copyWallet").addEventListener("click", () => {
+    const wallet = document.getElementById("depositWallet").textContent;
+    navigator.clipboard.writeText(wallet).then(() => {
+      alert("钱包地址已复制！");
+    });
+  });
+
+  document.getElementById("cancelDeposit").addEventListener("click", () => {
+    depositModal.style.display = "none";
+  });
+
+  document.getElementById("confirmDeposit").addEventListener("click", () => {
+    depositModal.style.display = "none";
+    transferModal.style.display = "flex";
+  });
+
+  document.getElementById("cancelTransfer").addEventListener("click", () => {
+    transferModal.style.display = "none";
+  });
+
+  document.getElementById("submitTransfer").addEventListener("click", async () => {
+    const amount = parseFloat(document.getElementById("transferAmount").value);
+    const proofFile = document.getElementById("transferProof").files[0];
+    const desc = document.getElementById("transferDesc").value;
+
+    if (!amount || amount < 10) {
+      alert("充值金额必须 ≥ 10 USDT");
+      return;
+    }
+    if (!proofFile) {
+      alert("请上传转账截图！");
+      return;
+    }
+
+    // 上传图片到 Supabase Storage
+    const fileExt = proofFile.name.split('.').pop();
+    const filePath = `${currentUser.id}/${Date.now()}.${fileExt}`;
+    let { error: uploadError } = await supabaseClient.storage
+      .from("deposit-proofs")
+      .upload(filePath, proofFile);
+
+    if (uploadError) {
+      alert("上传失败：" + uploadError.message);
+      return;
+    }
+
+    const { data: { publicUrl } } = supabaseClient.storage
+      .from("deposit-proofs")
+      .getPublicUrl(filePath);
+
+    // 写入数据库
+    const { error } = await supabaseClient
+      .from("deposits")
+      .insert([{
+        user_id: currentUser.id,
+        amount: amount,
+        proof_url: publicUrl,
+        description: desc,
+        status: "pending"
+      }]);
+
+    if (error) {
+      alert("提交失败：" + error.message);
+      return;
+    }
+
+    alert("充值申请已提交，等待后台审核！");
+    transferModal.style.display = "none";
+  });
+
   // ====== 事件代理：点击取消按钮或遮罩层关闭弹窗 ======
   window.addEventListener("click", (e) => {
     if (e.target.classList.contains("modal")) {
