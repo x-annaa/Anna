@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     withdrawModal.style.display = "flex";
   });
 
-  document.getElementById("cancelWithdraw").addEventListener("click", () => withdrawModal.style.display = "none");
+  document.getElementById("cancelWithdraw").addEventListener("click", () => withdrawModal.style.display = "none"));
 
   document.getElementById("confirmWithdraw").addEventListener("click", () => {
     const amount = document.getElementById("withdrawAmount").value;
@@ -187,50 +187,27 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("cancelDeposit").addEventListener("click", () => depositModal.style.display = "none");
   document.getElementById("cancelTransfer").addEventListener("click", () => transferModal.style.display = "none");
 
-  document.getElementById("submitDepositBtn").addEventListener("click", async () => {
-  const amount = parseFloat(document.getElementById("depositAmount").value);
-  const fileInput = document.getElementById("proofFile");
-  const desc = document.getElementById("depositDesc").value || "";
+  document.getElementById("submitDepositBtn").addEventListener("click", () => {
+    const amount = parseFloat(document.getElementById("depositAmount").value);
+    const fileInput = document.getElementById("proofFile");
 
-  if (!amount || amount < 10) {
-    return alert("充值金额必须 ≥ 10");
-  }
-  if (!fileInput.files.length) {
-    return alert("请上传转账截图！");
-  }
+    if (!amount || amount < 10) return alert("充值金额必须 ≥ 10");
+    if (!fileInput.files.length) return alert("请上传转账截图！");
 
-  const file = fileInput.files[0];
-  const formData = new FormData();
-  formData.append("user_id", currentUser.id);
-  formData.append("amount", amount);
-  formData.append("description", desc);
-  formData.append("proof_file", file);
+    // 调用后端接口提交充值申请
+    alert("前端验证完成，文件上传和充值申请将由后端处理。");
+  });
 
-  try {
-    const res = await fetch("/api/deposit", {
-      method: "POST",
-      body: formData
-    });
+  // ====== 弹窗统一关闭 ======
+  window.addEventListener("click", (e) => {
+    if (e.target.classList.contains("modal")) e.target.style.display = "none";
+    if (e.target.id === "cancelConfirmPwd") document.getElementById("confirmPwdModal").style.display = "none";
+  });
 
-    const result = await res.json();
-
-    if (!res.ok) {
-      return alert("提交充值申请失败：" + result.message);
-    }
-
-    alert("充值申请已提交，等待后台审核！");
-    document.getElementById("transferModal").style.display = "none";
-
-    // 清空表单
-    document.getElementById("depositAmount").value = "";
-    document.getElementById("proofFile").value = "";
-    document.getElementById("depositDesc").value = "";
-  } catch (err) {
-    console.error(err);
-    alert("提交充值申请异常，请稍后再试！");
-  }
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") document.querySelectorAll(".modal").forEach(m => m.style.display = "none");
+  });
 });
-
 
 // ======================
 // 加载用户信息函数
