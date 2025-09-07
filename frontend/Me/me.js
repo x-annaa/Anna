@@ -2,7 +2,6 @@
 // 当前登录用户
 // ======================
 let currentUser = null;
-let currentNetwork = null;
 
 // ======================
 // 页面初始化
@@ -22,8 +21,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   const cancelLogout = document.getElementById("cancelLogout");
   const confirmLogout = document.getElementById("confirmLogout");
 
-  logoutBtn.addEventListener("click", () => logoutModal.style.display = "flex");
-  cancelLogout.addEventListener("click", () => logoutModal.style.display = "none");
+  logoutBtn.addEventListener("click", () => {
+    logoutModal.style.display = "flex";
+  });
+
+  cancelLogout.addEventListener("click", () => {
+    logoutModal.style.display = "none";
+  });
+
   confirmLogout.addEventListener("click", () => {
     localStorage.removeItem("currentUser");
     localStorage.removeItem("currentUserId");
@@ -39,10 +44,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   withdrawBtn.addEventListener("click", () => {
     withdrawBalance.textContent = document.getElementById("balance").textContent;
     withdrawModal.style.display = "flex";
-  });
-
-  document.getElementById("cancelWithdraw").addEventListener("click", () => {
-    withdrawModal.style.display = "none";
   });
 
   document.getElementById("confirmWithdraw").addEventListener("click", () => {
@@ -61,30 +62,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  document.getElementById("submitWithdrawFinal").addEventListener("click", async () => {
-    const inputPwd = document.getElementById("inputWithdrawPwd").value;
-    const amount = parseFloat(document.getElementById("withdrawAmount").value);
-    const address = document.getElementById("walletAddress").value;
-
-    if (inputPwd !== currentUser.withdraw_password) return alert("密码错误！");
-    if (!amount || amount < 10) return alert("提现金额必须 ≥ 10");
-    if (!address) return alert("请输入钱包地址");
-    if (amount > Number(currentUser.balance)) return alert("余额不足");
-
-    const { error } = await supabaseClient.from("withdrawals")
-      .insert([{ user_id: currentUser.id, amount, wallet_address: address, status: "pending" }]);
-
-    if (error) return alert("提现申请失败：" + error.message);
-
-    alert("提现申请已提交，等待后台审核！");
-    withdrawModal.style.display = "none";
-    document.getElementById("confirmPwdModal").style.display = "none";
-
-    currentUser.balance -= amount;
-    document.getElementById("balance").textContent = currentUser.balance.toFixed(2);
-  });
-
-  // ====== 提现密码设置/更新 ======
+  // ====== 设置/更新提现密码 ======
   const setPasswordBtn = document.getElementById("setPasswordBtn");
   const setPasswordModal = document.getElementById("setPasswordModal");
   const updatePasswordModal = document.getElementById("updatePasswordModal");
@@ -97,18 +75,29 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
+  // ---- 设置密码 ----
   document.getElementById("saveWithdrawPwd").addEventListener("click", async () => {
     const pwd = document.getElementById("withdrawPwd").value;
     const confirmPwd = document.getElementById("confirmWithdrawPwd").value;
 
-    if (!/^\d{6}$/.test(pwd)) return alert("请输入6位数字密码");
-    if (pwd !== confirmPwd) return alert("两次输入的密码不一致");
+    if (!/^\d{6}$/.test(pwd)) {
+      alert("请输入6位数字密码");
+      return;
+    }
+    if (pwd !== confirmPwd) {
+      alert("两次输入的密码不一致");
+      return;
+    }
 
-    const { error } = await supabaseClient.from("users")
+    const { error } = await supabaseClient
+      .from("users")
       .update({ withdraw_password: pwd })
       .eq("id", currentUser.id);
 
-    if (error) return alert("保存密码失败：" + error.message);
+    if (error) {
+      alert("保存密码失败：" + error.message);
+      return;
+    }
 
     localStorage.setItem("hasWithdrawPwd", "true");
     setPasswordBtn.textContent = "更新密码";
@@ -117,121 +106,110 @@ document.addEventListener("DOMContentLoaded", async () => {
     setPasswordModal.style.display = "none";
   });
 
-  document.getElementById("cancelSetPwd").addEventListener("click", () => setPasswordModal.style.display = "none");
+  document.getElementById("cancelSetPwd").addEventListener("click", () => {
+    setPasswordModal.style.display = "none";
+  });
 
+  // ---- 更新密码 ----
   document.getElementById("saveUpdatePwd").addEventListener("click", async () => {
     const oldPwd = document.getElementById("oldWithdrawPwd").value;
     const newPwd = document.getElementById("newWithdrawPwd").value;
     const confirmNewPwd = document.getElementById("confirmNewWithdrawPwd").value;
 
-    if (oldPwd !== currentUser.withdraw_password) return alert("原密码错误！");
-    if (!/^\d{6}$/.test(newPwd)) return alert("新密码必须是6位数字");
-    if (newPwd !== confirmNewPwd) return alert("两次新密码不一致");
+    if (oldPwd !== currentUser.withdraw_password) {
+      alert("原密码错误！");
+      return;
+    }
+    if (!/^\d{6}$/.test(newPwd)) {
+      alert("新密码必须是6位数字");
+      return;
+    }
+    if (newPwd !== confirmNewPwd) {
+      alert("两次新密码不一致");
+      return;
+    }
 
-    const { error } = await supabaseClient.from("users")
+    const { error } = await supabaseClient
+      .from("users")
       .update({ withdraw_password: newPwd })
       .eq("id", currentUser.id);
 
-    if (error) return alert("更新密码失败：" + error.message);
+    if (error) {
+      alert("更新密码失败：" + error.message);
+      return;
+    }
 
     currentUser.withdraw_password = newPwd;
     alert("提现密码更新成功！");
     updatePasswordModal.style.display = "none";
   });
 
-  document.getElementById("cancelUpdatePwd").addEventListener("click", () => updatePasswordModal.style.display = "none");
+  document.getElementById("cancelUpdatePwd").addEventListener("click", () => {
+    updatePasswordModal.style.display = "none";
+  });
 
-  // ====== 充值逻辑 ======
-  const depositBtn = document.getElementById("depositBtn");
-  const depositModal = document.getElementById("depositModal");
-  const transferModal = document.getElementById("transferModal");
+  // ---- 确认提现密码 & 提交申请 ----
+  document.getElementById("submitWithdrawFinal").addEventListener("click", async () => {
+    const inputPwd = document.getElementById("inputWithdrawPwd").value;
 
-  const networkConfig = {
-    TRC20: {
-      qr: "https://ffdrwsemmfvqlqhyjlnb.supabase.co/storage/v1/object/public/Photos/USDTQR/images%20(1).png",
-      address: "TX6aSYyGVTf1NsXWzY3kUC9pTQP111111"
-    },
-    ERC20: {
-      qr: "https://ffdrwsemmfvqlqhyjlnb.supabase.co/storage/v1/object/public/Photos/USDTQR/images%20(2).png",
-      address: "0x1111111111111111111111111111111111111111"
+    if (inputPwd !== currentUser.withdraw_password) {
+      alert("密码错误！");
+      return;
     }
-  };
 
-  depositBtn.addEventListener("click", () => depositModal.style.display = "flex");
+    const amount = parseFloat(document.getElementById("withdrawAmount").value);
+    const address = document.getElementById("walletAddress").value;
 
-  document.querySelectorAll(".network-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      currentNetwork = btn.dataset.network;
-      document.getElementById("depositQr").src = networkConfig[currentNetwork].qr;
-      document.getElementById("depositAddress").textContent = networkConfig[currentNetwork].address;
-    });
-  });
-
-  document.getElementById("copyAddressBtn").addEventListener("click", () => {
-    navigator.clipboard.writeText(document.getElementById("depositAddress").textContent)
-      .then(() => alert("已复制钱包地址"));
-  });
-
-  document.getElementById("downloadQrBtn").addEventListener("click", () => {
-    if (!currentNetwork) return alert("请先选择网络协议");
-    const link = document.createElement("a");
-    link.href = networkConfig[currentNetwork].qr;
-    link.download = currentNetwork + "-qr.png";
-    link.click();
-  });
-
-  document.getElementById("goTransferBtn").addEventListener("click", () => {
-    if (!currentNetwork) return alert("请先选择网络协议");
-    depositModal.style.display = "none";
-    transferModal.style.display = "flex";
-  });
-
-  document.getElementById("cancelDeposit").addEventListener("click", () => depositModal.style.display = "none");
-  document.getElementById("cancelTransfer").addEventListener("click", () => transferModal.style.display = "none");
-
-  document.getElementById("submitDepositBtn").addEventListener("click", async () => {
-    const amount = parseFloat(document.getElementById("depositAmount").value);
-    const fileInput = document.getElementById("proofFile");
-    const desc = document.getElementById("depositDesc").value || "";
-
-    if (!amount || amount < 10) return alert("充值金额必须 ≥ 10");
-    if (!fileInput.files.length) return alert("请上传转账截图！");
-    if (!currentNetwork) return alert("请选择网络协议");
-
-    const file = fileInput.files[0];
-    const formData = new FormData();
-    formData.append("amount", amount);
-    formData.append("network", currentNetwork);
-    formData.append("description", desc);
-    formData.append("proof", file);
-    formData.append("user_id", currentUser.id);
-
-    try {
-      const res = await fetch("/api/deposit", {
-        method: "POST",
-        body: formData
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert("充值提交成功！");
-        depositModal.style.display = "none";
-      } else {
-        alert("提交失败：" + data.message);
-      }
-    } catch (err) {
-      console.error(err);
-      alert("提交失败");
+    if (!amount || amount < 10) {
+      alert("提现金额必须 ≥ 10");
+      return;
     }
+    if (!address) {
+      alert("请输入钱包地址");
+      return;
+    }
+    if (amount > Number(currentUser.balance)) {
+      alert("余额不足");
+      return;
+    }
+
+    const { error } = await supabaseClient
+      .from("withdrawals")
+      .insert([{
+        user_id: currentUser.id,
+        amount: amount,
+        wallet_address: address,
+        status: "pending"
+      }]);
+
+    if (error) {
+      alert("提现申请失败：" + error.message);
+      return;
+    }
+
+    alert("提现申请已提交，等待后台审核！");
+
+    withdrawModal.style.display = "none";
+    document.getElementById("confirmPwdModal").style.display = "none";
+
+    currentUser.balance -= amount;
+    document.getElementById("balance").textContent = currentUser.balance.toFixed(2);
   });
 
-  // ====== 弹窗统一关闭逻辑 ======
+  // ====== 事件代理：点击遮罩层或取消按钮关闭弹窗 ======
   window.addEventListener("click", (e) => {
-    if (e.target.classList.contains("modal")) e.target.style.display = "none";
-    if (e.target.id === "cancelConfirmPwd") document.getElementById("confirmPwdModal").style.display = "none";
+    if (e.target.classList.contains("modal")) {
+      e.target.style.display = "none";
+    }
+    if (e.target.id === "cancelConfirmPwd") {
+      document.getElementById("confirmPwdModal").style.display = "none";
+    }
   });
 
   window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") document.querySelectorAll(".modal").forEach(m => m.style.display = "none");
+    if (e.key === "Escape") {
+      document.querySelectorAll(".modal").forEach((m) => (m.style.display = "none"));
+    }
   });
 });
 
@@ -256,6 +234,7 @@ async function loadUserInfo(username) {
     }
 
     currentUser = data;
+
     document.getElementById("username").textContent = data.username || "未知";
     document.getElementById("platformAccount").textContent = data.platform_account || "未知";
     document.getElementById("balance").textContent = (Number(data.balance) || 0).toFixed(2);
