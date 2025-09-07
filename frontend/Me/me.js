@@ -329,7 +329,7 @@ document.getElementById("submitDepositBtn").addEventListener("click", async () =
   try {
     // 上传到 Supabase Storage (Public bucket)
     const { data, error: uploadError } = await supabaseClient.storage
-      .from("Photos/User-recharge")
+      .from("Photos")
       .upload(filePath, file, { upsert: false });
 
     if (uploadError) {
@@ -339,7 +339,7 @@ document.getElementById("submitDepositBtn").addEventListener("click", async () =
 
     // 获取公开 URL
     const { data: publicUrl } = supabaseClient.storage
-      .from("Photos/User-recharge")
+      .from("Photos")
       .getPublicUrl(filePath);
 
     // 插入数据库 deposits 表
