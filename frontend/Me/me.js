@@ -61,7 +61,30 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // ====== 设置/更新提现密码 ======
+  document.getElementById("submitWithdrawFinal").addEventListener("click", async () => {
+    const inputPwd = document.getElementById("inputWithdrawPwd").value;
+    const amount = parseFloat(document.getElementById("withdrawAmount").value);
+    const address = document.getElementById("walletAddress").value;
+
+    if (inputPwd !== currentUser.withdraw_password) return alert("密码错误！");
+    if (!amount || amount < 10) return alert("提现金额必须 ≥ 10");
+    if (!address) return alert("请输入钱包地址");
+    if (amount > Number(currentUser.balance)) return alert("余额不足");
+
+    const { error } = await supabaseClient.from("withdrawals")
+      .insert([{ user_id: currentUser.id, amount, wallet_address: address, status: "pending" }]);
+
+    if (error) return alert("提现申请失败：" + error.message);
+
+    alert("提现申请已提交，等待后台审核！");
+    withdrawModal.style.display = "none";
+    document.getElementById("confirmPwdModal").style.display = "none";
+
+    currentUser.balance -= amount;
+    document.getElementById("balance").textContent = currentUser.balance.toFixed(2);
+  });
+
+  // ====== 提现密码设置/更新 ======
   const setPasswordBtn = document.getElementById("setPasswordBtn");
   const setPasswordModal = document.getElementById("setPasswordModal");
   const updatePasswordModal = document.getElementById("updatePasswordModal");
@@ -118,29 +141,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   document.getElementById("cancelUpdatePwd").addEventListener("click", () => updatePasswordModal.style.display = "none");
 
-  document.getElementById("submitWithdrawFinal").addEventListener("click", async () => {
-    const inputPwd = document.getElementById("inputWithdrawPwd").value;
-    const amount = parseFloat(document.getElementById("withdrawAmount").value);
-    const address = document.getElementById("walletAddress").value;
-
-    if (inputPwd !== currentUser.withdraw_password) return alert("密码错误！");
-    if (!amount || amount < 10) return alert("提现金额必须 ≥ 10");
-    if (!address) return alert("请输入钱包地址");
-    if (amount > Number(currentUser.balance)) return alert("余额不足");
-
-    const { error } = await supabaseClient.from("withdrawals")
-      .insert([{ user_id: currentUser.id, amount, wallet_address: address, status: "pending" }]);
-
-    if (error) return alert("提现申请失败：" + error.message);
-
-    alert("提现申请已提交，等待后台审核！");
-    withdrawModal.style.display = "none";
-    document.getElementById("confirmPwdModal").style.display = "none";
-
-    currentUser.balance -= amount;
-    document.getElementById("balance").textContent = currentUser.balance.toFixed(2);
-  });
-
   // ====== 充值逻辑 ======
   const depositBtn = document.getElementById("depositBtn");
   const depositModal = document.getElementById("depositModal");
@@ -189,15 +189,39 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("cancelDeposit").addEventListener("click", () => depositModal.style.display = "none");
   document.getElementById("cancelTransfer").addEventListener("click", () => transferModal.style.display = "none");
 
-  document.getElementById("submitDepositBtn").addEventListener("click", () => {
+  document.getElementById("submitDepositBtn").addEventListener("click", async () => {
     const amount = parseFloat(document.getElementById("depositAmount").value);
     const fileInput = document.getElementById("proofFile");
+    const desc = document.getElementById("depositDesc").value || "";
 
     if (!amount || amount < 10) return alert("充值金额必须 ≥ 10");
     if (!fileInput.files.length) return alert("请上传转账截图！");
+    if (!currentNetwork) return alert("请选择网络协议");
 
-    // 调用后端接口提交充值申请
-    alert("前端验证完成，文件上传和充值申请将由后端处理。");
+    const file = fileInput.files[0];
+    const formData = new FormData();
+    formData.append("amount", amount);
+    formData.append("network", currentNetwork);
+    formData.append("description", desc);
+    formData.append("proof", file);
+    formData.append("user_id", currentUser.id);
+
+    try {
+      const res = await fetch("/api/deposit", {
+        method: "POST",
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("充值提交成功！");
+        depositModal.style.display = "none";
+      } else {
+        alert("提交失败：" + data.message);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("提交失败");
+    }
   });
 
   // ====== 弹窗统一关闭逻辑 ======
