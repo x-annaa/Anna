@@ -263,6 +263,8 @@ const depositModal = document.getElementById("depositModal");
 const transferModal = document.getElementById("transferModal");
 
 let currentNetwork = null;
+
+// 配置二维码和钱包地址
 const networkConfig = {
   TRC20: {
     qr: "https://ffdrwsemmfvqlqhyjlnb.supabase.co/storage/v1/object/public/Photos/USDTQR/images%20(1).png",
@@ -326,7 +328,7 @@ document.getElementById("cancelTransfer").addEventListener("click", () => {
 document.getElementById("submitDepositBtn").addEventListener("click", async () => {
   const amount = parseFloat(document.getElementById("depositAmount").value);
   const fileInput = document.getElementById("proofFile");
-  const desc = document.getElementById("depositDesc").value;
+  const desc = document.getElementById("depositDesc").value || "";
 
   if (!amount || amount < 10) {
     alert("充值金额必须 ≥ 10");
@@ -337,45 +339,51 @@ document.getElementById("submitDepositBtn").addEventListener("click", async () =
     return;
   }
 
-  // 上传截图到 Supabase Storage
-const file = fileInput.files[0];
-if (!file) {
-  alert("请先选择截图文件！");
-  return;
-}
+  const file = fileInput.files[0];
+  const filePath = `proofs/${currentUser.id}_${Date.now()}_${file.name}`;
 
-const filePath = `proofs/${currentUser.id}_${Date.now()}_${file.name}`;
+  try {
+    // 上传到 Supabase Storage
+    const { data, error: uploadError } = await supabaseClient.storage
+      .from("Photos/User-recharge")   // bucket 名必须一致
+      .upload(filePath, file, { upsert: false });
 
-// 上传到你创建的 bucket
-const { data, error: uploadError } = await supabaseClient.storage
-  .from("Photos/User-recharge")   // ← 改成真实 bucket 名
-  .upload(filePath, file, { upsert: false });
+    if (uploadError) {
+      console.error(uploadError);
+      alert("图片上传失败：" + uploadError.message);
+      return;
+    }
 
-if (uploadError) {
-  alert("图片上传失败：" + uploadError.message);
-  return;
-}
+    // 获取公开 URL
+    const { data: publicUrl } = supabaseClient.storage
+      .from("Photos/User-recharge")
+      .getPublicUrl(filePath);
 
-// 获取公开 URL
-const { data: publicUrl } = supabaseClient.storage
-  .from("Photos/User-recharge")   // ← bucket 名保持一致
-  .getPublicUrl(filePath);
+    // 插入数据库 deposits 表
+    const { error } = await supabaseClient
+      .from("deposits")
+      .insert([{
+        user_id: currentUser.id,
+        amount: amount,
+        proof_url: publicUrl.publicUrl,
+        description: desc,
+        status: "pending"
+      }]);
 
-// 插入数据库 deposits 表
-const { error } = await supabaseClient
-  .from("deposits")
-  .insert([{
-    user_id: currentUser.id,
-    amount: amount,
-    proof_url: publicUrl.publicUrl,
-    description: desc,
-    status: "pending"
-  }]);
+    if (error) {
+      alert("提交充值申请失败：" + error.message);
+      return;
+    }
 
-if (error) {
-  alert("提交充值申请失败：" + error.message);
-  return;
-}
+    alert("充值申请已提交，等待后台审核！");
+    transferModal.style.display = "none";
 
-alert("充值申请已提交，等待后台审核！");
-transferModal.style.display = "none";
+    // 清空表单
+    document.getElementById("depositAmount").value = "";
+    document.getElementById("proofFile").value = "";
+    document.getElementById("depositDesc").value = "";
+  } catch (err) {
+    console.error(err);
+    alert("充值操作异常，请稍后再试！");
+  }
+});
