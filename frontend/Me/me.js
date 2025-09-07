@@ -338,37 +338,44 @@ document.getElementById("submitDepositBtn").addEventListener("click", async () =
   }
 
   // 上传截图到 Supabase Storage
-  const file = fileInput.files[0];
-  const filePath = `proofs/${currentUser.id}_${Date.now()}_${file.name}`;
-  const { error: uploadError } = await supabaseClient.storage
-    .from("deposits")
-    .upload(filePath, file);
+const file = fileInput.files[0];
+if (!file) {
+  alert("请先选择截图文件！");
+  return;
+}
 
-  if (uploadError) {
-    alert("图片上传失败：" + uploadError.message);
-    return;
-  }
+const filePath = `proofs/${currentUser.id}_${Date.now()}_${file.name}`;
 
-  const { data: publicUrl } = supabaseClient.storage
-    .from("Photos/User-recharge")
-    .getPublicUrl(filePath);
+// 上传到你创建的 bucket
+const { data, error: uploadError } = await supabaseClient.storage
+  .from("Photos/User-recharge")   // ← 改成真实 bucket 名
+  .upload(filePath, file, { upsert: false });
 
-  // 插入数据库
-  const { error } = await supabaseClient
-    .from("deposits")
-    .insert([{
-      user_id: currentUser.id,
-      amount: amount,
-      proof_url: publicUrl.publicUrl,
-      description: desc,
-      status: "pending"
-    }]);
+if (uploadError) {
+  alert("图片上传失败：" + uploadError.message);
+  return;
+}
 
-  if (error) {
-    alert("提交充值申请失败：" + error.message);
-    return;
-  }
+// 获取公开 URL
+const { data: publicUrl } = supabaseClient.storage
+  .from("Photos/User-recharge")   // ← bucket 名保持一致
+  .getPublicUrl(filePath);
 
-  alert("充值申请已提交，等待后台审核！");
-  transferModal.style.display = "none";
-});
+// 插入数据库 deposits 表
+const { error } = await supabaseClient
+  .from("deposits")
+  .insert([{
+    user_id: currentUser.id,
+    amount: amount,
+    proof_url: publicUrl.publicUrl,
+    description: desc,
+    status: "pending"
+  }]);
+
+if (error) {
+  alert("提交充值申请失败：" + error.message);
+  return;
+}
+
+alert("充值申请已提交，等待后台审核！");
+transferModal.style.display = "none";
