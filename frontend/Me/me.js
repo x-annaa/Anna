@@ -15,37 +15,63 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await loadUserInfo(username);
 
-  // ====== Logout 弹窗 ======
-  const logoutBtn = document.getElementById("logoutBtn");
-  const logoutModal = document.getElementById("logoutModal");
-  const cancelLogout = document.getElementById("cancelLogout");
-  const confirmLogout = document.getElementById("confirmLogout");
+  // ====== 弹窗管理 ======
+  const modalMap = {
+    logoutBtn: "logoutModal",
+    withdrawBtn: "withdrawModal",
+    setPasswordBtn: "setPasswordModal", // 默认是设置密码，如果已设置会改成 updatePasswordModal
+  };
 
-  logoutBtn.addEventListener("click", () => {
-    logoutModal.style.display = "flex";
+  // 打开弹窗
+  Object.keys(modalMap).forEach(btnId => {
+    const btn = document.getElementById(btnId);
+    const modalId = modalMap[btnId];
+    if (!btn) return;
+    btn.addEventListener("click", () => {
+      // 特殊逻辑：设置/更新密码按钮
+      if (btnId === "setPasswordBtn") {
+        const modalToShow = localStorage.getItem("hasWithdrawPwd") === "true"
+          ? document.getElementById("updatePasswordModal")
+          : document.getElementById("setPasswordModal");
+        modalToShow.style.display = "flex";
+        return;
+      }
+
+      // 提现按钮逻辑
+      if (btnId === "withdrawBtn") {
+        document.getElementById("withdrawBalance").textContent =
+          document.getElementById("balance").textContent;
+      }
+
+      document.getElementById(modalId).style.display = "flex";
+    });
   });
 
-  cancelLogout.addEventListener("click", () => {
-    logoutModal.style.display = "none";
+  // 统一关闭弹窗（点击遮罩或取消按钮）
+  document.body.addEventListener("click", e => {
+    if (e.target.classList.contains("modal") ||
+        e.target.dataset.dismiss === "modal") {
+      const modal = e.target.classList.contains("modal")
+        ? e.target
+        : e.target.closest(".modal");
+      if (modal) modal.style.display = "none";
+    }
   });
 
-  confirmLogout.addEventListener("click", () => {
-    localStorage.removeItem("currentUser");
-    localStorage.removeItem("currentUserId");
-    localStorage.removeItem("hasWithdrawPwd");
+  // ESC键关闭所有弹窗
+  window.addEventListener("keydown", e => {
+    if (e.key === "Escape") {
+      document.querySelectorAll(".modal").forEach(m => m.style.display = "none");
+    }
+  });
+
+  // ====== Logout 操作 ======
+  document.getElementById("confirmLogout").addEventListener("click", () => {
+    ["currentUser", "currentUserId", "hasWithdrawPwd"].forEach(k => localStorage.removeItem(k));
     window.location.href = "../index.html";
   });
 
   // ====== 提现逻辑 ======
-  const withdrawBtn = document.getElementById("withdrawBtn");
-  const withdrawModal = document.getElementById("withdrawModal");
-  const withdrawBalance = document.getElementById("withdrawBalance");
-
-  withdrawBtn.addEventListener("click", () => {
-    withdrawBalance.textContent = document.getElementById("balance").textContent;
-    withdrawModal.style.display = "flex";
-  });
-
   document.getElementById("confirmWithdraw").addEventListener("click", () => {
     const amount = document.getElementById("withdrawAmount").value;
     const address = document.getElementById("walletAddress").value;
@@ -62,20 +88,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // ====== 设置/更新提现密码 ======
-  const setPasswordBtn = document.getElementById("setPasswordBtn");
-  const setPasswordModal = document.getElementById("setPasswordModal");
-  const updatePasswordModal = document.getElementById("updatePasswordModal");
-
-  setPasswordBtn.addEventListener("click", () => {
-    if (localStorage.getItem("hasWithdrawPwd") === "true") {
-      updatePasswordModal.style.display = "flex";
-    } else {
-      setPasswordModal.style.display = "flex";
-    }
-  });
-
-  // ---- 设置密码 ----
+  // ====== 设置提现密码 ======
   document.getElementById("saveWithdrawPwd").addEventListener("click", async () => {
     const pwd = document.getElementById("withdrawPwd").value;
     const confirmPwd = document.getElementById("confirmWithdrawPwd").value;
@@ -100,17 +113,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     localStorage.setItem("hasWithdrawPwd", "true");
-    setPasswordBtn.textContent = "更新密码";
+    document.getElementById("setPasswordBtn").textContent = "更新密码";
     currentUser.withdraw_password = pwd;
     alert("提现密码设置成功！");
-    setPasswordModal.style.display = "none";
+    document.getElementById("setPasswordModal").style.display = "none";
   });
 
-  document.getElementById("cancelSetPwd").addEventListener("click", () => {
-    setPasswordModal.style.display = "none";
-  });
-
-  // ---- 更新密码 ----
+  // ====== 更新提现密码 ======
   document.getElementById("saveUpdatePwd").addEventListener("click", async () => {
     const oldPwd = document.getElementById("oldWithdrawPwd").value;
     const newPwd = document.getElementById("newWithdrawPwd").value;
@@ -141,14 +150,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     currentUser.withdraw_password = newPwd;
     alert("提现密码更新成功！");
-    updatePasswordModal.style.display = "none";
+    document.getElementById("updatePasswordModal").style.display = "none";
   });
 
-  document.getElementById("cancelUpdatePwd").addEventListener("click", () => {
-    updatePasswordModal.style.display = "none";
-  });
-
-  // ---- 确认提现密码 & 提交申请 ----
+  // ====== 确认提现密码 & 提交申请 ======
   document.getElementById("submitWithdrawFinal").addEventListener("click", async () => {
     const inputPwd = document.getElementById("inputWithdrawPwd").value;
 
@@ -177,7 +182,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       .from("withdrawals")
       .insert([{
         user_id: currentUser.id,
-        amount: amount,
+        amount,
         wallet_address: address,
         status: "pending"
       }]);
@@ -189,32 +194,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     alert("提现申请已提交，等待后台审核！");
 
-    withdrawModal.style.display = "none";
+    document.getElementById("withdrawModal").style.display = "none";
     document.getElementById("confirmPwdModal").style.display = "none";
 
     currentUser.balance -= amount;
     document.getElementById("balance").textContent = currentUser.balance.toFixed(2);
   });
-
-  // ====== 事件代理：点击遮罩层或取消按钮关闭弹窗 ======
-  window.addEventListener("click", (e) => {
-    if (e.target.classList.contains("modal")) {
-      e.target.style.display = "none";
-    }
-    if (e.target.id === "cancelConfirmPwd") {
-      document.getElementById("confirmPwdModal").style.display = "none";
-    }
-  });
-
-  window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      document.querySelectorAll(".modal").forEach((m) => (m.style.display = "none"));
-    }
-  });
 });
 
 // ======================
-// 加载用户信息函数
+// 加载用户信息
 // ======================
 async function loadUserInfo(username) {
   if (!username) return;
