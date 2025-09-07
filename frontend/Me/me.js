@@ -368,4 +368,129 @@ document.getElementById("submitDepositBtn").addEventListener("click", async () =
   }
 });
 
+// ======================
+// 充值逻辑
+// ======================
+const depositBtn = document.getElementById("depositBtn");
+const depositModal = document.getElementById("depositModal");
+const transferModal = document.getElementById("transferModal");
 
+let currentNetwork = null;
+
+const networkConfig = {
+  TRC20: {
+    qr: "https://ffdrwsemmfvqlqhyjlnb.supabase.co/storage/v1/object/public/Photos/USDTQR/images%20(1).png",
+    address: "TX6aSYyGVTf1NsXWzY3kUC9pTQP111111"
+  },
+  ERC20: {
+    qr: "https://ffdrwsemmfvqlqhyjlnb.supabase.co/storage/v1/object/public/Photos/USDTQR/images%20(2).png",
+    address: "0x1111111111111111111111111111111111111111"
+  }
+};
+
+// 打开充值窗口
+depositBtn.addEventListener("click", () => {
+  depositModal.style.display = "flex";
+});
+
+// 切换网络协议
+document.querySelectorAll(".network-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const net = btn.dataset.network;
+    currentNetwork = net;
+    document.getElementById("depositQr").src = networkConfig[net].qr;
+    document.getElementById("depositAddress").textContent = networkConfig[net].address;
+  });
+});
+
+// 复制钱包地址
+document.getElementById("copyAddressBtn").addEventListener("click", () => {
+  const addr = document.getElementById("depositAddress").textContent;
+  navigator.clipboard.writeText(addr).then(() => alert("已复制钱包地址"));
+});
+
+// 下载二维码
+document.getElementById("downloadQrBtn").addEventListener("click", () => {
+  if (!currentNetwork) return alert("请先选择网络协议");
+  const link = document.createElement("a");
+  link.href = networkConfig[currentNetwork].qr;
+  link.download = currentNetwork + "-qr.png";
+  link.click();
+});
+
+// 打开转账提交窗口
+document.getElementById("goTransferBtn").addEventListener("click", () => {
+  if (!currentNetwork) return alert("请先选择网络协议");
+  depositModal.style.display = "none";
+  transferModal.style.display = "flex";
+});
+
+// 取消按钮
+document.getElementById("cancelDeposit").addEventListener("click", () => depositModal.style.display = "none");
+document.getElementById("cancelTransfer").addEventListener("click", () => transferModal.style.display = "none");
+
+// 提交充值申请
+document.getElementById("submitDepositBtn").addEventListener("click", async () => {
+  const amount = parseFloat(document.getElementById("depositAmount").value);
+  const fileInput = document.getElementById("proofFile");
+  const desc = document.getElementById("depositDesc").value || "";
+
+  if (!amount || amount < 10) {
+    alert("充值金额必须 ≥ 10");
+    return;
+  }
+  if (!fileInput.files.length) {
+    alert("请上传转账截图！");
+    return;
+  }
+
+  const file = fileInput.files[0];
+  // 注意路径不要有空格或特殊字符
+  const fileNameSafe = file.name.replace(/\s+/g, "_");
+  const filePath = `User-recharge/proofs/${currentUser.id}_${Date.now()}_${fileNameSafe}`;
+
+  try {
+    // 上传到 Supabase Public bucket
+    const { data: uploadData, error: uploadError } = await supabaseClient.storage
+      .from("Photos")
+      .upload(filePath, file, { upsert: false });
+
+    if (uploadError) {
+      console.error(uploadError);
+      alert("图片上传失败：" + uploadError.message);
+      return;
+    }
+
+    // 获取公开 URL
+    const { data: publicUrlData } = supabaseClient.storage
+      .from("Photos")
+      .getPublicUrl(filePath);
+
+    // 插入 deposits 表
+    const { error: insertError } = await supabaseClient
+      .from("deposits")
+      .insert([{
+        user_id: currentUser.id,
+        amount,
+        proof_url: publicUrlData.publicUrl,
+        description: desc,
+        status: "pending"
+      }]);
+
+    if (insertError) {
+      alert("提交充值申请失败：" + insertError.message);
+      return;
+    }
+
+    alert("充值申请已提交，等待后台审核！");
+    transferModal.style.display = "none";
+
+    // 清空表单
+    document.getElementById("depositAmount").value = "";
+    document.getElementById("proofFile").value = "";
+    document.getElementById("depositDesc").value = "";
+  } catch (err) {
+    console.error(err);
+    alert("充值操作异常，请稍后再试！");
+  }
+});
