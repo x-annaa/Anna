@@ -188,31 +188,49 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("cancelTransfer").addEventListener("click", () => transferModal.style.display = "none");
 
   document.getElementById("submitDepositBtn").addEventListener("click", async () => {
-    const amount = parseFloat(document.getElementById("depositAmount").value);
-    const fileInput = document.getElementById("proofFile");
-    const desc = document.getElementById("depositDesc").value || "";
+  const amount = parseFloat(document.getElementById("depositAmount").value);
+  const fileInput = document.getElementById("proofFile");
+  const desc = document.getElementById("depositDesc").value || "";
 
-    if (!amount || amount < 10) return alert("充值金额必须 ≥ 10");
-    if (!fileInput.files.length) return alert("请上传转账截图！");
+  if (!amount || amount < 10) {
+    return alert("充值金额必须 ≥ 10");
+  }
+  if (!fileInput.files.length) {
+    return alert("请上传转账截图！");
+  }
 
-    const file = fileInput.files[0];
-    const fileNameSafe = file.name.replace(/\s+/g, "_");
-    const filePath = `User-recharge/proofs/${currentUser.id}_${Date.now()}_${fileNameSafe}`;
+  const file = fileInput.files[0];
+  const formData = new FormData();
+  formData.append("user_id", currentUser.id);
+  formData.append("amount", amount);
+  formData.append("description", desc);
+  formData.append("proof_file", file);
 
-    // 这里暂时留给后端接口上传
-    alert("前端上传完成后，将调用后端接口提交充值申请（后端实现后）");
-  });
+  try {
+    const res = await fetch("/api/deposit", {
+      method: "POST",
+      body: formData
+    });
 
-  // ====== 事件代理：点击遮罩层或取消按钮关闭弹窗 ======
-  window.addEventListener("click", (e) => {
-    if (e.target.classList.contains("modal")) e.target.style.display = "none";
-    if (e.target.id === "cancelConfirmPwd") document.getElementById("confirmPwdModal").style.display = "none";
-  });
+    const result = await res.json();
 
-  window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") document.querySelectorAll(".modal").forEach(m => m.style.display = "none");
-  });
+    if (!res.ok) {
+      return alert("提交充值申请失败：" + result.message);
+    }
+
+    alert("充值申请已提交，等待后台审核！");
+    document.getElementById("transferModal").style.display = "none";
+
+    // 清空表单
+    document.getElementById("depositAmount").value = "";
+    document.getElementById("proofFile").value = "";
+    document.getElementById("depositDesc").value = "";
+  } catch (err) {
+    console.error(err);
+    alert("提交充值申请异常，请稍后再试！");
+  }
 });
+
 
 // ======================
 // 加载用户信息函数
