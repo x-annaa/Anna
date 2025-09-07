@@ -41,7 +41,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     withdrawModal.style.display = "flex";
   });
 
-  document.getElementById("cancelWithdraw").addEventListener("click", () => withdrawModal.style.display = "none");
+  document.getElementById("cancelWithdraw").addEventListener("click", () => {
+    withdrawModal.style.display = "none";
+  });
 
   document.getElementById("confirmWithdraw").addEventListener("click", () => {
     const amount = document.getElementById("withdrawAmount").value;
@@ -198,7 +200,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("前端验证完成，文件上传和充值申请将由后端处理。");
   });
 
-  // ====== 弹窗统一关闭 ======
+  // ====== 弹窗统一关闭逻辑 ======
   window.addEventListener("click", (e) => {
     if (e.target.classList.contains("modal")) e.target.style.display = "none";
     if (e.target.id === "cancelConfirmPwd") document.getElementById("confirmPwdModal").style.display = "none";
