@@ -41,6 +41,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     withdrawModal.style.display = "flex";
   });
 
+  document.getElementById("cancelWithdraw").addEventListener("click", () => withdrawModal.style.display = "none");
+
   document.getElementById("confirmWithdraw").addEventListener("click", () => {
     const amount = document.getElementById("withdrawAmount").value;
     const address = document.getElementById("walletAddress").value;
@@ -157,10 +159,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   document.querySelectorAll(".network-btn").forEach(btn => {
     btn.addEventListener("click", () => {
-      const net = btn.dataset.network;
-      currentNetwork = net;
-      document.getElementById("depositQr").src = networkConfig[net].qr;
-      document.getElementById("depositAddress").textContent = networkConfig[net].address;
+      currentNetwork = btn.dataset.network;
+      document.getElementById("depositQr").src = networkConfig[currentNetwork].qr;
+      document.getElementById("depositAddress").textContent = networkConfig[currentNetwork].address;
     });
   });
 
@@ -198,41 +199,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     const fileNameSafe = file.name.replace(/\s+/g, "_");
     const filePath = `User-recharge/proofs/${currentUser.id}_${Date.now()}_${fileNameSafe}`;
 
-    try {
-      const { data: uploadData, error: uploadError } = await supabaseClient.storage
-        .from("Photos")
-        .upload(filePath, file, { upsert: false });
-
-      if (uploadError) return alert("图片上传失败：" + uploadError.message);
-
-      const { data: publicUrlData } = supabaseClient.storage
-        .from("Photos")
-        .getPublicUrl(filePath);
-
-      const { error: insertError } = await supabaseClient.from("deposits")
-        .insert([{
-          user_id: currentUser.id,
-          amount,
-          proof_url: publicUrlData.publicUrl,
-          description: desc,
-          status: "pending"
-        }]);
-
-      if (insertError) return alert("提交充值申请失败：" + insertError.message);
-
-      alert("充值申请已提交，等待后台审核！");
-      transferModal.style.display = "none";
-
-      document.getElementById("depositAmount").value = "";
-      document.getElementById("proofFile").value = "";
-      document.getElementById("depositDesc").value = "";
-    } catch (err) {
-      console.error(err);
-      alert("充值操作异常，请稍后再试！");
-    }
+    // 这里暂时留给后端接口上传
+    alert("前端上传完成后，将调用后端接口提交充值申请（后端实现后）");
   });
 
-  // ====== 事件代理：关闭弹窗 ======
+  // ====== 事件代理：点击遮罩层或取消按钮关闭弹窗 ======
   window.addEventListener("click", (e) => {
     if (e.target.classList.contains("modal")) e.target.style.display = "none";
     if (e.target.id === "cancelConfirmPwd") document.getElementById("confirmPwdModal").style.display = "none";
