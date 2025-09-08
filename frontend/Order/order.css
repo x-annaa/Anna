@@ -1,275 +1,170 @@
-/* ========= 全局基础 ========= */
-body {
-  margin: 0;
-  font-family: "Segoe UI", Arial, sans-serif;
-  background: #f5f7fa;
-  color: #333;
-}
-
-h2, h3 {
-  margin: 10px 0;
-  font-weight: 600;
-}
-
-.page {
-  display: none;
-  padding: 20px;
-}
-
-.page.active {
-  display: block;
-}
-
-/* ========= 底部导航 ========= */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  display: flex;
-  justify-content: space-around;
-  border-top: 1px solid #ddd;
-  background: #fff;
-  padding: 8px 0;
-}
-
-.bottom-nav button {
-  flex: 1;
-  border: none;
-  background: none;
-  padding: 8px;
-  font-size: 15px;
-  cursor: pointer;
-  transition: color 0.3s;
-}
-
-.bottom-nav button.active {
-  color: #1976d2;
-  font-weight: bold;
-}
-
-/* ========= 订单中心 ========= */
+/* ======================
+   Order 页面整体样式
+   ====================== */
 .order-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
 }
 
 .coins-box {
-  font-weight: bold;
-  color: #2e7d32;
+  font-size: 14px;
+  background: #f4f4f4;
+  padding: 4px 8px;
+  border-radius: 6px;
 }
 
 .coins-box button {
-  margin-left: 8px;
-  padding: 2px 8px;
+  margin-left: 6px;
+  background: #007bff;
   border: none;
-  border-radius: 50%;
-  background: #ff8800d9;
   color: #fff;
-  font-size: 18px;
+  font-size: 14px;
+  border-radius: 4px;
   cursor: pointer;
-  transition: 0.3s;
+  padding: 2px 6px;
 }
-
 .coins-box button:hover {
-  background: #388e3c;
+  background: #0056b3;
 }
 
 .order-actions {
-  text-align: center;
-  margin: 20px 0;
+  margin: 12px 0;
 }
 
-.order-actions button {
-  padding: 10px 20px;
+#autoOrderBtn {
+  background: #28a745;
+  color: #fff;
   border: none;
-  border-radius: 10px;
-  background: #1976d2;
-  color: white;
-  font-size: 16px;
+  border-radius: 6px;
+  padding: 10px 16px;
+  font-size: 15px;
   cursor: pointer;
-  transition: 0.3s;
-  margin: 0 6px;
 }
-
-.order-actions button:hover {
-  background: #1565c0;
+#autoOrderBtn:hover {
+  background: #1e7e34;
 }
 
 .order-result {
-  margin-top: 20px;
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  background: #fafafa;
-  text-align: center;
-  font-size: 15px;
-  color: #555;
+  margin: 10px 0;
+  font-size: 14px;
+  color: #333;
 }
 
-/* ========= 最近订单历史 ========= */
 .order-history {
-  margin-top: 25px;
+  margin-top: 20px;
 }
 
 .order-history h3 {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  margin-bottom: 8px;
+  font-size: 16px;
 }
 
-.order-count {
-  font-size: 14px;
-  font-weight: 500;
-  color: #1976d2;
-  margin-left: 10px;
-}
-
-.order-history ul {
+#recentOrders {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.order-history li {
-  padding: 10px 12px;
-  border-bottom: 1px solid #eee;
+#recentOrders li {
+  background: #fafafa;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 8px;
+  margin-bottom: 6px;
   font-size: 14px;
 }
 
-.order-history li:last-child {
-  border-bottom: none;
-}
-
-/* ========= 通用按钮 ========= */
-button {
-  font-family: inherit;
-  outline: none;
-}
-
-button:disabled {
-  background: #ccc !important;
-  cursor: not-allowed;
-}
-
-/* ========= 通用 Modal 样式 ========= */
+/* ======================
+   exchangeModal 样式
+   ====================== */
 .modal {
-  display: none;              /* 默认隐藏，JS 控制时用 flex */
+  display: none; /* 默认隐藏 */
   position: fixed;
   z-index: 999;
-  top: 0;
   left: 0;
+  top: 0;
   width: 100%;
   height: 100%;
-
-  /* 半透明背景 */
-  background-color: rgba(0,0,0,0.5);
-
-  /* 居中内容（等 JS 设置 display:flex 时生效） */
+  overflow: auto;
+  background: rgba(0, 0, 0, 0.4); /* 半透明背景 */
   justify-content: center;
   align-items: center;
 }
 
 .modal-content {
   background: #fff;
-  padding: 25px 30px;
-  border-radius: 16px;
+  margin: auto;
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 360px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   text-align: center;
-  width: 320px;
-  max-width: 90%;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
-  animation: fadeIn 0.25s ease;
 }
 
 .modal-content h3 {
-  margin-top: 0;
   margin-bottom: 12px;
-  font-size: 1.3em;
-  color: #333;
+  font-size: 18px;
+}
+
+.modal-content label {
+  display: block;
+  text-align: left;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.modal-content input,
+.modal-content select {
+  width: 100%;
+  padding: 8px;
+  margin-top: 6px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
 }
 
 .modal-content p {
-  margin-bottom: 10px;
-  color: #555;
-  font-size: 0.95em;
+  font-size: 14px;
+  margin: 8px 0;
 }
 
-.modal-content input {
-  width: 80%;
-  padding: 10px 12px;
-  margin: 12px 0 18px 0;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 1em;
-  text-align: center;
-  transition: border-color 0.2s;
-}
-
-.modal-content input:focus {
-  border-color: #1976d2;
-  outline: none;
-  box-shadow: 0 0 5px rgba(25,118,210,0.3);
+#orderLimitNotice {
+  margin-top: 8px;
+  color: red;
+  font-size: 13px;
 }
 
 .modal-actions {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
+  margin-top: 16px;
 }
 
 .modal-actions button {
   flex: 1;
   padding: 10px 0;
+  margin: 0 4px;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 1em;
-  font-weight: 500;
-  transition: 0.2s;
+  font-size: 14px;
 }
 
-#cancelAddCoins {
-  background-color: #e0e0e0;
+#cancelExchange {
+  background: #ccc;
   color: #333;
 }
-
-#cancelAddCoins:hover {
-  background-color: #d5d5d5;
+#cancelExchange:hover {
+  background: #aaa;
 }
 
-#confirmAddCoins {
-  background-color: #4caf50;
-  color: white;
+#confirmExchange {
+  background: #007bff;
+  color: #fff;
 }
-
-#confirmAddCoins:hover {
-  background-color: #45a049;
-}
-
-/* ========= 余额不足弹窗 ========= */
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.modal-close-x {
-  background: none;
-  border: none;
-  font-size: 20px;
-  font-weight: bold;
-  cursor: pointer;
-  color: #666;
-}
-
-.modal-close-x:hover {
-  color: #000;
-}
-
-/* ========= 弹窗渐显动画 ========= */
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1); }
+#confirmExchange:hover {
+  background: #0056b3;
 }
