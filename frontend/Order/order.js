@@ -171,36 +171,42 @@ async function checkPendingLock() {
 /* ======================
    今日任务统计
    ====================== */
+/* ======================
+   今日任务统计
+   ====================== */
 async function getTodayProgress() {
   if (!window.currentUserId) return { todayCount: 0, dailyLimit: 0 };
 
-  // 查询今天完成的订单数量
-  const { count: todayCount } = await supabaseClient
-    .from("orders")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", window.currentUserId)
-    .eq("status", "completed")
-    .gte("created_at", new Date().toISOString().slice(0, 10));
-
-  // 查询用户等级
+  // 先获取用户信息
   const { data: user, error: userErr } = await supabaseClient
     .from("users")
     .select("level_id")
     .eq("id", window.currentUserId)
     .single();
-  if (userErr || !user) return { todayCount: todayCount || 0, dailyLimit: 0 };
+  if (userErr || !user) {
+    console.error("加载用户信息失败", userErr);
+    return { todayCount: 0, dailyLimit: 0 };
+  }
 
-  // 查询等级表获取 daily_limit
+  // 根据 level_id 获取 daily_limit
   const { data: levelData, error: levelErr } = await supabaseClient
-    .from("level")
+    .from("levels")
     .select("daily_limit")
     .eq("id", user.level_id)
     .single();
-  if (levelErr || !levelData) return { todayCount: todayCount || 0, dailyLimit: 10 };
+  const dailyLimit = levelData?.daily_limit || 10; // 如果没获取到，默认 10
 
-  return { todayCount: todayCount || 0, dailyLimit: levelData.daily_limit || 10 };
+  // 统计今日完成订单
+  const todayStart = new Date().toISOString().slice(0, 10);
+  const { count: todayCount } = await supabaseClient
+    .from("orders")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", window.currentUserId)
+    .eq("status", "completed")
+    .gte("created_at", todayStart);
+
+  return { todayCount: todayCount || 0, dailyLimit };
 }
-
 
 /* ======================
    通用 Modal 管理
