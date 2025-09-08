@@ -6,10 +6,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="index.css" />
 
-  <!-- Supabase SDK（必须在 supabaseClient.js 之前） -->
+  <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- 全局 Supabase 初始化（把 supabaseClient 挂到 window） -->
-  <script src="supabaseClient.js"></script>
+
+  <!-- 全局 Supabase 初始化（挂到 window） -->
+  <script>
+    // ⚡ Supabase 初始化
+    window.supabaseClient = supabase.createClient(
+      "https://ffdrwsemmfvqlqhyjlnb.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmZHJ3c2VtbWZ2cWxxaHlqbG5iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMDI1ODQsImV4cCI6MjA3MTg3ODU4NH0.x7TQHZ2af8O_f9ye__mT6eVstlH9BiyVkNVaOnL3h74"
+    );
+  </script>
 </head>
 <body>
   <div class="container">
@@ -30,7 +37,7 @@
 
       <div class="field password-wrapper">
         <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" />
-        <button type="button" class="toggle-password" data-target="loginPassword" aria-label="toggle password">👁️</button>
+        <button type="button" class="toggle-password" data-target="loginPassword">👁️</button>
       </div>
 
       <div id="loginMsg" class="form-msg"></div>
@@ -45,12 +52,12 @@
 
       <div class="field password-wrapper">
         <input type="password" id="regPassword" placeholder="Password" autocomplete="new-password" />
-        <button type="button" class="toggle-password" data-target="regPassword" aria-label="toggle password">👁️</button>
+        <button type="button" class="toggle-password" data-target="regPassword">👁️</button>
       </div>
 
       <div class="field password-wrapper">
         <input type="password" id="regConfirmPassword" placeholder="Confirm Password" autocomplete="new-password" />
-        <button type="button" class="toggle-password" data-target="regConfirmPassword" aria-label="toggle password">👁️</button>
+        <button type="button" class="toggle-password" data-target="regConfirmPassword">👁️</button>
       </div>
 
       <label class="agreement">
@@ -64,6 +71,6 @@
   </div>
 
   <!-- 业务逻辑 -->
-  <script src="index.js"></script>
+  <script type="module" src="index.js"></script>
 </body>
 </html>
