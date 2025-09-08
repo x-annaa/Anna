@@ -290,26 +290,32 @@ confirmDeposit.addEventListener("click", async () => {
   }
 
   try {
-    // 生成唯一文件名
+    // 生成唯一文件名，确保小写
     const timestamp = Date.now();
-    const ext = file.name.split(".").pop();
+    const ext = file.name.split(".").pop().toLowerCase();
     const fileName = `user_${currentUser.id}_${timestamp}.${ext}`;
 
     // 上传到 Supabase Storage
     const { data: uploadData, error: uploadError } = await supabaseClient.storage
       .from("recharges")
-      .upload(fileName, file);
+      .upload(fileName, file, { upsert: true });
 
     if (uploadError) {
-      console.error(uploadError);
-      alert("上传图片失败");
+      console.error("上传失败：", uploadError);
+      alert("上传图片失败，请重试");
       return;
     }
 
     // 获取公共访问 URL
-    const { data: publicURLData } = supabaseClient.storage
+    const { data: publicURLData, error: urlError } = supabaseClient.storage
       .from("recharges")
       .getPublicUrl(fileName);
+
+    if (urlError) {
+      console.error("获取 URL 失败：", urlError);
+      alert("生成图片链接失败");
+      return;
+    }
 
     const proofURL = publicURLData.publicUrl;
 
@@ -324,15 +330,16 @@ confirmDeposit.addEventListener("click", async () => {
       }]);
 
     if (insertError) {
-      console.error(insertError);
+      console.error("插入数据库失败：", insertError);
       alert("提交充值申请失败");
       return;
     }
 
     alert("充值申请已提交，等待后台审核！");
     depositModal.style.display = "none";
+
   } catch (err) {
-    console.error(err);
+    console.error("异常：", err);
     alert("操作异常，请重试");
   }
 });
