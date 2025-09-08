@@ -1,5 +1,3 @@
-<!-- supabaseClient.js -->
-<script>
 // 只初始化一次，全局挂载
 if (!window.supabaseClient) {
   const SUPABASE_URL = "https://ffdrwsemmfvqlqhyjlnb.supabase.co";
