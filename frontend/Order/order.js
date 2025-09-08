@@ -71,6 +71,22 @@ async function getRandomProduct() {
 }
 
 /* ======================
+   今日任务统计
+   ====================== */
+async function getTodayProgress() {
+  if (!window.currentUserId) return { todayCount: 0, dailyLimit: 10 };
+
+  const { count: todayCount } = await supabaseClient
+    .from("orders")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", window.currentUserId)
+    .eq("status", "completed")
+    .gte("created_at", new Date().toISOString().slice(0, 10));
+
+  return { todayCount: todayCount || 0, dailyLimit: 10 };
+}
+
+/* ======================
    渲染最近订单
    ====================== */
 function renderLastOrder(order, coinsRaw) {
@@ -169,23 +185,6 @@ async function checkPendingLock() {
 }
 
 /* ======================
-   今日任务统计
-   ====================== */
-async function getTodayProgress() {
-  if (!window.currentUserId) return { todayCount: 0, dailyLimit: 0 };
-
-  const { count: todayCount } = await supabaseClient
-    .from("orders")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", window.currentUserId)
-    .eq("status", "completed")
-    .gte("created_at", new Date().toISOString().slice(0, 10));
-
-  const dailyLimit = 10;
-  return { todayCount: todayCount || 0, dailyLimit };
-}
-
-/* ======================
    Coins / Balance 弹窗
    ====================== */
 function openExchangeModal() {
@@ -261,19 +260,20 @@ async function confirmAddCoins() {
     let balance = Number(user.balance || 0);
 
     if (type === "coins") {
-      // Coins -> Balance 需要完成今日订单任务
+      // Coins -> Balance 兑换逻辑
       const { todayCount, dailyLimit } = await getTodayProgress();
-      if (todayCount < dailyLimit) {
+      if (todayCount > 0 && todayCount < dailyLimit) {
         notice.style.display = "block";
         notice.textContent = "⚠️ 请先完成所有今日订单任务再转换";
         exchanging = false;
         return;
       }
+
       if (balance < amount) { alert("Balance 不足"); exchanging = false; return; }
       balance -= amount;
       coins += amount;
     } else {
-      // Balance -> Coins 不受任务限制
+      // Balance -> Coins 不受今日任务限制
       if (coins < amount) { alert("Coins 不足"); exchanging = false; return; }
       coins -= amount;
       balance += amount;
@@ -318,15 +318,6 @@ async function autoOrder() {
       return;
     }
 
-    // 检查今日任务是否完成
-    const { todayCount, dailyLimit } = await getTodayProgress();
-    if (todayCount < dailyLimit) {
-      alert(`⚠️ 今日订单任务未完成 (${todayCount}/${dailyLimit})，请完成后再下单`);
-      setOrderBtnDisabled(true, "今日订单任务未完成");
-      ordering = false;
-      return;
-    }
-
     const { data: pend } = await supabaseClient
       .from("orders")
       .select("id")
@@ -336,6 +327,15 @@ async function autoOrder() {
     if (pend?.length) {
       alert("您有未完成订单，请先完成订单再继续下单。");
       await checkPendingLock();
+      ordering = false;
+      return;
+    }
+
+    // 检查今日任务上限
+    const { todayCount, dailyLimit } = await getTodayProgress();
+    if (todayCount >= dailyLimit) {
+      alert(`⚠️ 今日订单任务已完成 (${todayCount}/${dailyLimit})，无法继续下单`);
+      setOrderBtnDisabled(true, "今日订单任务已完成");
       ordering = false;
       return;
     }
