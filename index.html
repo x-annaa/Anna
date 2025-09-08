@@ -1,19 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>U9 - Login & Register</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="index.css">
+  <meta charset="UTF-8" />
+  <title>U9</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="index.css" />
 
   <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <!-- 全局 Supabase 初始化 -->
   <script src="supabaseClient.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1>Welcome</h1>
+    <h1 class="title">Welcome</h1>
+    <p class="desc">Please register or login below:</p>
 
     <!-- Tab -->
     <div class="tab-container">
@@ -21,34 +23,46 @@
       <button id="showRegister" class="tab-btn">Register</button>
     </div>
 
-    <!-- 登录表单 -->
+    <!-- 登录 -->
     <div id="loginForm" class="form-container">
-      <input type="text" id="loginUsername" placeholder="Username">
-      <div class="password-wrapper">
-        <input type="password" id="loginPassword" placeholder="Password">
+      <div class="field">
+        <input type="text" id="loginUsername" placeholder="Username" autocomplete="username" />
+      </div>
+
+      <div class="field password-wrapper">
+        <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" />
         <button type="button" class="toggle-password" data-target="loginPassword">👁️</button>
       </div>
-      <button id="loginBtn">Login</button>
+
+      <button id="loginBtn" class="primary-btn">Login</button>
     </div>
 
-    <!-- 注册表单 -->
+    <!-- 注册 -->
     <div id="registerForm" class="form-container hidden">
-      <input type="text" id="regUsername" placeholder="Username">
-      <div class="password-wrapper">
-        <input type="password" id="regPassword" placeholder="Password">
+      <div class="field">
+        <input type="text" id="regUsername" placeholder="Username" autocomplete="username" />
+      </div>
+
+      <div class="field password-wrapper">
+        <input type="password" id="regPassword" placeholder="Password" autocomplete="new-password" />
         <button type="button" class="toggle-password" data-target="regPassword">👁️</button>
       </div>
-      <div class="password-wrapper">
-        <input type="password" id="regConfirmPassword" placeholder="Confirm Password">
+
+      <div class="field password-wrapper">
+        <input type="password" id="regConfirmPassword" placeholder="Confirm Password" autocomplete="new-password" />
         <button type="button" class="toggle-password" data-target="regConfirmPassword">👁️</button>
       </div>
-      <label>
-        <input type="checkbox" id="agreeTerms"> I agree to the terms
+
+      <label class="agreement">
+        <input type="checkbox" id="agreeTerms" />
+        <span>I agree to the terms</span>
       </label>
-      <button id="registerBtn">Register</button>
+
+      <button id="registerBtn" class="primary-btn">Register</button>
     </div>
   </div>
+
+  <!-- 业务逻辑 -->
+  <script src="index.js"></script>
 </body>
-<!-- 业务逻辑 -->
-<script type="module" src="index.js"></script>
 </html>
