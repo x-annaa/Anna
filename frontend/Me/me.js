@@ -254,3 +254,66 @@ async function loadUserInfo(username) {
     console.error("加载用户信息异常：", e);
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+document.getElementById("uploadBtn").addEventListener("click", async () => {
+  const fileInput = document.getElementById("fileInput");
+  const file = fileInput.files[0];
+  if (!file) return alert("请选择文件");
+
+  const userId = localStorage.getItem("currentUserId");
+  if (!userId) return alert("请先登录");
+
+  // 文件名: userId + 时间戳 + 原文件名，避免重复
+  const fileName = `${userId}_${Date.now()}_${file.name}`;
+
+  // 上传到 Supabasephotos bucket
+  const { data, error } = await supabaseClient
+    .storage
+    .from("Supabasephotos")
+    .upload(fileName, file);
+
+  if (error) {
+    console.error(error);
+    return alert("上传失败: " + error.message);
+  }
+
+  // 获取 Public URL
+  const publicUrl = supabaseClient
+    .storage
+    .from("Supabasephotos")
+    .getPublicUrl(fileName).data.publicUrl;
+
+  // 保存到 recharge 表
+  const { data: rechargeData, error: rechargeError } = await supabaseClient
+    .from("recharge")
+    .insert([{ user_id: userId, image_url: publicUrl }]);
+
+  if (rechargeError) {
+    console.error(rechargeError);
+    return alert("保存记录失败");
+  }
+
+  alert("上传成功！文件 URL: " + publicUrl);
+});
