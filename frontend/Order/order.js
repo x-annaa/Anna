@@ -197,16 +197,15 @@ async function getTodayProgress() {
   const dailyLimit = levelData?.daily_limit || 10; // 如果没获取到，默认 10
 
   // 统计今日完成订单
-  const todayStart = new Date().toISOString().slice(0, 10);
-  const { count: todayCount } = await supabaseClient
-    .from("orders")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", window.currentUserId)
-    .eq("status", "completed")
-    .gte("created_at", todayStart);
+  const todayStart = new Date();
+todayStart.setHours(0, 0, 0, 0); // 今日 00:00:00
+const { count: todayCount } = await supabaseClient
+  .from("orders")
+  .select("id", { count: "exact", head: true })
+  .eq("user_id", window.currentUserId)
+  .eq("status", "completed")
+  .gte("created_at", todayStart.toISOString());
 
-  return { todayCount: todayCount || 0, dailyLimit };
-}
 
 /* ======================
    通用 Modal 管理
