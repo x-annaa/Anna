@@ -1,49 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>U9</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="index.css" />
+  <meta charset="UTF-8">
+  <title>U9 - Login & Register</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="index.css">
 
   <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- 全局 Supabase 初始化 -->
+  <script src="supabaseClient.js"></script>
 </head>
 <body>
   <div class="container">
     <h1>Welcome</h1>
 
+    <!-- Tab -->
     <div class="tab-container">
       <button id="showLogin" class="tab-btn active">Login</button>
       <button id="showRegister" class="tab-btn">Register</button>
     </div>
 
+    <!-- 登录表单 -->
     <div id="loginForm" class="form-container">
-      <input type="text" id="loginUsername" placeholder="Username" autocomplete="username" />
-      <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" />
-      <button type="button" class="toggle-password" data-target="loginPassword">👁️</button>
+      <input type="text" id="loginUsername" placeholder="Username">
+      <div class="password-wrapper">
+        <input type="password" id="loginPassword" placeholder="Password">
+        <button type="button" class="toggle-password" data-target="loginPassword">👁️</button>
+      </div>
       <button id="loginBtn">Login</button>
     </div>
 
+    <!-- 注册表单 -->
     <div id="registerForm" class="form-container hidden">
-      <input type="text" id="regUsername" placeholder="Username" autocomplete="username" />
-      <input type="password" id="regPassword" placeholder="Password" autocomplete="new-password" />
-      <button type="button" class="toggle-password" data-target="regPassword">👁️</button>
-      <input type="password" id="regConfirmPassword" placeholder="Confirm Password" autocomplete="new-password" />
-      <button type="button" class="toggle-password" data-target="regConfirmPassword">👁️</button>
-      <label><input type="checkbox" id="agreeTerms" /> I agree to the terms</label>
+      <input type="text" id="regUsername" placeholder="Username">
+      <div class="password-wrapper">
+        <input type="password" id="regPassword" placeholder="Password">
+        <button type="button" class="toggle-password" data-target="regPassword">👁️</button>
+      </div>
+      <div class="password-wrapper">
+        <input type="password" id="regConfirmPassword" placeholder="Confirm Password">
+        <button type="button" class="toggle-password" data-target="regConfirmPassword">👁️</button>
+      </div>
+      <label>
+        <input type="checkbox" id="agreeTerms"> I agree to the terms
+      </label>
       <button id="registerBtn">Register</button>
     </div>
   </div>
-
-  <!-- HOME 页面上传示例 -->
-  <div class="container" id="homeSection" style="display:none;">
-    <h2>Upload Screenshot</h2>
-    <input type="file" id="fileInput" />
-    <button id="uploadBtn">Upload</button>
-    <div id="uploadList"></div>
-  </div>
-
-  <script type="module" src="index.js"></script>
 </body>
+<!-- 业务逻辑 -->
+<script type="module" src="index.js"></script>
 </html>
