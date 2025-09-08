@@ -243,14 +243,13 @@ async function confirmAddCoins() {
   if (exchanging) return;
   exchanging = true;
 
-  const type = document.getElementById("availableLabel").dataset.type;
-  const amount = parseFloat(document.getElementById("addCoinsInput").value || "0");
-  const notice = document.getElementById("exchangeNotice");
-  if (notice) notice.style.display = "none";
-
-  if (isNaN(amount) || amount <= 0) { alert("请输入有效数量"); exchanging = false; return; }
-
   try {
+    const type = document.getElementById("availableLabel").dataset.type;
+    const amount = parseFloat(document.getElementById("addCoinsInput").value || "0");
+    const notice = document.getElementById("exchangeNotice");
+
+    if (!amount || amount <= 0) { alert("请输入有效数量"); return; }
+
     if (!window.currentUserId) throw new Error("用户未登录");
 
     const { data: user } = await supabaseClient
@@ -264,28 +263,24 @@ async function confirmAddCoins() {
     let balance = Number(user.balance || 0);
 
     if (type === "coins") {
-      // Coins -> Balance 兑换逻辑
+      // Coins -> Balance 必须今日任务完成
       const { todayCount, dailyLimit } = await getTodayProgress();
-
-      // 今日任务未完成禁止兑换 Coins -> Balance
-      if (todayCount > 0 && todayCount < dailyLimit) {
+      if (todayCount < dailyLimit) {
         if (notice) {
           notice.style.display = "block";
           notice.textContent = "⚠️ 今日订单任务未完成，无法将 Coins 转换为 Balance";
-        }
-        exchanging = false;
+        } 
         return;
       }
-
-      if (balance < amount) { alert("Balance 不足"); exchanging = false; return; }
-      balance -= amount;
-      coins += amount;
+      if (coins < amount) { alert("Coins 不足"); return; }
+      coins -= amount;
+      balance += amount;
 
     } else {
       // Balance -> Coins 永远允许
-      if (coins < amount) { alert("Coins 不足"); exchanging = false; return; }
-      coins -= amount;
-      balance += amount;
+      if (balance < amount) { alert("Balance 不足"); return; }
+      balance -= amount;
+      coins += amount;
     }
 
     await supabaseClient
@@ -293,14 +288,17 @@ async function confirmAddCoins() {
       .update({ coins, balance })
       .eq("id", window.currentUserId);
 
-    alert(`✅ 成功兑换 ${amount.toFixed(2)} ${type}`);
+    alert(`✅ 成功兑换 ${amount.toFixed(2)} ${type === "coins" ? 'Balance' : 'Coins'}`);
     closeExchangeModal();
     await loadCoinsOrderPage();
 
   } catch (e) {
     alert(e.message || "兑换失败");
   } finally {
-    exchanging = false;
+    exchanging = false;  // 确保按钮不会被锁死
+    if (document.getElementById("exchangeNotice")) {
+      document.getElementById("exchangeNotice").style.display = "none";
+    }
   }
 }
 
