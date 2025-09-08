@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   await loadUserInfo(username);
+  setupUpload(); // 初始化上传功能
 
   // ====== Logout 弹窗 ======
   const logoutBtn = document.getElementById("logoutBtn");
@@ -255,11 +256,6 @@ async function loadUserInfo(username) {
   }
 }
 
-
-
-
-
-
 // ======================
 // 上传充值截图功能
 // ======================
@@ -268,7 +264,6 @@ function setupUpload() {
   const fileInput = document.getElementById("fileInput");
   const uploadList = document.getElementById("uploadList");
 
-  // 加载用户上传记录
   async function loadUploads() {
     if (!currentUser) return;
 
@@ -298,9 +293,9 @@ function setupUpload() {
     if (!file) return alert("请选择文件");
     if (!currentUser) return alert("用户未登录");
 
-    // 生成安全文件名
     const safeFileName = `user_${currentUser.id}_${Date.now()}_${file.name.replace(/\s/g, '_')}`;
 
+    // 上传文件
     const { data: storageData, error: storageError } = await supabaseClient
       .storage
       .from("Supabasephotos")
@@ -312,10 +307,12 @@ function setupUpload() {
     }
 
     // 获取 Public URL
-    const publicUrl = supabaseClient
+    const { data: publicUrlData } = supabaseClient
       .storage
       .from("Supabasephotos")
-      .getPublicUrl(safeFileName).data.publicUrl;
+      .getPublicUrl(safeFileName);
+
+    const publicUrl = publicUrlData.publicUrl;
 
     // 保存到 recharge 表
     const { error: rechargeError } = await supabaseClient
@@ -328,15 +325,9 @@ function setupUpload() {
     }
 
     alert("上传成功！");
-    fileInput.value = ""; 
+    fileInput.value = "";
     loadUploads();
   });
 
-  // 页面加载时显示记录
   loadUploads();
 }
-
-// 页面加载完成后调用
-document.addEventListener("DOMContentLoaded", () => {
-  setupUpload();
-});
