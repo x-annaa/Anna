@@ -36,7 +36,7 @@
       <h2>📦 ORDER</h2>
       <div class="coins-box">
         💰 Coins: <span id="ordercoins">0</span>
-        <button id="addCoinsBtn" type="button" title="从余额兑换Coins">⇋</button>
+        <button id="addCoinsBtn" type="button" title="账户兑换">⇋</button>
       </div>
     </div>
 
@@ -53,15 +53,34 @@
       </ul>
     </div>
 
-    <!-- 兑换 Coins 弹窗 -->
-    <div id="addCoinsModal" class="modal">
+    <!-- Coins / Balance 兑换弹窗 -->
+    <div id="exchangeModal" class="modal">
       <div class="modal-content">
-        <h3>兑换 Coins</h3>
-        <p>请输入要兑换的数量：</p>
-        <input type="number" id="addCoinsInput" min="1" placeholder="输入数量" required />
+        <h3>💱 账户兑换</h3>
+
+        <!-- 选择兑换类型 -->
+        <label for="exchangeType">请选择兑换类型：</label>
+        <select id="exchangeType">
+          <option value="coins">兑换到 Coins</option>
+          <option value="balance">兑换到 Balance</option>
+        </select>
+
+        <!-- 显示账户余额 -->
+        <div id="exchangeInfo" class="exchange-info">
+          <p>可用 <span id="exchangeFromLabel">Balance</span>：<span id="exchangeAvailable">0.00</span></p>
+          <p id="orderLimitNotice" style="color:red;display:none;">
+            ⚠️ 请先完成今日订单任务后再进行兑换！
+          </p>
+        </div>
+
+        <!-- 输入兑换数量 -->
+        <label for="exchangeAmount">兑换数量：</label>
+        <input type="number" id="exchangeAmount" min="0.01" step="0.01" placeholder="输入数量" required />
+
+        <!-- 按钮 -->
         <div class="modal-actions">
-          <button id="cancelAddCoins" type="button">取消</button>
-          <button id="confirmAddCoins" type="button">确认</button>
+          <button id="cancelExchange" type="button">取消</button>
+          <button id="confirmExchange" type="button">确认</button>
         </div>
       </div>
     </div>
