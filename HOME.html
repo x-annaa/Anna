@@ -76,13 +76,6 @@
       <p class="platform"><strong>平台账号：</strong><span id="platformAccount">加载中...</span></p>
     </div>
 
-    <h3>上传充值截图</h3>
-    <input type="file" id="fileInput" />
-    <button id="uploadBtn">上传截图</button>
-
-    <h3>我的上传记录</h3>
-    <div id="uploadList"></div>
-
     <!-- 余额和提现区域 -->
     <div class="balance-box">
       <p><strong>Balance：</strong><span id="balance">0.00</span></p>
@@ -94,6 +87,15 @@
 
     <div class="my-buttons">
       <button id="logoutBtn">Logout</button>
+    </div>
+  </div>
+
+  <!-- Logout 确认弹窗 -->
+  <div id="logoutModal" class="modal">
+    <div class="modal-content">
+      <p>确定要退出吗？</p>
+      <button id="cancelLogout">否</button>
+      <button id="confirmLogout">确定</button>
     </div>
   </div>
 
@@ -150,36 +152,6 @@
       </div>
     </div>
   </div>
-
-  <!-- 充值窗口 -->
-<div id="depositModal" class="modal">
-  <div class="modal-content">
-    <h3>充值</h3>
-    <p>请输入充值金额并上传支付截图：</p>
-    
-    <input type="number" id="depositAmount" placeholder="输入充值金额" min="1" />
-    
-    <!-- 上传凭证 -->
-    <input type="file" id="depositProof" accept="image/*" />
-    
-    <div class="modal-actions">
-      <button id="cancelDeposit">取消</button>
-      <button id="confirmDeposit">提交</button>
-    </div>
-  </div>
-</div>
-
-  <!-- Logout 确认弹窗 -->
-  <div id="logoutModal" class="modal">
-    <div class="modal-content">
-      <p>确定要退出吗？</p>
-      <button id="cancelLogout">否</button>
-      <button id="confirmLogout">确定</button>
-    </div>
-  </div>
-
-  
-
 
   <!-- 底部导航栏 -->
   <div class="bottom-nav">
