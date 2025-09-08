@@ -1,9 +1,4 @@
 // ======================
-// 引入 Supabase 客户端
-// ======================
-import { supabaseClient } from './supabaseClient.js';
-
-// ======================
 // 当前登录用户
 // ======================
 let currentUser = null;
