@@ -1,7 +1,7 @@
-// 只初始化一次，全局挂载
-if (!window.supabaseClient) {
-  const SUPABASE_URL = "https://ffdrwsemmfvqlqhyjlnb.supabase.co";
-  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmZHJ3c2VtbWZ2cWxxaHlqbG5iLCJpYXQiOjE3NTYzMDI1ODQsImV4cCI6MjA3MTg3ODU4NH0.x7TQHZ2af8O_f9ye__mT6eVstlH9BiyVkNVaOnL3h74"; // ⚠️ 请换成你的 anon key
+// ⚡ 初始化 Supabase 客户端（前端安全使用 anon key）
+const SUPABASE_URL = "https://ffdrwsemmfvqlqhyjlnb.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmZHJ3c2VtbWZ2cWxxaHlqbG5iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMDI1ODQsImV4cCI6MjA3MTg3ODU4NH0.x7TQHZ2af8O_f9ye__mT6eVstlH9BiyVkNVaOnL3h74"; // 替换成你的匿名 key
 
+if (!window.supabaseClient) {
   window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 }
