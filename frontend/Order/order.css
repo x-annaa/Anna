@@ -63,10 +63,10 @@ h2, h3 {
 
 .coins-box button {
   margin-left: 8px;
-  padding: 2px 8px;
+  padding: 6px 10px;
   border: none;
-  border-radius: 50%;
-  background: #ff8800d9;
+  border-radius: 6px;
+  background: #1976d2;
   color: #fff;
   font-size: 18px;
   cursor: pointer;
@@ -74,7 +74,7 @@ h2, h3 {
 }
 
 .coins-box button:hover {
-  background: #388e3c;
+  background: #1565c0;
 }
 
 .order-actions {
@@ -163,7 +163,6 @@ button:disabled {
   left: 0;
   width: 100%;
   height: 100%;
-
   background-color: rgba(0,0,0,0.5);
   justify-content: center;
   align-items: center;
@@ -193,8 +192,7 @@ button:disabled {
   font-size: 0.95em;
 }
 
-.modal-content input,
-.modal-content select {
+.modal-content input {
   width: 85%;
   padding: 10px 12px;
   margin: 12px 0 18px 0;
@@ -205,8 +203,7 @@ button:disabled {
   transition: border-color 0.2s;
 }
 
-.modal-content input:focus,
-.modal-content select:focus {
+.modal-content input:focus {
   border-color: #1976d2;
   outline: none;
   box-shadow: 0 0 5px rgba(25,118,210,0.3);
@@ -229,7 +226,7 @@ button:disabled {
   transition: 0.2s;
 }
 
-/* ========= AddCoins 按钮 ========= */
+/* ========= AddCoins 弹窗按钮 ========= */
 #cancelAddCoins {
   background-color: #e0e0e0;
   color: #333;
@@ -245,32 +242,58 @@ button:disabled {
   background-color: #45a049;
 }
 
-/* ========= Balance/Coins 弹窗新增 ========= */
-#exchangeModal h3 {
-  color: #1976d2;
-}
-
-#exchangeNotice {
-  font-size: 0.85em;
-  color: #d32f2f;
-  margin-top: -8px;
+/* ========= Coins / Balance 切换按钮 ========= */
+.exchange-btns {
+  display: flex;
+  justify-content: space-around;
   margin-bottom: 12px;
 }
 
-#cancelExchange {
-  background-color: #e0e0e0;
-  color: #333;
-}
-#cancelExchange:hover {
-  background-color: #bdbdbd;
+.exchange-btns button {
+  flex: 1;
+  margin: 0 4px;
+  padding: 8px 0;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
-#confirmExchange {
+.exchange-btns button.active {
   background-color: #1976d2;
   color: #fff;
 }
-#confirmExchange:hover {
-  background-color: #1565c0;
+
+.exchange-btns button.inactive {
+  background-color: #e0e0e0;
+  color: #555;
+}
+
+#availableLabel {
+  font-size: 0.95em;
+  margin-bottom: 12px;
+  display: block;
+}
+
+/* ========= AddCoins/Balance确认取消按钮 ========= */
+#confirmAddCoins {
+  background-color: #4caf50;
+  color: #fff;
+}
+
+#confirmAddCoins:hover {
+  background-color: #45a049;
+}
+
+#cancelAddCoins {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+#cancelAddCoins:hover {
+  background-color: #bdbdbd;
 }
 
 /* ========= 弹窗渐显动画 ========= */
