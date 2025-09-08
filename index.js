@@ -1,12 +1,4 @@
 // =======================
-// 初始化 Supabase
-// =======================
-const supabaseClient = supabase.createClient(
-  "https://ffdrwsemmfvqlqhyjlnb.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmZHJ3c2VtbWZ2cWxxaHlqbG5iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMDI1ODQsImV4cCI6MjA3MTg3ODU4NH0.x7TQHZ2af8O_f9ye__mT6eVstlH9BiyVkNVaOnL3h74"
-);
-
-// =======================
 // 密码可见切换
 // =======================
 window.togglePassword = function (id, el) {
@@ -44,7 +36,7 @@ showRegisterBtn.addEventListener("click", () => {
 });
 
 // =======================
-// 生成随机平台账号（2位大写字母 + 4位数字）
+// 生成随机平台账号（2位大写字母 + 4位数字，如 AB1234）
 // =======================
 function generatePlatformAccount() {
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -56,7 +48,7 @@ function generatePlatformAccount() {
 }
 
 // =======================
-// 注册逻辑 (Supabase Auth)
+// 注册逻辑
 // =======================
 document.getElementById("registerBtn").addEventListener("click", async () => {
   const username = document.getElementById("regUsername").value.trim();
@@ -77,49 +69,51 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  // 注册到 Supabase Auth (用 username 拼接成假邮箱)
-  const { data, error } = await supabaseClient.auth.signUp({
-    email: username + "@example.com",
-    password: password
-  });
+  // 检查是否已有用户
+  const { data: exist } = await supabaseClient
+    .from("users")
+    .select("id")
+    .eq("username", username)
+    .maybeSingle();
 
-  if (error) {
-    alert("注册失败: " + error.message);
+  if (exist) {
+    alert("该用户名已存在，请换一个");
     return;
   }
 
   // 生成平台账号
   const platformAccount = generatePlatformAccount();
 
-  // 在 users 表插入数据，关联 auth_id
-  const { error: insertError } = await supabaseClient
+  // 插入新用户
+  const { data, error } = await supabaseClient
     .from("users")
     .insert({
-      auth_id: data.user.id, // 新增 auth_id 列
-      username: username,
+      username,
+      password, // ⚠️ 明文存储不安全，建议 hash
       coins: 0,
       balance: 0,
       traffic: 0,
       platform_account: platformAccount
-    });
+    })
+    .select()
+    .single();
 
-  if (insertError) {
-    alert("保存用户信息失败: " + insertError.message);
+  if (error) {
+    alert("注册失败: " + error.message);
     return;
   }
 
-  // 保存 Token
-  if (data.session) {
-    localStorage.setItem("currentUserToken", data.session.access_token);
-  }
-  localStorage.setItem("currentUser", username);
+  // 保存到 localStorage
+  localStorage.setItem("currentUserId", data.id);
+  localStorage.setItem("currentUser", data.username);
+  localStorage.setItem("platformAccount", data.platform_account);
 
   alert("注册成功！");
   window.location.href = "frontend/HOME.html";
 });
 
 // =======================
-// 登录逻辑 (Supabase Auth)
+// 登录逻辑
 // =======================
 document.getElementById("loginBtn").addEventListener("click", async () => {
   const username = document.getElementById("loginUsername").value.trim();
@@ -130,105 +124,30 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     return;
   }
 
-  const { data, error } = await supabaseClient.auth.signInWithPassword({
-    email: username + "@example.com",
-    password: password
-  });
+  const { data, error } = await supabaseClient
+    .from("users")
+    .select("id, username, password, platform_account")
+    .eq("username", username)
+    .maybeSingle();
 
   if (error) {
     alert("登录失败: " + error.message);
     return;
   }
+  if (!data) {
+    alert("用户不存在");
+    return;
+  }
+  if (data.password !== password) {
+    alert("密码错误");
+    return;
+  }
 
-  // 保存 Token
-  localStorage.setItem("currentUserToken", data.session.access_token);
-  localStorage.setItem("currentUser", username);
+  // 保存到 localStorage
+  localStorage.setItem("currentUserId", data.id);
+  localStorage.setItem("currentUser", data.username);
+  localStorage.setItem("platformAccount", data.platform_account);
 
   alert("登录成功！");
   window.location.href = "frontend/HOME.html";
 });
-
-// =======================
-// HOME 页面：上传截图
-// =======================
-async function setupUpload() {
-  const uploadBtn = document.getElementById("uploadBtn");
-  const fileInput = document.getElementById("fileInput");
-  const uploadList = document.getElementById("uploadList");
-
-  const currentUser = localStorage.getItem("currentUser");
-  if (!currentUser) {
-    alert("请先登录！");
-    window.location.href = "../index.html";
-    return;
-  }
-
-  async function loadUploads() {
-    const { data, error } = await supabaseClient
-      .from("recharge")
-      .select("image_url, created_at")
-      .eq("username", currentUser)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("加载上传记录失败:", error.message);
-      return;
-    }
-
-    uploadList.innerHTML = data.map(item => `
-      <div style="margin-bottom:10px;">
-        <a href="${item.image_url}" target="_blank">
-          <img src="${item.image_url}" width="100" style="border:1px solid #ccc;"/>
-        </a>
-        <span>${new Date(item.created_at).toLocaleString()}</span>
-      </div>
-    `).join("");
-  }
-
-  uploadBtn.addEventListener("click", async () => {
-    const file = fileInput.files[0];
-    if (!file) return alert("请选择文件");
-
-    const safeFileName = `${currentUser}_${Date.now()}_${file.name.replace(/\s/g, "_")}`;
-
-    // 上传文件
-    const { data: storageData, error: storageError } = await supabaseClient
-      .storage
-      .from("Supabasephotos")
-      .upload(safeFileName, file, {
-        upsert: false
-      });
-
-    if (storageError) {
-      console.error(storageError);
-      return alert("上传失败: " + storageError.message);
-    }
-
-    // 获取 Public URL
-    const { data: publicUrlData } = supabaseClient
-      .storage
-      .from("Supabasephotos")
-      .getPublicUrl(safeFileName);
-
-    const publicUrl = publicUrlData.publicUrl;
-
-    // 保存到 recharge 表
-    const { error: rechargeError } = await supabaseClient
-      .from("recharge")
-      .insert([{ username: currentUser, image_url: publicUrl }]);
-
-    if (rechargeError) {
-      console.error(rechargeError);
-      return alert("保存记录失败: " + rechargeError.message);
-    }
-
-    alert("上传成功！");
-    fileInput.value = "";
-    loadUploads();
-  });
-
-  loadUploads();
-}
-
-// 页面加载时调用
-document.addEventListener("DOMContentLoaded", setupUpload);
