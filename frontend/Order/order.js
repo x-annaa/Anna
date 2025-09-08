@@ -193,6 +193,9 @@ function openExchangeModal() {
   modal.style.display = "flex";
 
   document.getElementById("addCoinsInput").value = "";
+  const notice = document.getElementById("exchangeNotice");
+  if (notice) notice.style.display = "none";
+
   setExchangeType("coins");
 }
 
@@ -243,6 +246,7 @@ async function confirmAddCoins() {
   const type = document.getElementById("availableLabel").dataset.type;
   const amount = parseFloat(document.getElementById("addCoinsInput").value || "0");
   const notice = document.getElementById("exchangeNotice");
+  if (notice) notice.style.display = "none";
 
   if (isNaN(amount) || amount <= 0) { alert("请输入有效数量"); exchanging = false; return; }
 
@@ -262,9 +266,13 @@ async function confirmAddCoins() {
     if (type === "coins") {
       // Coins -> Balance 兑换逻辑
       const { todayCount, dailyLimit } = await getTodayProgress();
+
+      // 今日任务未完成禁止兑换 Coins -> Balance
       if (todayCount > 0 && todayCount < dailyLimit) {
-        notice.style.display = "block";
-        notice.textContent = "⚠️ 请先完成所有今日订单任务再转换";
+        if (notice) {
+          notice.style.display = "block";
+          notice.textContent = "⚠️ 今日订单任务未完成，无法将 Coins 转换为 Balance";
+        }
         exchanging = false;
         return;
       }
@@ -272,8 +280,9 @@ async function confirmAddCoins() {
       if (balance < amount) { alert("Balance 不足"); exchanging = false; return; }
       balance -= amount;
       coins += amount;
+
     } else {
-      // Balance -> Coins 不受今日任务限制
+      // Balance -> Coins 永远允许
       if (coins < amount) { alert("Coins 不足"); exchanging = false; return; }
       coins -= amount;
       balance += amount;
@@ -287,6 +296,7 @@ async function confirmAddCoins() {
     alert(`✅ 成功兑换 ${amount.toFixed(2)} ${type}`);
     closeExchangeModal();
     await loadCoinsOrderPage();
+
   } catch (e) {
     alert(e.message || "兑换失败");
   } finally {
