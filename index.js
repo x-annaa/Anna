@@ -1,54 +1,5 @@
 // =======================
-// 密码可见切换
-// =======================
-window.togglePassword = function (id, el) {
-  const input = document.getElementById(id);
-  if (!input) return;
-  if (input.type === "password") {
-    input.type = "text";
-    el.textContent = "🙈";
-  } else {
-    input.type = "password";
-    el.textContent = "👁️";
-  }
-};
-
-// =======================
-// 登录 / 注册 Tab 切换
-// =======================
-const loginForm = document.getElementById("loginForm");
-const registerForm = document.getElementById("registerForm");
-const showLoginBtn = document.getElementById("showLogin");
-const showRegisterBtn = document.getElementById("showRegister");
-
-showLoginBtn.addEventListener("click", () => {
-  loginForm.classList.remove("hidden");
-  registerForm.classList.add("hidden");
-  showLoginBtn.classList.add("active");
-  showRegisterBtn.classList.remove("active");
-});
-
-showRegisterBtn.addEventListener("click", () => {
-  loginForm.classList.add("hidden");
-  registerForm.classList.remove("hidden");
-  showLoginBtn.classList.remove("active");
-  showRegisterBtn.classList.add("active");
-});
-
-// =======================
-// 生成随机平台账号（2位大写字母 + 4位数字，如 AB1234）
-// =======================
-function generatePlatformAccount() {
-  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  const numbers = "0123456789";
-  let acc = "";
-  for (let i = 0; i < 2; i++) acc += letters[Math.floor(Math.random() * letters.length)];
-  for (let i = 0; i < 4; i++) acc += numbers[Math.floor(Math.random() * numbers.length)];
-  return acc;
-}
-
-// =======================
-// 注册逻辑
+// 注册逻辑 (Supabase Auth)
 // =======================
 document.getElementById("registerBtn").addEventListener("click", async () => {
   const username = document.getElementById("regUsername").value.trim();
@@ -69,51 +20,48 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  // 检查是否已有用户
-  const { data: exist } = await supabaseClient
-    .from("users")
-    .select("id")
-    .eq("username", username)
-    .maybeSingle();
-
-  if (exist) {
-    alert("该用户名已存在，请换一个");
-    return;
-  }
-
-  // 生成平台账号
-  const platformAccount = generatePlatformAccount();
-
-  // 插入新用户
-  const { data, error } = await supabaseClient
-    .from("users")
-    .insert({
-      username,
-      password, // ⚠️ 明文存储不安全，建议 hash
-      coins: 0,
-      balance: 0,
-      traffic: 0,
-      platform_account: platformAccount
-    })
-    .select()
-    .single();
+  // 注册到 Supabase Auth
+  const { data, error } = await supabaseClient.auth.signUp({
+    email: username + "@example.com", // ⚠️ 你也可以直接要求用户输入邮箱
+    password: password
+  });
 
   if (error) {
     alert("注册失败: " + error.message);
     return;
   }
 
-  // 保存到 localStorage
-  localStorage.setItem("currentUserId", data.id);
-  localStorage.setItem("currentUser", data.username);
-  localStorage.setItem("platformAccount", data.platform_account);
+  // 生成平台账号
+  const platformAccount = generatePlatformAccount();
+
+  // 在你自己的 users 表插入数据（关联 auth 用户）
+  const { error: insertError } = await supabaseClient
+    .from("users")
+    .insert({
+      auth_id: data.user.id, // 新增一列存 auth 用户的 id
+      username: username,
+      coins: 0,
+      balance: 0,
+      traffic: 0,
+      platform_account: platformAccount
+    });
+
+  if (insertError) {
+    alert("保存用户信息失败: " + insertError.message);
+    return;
+  }
+
+  // 保存 Token
+  if (data.session) {
+    localStorage.setItem("currentUserToken", data.session.access_token);
+  }
 
   alert("注册成功！");
   window.location.href = "frontend/HOME.html";
 });
 
 // =======================
-// 登录逻辑
+// 登录逻辑 (Supabase Auth)
 // =======================
 document.getElementById("loginBtn").addEventListener("click", async () => {
   const username = document.getElementById("loginUsername").value.trim();
@@ -124,29 +72,20 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     return;
   }
 
-  const { data, error } = await supabaseClient
-    .from("users")
-    .select("id, username, password, platform_account")
-    .eq("username", username)
-    .maybeSingle();
+  // 登录 Supabase Auth
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email: username + "@example.com", // ⚠️ 如果用邮箱注册，这里就直接用邮箱
+    password: password
+  });
 
   if (error) {
     alert("登录失败: " + error.message);
     return;
   }
-  if (!data) {
-    alert("用户不存在");
-    return;
-  }
-  if (data.password !== password) {
-    alert("密码错误");
-    return;
-  }
 
-  // 保存到 localStorage
-  localStorage.setItem("currentUserId", data.id);
-  localStorage.setItem("currentUser", data.username);
-  localStorage.setItem("platformAccount", data.platform_account);
+  // 保存 Token
+  localStorage.setItem("currentUserToken", data.session.access_token);
+  localStorage.setItem("currentUser", username);
 
   alert("登录成功！");
   window.location.href = "frontend/HOME.html";
