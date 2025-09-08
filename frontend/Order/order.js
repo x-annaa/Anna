@@ -414,64 +414,82 @@ async function loadLastOrder() {
 }
 
 /* ======================
-   Coins / Balance 弹窗
+   Coins / Balance 弹窗逻辑
    ====================== */
-function openExchangeModal() {
-  const modal = document.getElementById("exchangeModal");
-  if (modal) modal.style.display = "flex";
+let exchangeType = "coins"; // 默认兑换类型
+const addCoinsBtn = document.getElementById("addCoinsBtn");
+const addCoinsModal = document.getElementById("addCoinsModal");
+const selectCoinsBtn = document.getElementById("selectCoins");
+const selectBalanceBtn = document.getElementById("selectBalance");
+const availableLabel = document.getElementById("availableLabel");
+const addCoinsInput = document.getElementById("addCoinsInput");
+const cancelAddCoinsBtn = document.getElementById("cancelAddCoins");
+const confirmAddCoinsBtn = document.getElementById("confirmAddCoins");
 
-  // 初始化界面
-  document.getElementById("exchangeAmount").value = "";
-  document.getElementById("exchangeType").value = "coins";
-  document.getElementById("orderLimitNotice").style.display = "none";
-
-  // 加载余额
-  loadExchangeInfo();
+function openAddCoinsModal() {
+  if (!addCoinsModal) return;
+  addCoinsModal.style.display = "flex";
+  addCoinsInput.value = "";
+  setExchangeType("coins");
+  loadAddCoinsInfo();
 }
 
-function closeExchangeModal() {
-  const modal = document.getElementById("exchangeModal");
-  if (modal) modal.style.display = "none";
+function closeAddCoinsModal() {
+  if (!addCoinsModal) return;
+  addCoinsModal.style.display = "none";
 }
 
-async function loadExchangeInfo() {
+function setExchangeType(type) {
+  exchangeType = type;
+  if (type === "coins") {
+    selectCoinsBtn.classList.add("active");
+    selectCoinsBtn.classList.remove("inactive");
+    selectBalanceBtn.classList.add("inactive");
+    selectBalanceBtn.classList.remove("active");
+  } else {
+    selectBalanceBtn.classList.add("active");
+    selectBalanceBtn.classList.remove("inactive");
+    selectCoinsBtn.classList.add("inactive");
+    selectCoinsBtn.classList.remove("active");
+  }
+  loadAddCoinsInfo();
+}
+
+async function loadAddCoinsInfo() {
   if (!window.currentUserId) return;
+  try {
+    const { data: user, error } = await supabaseClient
+      .from("users")
+      .select("coins,balance")
+      .eq("id", window.currentUserId)
+      .single();
+    if (error || !user) throw new Error("获取用户信息失败");
 
-  const { data: user, error } = await supabaseClient
-    .from("users")
-    .select("coins, balance")
-    .eq("id", window.currentUserId)
-    .single();
-
-  if (!error && user) {
-    const type = document.getElementById("exchangeType").value;
-    const label = document.getElementById("exchangeFromLabel");
-    const available = document.getElementById("exchangeAvailable");
-
-    if (type === "coins") {
-      label.textContent = "Balance";
-      available.textContent = (Number(user.balance) || 0).toFixed(2);
+    if (exchangeType === "coins") {
+      availableLabel.textContent = `可用 Balance：${(Number(user.balance) || 0).toFixed(2)}`;
     } else {
-      label.textContent = "Coins";
-      available.textContent = (Number(user.coins) || 0).toFixed(2);
+      availableLabel.textContent = `可用 Coins：${(Number(user.coins) || 0).toFixed(2)}`;
     }
+  } catch (e) {
+    console.error(e);
   }
 }
 
-async function confirmExchange() {
+async function confirmAddCoins() {
   if (exchanging) return;
   exchanging = true;
 
-  const type = document.getElementById("exchangeType").value;
-  const amount = parseFloat(document.getElementById("exchangeAmount").value || "0");
-  const notice = document.getElementById("orderLimitNotice");
-
-  if (isNaN(amount) || amount <= 0) { alert("请输入有效数量"); exchanging = false; return; }
+  const amount = parseFloat(addCoinsInput.value || "0");
+  if (isNaN(amount) || amount <= 0) {
+    alert("请输入有效数量");
+    exchanging = false;
+    return;
+  }
 
   try {
     const { data: user, error } = await supabaseClient
       .from("users")
-      .select("coins, balance")
+      .select("coins,balance")
       .eq("id", window.currentUserId)
       .single();
     if (error || !user) throw new Error("加载用户信息失败");
@@ -479,14 +497,7 @@ async function confirmExchange() {
     let coins = Number(user.coins) || 0;
     let balance = Number(user.balance) || 0;
 
-    if (type === "coins") {
-      // Coins -> Balance 转换需要任务限制
-      const { todayCount, dailyLimit } = await getTodayProgress();
-      if (todayCount > 0 && todayCount < dailyLimit) {
-        notice.style.display = "block";
-        exchanging = false;
-        return;
-      }
+    if (exchangeType === "coins") {
       if (balance < amount) { alert("Balance 不足"); exchanging = false; return; }
       balance -= amount;
       coins += amount;
@@ -501,8 +512,8 @@ async function confirmExchange() {
       .update({ coins, balance })
       .eq("id", window.currentUserId);
 
-    alert(`✅ 成功兑换 ${amount.toFixed(2)} ${type}`);
-    closeExchangeModal();
+    alert(`✅ 成功兑换 ${amount.toFixed(2)} ${exchangeType}`);
+    closeAddCoinsModal();
     await refreshAll();
   } catch (e) {
     alert(e.message || "兑换失败");
@@ -510,3 +521,13 @@ async function confirmExchange() {
     exchanging = false;
   }
 }
+
+/* ======================
+   绑定按钮事件
+   ====================== */
+addCoinsBtn?.addEventListener("click", openAddCoinsModal);
+cancelAddCoinsBtn?.addEventListener("click", closeAddCoinsModal);
+confirmAddCoinsBtn?.addEventListener("click", confirmAddCoins);
+
+selectCoinsBtn?.addEventListener("click", () => setExchangeType("coins"));
+selectBalanceBtn?.addEventListener("click", () => setExchangeType("balance"));
