@@ -254,3 +254,85 @@ async function loadUserInfo(username) {
     console.error("加载用户信息异常：", e);
   }
 }
+
+// ====== 充值弹窗逻辑 ======
+const depositBtn = document.getElementById("depositBtn");
+const depositModal = document.getElementById("depositModal");
+const cancelDeposit = document.getElementById("cancelDeposit");
+const confirmDeposit = document.getElementById("confirmDeposit");
+const depositAmountInput = document.getElementById("depositAmount");
+const depositProofInput = document.getElementById("depositProof");
+
+// 打开充值弹窗
+depositBtn.addEventListener("click", () => {
+  depositAmountInput.value = "";
+  depositProofInput.value = "";
+  depositModal.style.display = "flex";
+});
+
+// 关闭充值弹窗
+cancelDeposit.addEventListener("click", () => {
+  depositModal.style.display = "none";
+});
+
+// 提交充值
+confirmDeposit.addEventListener("click", async () => {
+  const amount = parseFloat(depositAmountInput.value);
+  const file = depositProofInput.files[0];
+
+  if (!amount || amount <= 0) {
+    alert("请输入有效的充值金额");
+    return;
+  }
+  if (!file) {
+    alert("请上传支付截图");
+    return;
+  }
+
+  try {
+    // 生成唯一文件名
+    const timestamp = Date.now();
+    const ext = file.name.split(".").pop();
+    const fileName = `user_${currentUser.id}_${timestamp}.${ext}`;
+
+    // 上传到 Supabase Storage
+    const { data: uploadData, error: uploadError } = await supabaseClient.storage
+      .from("recharges")
+      .upload(fileName, file);
+
+    if (uploadError) {
+      console.error(uploadError);
+      alert("上传图片失败");
+      return;
+    }
+
+    // 获取公共访问 URL
+    const { data: publicURLData } = supabaseClient.storage
+      .from("recharges")
+      .getPublicUrl(fileName);
+
+    const proofURL = publicURLData.publicUrl;
+
+    // 插入 recharges 表
+    const { error: insertError } = await supabaseClient
+      .from("recharges")
+      .insert([{
+        user_id: currentUser.id,
+        amount: amount,
+        proof_url: proofURL,
+        status: "pending"
+      }]);
+
+    if (insertError) {
+      console.error(insertError);
+      alert("提交充值申请失败");
+      return;
+    }
+
+    alert("充值申请已提交，等待后台审核！");
+    depositModal.style.display = "none";
+  } catch (err) {
+    console.error(err);
+    alert("操作异常，请重试");
+  }
+});
