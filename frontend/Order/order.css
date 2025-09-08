@@ -56,17 +56,13 @@ h2, h3 {
   margin-bottom: 15px;
 }
 
-.coins-box {
-  font-weight: bold;
-  color: #2e7d32;
-}
-
+/* ========= Coins 兑换按钮（蓝色圆形） ========= */
 .coins-box button {
   margin-left: 8px;
-  padding: 2px 8px;
+  padding: 10px 12px;       /* 调整大小，让按钮圆润 */
   border: none;
-  border-radius: 50%;
-  background: #ff8800d9;
+  border-radius: 50%;        /* 完全圆形 */
+  background-color: #1976d2; /* 蓝色背景 */
   color: #fff;
   font-size: 18px;
   cursor: pointer;
@@ -74,8 +70,9 @@ h2, h3 {
 }
 
 .coins-box button:hover {
-  background: #388e3c;
+  background-color: #1565c0; /* 深蓝悬停效果 */
 }
+
 
 .order-actions {
   text-align: center;
