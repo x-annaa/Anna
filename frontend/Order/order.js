@@ -426,33 +426,56 @@ async function loadLastOrder() {
    Coins / Balance 弹窗
    ====================== */
 function openExchangeModal() {
-  const modal = document.getElementById("addCoinsModal");
-  const input = document.getElementById("addCoinsInput");
-  if (modal) {
-    modal.style.display = "flex";
-    if (input) { input.value = ""; setTimeout(() => input.focus(), 50); }
-  }
+  const modal = document.getElementById("exchangeModal");
+  if (modal) modal.style.display = "flex";
+
+  // 初始化界面
+  document.getElementById("exchangeAmount").value = "";
+  document.getElementById("exchangeType").value = "coins";
+  document.getElementById("orderLimitNotice").style.display = "none";
+
+  // 加载余额
+  loadExchangeInfo();
 }
 
 function closeExchangeModal() {
-  const modal = document.getElementById("addCoinsModal");
+  const modal = document.getElementById("exchangeModal");
   if (modal) modal.style.display = "none";
+}
+
+async function loadExchangeInfo() {
+  if (!window.currentUserId) return;
+
+  const { data: user, error } = await supabaseClient
+    .from("users")
+    .select("coins, balance")
+    .eq("id", window.currentUserId)
+    .single();
+
+  if (!error && user) {
+    const type = document.getElementById("exchangeType").value;
+    const label = document.getElementById("exchangeFromLabel");
+    const available = document.getElementById("exchangeAvailable");
+
+    if (type === "coins") {
+      label.textContent = "Balance";
+      available.textContent = (Number(user.balance) || 0).toFixed(2);
+    } else {
+      label.textContent = "Coins";
+      available.textContent = (Number(user.coins) || 0).toFixed(2);
+    }
+  }
 }
 
 async function confirmExchange() {
   if (exchanging) return;
   exchanging = true;
 
-  const inputEl = document.getElementById("addCoinsInput");
-  const typeEl = document.getElementById("exchangeType"); // Coins / Balance
-  const confirmBtn = document.getElementById("confirmAddCoins");
-  const amount = parseFloat(inputEl?.value || "0");
-  const type = typeEl?.value || "Coins";
+  const type = document.getElementById("exchangeType").value;
+  const amount = parseFloat(document.getElementById("exchangeAmount").value || "0");
+  const notice = document.getElementById("orderLimitNotice");
 
-  if (isNaN(amount) || amount <= 0) { alert("输入无效"); exchanging = false; return; }
-  if (!window.currentUserId) { alert("请先登录！"); exchanging = false; return; }
-
-  if (confirmBtn) confirmBtn.disabled = true;
+  if (isNaN(amount) || amount <= 0) { alert("请输入有效数量"); exchanging = false; return; }
 
   try {
     const { data: user, error } = await supabaseClient
@@ -465,43 +488,34 @@ async function confirmExchange() {
     let coins = Number(user.coins) || 0;
     let balance = Number(user.balance) || 0;
 
-    if (type === "Coins") {
-      // 必须检查今日任务
+    if (type === "coins") {
+      // Coins -> Balance 转换需要任务限制
       const { todayCount, dailyLimit } = await getTodayProgress();
       if (todayCount > 0 && todayCount < dailyLimit) {
-        alert(`请先完成今日任务 ${todayCount}/${dailyLimit} 再转换！`);
+        notice.style.display = "block";
+        exchanging = false;
         return;
       }
-      if (coins < amount) { alert(`Coins 不足，当前 Coins：¥${coins.toFixed(2)}`); return; }
-      coins -= amount;
-      balance += amount;
-    } else {
-      if (balance < amount) { alert(`Balance 不足，当前 Balance：¥${balance.toFixed(2)}`); return; }
+      if (balance < amount) { alert("Balance 不足"); exchanging = false; return; }
       balance -= amount;
       coins += amount;
+    } else {
+      if (coins < amount) { alert("Coins 不足"); exchanging = false; return; }
+      coins -= amount;
+      balance += amount;
     }
 
-    const { error: updateErr } = await supabaseClient
+    await supabaseClient
       .from("users")
       .update({ coins, balance })
       .eq("id", window.currentUserId);
-    if (updateErr) throw new Error("兑换失败：" + updateErr.message);
 
     alert(`✅ 成功兑换 ${amount.toFixed(2)} ${type}`);
-    document.getElementById("ordercoins").textContent = coins.toFixed(2);
-    const balEl = document.getElementById("balance");
-    if (balEl) balEl.textContent = balance.toFixed(2);
-
-    updateCoinsUI(coins);
-    await checkPendingLock();
-    await loadLastOrder();
-    await loadRecentOrders();
     closeExchangeModal();
-
+    await refreshAll();
   } catch (e) {
     alert(e.message || "兑换失败");
   } finally {
     exchanging = false;
-    if (confirmBtn) confirmBtn.disabled = false;
   }
 }
