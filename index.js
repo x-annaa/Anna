@@ -3,8 +3,8 @@
 // 初始化 Supabase
 // =======================
 const supabaseClient = supabase.createClient(
-  "https://YOUR_PROJECT_URL.supabase.co",
-  "YOUR_ANON_KEY"
+  "https://ffdrwsemmfvqlqhyjlnb.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmZHJ3c2VtbWZ2cWxxaHlqbG5iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMDI1ODQsImV4cCI6MjA3MTg3ODU4NH0.x7TQHZ2af8O_f9ye__mT6eVstlH9BiyVkNVaOnL3h74"
 );
 
 // =======================
@@ -116,7 +116,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   localStorage.setItem("currentUser", username);
 
   alert("注册成功！");
-  window.location.href = "frontend/HOME.html";
+  window.location.href = "HOME.html";
 });
 
 // =======================
