@@ -181,7 +181,6 @@ async function getTodayProgress() {
     .eq("status", "completed")
     .gte("created_at", new Date().toISOString().slice(0, 10));
 
-  // TODO: 从 level 表获取 dailyLimit，这里先写死 10
   const dailyLimit = 10;
   return { todayCount: todayCount || 0, dailyLimit };
 }
@@ -194,7 +193,6 @@ function openExchangeModal() {
   if (!modal) return;
   modal.style.display = "flex";
 
-  // 初始化界面
   document.getElementById("addCoinsInput").value = "";
   setExchangeType("coins");
 }
@@ -222,7 +220,6 @@ async function setExchangeType(type) {
     coinsBtn.classList.remove("active");
   }
 
-  // 显示可用余额
   if (!window.currentUserId) return;
   const { data: user } = await supabaseClient
     .from("users")
@@ -246,6 +243,7 @@ async function confirmAddCoins() {
 
   const type = document.getElementById("availableLabel").dataset.type;
   const amount = parseFloat(document.getElementById("addCoinsInput").value || "0");
+  const notice = document.getElementById("exchangeNotice");
 
   if (isNaN(amount) || amount <= 0) { alert("请输入有效数量"); exchanging = false; return; }
 
@@ -263,10 +261,19 @@ async function confirmAddCoins() {
     let balance = Number(user.balance || 0);
 
     if (type === "coins") {
+      // Coins -> Balance 需要完成今日订单任务
+      const { todayCount, dailyLimit } = await getTodayProgress();
+      if (todayCount < dailyLimit) {
+        notice.style.display = "block";
+        notice.textContent = "⚠️ 请先完成所有今日订单任务再转换";
+        exchanging = false;
+        return;
+      }
       if (balance < amount) { alert("Balance 不足"); exchanging = false; return; }
       balance -= amount;
       coins += amount;
     } else {
+      // Balance -> Coins 不受任务限制
       if (coins < amount) { alert("Coins 不足"); exchanging = false; return; }
       coins -= amount;
       balance += amount;
@@ -307,6 +314,15 @@ async function autoOrder() {
     if (coins < 50) {
       alert("你的余额不足，最少需要 50 coins");
       setOrderBtnDisabled(false);
+      ordering = false;
+      return;
+    }
+
+    // 检查今日任务是否完成
+    const { todayCount, dailyLimit } = await getTodayProgress();
+    if (todayCount < dailyLimit) {
+      alert(`⚠️ 今日订单任务未完成 (${todayCount}/${dailyLimit})，请完成后再下单`);
+      setOrderBtnDisabled(true, "今日订单任务未完成");
       ordering = false;
       return;
     }
