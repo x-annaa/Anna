@@ -259,7 +259,7 @@ async function autoOrder() {
     if (!product) product = await getRandomProduct();
 
     const price = Number(product.price) || 0;
-    const profit = +(price * 0.01).toFixed(2);
+    const profit = +(price * 0.01); // 利润 = 价格 * 1%
     const tempCoins = coins - price;
 
     // 扣除金币
