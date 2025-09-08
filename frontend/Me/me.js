@@ -255,6 +255,11 @@ async function loadUserInfo(username) {
   }
 }
 
+
+
+
+
+
 // ======================
 // 上传充值截图功能
 // ======================
@@ -293,8 +298,8 @@ function setupUpload() {
     if (!file) return alert("请选择文件");
     if (!currentUser) return alert("用户未登录");
 
-    // 保证文件名安全
-    const safeFileName = `user_${currentUser.id}_${Date.now()}_${file.name}`;
+    // 生成安全文件名
+    const safeFileName = `user_${currentUser.id}_${Date.now()}_${file.name.replace(/\s/g, '_')}`;
 
     const { data: storageData, error: storageError } = await supabaseClient
       .storage
@@ -331,7 +336,7 @@ function setupUpload() {
   loadUploads();
 }
 
-// 在 DOMContentLoaded 里面调用
+// 页面加载完成后调用
 document.addEventListener("DOMContentLoaded", () => {
   setupUpload();
 });
