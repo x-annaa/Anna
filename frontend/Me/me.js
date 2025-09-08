@@ -257,7 +257,7 @@ async function loadUserInfo(username) {
 }
 
 // ======================
-// 上传充值截图功能
+// 上传充值截图功能（使用用户会话上传）
 // ======================
 function setupUpload() {
   const uploadBtn = document.getElementById("uploadBtn");
@@ -295,8 +295,14 @@ function setupUpload() {
 
     const safeFileName = `user_${currentUser.id}_${Date.now()}_${file.name.replace(/\s/g, '_')}`;
 
+    // 创建一个使用当前登录用户 token 的 Supabase Client
+    const userClient = supabase.createClient(
+      supabaseClient.supabaseUrl,
+      localStorage.getItem("currentUserToken") // 这里需要在用户登录时保存 session.access_token
+    );
+
     // 上传文件
-    const { data: storageData, error: storageError } = await supabaseClient
+    const { data: storageData, error: storageError } = await userClient
       .storage
       .from("Supabasephotos")
       .upload(safeFileName, file);
@@ -307,7 +313,7 @@ function setupUpload() {
     }
 
     // 获取 Public URL
-    const { data: publicUrlData } = supabaseClient
+    const { data: publicUrlData } = userClient
       .storage
       .from("Supabasephotos")
       .getPublicUrl(safeFileName);
