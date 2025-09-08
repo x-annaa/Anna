@@ -174,6 +174,7 @@ async function checkPendingLock() {
 async function getTodayProgress() {
   if (!window.currentUserId) return { todayCount: 0, dailyLimit: 0 };
 
+  // 查询今天完成的订单数量
   const { count: todayCount } = await supabaseClient
     .from("orders")
     .select("id", { count: "exact", head: true })
@@ -181,10 +182,25 @@ async function getTodayProgress() {
     .eq("status", "completed")
     .gte("created_at", new Date().toISOString().slice(0, 10));
 
-  // TODO: 从 level 表获取 dailyLimit，这里先写死 10
-  const dailyLimit = 10;
-  return { todayCount: todayCount || 0, dailyLimit };
+  // 查询用户等级
+  const { data: user, error: userErr } = await supabaseClient
+    .from("users")
+    .select("level_id")
+    .eq("id", window.currentUserId)
+    .single();
+  if (userErr || !user) return { todayCount: todayCount || 0, dailyLimit: 0 };
+
+  // 查询等级表获取 daily_limit
+  const { data: levelData, error: levelErr } = await supabaseClient
+    .from("level")
+    .select("daily_limit")
+    .eq("id", user.level_id)
+    .single();
+  if (levelErr || !levelData) return { todayCount: todayCount || 0, dailyLimit: 10 };
+
+  return { todayCount: todayCount || 0, dailyLimit: levelData.daily_limit || 10 };
 }
+
 
 /* ======================
    通用 Modal 管理
