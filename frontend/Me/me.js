@@ -14,7 +14,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   await loadUserInfo(username);
-  setupUpload(); // 初始化上传功能
 
   // ====== Logout 弹窗 ======
   const logoutBtn = document.getElementById("logoutBtn");
@@ -254,86 +253,4 @@ async function loadUserInfo(username) {
   } catch (e) {
     console.error("加载用户信息异常：", e);
   }
-}
-
-// ======================
-// 上传充值截图功能（使用用户会话上传）
-// ======================
-function setupUpload() {
-  const uploadBtn = document.getElementById("uploadBtn");
-  const fileInput = document.getElementById("fileInput");
-  const uploadList = document.getElementById("uploadList");
-
-  async function loadUploads() {
-    if (!currentUser) return;
-
-    const { data, error } = await supabaseClient
-      .from("recharge")
-      .select("image_url, created_at")
-      .eq("user_id", currentUser.id)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("加载上传记录失败:", error.message);
-      return;
-    }
-
-    uploadList.innerHTML = data.map(item => `
-      <div style="margin-bottom:10px;">
-        <a href="${item.image_url}" target="_blank">
-          <img src="${item.image_url}" width="100" style="border:1px solid #ccc;"/>
-        </a>
-        <span>${new Date(item.created_at).toLocaleString()}</span>
-      </div>
-    `).join("");
-  }
-
-  uploadBtn.addEventListener("click", async () => {
-    const file = fileInput.files[0];
-    if (!file) return alert("请选择文件");
-    if (!currentUser) return alert("用户未登录");
-
-    const safeFileName = `user_${currentUser.id}_${Date.now()}_${file.name.replace(/\s/g, '_')}`;
-
-    // 创建一个使用当前登录用户 token 的 Supabase Client
-    const userClient = supabase.createClient(
-      supabaseClient.supabaseUrl,
-      localStorage.getItem("currentUserToken") // 这里需要在用户登录时保存 session.access_token
-    );
-
-    // 上传文件
-    const { data: storageData, error: storageError } = await userClient
-      .storage
-      .from("Supabasephotos")
-      .upload(safeFileName, file);
-
-    if (storageError) {
-      console.error(storageError);
-      return alert("上传失败: " + storageError.message);
-    }
-
-    // 获取 Public URL
-    const { data: publicUrlData } = userClient
-      .storage
-      .from("Supabasephotos")
-      .getPublicUrl(safeFileName);
-
-    const publicUrl = publicUrlData.publicUrl;
-
-    // 保存到 recharge 表
-    const { error: rechargeError } = await supabaseClient
-      .from("recharge")
-      .insert([{ user_id: currentUser.id, image_url: publicUrl }]);
-
-    if (rechargeError) {
-      console.error(rechargeError);
-      return alert("保存记录失败: " + rechargeError.message);
-    }
-
-    alert("上传成功！");
-    fileInput.value = "";
-    loadUploads();
-  });
-
-  loadUploads();
 }
