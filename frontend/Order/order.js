@@ -187,33 +187,104 @@ async function getTodayProgress() {
 }
 
 /* ======================
-   通用 Modal 管理
+   Coins / Balance 弹窗
    ====================== */
-function showModal(contentHtml) {
-  const modal = document.createElement("div");
-  modal.className = "modal";
+function openExchangeModal() {
+  const modal = document.getElementById("addCoinsModal");
+  if (!modal) return;
   modal.style.display = "flex";
-  modal.innerHTML = `
-    <div class="modal-content">
-      ${contentHtml}
-      <div class="modal-actions">
-        <button id="closeModalBtn">关闭</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(modal);
 
-  document.getElementById("closeModalBtn").addEventListener("click", () => {
-    modal.remove();
-  });
+  // 初始化界面
+  document.getElementById("addCoinsInput").value = "";
+  setExchangeType("coins");
+}
 
-  // ESC 关闭
-  document.addEventListener("keydown", function escHandler(e) {
-    if (e.key === "Escape") {
-      modal.remove();
-      document.removeEventListener("keydown", escHandler);
+function closeExchangeModal() {
+  const modal = document.getElementById("addCoinsModal");
+  if (!modal) return;
+  modal.style.display = "none";
+}
+
+async function setExchangeType(type) {
+  const coinsBtn = document.getElementById("selectCoins");
+  const balanceBtn = document.getElementById("selectBalance");
+  const label = document.getElementById("availableLabel");
+
+  if (type === "coins") {
+    coinsBtn.classList.add("active");
+    coinsBtn.classList.remove("inactive");
+    balanceBtn.classList.add("inactive");
+    balanceBtn.classList.remove("active");
+  } else {
+    balanceBtn.classList.add("active");
+    balanceBtn.classList.remove("inactive");
+    coinsBtn.classList.add("inactive");
+    coinsBtn.classList.remove("active");
+  }
+
+  // 显示可用余额
+  if (!window.currentUserId) return;
+  const { data: user } = await supabaseClient
+    .from("users")
+    .select("coins, balance")
+    .eq("id", window.currentUserId)
+    .single();
+  if (!user) return;
+
+  if (type === "coins") {
+    label.textContent = `可用 Balance：${(Number(user.balance) || 0).toFixed(2)}`;
+  } else {
+    label.textContent = `可用 Coins：${(Number(user.coins) || 0).toFixed(2)}`;
+  }
+
+  label.dataset.type = type;
+}
+
+async function confirmAddCoins() {
+  if (exchanging) return;
+  exchanging = true;
+
+  const type = document.getElementById("availableLabel").dataset.type;
+  const amount = parseFloat(document.getElementById("addCoinsInput").value || "0");
+
+  if (isNaN(amount) || amount <= 0) { alert("请输入有效数量"); exchanging = false; return; }
+
+  try {
+    if (!window.currentUserId) throw new Error("用户未登录");
+
+    const { data: user } = await supabaseClient
+      .from("users")
+      .select("coins, balance")
+      .eq("id", window.currentUserId)
+      .single();
+    if (!user) throw new Error("加载用户信息失败");
+
+    let coins = Number(user.coins || 0);
+    let balance = Number(user.balance || 0);
+
+    if (type === "coins") {
+      if (balance < amount) { alert("Balance 不足"); exchanging = false; return; }
+      balance -= amount;
+      coins += amount;
+    } else {
+      if (coins < amount) { alert("Coins 不足"); exchanging = false; return; }
+      coins -= amount;
+      balance += amount;
     }
-  });
+
+    await supabaseClient
+      .from("users")
+      .update({ coins, balance })
+      .eq("id", window.currentUserId);
+
+    alert(`✅ 成功兑换 ${amount.toFixed(2)} ${type}`);
+    closeExchangeModal();
+    await loadCoinsOrderPage();
+  } catch (e) {
+    alert(e.message || "兑换失败");
+  } finally {
+    exchanging = false;
+  }
 }
 
 /* ======================
@@ -226,7 +297,6 @@ async function autoOrder() {
   setOrderBtnDisabled(true, "下单中…");
 
   try {
-    // 用户信息
     const { data: user } = await supabaseClient
       .from("users")
       .select("coins")
@@ -235,13 +305,12 @@ async function autoOrder() {
     const coins = Number(user?.coins || 0);
 
     if (coins < 50) {
-      showModal(`<p>你的余额不足，最少需要 50 coins</p>`);
+      alert("你的余额不足，最少需要 50 coins");
       setOrderBtnDisabled(false);
       ordering = false;
       return;
     }
 
-    // 检查 pending
     const { data: pend } = await supabaseClient
       .from("orders")
       .select("id")
@@ -251,26 +320,25 @@ async function autoOrder() {
     if (pend?.length) {
       alert("您有未完成订单，请先完成订单再继续下单。");
       await checkPendingLock();
+      ordering = false;
       return;
     }
 
-    // 当前订单号
     const { data: orders } = await supabaseClient
       .from("orders")
       .select("id")
       .eq("user_id", window.currentUserId);
     const orderNumber = (orders?.length || 0) + 1;
 
-    // 检查手动规则
     let product;
     const ruleProductId = await getUserRuleProduct(window.currentUserId, orderNumber);
     if (ruleProductId) {
-      const { data: pData, error } = await supabaseClient
+      const { data: pData } = await supabaseClient
         .from("products")
         .select("*")
         .eq("id", ruleProductId)
         .single();
-      if (!error && pData) product = pData;
+      if (pData) product = pData;
     }
     if (!product) product = await getRandomProduct();
 
@@ -283,7 +351,7 @@ async function autoOrder() {
       .update({ coins: tempCoins })
       .eq("id", window.currentUserId);
 
-    const { data: newOrder, error: orderErr } = await supabaseClient
+    const { data: newOrder } = await supabaseClient
       .from("orders")
       .insert({
         user_id: window.currentUserId,
@@ -294,7 +362,6 @@ async function autoOrder() {
       })
       .select(`id, total_price, profit, status, created_at, products ( name )`)
       .single();
-    if (orderErr) throw new Error(orderErr.message);
 
     renderLastOrder(newOrder, tempCoins);
     updateCoinsUI(tempCoins);
@@ -309,62 +376,63 @@ async function autoOrder() {
 }
 
 /* ======================
-   最近订单 + 今日任务
+   最近订单
    ====================== */
 async function loadRecentOrders() {
   if (!window.currentUserId) return;
 
-  try {
-    const { data: recentOrders } = await supabaseClient
-      .from("orders")
-      .select(`id, total_price, profit, status, created_at, products ( name )`)
-      .eq("user_id", window.currentUserId)
-      .order("created_at", { ascending: false })
-      .limit(5);
+  const { data: recentOrders } = await supabaseClient
+    .from("orders")
+    .select(`id, total_price, profit, status, created_at, products ( name )`)
+    .eq("user_id", window.currentUserId)
+    .order("created_at", { ascending: false })
+    .limit(5);
 
-    const { count: totalCount } = await supabaseClient
-      .from("orders")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", window.currentUserId);
+  const { count: totalCount } = await supabaseClient
+    .from("orders")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", window.currentUserId);
 
-    const { todayCount, dailyLimit } = await getTodayProgress();
+  const { todayCount, dailyLimit } = await getTodayProgress();
 
-    const historyTitle = document.querySelector(".order-history h3");
-    if (historyTitle) {
-      historyTitle.textContent =
-        `🕘 最近订单 ⛞今日订单任务：${todayCount}/${dailyLimit} ♲总共：${totalCount || 0}单`;
+  const historyTitle = document.querySelector(".order-history h3");
+  if (historyTitle) {
+    historyTitle.textContent =
+      `🕘 最近订单 ⛞今日订单任务：${todayCount}/${dailyLimit} ♲总共：${totalCount || 0}单`;
+  }
+
+  const list = document.getElementById("recentOrders");
+  if (list) {
+    if (!recentOrders || recentOrders.length === 0) {
+      list.innerHTML = `<li>暂无订单！</li>`;
+    } else {
+      list.innerHTML = recentOrders.map(o => {
+        const price = Number(o.total_price) || 0;
+        const profit = Number(o.profit) || 0;
+        return `
+          <li>
+            🛒 ${o.products?.name || "未知商品"} /
+            ¥${price.toFixed(2)} /
+            利润 +¥${profit.toFixed(2)} /
+            状态：${o.status === "completed" ? "已完成" : "待完成"} /
+            <small>${new Date(o.created_at).toLocaleString()}</small>
+          </li>`;
+      }).join("");
     }
-
-    const list = document.getElementById("recentOrders");
-    if (list) {
-      if (!recentOrders || recentOrders.length === 0) {
-        list.innerHTML = `<li>暂无订单！</li>`;
-      } else {
-        list.innerHTML = recentOrders.map(o => {
-          const price = Number(o.total_price) || 0;
-          const profit = Number(o.profit) || 0;
-          return `
-            <li>
-              🛒 ${o.products?.name || "未知商品"} /
-              ¥${price.toFixed(2)} /
-              利润 +¥${profit.toFixed(2)} /
-              状态：${o.status === "completed" ? "已完成" : "待完成"} /
-              <small>${new Date(o.created_at).toLocaleString()}</small>
-            </li>`;
-        }).join("");
-      }
-    }
-  } catch (e) {
-    console.error("加载最近订单失败：", e);
   }
 }
 
+/* ======================
+   页面初始化
+   ====================== */
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
   document.getElementById("addCoinsBtn")?.addEventListener("click", openExchangeModal);
-  document.getElementById("cancelExchange")?.addEventListener("click", closeExchangeModal);
-  document.getElementById("confirmExchange")?.addEventListener("click", confirmExchange);
-  document.getElementById("exchangeType")?.addEventListener("change", loadExchangeInfo);
+  document.getElementById("cancelAddCoins")?.addEventListener("click", closeExchangeModal);
+  document.getElementById("confirmAddCoins")?.addEventListener("click", confirmAddCoins);
+
+  document.getElementById("selectCoins")?.addEventListener("click", () => setExchangeType("coins"));
+  document.getElementById("selectBalance")?.addEventListener("click", () => setExchangeType("balance"));
 
   refreshAll();
 });
@@ -412,122 +480,3 @@ async function loadLastOrder() {
   if (orders?.length) renderLastOrder(orders[0], user?.coins ?? 0);
   else document.getElementById("orderResult").innerHTML = "";
 }
-
-/* ======================
-   Coins / Balance 弹窗逻辑
-   ====================== */
-let exchangeType = "coins"; // 默认兑换类型
-const addCoinsBtn = document.getElementById("addCoinsBtn");
-const addCoinsModal = document.getElementById("addCoinsModal");
-const selectCoinsBtn = document.getElementById("selectCoins");
-const selectBalanceBtn = document.getElementById("selectBalance");
-const availableLabel = document.getElementById("availableLabel");
-const addCoinsInput = document.getElementById("addCoinsInput");
-const cancelAddCoinsBtn = document.getElementById("cancelAddCoins");
-const confirmAddCoinsBtn = document.getElementById("confirmAddCoins");
-
-function openAddCoinsModal() {
-  if (!addCoinsModal) return;
-  addCoinsModal.style.display = "flex";
-  addCoinsInput.value = "";
-  setExchangeType("coins");
-  loadAddCoinsInfo();
-}
-
-function closeAddCoinsModal() {
-  if (!addCoinsModal) return;
-  addCoinsModal.style.display = "none";
-}
-
-function setExchangeType(type) {
-  exchangeType = type;
-  if (type === "coins") {
-    selectCoinsBtn.classList.add("active");
-    selectCoinsBtn.classList.remove("inactive");
-    selectBalanceBtn.classList.add("inactive");
-    selectBalanceBtn.classList.remove("active");
-  } else {
-    selectBalanceBtn.classList.add("active");
-    selectBalanceBtn.classList.remove("inactive");
-    selectCoinsBtn.classList.add("inactive");
-    selectCoinsBtn.classList.remove("active");
-  }
-  loadAddCoinsInfo();
-}
-
-async function loadAddCoinsInfo() {
-  if (!window.currentUserId) return;
-  try {
-    const { data: user, error } = await supabaseClient
-      .from("users")
-      .select("coins,balance")
-      .eq("id", window.currentUserId)
-      .single();
-    if (error || !user) throw new Error("获取用户信息失败");
-
-    if (exchangeType === "coins") {
-      availableLabel.textContent = `可用 Balance：${(Number(user.balance) || 0).toFixed(2)}`;
-    } else {
-      availableLabel.textContent = `可用 Coins：${(Number(user.coins) || 0).toFixed(2)}`;
-    }
-  } catch (e) {
-    console.error(e);
-  }
-}
-
-async function confirmAddCoins() {
-  if (exchanging) return;
-  exchanging = true;
-
-  const amount = parseFloat(addCoinsInput.value || "0");
-  if (isNaN(amount) || amount <= 0) {
-    alert("请输入有效数量");
-    exchanging = false;
-    return;
-  }
-
-  try {
-    const { data: user, error } = await supabaseClient
-      .from("users")
-      .select("coins,balance")
-      .eq("id", window.currentUserId)
-      .single();
-    if (error || !user) throw new Error("加载用户信息失败");
-
-    let coins = Number(user.coins) || 0;
-    let balance = Number(user.balance) || 0;
-
-    if (exchangeType === "coins") {
-      if (balance < amount) { alert("Balance 不足"); exchanging = false; return; }
-      balance -= amount;
-      coins += amount;
-    } else {
-      if (coins < amount) { alert("Coins 不足"); exchanging = false; return; }
-      coins -= amount;
-      balance += amount;
-    }
-
-    await supabaseClient
-      .from("users")
-      .update({ coins, balance })
-      .eq("id", window.currentUserId);
-
-    alert(`✅ 成功兑换 ${amount.toFixed(2)} ${exchangeType}`);
-    closeAddCoinsModal();
-    await refreshAll();
-  } catch (e) {
-    alert(e.message || "兑换失败");
-  } finally {
-    exchanging = false;
-  }
-}
-
-/* ======================
-   绑定按钮事件
-   ====================== */
-addCoinsBtn?.addEventListener("click", openAddCoinsModal);
-cancelAddCoinsBtn?.addEventListener("click", closeAddCoinsModal);
-confirmAddCoinsBtn?.addEventListener("click", confirmAddCoins);
-
-selectCoinsBtn?.addEventListener("click", () => setExchangeType("coins"));
-selectBalanceBtn?.addEventListener("click", () => setExchangeType("balance"));
