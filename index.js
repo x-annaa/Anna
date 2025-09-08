@@ -1,29 +1,21 @@
-<script type="module">
-// =======================
-// 初始化 Supabase
-// =======================
-const supabaseClient = supabase.createClient(
-  "https://ffdrwsemmfvqlqhyjlnb.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmZHJ3c2VtbWZ2cWxxaHlqbG5iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMDI1ODQsImV4cCI6MjA3MTg3ODU4NH0.x7TQHZ2af8O_f9ye__mT6eVstlH9BiyVkNVaOnL3h74"
-);
+// index.js
+import { supabaseClient } from './supabaseClient.js';
 
 // =======================
 // 密码可见切换
 // =======================
-window.togglePassword = function (id, el) {
-  const input = document.getElementById(id);
-  if (!input) return;
-  if (input.type === "password") {
-    input.type = "text";
-    el.textContent = "🙈";
-  } else {
-    input.type = "password";
-    el.textContent = "👁️";
-  }
-};
+document.querySelectorAll(".toggle-password").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const inputId = btn.dataset.target;
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    input.type = input.type === "password" ? "text" : "password";
+    btn.textContent = input.type === "password" ? "👁️" : "🙈";
+  });
+});
 
 // =======================
-// 登录 / 注册 Tab 切换
+// 登录/注册 Tab 切换
 // =======================
 const loginForm = document.getElementById("loginForm");
 const registerForm = document.getElementById("registerForm");
@@ -57,7 +49,7 @@ function generatePlatformAccount() {
 }
 
 // =======================
-// 注册逻辑 (Supabase Auth)
+// 注册逻辑
 // =======================
 document.getElementById("registerBtn").addEventListener("click", async () => {
   const username = document.getElementById("regUsername").value.trim();
@@ -65,53 +57,25 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   const confirm = document.getElementById("regConfirmPassword").value;
   const agree = document.getElementById("agreeTerms").checked;
 
-  if (!username || !password) {
-    alert("请输入用户名和密码");
-    return;
-  }
-  if (password !== confirm) {
-    alert("两次输入的密码不一致");
-    return;
-  }
-  if (!agree) {
-    alert("请先勾选同意条款");
-    return;
-  }
+  if (!username || !password) return alert("请输入用户名和密码");
+  if (password !== confirm) return alert("两次输入的密码不一致");
+  if (!agree) return alert("请先勾选同意条款");
 
-  // 注册到 Supabase Auth (username 拼接成假邮箱)
   const { data, error } = await supabaseClient.auth.signUp({
     email: username + "@example.com",
-    password: password
+    password
   });
-
-  if (error) {
-    alert("注册失败: " + error.message);
-    return;
-  }
+  if (error) return alert("注册失败: " + error.message);
 
   const userId = data.user.id;
-
-  // 生成平台账号
   const platformAccount = generatePlatformAccount();
 
-  // 插入用户资料
   const { error: insertError } = await supabaseClient
     .from("users")
-    .insert({
-      auth_id: userId,
-      username: username,
-      coins: 0,
-      balance: 0,
-      traffic: 0,
-      platform_account: platformAccount
-    });
+    .insert({ auth_id: userId, username, coins: 0, balance: 0, traffic: 0, platform_account: platformAccount });
 
-  if (insertError) {
-    alert("保存用户信息失败: " + insertError.message);
-    return;
-  }
+  if (insertError) return alert("保存用户信息失败: " + insertError.message);
 
-  // 保存到 localStorage
   localStorage.setItem("currentUserId", userId);
   localStorage.setItem("currentUser", username);
 
@@ -120,41 +84,31 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
 });
 
 // =======================
-// 登录逻辑 (Supabase Auth)
+// 登录逻辑
 // =======================
 document.getElementById("loginBtn").addEventListener("click", async () => {
   const username = document.getElementById("loginUsername").value.trim();
   const password = document.getElementById("loginPassword").value;
 
-  if (!username || !password) {
-    alert("请输入用户名和密码");
-    return;
-  }
+  if (!username || !password) return alert("请输入用户名和密码");
 
   const { data, error } = await supabaseClient.auth.signInWithPassword({
     email: username + "@example.com",
-    password: password
+    password
   });
+  if (error) return alert("登录失败: " + error.message);
 
-  if (error) {
-    alert("登录失败: " + error.message);
-    return;
-  }
-
-  const userId = data.user.id;
-
-  // 保存到 localStorage
-  localStorage.setItem("currentUserId", userId);
+  localStorage.setItem("currentUserId", data.user.id);
   localStorage.setItem("currentUser", username);
 
   alert("登录成功！");
-  window.location.href = "frontend/HOME.html";
+  window.location.href = "HOME.html";
 });
 
 // =======================
-// HOME 页面：上传截图
+// 上传截图逻辑（HOME 页面）
 // =======================
-async function setupUpload() {
+export async function setupUpload() {
   const uploadBtn = document.getElementById("uploadBtn");
   const fileInput = document.getElementById("fileInput");
   const uploadList = document.getElementById("uploadList");
@@ -162,7 +116,7 @@ async function setupUpload() {
   const currentUserId = localStorage.getItem("currentUserId");
   if (!currentUserId) {
     alert("请先登录！");
-    window.location.href = "../index.html";
+    window.location.href = "index.html";
     return;
   }
 
@@ -173,10 +127,7 @@ async function setupUpload() {
       .eq("user_id", currentUserId)
       .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error("加载上传记录失败:", error.message);
-      return;
-    }
+    if (error) return console.error(error.message);
 
     uploadList.innerHTML = data.map(item => `
       <div style="margin-bottom:10px;">
@@ -194,18 +145,13 @@ async function setupUpload() {
 
     const safeFileName = `${currentUserId}_${Date.now()}_${file.name.replace(/\s/g, "_")}`;
 
-    // 上传文件
     const { data: storageData, error: storageError } = await supabaseClient
       .storage
       .from("Supabasephotos")
       .upload(safeFileName, file, { upsert: false });
 
-    if (storageError) {
-      console.error(storageError);
-      return alert("上传失败: " + storageError.message);
-    }
+    if (storageError) return alert("上传失败: " + storageError.message);
 
-    // 获取 Public URL
     const { data: publicUrlData } = supabaseClient
       .storage
       .from("Supabasephotos")
@@ -213,15 +159,11 @@ async function setupUpload() {
 
     const publicUrl = publicUrlData.publicUrl;
 
-    // 保存到 recharge 表
     const { error: rechargeError } = await supabaseClient
       .from("recharge")
       .insert([{ user_id: currentUserId, image_url: publicUrl }]);
 
-    if (rechargeError) {
-      console.error(rechargeError);
-      return alert("保存记录失败: " + rechargeError.message);
-    }
+    if (rechargeError) return alert("保存记录失败: " + rechargeError.message);
 
     alert("上传成功！");
     fileInput.value = "";
@@ -231,6 +173,7 @@ async function setupUpload() {
   loadUploads();
 }
 
-// 页面加载时调用
-document.addEventListener("DOMContentLoaded", setupUpload);
-</script>
+// 页面加载时，如果是 HOME 页面就调用
+document.addEventListener("DOMContentLoaded", () => {
+  if (document.getElementById("uploadBtn")) setupUpload();
+});
