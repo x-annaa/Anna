@@ -1,5 +1,5 @@
 // ======================
-// Order Page JS
+// Order Page JS - 完整版
 // ======================
 
 // Supabase 客户端
@@ -16,15 +16,17 @@ const orderResult = document.getElementById("orderResult");
 
 let currentTask = null; // 当前任务对象
 let coins = 0;          // 用户 Coins
+let ordering = false;   // 防止并发刷单
 
 // ======================
-// 获取随机产品（调试版）
+// 获取随机产品
 // ======================
 async function getRandomProduct() {
   const { data: products, error } = await supabaseClient
     .from("products")
     .select("*")
-    .eq("enabled", true); // 先只过滤 enabled，不管 manual_only
+    .eq("enabled", true)
+    .eq("manual_only", false);
 
   if (error) {
     console.error("读取产品失败:", error);
@@ -36,15 +38,11 @@ async function getRandomProduct() {
     throw new Error("产品列表为空");
   }
 
-  console.log("随机匹配产品候选:", products);
-
-  // 随机返回一个
   return products[Math.floor(Math.random() * products.length)];
 }
 
-
 // ======================
-// 工具函数 - 获取用户手动规则的产品
+// 获取用户手动规则产品
 // ======================
 async function getUserRuleProduct(userId, orderNumber) {
   const { data: rules, error } = await supabaseClient
@@ -68,6 +66,8 @@ async function getUserRuleProduct(userId, orderNumber) {
 async function loadCoins() {
   const userId = localStorage.getItem("currentUserId");
 
+  if (!userId) return;
+
   const { data, error } = await supabaseClient
     .from("users")
     .select("coins")
@@ -80,7 +80,7 @@ async function loadCoins() {
   }
 
   coins = data.coins || 0;
-  orderCoinsEl.textContent = coins;
+  orderCoinsEl.textContent = coins.toFixed(2);
 }
 
 // ======================
@@ -98,7 +98,7 @@ async function updateCoins(newCoins) {
     console.error("更新 Coins 出错:", error.message);
   } else {
     coins = newCoins;
-    orderCoinsEl.textContent = coins;
+    orderCoinsEl.textContent = coins.toFixed(2);
   }
 }
 
@@ -159,17 +159,21 @@ taskOptions.forEach(btn => {
 });
 
 // ======================
-// 刷单逻辑 (自动匹配产品 / 手动规则 / 随机产品)
+// 刷单逻辑 (随机产品 + 手动规则)
 // ======================
 autoOrderBtn.addEventListener("click", async () => {
   if (!currentTask) return;
+  if (ordering) return;
+
+  ordering = true;
 
   const userId = localStorage.getItem("currentUserId");
-  const orderNumber = currentTask.completed_orders + 1; // 当前第几单
+  const orderNumber = currentTask.completed_orders + 1;
 
   try {
-    // 先查手动规则
     let product = null;
+
+    // 先查手动规则
     const ruleProductId = await getUserRuleProduct(userId, orderNumber);
     if (ruleProductId) {
       const { data: pData, error } = await supabaseClient
@@ -181,16 +185,15 @@ autoOrderBtn.addEventListener("click", async () => {
     }
 
     // 没有规则 -> 随机产品
-    if (!product) {
-      product = await getRandomProduct();
-    }
+    if (!product) product = await getRandomProduct();
 
     const price = Number(product.price) || 0;
     const profit = +(price * 0.1).toFixed(2);
 
+    // 执行一单刷单
     if (currentTask.completed_orders < currentTask.total_orders) {
       currentTask.completed_orders++;
-      currentTask.task_balance += profit; // 返还利润
+      currentTask.task_balance += price + profit;
 
       renderTaskProgress();
 
@@ -206,11 +209,16 @@ autoOrderBtn.addEventListener("click", async () => {
       if (error) console.error("更新任务出错:", error.message);
     }
 
+    // 检查是否完成任务
     if (currentTask.completed_orders >= currentTask.total_orders) {
       showDoneButton();
     }
+
   } catch (err) {
-    alert(err.message || "刷单失败");
+    console.error("刷单失败:", err);
+    alert("刷单失败，请重试");
+  } finally {
+    ordering = false;
   }
 });
 
@@ -218,6 +226,7 @@ autoOrderBtn.addEventListener("click", async () => {
 // 渲染任务进度
 // ======================
 function renderTaskProgress() {
+  if (!currentTask) return;
   orderResult.innerHTML = `
     当前任务：${currentTask.task_amount} - ${currentTask.completed_orders}/${currentTask.total_orders} 单
     <br>任务余额：${currentTask.task_balance.toFixed(2)}
@@ -233,6 +242,7 @@ function showDoneButton() {
   const doneBtn = document.createElement("button");
   doneBtn.textContent = "Done ✅";
   doneBtn.addEventListener("click", async () => {
+    // 返回 Coins
     await updateCoins(coins + currentTask.task_balance);
 
     // 更新任务状态
