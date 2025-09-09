@@ -79,14 +79,14 @@ function renderLastOrder(order, coinsRaw) {
 
   const coins = Number(coinsRaw) || 0;
   const price = Number(order.total_price) || 0;
-  const profit = Number(order.profit) || 0;
-  const profitRatio = Number(order.products?.profit) || 0; // 数据库 profit
+  const profit = Number(order.profit) || 0; 
+  const profitRatio = Number(order.products?.profit) || 0; // 数据库设置的比例
 
   let html = `
     <h3>✅ 最近一次订单</h3>
     <p>商品：${order.products?.name || "未知商品"}</p>
     <p>价格：¥${price.toFixed(2)}</p>
-    <p>利润：<span style="color:green;">+¥${profit.toFixed(2)}</span>（比例：${(profitRatio*100).toFixed(0)}%）</p>
+    <p>利润：${profitRatio}</p>
     <p>收入：+¥${profit.toFixed(2)}</p>
     <p>状态：${order.status === "completed" ? "✅ 已完成" : "⏳ 待完成"}</p>
     <p>时间：${new Date(order.created_at).toLocaleString()}</p>
@@ -325,7 +325,8 @@ async function loadRecentOrders() {
             <li>
               🛒 ${o.products?.name || "未知商品"} /
               ¥${price.toFixed(2)} /
-              利润 +¥${profit.toFixed(2)}（比例：${(profitRatio*100).toFixed(0)}%） /
+              利润：${profitRatio} /
+              收入：+¥${profit.toFixed(2)} /
               状态：${o.status === "completed" ? "已完成" : "待完成"} /
               <small>${new Date(o.created_at).toLocaleString()}</small>
             </li>`;
