@@ -1,5 +1,3 @@
-
-
 /* ======================
    初始化用户信息
    ====================== */
@@ -610,3 +608,4 @@ async function confirmExchange() {
     exchanging = false;
     if (confirmBtn) confirmBtn.disabled = false;
   }
+}
