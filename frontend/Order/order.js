@@ -114,7 +114,7 @@ function renderLastOrder(order, coinsRaw) {
   const coins = Number(coinsRaw) || 0;
   const price = Number(order.total_price) || 0;
   const profitRatio = Number(order.products?.profit) || 0; // 数据库 profit
-  const profitDb = profitRatio; // 直接显示比例字段
+  const profitDb = profitRatio; // 直接显示数据库 profit
 
   let html = `
     <h3>✅ 最近一次订单</h3>
@@ -311,6 +311,75 @@ async function autoOrder() {
 }
 
 /* ======================
+   最近订单
+   ====================== */
+async function loadRecentOrders() {
+  if (!window.currentUserId) return;
+
+  try {
+    const { data: recentOrders } = await supabaseClient
+      .from("orders")
+      .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
+      .eq("user_id", window.currentUserId)
+      .order("created_at", { ascending: false })
+      .limit(5);
+
+    const { count: totalCount } = await supabaseClient
+      .from("orders")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", window.currentUserId);
+
+    const historyTitle = document.querySelector(".order-history h3");
+    if (historyTitle) {
+      historyTitle.textContent = `🕘 最近订单 订单数：${totalCount || 0}单`;
+    }
+
+    const list = document.getElementById("recentOrders");
+    if (list) {
+      if (!recentOrders || recentOrders.length === 0) {
+        list.innerHTML = `<li>暂无订单！</li>`;
+      } else {
+        list.innerHTML = recentOrders.map(o => {
+          const price = Number(o.total_price) || 0;
+          const profit = Number(o.profit) || 0;
+          const profitRatio = Number(o.products?.profit) || 0;
+          return `
+            <li>
+              🛒 ${o.products?.name || "未知商品"} /
+              ¥${price.toFixed(2)} /
+              利润：${profitRatio} /
+              状态：${o.status === "completed" ? "已完成" : "待完成"} /
+              <small>${new Date(o.created_at).toLocaleString()}</small>
+            </li>`;
+        }).join("");
+      }
+    }
+  } catch (e) {
+    console.error("加载最近订单失败：", e);
+  }
+}
+
+/* ======================
+   检查 pending 订单锁定按钮
+   ====================== */
+async function checkPendingLock() {
+  if (!window.currentUserId) return;
+
+  const { data: pend } = await supabaseClient
+    .from("orders")
+    .select("id")
+    .eq("user_id", window.currentUserId)
+    .eq("status", "pending")
+    .limit(1);
+
+  if (pend?.length) {
+    setOrderBtnDisabled(true, "存在未完成订单，请先完成订单");
+  } else {
+    setOrderBtnDisabled(false);
+  }
+}
+
+/* ======================
    页面初始化
    ====================== */
 document.addEventListener("DOMContentLoaded", () => {
@@ -356,24 +425,3 @@ async function loadLastOrder() {
   if (orders?.length) renderLastOrder(orders[0], user?.coins ?? 0);
   else document.getElementById("orderResult").innerHTML = "";
 }
-
-/* ======================
-   检查 pending 订单锁定按钮
-   ====================== */
-async function checkPendingLock() {
-  if (!window.currentUserId) return;
-
-  const { data: pend } = await supabaseClient
-    .from("orders")
-    .select("id")
-    .eq("user_id", window.currentUserId)
-    .eq("status", "pending")
-    .limit(1);
-
-  if (pend?.length) {
-    setOrderBtnDisabled(true, "存在未完成订单，请先完成订单");
-  } else {
-    setOrderBtnDisabled(false);
-  }
-}
-
