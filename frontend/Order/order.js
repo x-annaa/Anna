@@ -464,3 +464,45 @@ async function confirmExchange() {
     if (confirmBtn) confirmBtn.disabled = false;
   }
 }
+
+/* ======================
+   最近订单列表
+   ====================== */
+async function loadRecentOrders() {
+  if (!window.currentUserId) return;
+
+  const { data: orders, error } = await supabaseClient
+    .from("orders")
+    .select(`id, total_price, profit, status, created_at, products ( name )`)
+    .eq("user_id", window.currentUserId)
+    .order("created_at", { ascending: false })
+    .limit(10); // 最近 10 条
+
+  if (error) {
+    console.error("加载最近订单失败", error);
+    return;
+  }
+
+  const el = document.getElementById("recentOrders");
+  if (!el) return;
+
+  if (!orders?.length) {
+    el.innerHTML = "<p>暂无最近订单</p>";
+    return;
+  }
+
+  el.innerHTML = `
+    <h3>📜 最近订单</h3>
+    <ul>
+      ${orders.map(o => `
+        <li>
+          [${new Date(o.created_at).toLocaleString()}] 
+          ${o.products?.name || "未知商品"} 
+          - ¥${o.total_price} 
+          (${o.status === "completed" ? "✅ 完成" : "⏳ 待完成"})
+        </li>
+      `).join("")}
+    </ul>
+  `;
+}
+
