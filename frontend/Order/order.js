@@ -356,3 +356,24 @@ async function loadLastOrder() {
   if (orders?.length) renderLastOrder(orders[0], user?.coins ?? 0);
   else document.getElementById("orderResult").innerHTML = "";
 }
+
+/* ======================
+   检查 pending 订单锁定按钮
+   ====================== */
+async function checkPendingLock() {
+  if (!window.currentUserId) return;
+
+  const { data: pend } = await supabaseClient
+    .from("orders")
+    .select("id")
+    .eq("user_id", window.currentUserId)
+    .eq("status", "pending")
+    .limit(1);
+
+  if (pend?.length) {
+    setOrderBtnDisabled(true, "存在未完成订单，请先完成订单");
+  } else {
+    setOrderBtnDisabled(false);
+  }
+}
+
