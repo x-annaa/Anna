@@ -204,6 +204,7 @@ async function completeOrder(order, currentCoinsRaw) {
     const profit = Number(order.profit) || 0;
     const finalCoins = currentCoins + price + profit;
 
+    // 标记订单完成
     const { error: orderErr } = await supabaseClient
       .from("orders")
       .update({ status: "completed" })
@@ -211,6 +212,7 @@ async function completeOrder(order, currentCoinsRaw) {
       .eq("status", "pending");
     if (orderErr) throw new Error(orderErr.message);
 
+    // 更新金币
     const { error: coinErr } = await supabaseClient
       .from("users")
       .update({ coins: finalCoins })
@@ -219,10 +221,46 @@ async function completeOrder(order, currentCoinsRaw) {
 
     renderLastOrder({ ...order, status: "completed" }, finalCoins);
     updateCoinsUI(finalCoins);
+
+    // 检查是否达到每日订单上限
+    const { data: userOrders } = await supabaseClient
+      .from("orders")
+      .select("id")
+      .eq("user_id", window.currentUserId)
+      .gte("created_at", new Date().setHours(0, 0, 0, 0)) // 今日
+      .eq("status", "completed");
+
+    const { data: user } = await supabaseClient
+      .from("users")
+      .select("daily_order_limit")
+      .eq("id", window.currentUserId)
+      .single();
+
+    const limit = Number(user?.daily_order_limit || 10);
+
+    if (userOrders.length >= limit) {
+      // 达到上限 → 启动冷冻
+      const freezeMs = 3 * 60 * 1000; // 3分钟
+      setOrderBtnDisabled(true, `冷冻中…倒计时 3 分钟`);
+
+      setTimeout(async () => {
+        // 冷冻结束后重置今日订单进度
+        await supabaseClient
+          .from("orders")
+          .delete()
+          .eq("user_id", window.currentUserId)
+          .gte("created_at", new Date().setHours(0, 0, 0, 0))
+          .eq("status", "completed"); // 可以只重置前端计数或保留历史看需求
+
+        setOrderBtnDisabled(false);
+        await updateLimitUI();
+      }, freezeMs);
+    }
+
     await checkPendingLock();
     await loadRecentOrders();
-    // 更新今日进度 UI（因为完成并不会改变 created_at，所以进度不变，但保持刷新）
     await updateLimitUI();
+
   } catch (e) {
     alert(e.message || "完成订单失败");
   } finally {
