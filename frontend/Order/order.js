@@ -43,21 +43,21 @@ function updateCoinsUI(coinsRaw) {
    获取规则（优先用户手动，否则默认 2/2）
    ====================== */
 async function getEffectiveRule(userId, orderNumber) {
-  // 1. 查用户手动规则
+  // 1. 查用户手动规则（忽略 orderNumber，优先用户设置）
   const { data: rules, error } = await supabaseClient
     .from("user_product_rules")
     .select("product_id, max_orders, period_minutes")
     .eq("user_id", userId)
-    .eq("order_number", orderNumber)
     .eq("enabled", true)
+    .order("id", { ascending: false }) // 最新的一条优先
     .limit(1);
 
   if (!error && rules?.length) {
     return {
       productId: rules[0].product_id,
-      maxOrders: Number(rules[0].max_orders || 2),
-      periodMinutes: Number(rules[0].period_minutes || 2),
-      source: "user"   // 手动规则
+      maxOrders: Number(rules[0].max_orders),
+      periodMinutes: Number(rules[0].period_minutes),
+      source: "user"
     };
   }
 
@@ -69,6 +69,7 @@ async function getEffectiveRule(userId, orderNumber) {
     source: "default" 
   };
 }
+
 
 
 /* ======================
