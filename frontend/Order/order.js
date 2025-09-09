@@ -40,10 +40,10 @@ function updateCoinsUI(coinsRaw) {
 }
 
 /* ======================
-   获取规则（优先用户手动，否则全局）
+   获取规则（优先用户手动，否则默认 2/2）
    ====================== */
 async function getEffectiveRule(userId, orderNumber) {
-  // 1. 尝试查用户手动规则
+  // 1. 查用户手动规则
   const { data: rules, error } = await supabaseClient
     .from("user_product_rules")
     .select("product_id, max_orders, period_minutes")
@@ -61,25 +61,13 @@ async function getEffectiveRule(userId, orderNumber) {
     };
   }
 
-  // 2. 否则查全局规则
-  try {
-    const { data: rule } = await supabaseClient
-      .from("user_product_rules")
-      .select("max_orders, period_minutes")
-      .eq("enabled", true)
-      .limit(1)
-      .single();
-
-    return {
-      productId: null,
-      maxOrders: Number(rule?.max_orders || 2),
-      periodMinutes: Number(rule?.period_minutes || 2),
-      source: "global"  // 全局规则
-    };
-  } catch (e) {
-    console.error("读取全局规则失败，使用默认值", e);
-    return { productId: null, maxOrders: 2, periodMinutes: 2, source: "default" };
-  }
+  // 2. 没有手动规则 → 默认 2 单 / 2 分钟
+  return { 
+    productId: null, 
+    maxOrders: 2, 
+    periodMinutes: 2, 
+    source: "default" 
+  };
 }
 
 
