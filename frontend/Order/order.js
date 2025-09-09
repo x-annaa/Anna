@@ -1,5 +1,5 @@
 // ======================
-// Order Page JS - 完整版
+// Order Page JS
 // ======================
 
 // Supabase 客户端
@@ -16,57 +16,12 @@ const orderResult = document.getElementById("orderResult");
 
 let currentTask = null; // 当前任务对象
 let coins = 0;          // 用户 Coins
-let ordering = false;   // 防止并发刷单
-
-// ======================
-// 获取随机产品
-// ======================
-async function getRandomProduct() {
-  const { data: products, error } = await supabaseClient
-    .from("products")
-    .select("*")
-    .eq("enabled", true)
-    .eq("manual_only", false);
-
-  if (error) {
-    console.error("读取产品失败:", error);
-    throw new Error("产品列表读取失败");
-  }
-
-  if (!products || products.length === 0) {
-    console.warn("产品列表为空，请检查数据库");
-    throw new Error("产品列表为空");
-  }
-
-  return products[Math.floor(Math.random() * products.length)];
-}
-
-// ======================
-// 获取用户手动规则产品
-// ======================
-async function getUserRuleProduct(userId, orderNumber) {
-  const { data: rules, error } = await supabaseClient
-    .from("user_product_rules")
-    .select("product_id")
-    .eq("user_id", userId)
-    .eq("order_number", orderNumber)
-    .eq("enabled", true)
-    .limit(1);
-
-  if (error) {
-    console.error("读取手动规则失败", error);
-    return null;
-  }
-  return rules?.[0]?.product_id || null;
-}
 
 // ======================
 // 加载用户 Coins
 // ======================
 async function loadCoins() {
   const userId = localStorage.getItem("currentUserId");
-
-  if (!userId) return;
 
   const { data, error } = await supabaseClient
     .from("users")
@@ -80,7 +35,7 @@ async function loadCoins() {
   }
 
   coins = data.coins || 0;
-  orderCoinsEl.textContent = coins.toFixed(2);
+  orderCoinsEl.textContent = coins;
 }
 
 // ======================
@@ -98,7 +53,7 @@ async function updateCoins(newCoins) {
     console.error("更新 Coins 出错:", error.message);
   } else {
     coins = newCoins;
-    orderCoinsEl.textContent = coins.toFixed(2);
+    orderCoinsEl.textContent = coins;
   }
 }
 
@@ -159,66 +114,31 @@ taskOptions.forEach(btn => {
 });
 
 // ======================
-// 刷单逻辑 (随机产品 + 手动规则)
+// 刷单逻辑
 // ======================
 autoOrderBtn.addEventListener("click", async () => {
   if (!currentTask) return;
-  if (ordering) return;
 
-  ordering = true;
+  if (currentTask.completed_orders < currentTask.total_orders) {
+    currentTask.completed_orders++;
+    currentTask.task_balance += 1; // 模拟返还 + profit
 
-  const userId = localStorage.getItem("currentUserId");
-  const orderNumber = currentTask.completed_orders + 1;
+    renderTaskProgress();
 
-  try {
-    let product = null;
+    // 更新数据库
+    const { error } = await supabaseClient
+      .from("user_tasks")
+      .update({
+        completed_orders: currentTask.completed_orders,
+        task_balance: currentTask.task_balance
+      })
+      .eq("id", currentTask.id);
 
-    // 先查手动规则
-    const ruleProductId = await getUserRuleProduct(userId, orderNumber);
-    if (ruleProductId) {
-      const { data: pData, error } = await supabaseClient
-        .from("products")
-        .select("*")
-        .eq("id", ruleProductId)
-        .single();
-      if (!error && pData) product = pData;
-    }
+    if (error) console.error("更新任务出错:", error.message);
+  }
 
-    // 没有规则 -> 随机产品
-    if (!product) product = await getRandomProduct();
-
-    const price = Number(product.price) || 0;
-    const profit = +(price * 0.1).toFixed(2);
-
-    // 执行一单刷单
-    if (currentTask.completed_orders < currentTask.total_orders) {
-      currentTask.completed_orders++;
-      currentTask.task_balance += price + profit;
-
-      renderTaskProgress();
-
-      // 更新数据库
-      const { error } = await supabaseClient
-        .from("user_tasks")
-        .update({
-          completed_orders: currentTask.completed_orders,
-          task_balance: currentTask.task_balance
-        })
-        .eq("id", currentTask.id);
-
-      if (error) console.error("更新任务出错:", error.message);
-    }
-
-    // 检查是否完成任务
-    if (currentTask.completed_orders >= currentTask.total_orders) {
-      showDoneButton();
-    }
-
-  } catch (err) {
-    console.error("刷单失败:", err);
-    alert("刷单失败，请重试");
-  } finally {
-    ordering = false;
+  if (currentTask.completed_orders >= currentTask.total_orders) {
+    showDoneButton();
   }
 });
 
@@ -226,10 +146,9 @@ autoOrderBtn.addEventListener("click", async () => {
 // 渲染任务进度
 // ======================
 function renderTaskProgress() {
-  if (!currentTask) return;
   orderResult.innerHTML = `
     当前任务：${currentTask.task_amount} - ${currentTask.completed_orders}/${currentTask.total_orders} 单
-    <br>任务余额：${currentTask.task_balance.toFixed(2)}
+    <br>任务余额：${currentTask.task_balance}
   `;
 }
 
@@ -242,7 +161,6 @@ function showDoneButton() {
   const doneBtn = document.createElement("button");
   doneBtn.textContent = "Done ✅";
   doneBtn.addEventListener("click", async () => {
-    // 返回 Coins
     await updateCoins(coins + currentTask.task_balance);
 
     // 更新任务状态
