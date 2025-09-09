@@ -78,19 +78,21 @@ async function getRandomProduct() {
 async function checkOrderCooldown() {
   if (!window.currentUserId) return false;
 
-  const { data: user } = await supabaseClient
+  const { data: user, error } = await supabaseClient
     .from("users")
-    .select("order_freeze_until")
+    .select("order_freeze_until, order_freeze_minutes")
     .eq("id", window.currentUserId)
     .single();
+  if (error || !user) return false;
 
   const cooldownEl = document.getElementById("orderCooldown");
   if (!cooldownEl) return false;
 
-  const freezeUntil = user?.order_freeze_until ? new Date(user.order_freeze_until) : null;
+  // 明确告诉 JS 这是 UTC 时间
+  const freezeUntil = user?.order_freeze_until ? new Date(user.order_freeze_until + 'Z') : null;
 
   if (freezeUntil && freezeUntil > new Date()) {
-    const diffMs = freezeUntil - new Date();
+    const diffMs = freezeUntil - new Date(); // 当前本地时间减去 UTC 转本地后的时间差
     const minutes = Math.floor(diffMs / 60000);
     const seconds = Math.floor((diffMs % 60000) / 1000);
     cooldownEl.textContent = `订单冷冻中：${minutes}分${seconds}秒`;
@@ -105,6 +107,7 @@ async function checkOrderCooldown() {
 
 // 每秒刷新倒计时
 setInterval(checkOrderCooldown, 1000);
+
 
 /* ======================
    渲染最近订单
