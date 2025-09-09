@@ -119,14 +119,61 @@ taskOptions.forEach(btn => {
 autoOrderBtn.addEventListener("click", async () => {
   if (!currentTask) return;
 
-  if (currentTask.completed_orders < currentTask.total_orders) {
+  if (currentTask.completed_orders >= currentTask.total_orders) {
+    showDoneButton();
+    return;
+  }
+
+  try {
+    // 1️⃣ 获取随机产品
+    const { data: products, error } = await supabaseClient
+      .from("products")
+      .select("*")
+      .eq("enabled", true)
+      .eq("manual_only", false);
+
+    if (error || !products || products.length === 0) {
+      alert("产品列表为空或加载失败！");
+      return;
+    }
+
+    const product = products[Math.floor(Math.random() * products.length)];
+    const price = Number(product.price) || 0;
+    const profit = Number(product.profit) || 0;
+
+    // 2️⃣ 检查任务余额
+    if (currentTask.task_balance < price) {
+      alert("任务余额不足，无法继续刷单！");
+      return;
+    }
+
+    // 3️⃣ 扣除任务余额
+    currentTask.task_balance -= price;
+
+    // 4️⃣ 插入订单
+    const userId = localStorage.getItem("currentUserId");
+    const { data: newOrder, error: orderErr } = await supabaseClient
+      .from("orders")
+      .insert({
+        user_id: userId,
+        product_id: product.id,
+        total_price: price,
+        profit: profit,
+        status: "completed" // 立即完成
+      })
+      .select(`id, total_price, profit, status, created_at, products ( name )`)
+      .single();
+
+    if (orderErr) {
+      alert("下单失败：" + orderErr.message);
+      return;
+    }
+
+    // 5️⃣ 更新任务信息
     currentTask.completed_orders++;
-    currentTask.task_balance += 1; // 模拟返还 + profit
+    currentTask.task_balance += (price + profit);
 
-    renderTaskProgress();
-
-    // 更新数据库
-    const { error } = await supabaseClient
+    const { error: taskErr } = await supabaseClient
       .from("user_tasks")
       .update({
         completed_orders: currentTask.completed_orders,
@@ -134,11 +181,18 @@ autoOrderBtn.addEventListener("click", async () => {
       })
       .eq("id", currentTask.id);
 
-    if (error) console.error("更新任务出错:", error.message);
-  }
+    if (taskErr) console.error("更新任务失败：", taskErr.message);
 
-  if (currentTask.completed_orders >= currentTask.total_orders) {
-    showDoneButton();
+    renderTaskProgress();
+
+    // 6️⃣ 检查是否完成任务
+    if (currentTask.completed_orders >= currentTask.total_orders) {
+      showDoneButton();
+    }
+
+  } catch (e) {
+    console.error("刷单异常：", e);
+    alert("刷单失败，请重试！");
   }
 });
 
@@ -148,7 +202,7 @@ autoOrderBtn.addEventListener("click", async () => {
 function renderTaskProgress() {
   orderResult.innerHTML = `
     当前任务：${currentTask.task_amount} - ${currentTask.completed_orders}/${currentTask.total_orders} 单
-    <br>任务余额：${currentTask.task_balance}
+    <br>任务余额：${currentTask.task_balance.toFixed(2)}
   `;
 }
 
