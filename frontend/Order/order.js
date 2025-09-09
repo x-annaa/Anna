@@ -40,27 +40,35 @@ function updateCoinsUI(coinsRaw) {
 }
 
 /* ======================
-   获取用户规则产品
+   获取全局规则
    ====================== */
-async function getUserRuleProduct(userId, orderNumber) {
-  const { data: rules, error } = await supabaseClient
-    .from("user_product_rules")
-    .select("product_id, max_orders, period_minutes")
-    .eq("user_id", userId)
-    .eq("order_number", orderNumber)
-    .eq("enabled", true)
-    .limit(1);
-
-  if (error) { console.error("读取手动规则失败", error); return null; }
-  return rules?.[0] || null; // 返回完整规则对象
+async function getGlobalRule() {
+  try {
+    const { data: rule } = await supabaseClient
+      .from("user_product_rules")
+      .select("max_orders, period_minutes")
+      .eq("enabled", true)
+      .limit(1)
+      .single();
+    return {
+      maxOrders: Number(rule?.max_orders || 2),
+      periodMinutes: Number(rule?.period_minutes || 2)
+    };
+  } catch (e) {
+    console.error("读取全局规则失败，使用默认值", e);
+    return { maxOrders: 2, periodMinutes: 2 };
+  }
 }
 
 /* ======================
    检查下单限制（倒计时） 
    ====================== */
-async function canPlaceOrder(userId, maxOrders = 10, periodMinutes = 1) {
+async function canPlaceOrder(userId) {
   if (!userId) return false;
   clearInterval(countdownTimer);
+
+  const { maxOrders, periodMinutes } = await getGlobalRule();
+  const periodSeconds = periodMinutes * 60;
 
   try {
     const { data: recentOrders, error } = await supabaseClient
@@ -77,15 +85,15 @@ async function canPlaceOrder(userId, maxOrders = 10, periodMinutes = 1) {
     const now = new Date();
     let diff = (now - oldestTime) / 1000; // 秒
 
-    if (diff < periodMinutes * 60) {
+    if (diff < periodSeconds) {
       const btn = document.getElementById("autoOrderBtn");
       setOrderBtnDisabled(true, `最近 ${maxOrders} 单限制`);
 
       countdownTimer = setInterval(() => {
         diff += 1;
-        const left = Math.max(0, Math.ceil(periodMinutes * 60 - diff));
+        const left = Math.max(0, Math.ceil(periodSeconds - diff));
         if (btn) btn.textContent = `🎲 一键刷单（请等待 ${left}s）`;
-        if (diff >= periodMinutes * 60) {
+        if (diff >= periodSeconds) {
           clearInterval(countdownTimer);
           setOrderBtnDisabled(false);
         }
@@ -205,7 +213,7 @@ async function checkPendingLock() {
 }
 
 /* ======================
-   自动下单（含数据库倒计时规则）
+   自动下单（全局规则 2单/2分钟）
    ====================== */
 async function autoOrder() {
   if (!window.currentUserId) { alert("请先登录！"); return; }
@@ -229,32 +237,9 @@ async function autoOrder() {
       return;
     }
 
-    // 获取订单数量，计算 orderNumber
-    const { data: orders } = await supabaseClient
-      .from("orders")
-      .select("id")
-      .eq("user_id", window.currentUserId);
-    const orderNumber = (orders?.length || 0) + 1;
-
-    // 获取用户规则
-    const rule = await getUserRuleProduct(window.currentUserId, orderNumber);
-    let maxOrders = rule?.max_orders || 10;
-    let periodMinutes = rule?.period_minutes || 1;
-    let product;
-
-    if (rule?.product_id) {
-      const { data: pData, error } = await supabaseClient
-        .from("products")
-        .select("*")
-        .eq("id", rule.product_id)
-        .single();
-      if (!error && pData) product = pData;
-    }
-    if (!product) product = await getRandomProduct();
-
     // 检查倒计时限制
-    const canOrderNow = await canPlaceOrder(window.currentUserId, maxOrders, periodMinutes);
-    if (!canOrderNow) return;
+    const canOrderNow = await canPlaceOrder(window.currentUserId);
+    if (!canOrderNow) { ordering = false; return; }
 
     // 检查是否有 pending
     const { data: pend } = await supabaseClient
@@ -269,6 +254,9 @@ async function autoOrder() {
       ordering = false;
       return;
     }
+
+    // 随机产品
+    const product = await getRandomProduct();
 
     const price = Number(product.price) || 0;
     const profitRatio = Number(product.profit) || 0;
