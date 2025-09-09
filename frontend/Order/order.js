@@ -64,9 +64,11 @@ async function getRandomProduct() {
     .select("*")
     .eq("enabled", true)
     .eq("manual_only", false);
+
   if (error || !products || products.length === 0) {
     throw new Error("产品列表为空或读取失败！");
   }
+
   return products[Math.floor(Math.random() * products.length)];
 }
 
@@ -113,8 +115,8 @@ function renderLastOrder(order, coinsRaw) {
 
   const coins = Number(coinsRaw) || 0;
   const price = Number(order.total_price) || 0;
-  const profitRatio = Number(order.products?.profit) || 0; // 数据库 profit
-  const profitDb = profitRatio; // 直接显示数据库 profit
+  const profitRatio = Number(order.products?.profit) || 0; 
+  const profitDb = profitRatio; // 数据库直接显示
 
   let html = `
     <h3>✅ 最近一次订单</h3>
@@ -130,6 +132,7 @@ function renderLastOrder(order, coinsRaw) {
   if (order.status === "pending" && coins >= 0) {
     html += `<button id="completeOrderBtn">完成订单</button>`;
   }
+
   if (coins < 0) {
     html += `<p style="color:red;">⚠️ 金币为负，欠款 ¥${Math.abs(coins).toFixed(2)}</p>`;
   }
@@ -192,22 +195,23 @@ async function autoOrder() {
   if (ordering) return;
   ordering = true;
 
-  if (await checkOrderCooldown()) {
-    ordering = false;
-    return; // 冷冻中不允许下单
-  }
-
-  setOrderBtnDisabled(true, "下单中…");
-
   try {
+    if (await checkOrderCooldown()) {
+      ordering = false;
+      return; // 冷冻中不允许下单
+    }
+
+    setOrderBtnDisabled(true, "下单中…");
+
     const { data: user } = await supabaseClient
       .from("users")
-      .select("coins,daily_order_limit")
+      .select("coins,daily_order_limit,order_freeze_minutes")
       .eq("id", window.currentUserId)
       .single();
 
     const coins = Number(user?.coins || 0);
     const dailyOrderLimit = Number(user?.daily_order_limit || 10);
+    const freezeMinutes = Number(user?.order_freeze_minutes || 1);
 
     if (coins < 50) {
       alert("余额不足 50 coins");
@@ -226,9 +230,7 @@ async function autoOrder() {
       .gte("created_at", today.toISOString());
 
     if ((todayOrders?.length || 0) >= dailyOrderLimit) {
-      const freezeMinutes = 1; // 冷冻时间，可自定义
       const freezeUntil = new Date(Date.now() + freezeMinutes * 60 * 1000);
-
       await supabaseClient
         .from("users")
         .update({ order_freeze_until: freezeUntil.toISOString() })
@@ -254,6 +256,7 @@ async function autoOrder() {
       return;
     }
 
+    // 获取订单序号
     const { data: orders } = await supabaseClient
       .from("orders")
       .select("id")
@@ -307,6 +310,7 @@ async function autoOrder() {
     alert(e.message || "下单失败");
   } finally {
     ordering = false;
+    checkOrderCooldown(); // 下单后立即刷新倒计时显示
   }
 }
 
@@ -341,7 +345,6 @@ async function loadRecentOrders() {
       } else {
         list.innerHTML = recentOrders.map(o => {
           const price = Number(o.total_price) || 0;
-          const profit = Number(o.profit) || 0;
           const profitRatio = Number(o.products?.profit) || 0;
           return `
             <li>
