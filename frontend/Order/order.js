@@ -80,12 +80,14 @@ function renderLastOrder(order, coinsRaw) {
   const coins = Number(coinsRaw) || 0;
   const price = Number(order.total_price) || 0;
   const profit = Number(order.profit) || 0;
+  const profitRatio = Number(order.products?.profit) || 0; // 数据库 profit
 
   let html = `
     <h3>✅ 最近一次订单</h3>
     <p>商品：${order.products?.name || "未知商品"}</p>
     <p>价格：¥${price.toFixed(2)}</p>
-    <p>利润：<span style="color:green;">+¥${profit.toFixed(2)}</span></p>
+    <p>利润：<span style="color:green;">+¥${profit.toFixed(2)}</span>（比例：${(profitRatio*100).toFixed(0)}%）</p>
+    <p>收入：+¥${profit.toFixed(2)}</p>
     <p>状态：${order.status === "completed" ? "✅ 已完成" : "⏳ 待完成"}</p>
     <p>时间：${new Date(order.created_at).toLocaleString()}</p>
     <p>当前金币：¥${coins.toFixed(2)}</p>
@@ -189,7 +191,6 @@ function showModal(contentHtml) {
     modal.remove();
   });
 
-  // ESC 关闭
   document.addEventListener("keydown", function escHandler(e) {
     if (e.key === "Escape") {
       modal.remove();
@@ -199,7 +200,7 @@ function showModal(contentHtml) {
 }
 
 /* ======================
-   自动下单（利润按数据库 profit 字段）
+   自动下单
    ====================== */
 async function autoOrder() {
   if (!window.currentUserId) { alert("请先登录！"); return; }
@@ -208,7 +209,6 @@ async function autoOrder() {
   setOrderBtnDisabled(true, "下单中…");
 
   try {
-    // 获取用户信息
     const { data: user } = await supabaseClient
       .from("users")
       .select("coins")
@@ -223,7 +223,6 @@ async function autoOrder() {
       return;
     }
 
-    // 检查是否存在 pending 订单
     const { data: pend } = await supabaseClient
       .from("orders")
       .select("id")
@@ -236,14 +235,12 @@ async function autoOrder() {
       return;
     }
 
-    // 当前订单号
     const { data: orders } = await supabaseClient
       .from("orders")
       .select("id")
       .eq("user_id", window.currentUserId);
     const orderNumber = (orders?.length || 0) + 1;
 
-    // 获取手动规则产品
     let product;
     const ruleProductId = await getUserRuleProduct(window.currentUserId, orderNumber);
     if (ruleProductId) {
@@ -254,22 +251,18 @@ async function autoOrder() {
         .single();
       if (!error && pData) product = pData;
     }
-
-    // 如果没有手动规则，则随机产品
     if (!product) product = await getRandomProduct();
 
     const price = Number(product.price) || 0;
-    const profitRatio = Number(product.profit) || 0;  // 数据库 profit 字段
+    const profitRatio = Number(product.profit) || 0;
     const profit = +(price * profitRatio).toFixed(2);
     const tempCoins = coins - price;
 
-    // 扣除金币
     await supabaseClient
       .from("users")
       .update({ coins: tempCoins })
       .eq("id", window.currentUserId);
 
-    // 创建订单
     const { data: newOrder, error: orderErr } = await supabaseClient
       .from("orders")
       .insert({
@@ -279,7 +272,7 @@ async function autoOrder() {
         profit: profit,
         status: "pending"
       })
-      .select(`id, total_price, profit, status, created_at, products ( name )`)
+      .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
       .single();
     if (orderErr) throw new Error(orderErr.message);
 
@@ -304,7 +297,7 @@ async function loadRecentOrders() {
   try {
     const { data: recentOrders } = await supabaseClient
       .from("orders")
-      .select(`id, total_price, profit, status, created_at, products ( name )`)
+      .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
       .eq("user_id", window.currentUserId)
       .order("created_at", { ascending: false })
       .limit(5);
@@ -327,11 +320,12 @@ async function loadRecentOrders() {
         list.innerHTML = recentOrders.map(o => {
           const price = Number(o.total_price) || 0;
           const profit = Number(o.profit) || 0;
+          const profitRatio = Number(o.products?.profit) || 0;
           return `
             <li>
               🛒 ${o.products?.name || "未知商品"} /
               ¥${price.toFixed(2)} /
-              利润 +¥${profit.toFixed(2)} /
+              利润 +¥${profit.toFixed(2)}（比例：${(profitRatio*100).toFixed(0)}%） /
               状态：${o.status === "completed" ? "已完成" : "待完成"} /
               <small>${new Date(o.created_at).toLocaleString()}</small>
             </li>`;
@@ -391,7 +385,7 @@ async function loadLastOrder() {
 
   const { data: orders } = await supabaseClient
     .from("orders")
-    .select(`id, total_price, profit, status, created_at, products ( name )`)
+    .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
     .eq("user_id", window.currentUserId)
     .order("created_at", { ascending: false })
     .limit(1);
