@@ -236,16 +236,20 @@ async function checkPendingLock() {
 }
 
 /* ======================
-   自动下单（全局规则 2单/2分钟）
+   自动下单（支持手动规则 + 全局规则）
    ====================== */
 async function autoOrder() {
-  if (!window.currentUserId) { alert("请先登录！"); return; }
+  if (!window.currentUserId) { 
+    alert("请先登录！"); 
+    return; 
+  }
   if (ordering) return;
 
   ordering = true;
   setOrderBtnDisabled(true, "下单中…");
 
   try {
+    // 1. 查用户余额
     const { data: user } = await supabaseClient
       .from("users")
       .select("coins")
@@ -260,11 +264,23 @@ async function autoOrder() {
       return;
     }
 
-    // 检查倒计时限制
-    const canOrderNow = await canPlaceOrder(window.currentUserId);
+    // 2. 计算当前订单号（已有订单数+1）
+    const { count: orderCount } = await supabaseClient
+      .from("orders")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", window.currentUserId);
+    const orderNumber = (orderCount || 0) + 1;
+
+    // 3. 获取规则（优先用户手动，否则全局）
+    const rule = await getEffectiveRule(window.currentUserId, orderNumber);
+    const maxOrders = rule.maxOrders;
+    const periodMinutes = rule.periodMinutes;
+
+    // 4. 检查倒计时限制
+    const canOrderNow = await canPlaceOrder(window.currentUserId, maxOrders, periodMinutes);
     if (!canOrderNow) { ordering = false; return; }
 
-    // 检查是否有 pending
+    // 5. 检查是否有 pending
     const { data: pend } = await supabaseClient
       .from("orders")
       .select("id")
@@ -278,19 +294,33 @@ async function autoOrder() {
       return;
     }
 
-    // 随机产品
-    const product = await getRandomProduct();
+    // 6. 确定商品（手动规则指定 productId 优先，否则随机）
+    let product;
+    if (rule.productId) {
+      const { data: pData, error } = await supabaseClient
+        .from("products")
+        .select("*")
+        .eq("id", rule.productId)
+        .single();
+      if (!error && pData) product = pData;
+    }
+    if (!product) {
+      product = await getRandomProduct();
+    }
 
+    // 7. 价格/利润计算
     const price = Number(product.price) || 0;
     const profitRatio = Number(product.profit) || 0;
     const profit = +(price * profitRatio).toFixed(2);
     const tempCoins = coins - price;
 
+    // 8. 扣 coins
     await supabaseClient
       .from("users")
       .update({ coins: tempCoins })
       .eq("id", window.currentUserId);
 
+    // 9. 插入订单
     const { data: newOrder, error: orderErr } = await supabaseClient
       .from("orders")
       .insert({
@@ -304,6 +334,7 @@ async function autoOrder() {
       .single();
     if (orderErr) throw new Error(orderErr.message);
 
+    // 10. 更新前端
     renderLastOrder(newOrder, tempCoins);
     updateCoinsUI(tempCoins);
     await checkPendingLock();
@@ -316,50 +347,6 @@ async function autoOrder() {
   }
 }
 
-/* ======================
-   最近订单
-   ====================== */
-async function loadRecentOrders() {
-  if (!window.currentUserId) return;
-
-  try {
-    const { data: recentOrders } = await supabaseClient
-      .from("orders")
-      .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
-      .eq("user_id", window.currentUserId)
-      .order("created_at", { ascending: false })
-      .limit(5);
-
-    const { count: totalCount } = await supabaseClient
-      .from("orders")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", window.currentUserId);
-
-    const historyTitle = document.querySelector(".order-history h3");
-    if (historyTitle) historyTitle.textContent = `🕘 最近订单 订单数：${totalCount || 0}单`;
-
-    const list = document.getElementById("recentOrders");
-    if (list) {
-      if (!recentOrders || recentOrders.length === 0) list.innerHTML = `<li>暂无订单！</li>`;
-      else list.innerHTML = recentOrders.map(o => {
-        const price = Number(o.total_price) || 0;
-        const profit = Number(o.profit) || 0;
-        const profitRatio = Number(o.products?.profit) || 0;
-        return `
-          <li>
-            🛒 ${o.products?.name || "未知商品"} /
-            ¥${price.toFixed(2)} /
-            利润：${profitRatio} /
-            收入：+¥${profit.toFixed(2)} /
-            状态：${o.status === "completed" ? "已完成" : "待完成"} /
-            <small>${new Date(o.created_at).toLocaleString()}</small>
-          </li>`;
-      }).join("");
-    }
-  } catch (e) {
-    console.error("加载最近订单失败：", e);
-  }
-}
 
 /* ======================
    页面初始化
