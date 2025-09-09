@@ -86,12 +86,11 @@ async function getEffectiveRule(userId, orderNumber) {
 /* ======================
    检查下单限制（倒计时） 
    ====================== */
-async function canPlaceOrder(userId) {
+async function canPlaceOrder(userId, maxOrders, periodMinutes) {
   if (!userId) return false;
   clearInterval(countdownTimer);
 
-  const { maxOrders, periodMinutes } = await getGlobalRule();
-  const periodSeconds = periodMinutes * 60;
+  const periodSeconds = (periodMinutes || 1) * 60;
 
   try {
     const { data: recentOrders, error } = await supabaseClient
@@ -101,7 +100,11 @@ async function canPlaceOrder(userId) {
       .order("created_at", { ascending: false })
       .limit(maxOrders);
 
-    if (error) { console.error("获取最近订单失败", error); return false; }
+    if (error) { 
+      console.error("获取最近订单失败", error); 
+      return false; 
+    }
+
     if (!recentOrders || recentOrders.length < maxOrders) return true;
 
     const oldestTime = new Date(recentOrders[recentOrders.length - 1].created_at);
@@ -130,6 +133,7 @@ async function canPlaceOrder(userId) {
     return false;
   }
 }
+
 
 /* ======================
    获取随机产品
