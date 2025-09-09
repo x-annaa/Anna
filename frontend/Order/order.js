@@ -364,6 +364,12 @@ async function refreshAll() {
   await loadCoinsOrderPage();
   await loadLastOrder();
   await loadRecentOrders();
+   
+  // 倒计时检查
+  if (window.currentUserId) {
+    const { maxOrders, periodMinutes } = await getEffectiveRule(window.currentUserId, 1); // orderNumber 可以随便写
+    await canPlaceOrder(window.currentUserId, maxOrders, periodMinutes);
+  }
 }
 
 async function loadCoinsOrderPage() {
