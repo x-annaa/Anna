@@ -325,7 +325,7 @@ async function loadRecentOrders() {
             <li>
               🛒 ${o.products?.name || "未知商品"} /
               ¥${price.toFixed(2)} /
-              利润：${profitRatio} /
+              利润：${profitRatio} %/%
               收入：+¥${profit.toFixed(2)} /
               状态：${o.status === "completed" ? "已完成" : "待完成"} /
               <small>${new Date(o.created_at).toLocaleString()}</small>
