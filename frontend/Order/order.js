@@ -18,20 +18,30 @@ let currentTask = null; // 当前任务对象
 let coins = 0;          // 用户 Coins
 
 // ======================
-// 工具函数 - 获取随机产品
+// 获取随机产品（调试版）
 // ======================
 async function getRandomProduct() {
   const { data: products, error } = await supabaseClient
     .from("products")
     .select("*")
-    .eq("enabled", true)
-    .eq("manual_only", false);
+    .eq("enabled", true); // 先只过滤 enabled，不管 manual_only
 
-  if (error || !products || products.length === 0) {
-    throw new Error("产品列表为空或读取失败！");
+  if (error) {
+    console.error("读取产品失败:", error);
+    throw new Error("产品列表读取失败");
   }
+
+  if (!products || products.length === 0) {
+    console.warn("产品列表为空，请检查数据库");
+    throw new Error("产品列表为空");
+  }
+
+  console.log("随机匹配产品候选:", products);
+
+  // 随机返回一个
   return products[Math.floor(Math.random() * products.length)];
 }
+
 
 // ======================
 // 工具函数 - 获取用户手动规则的产品
