@@ -199,22 +199,38 @@ async function autoOrder() {
   ordering = true;
 
   try {
-    if (await checkOrderCooldown()) {
-      ordering = false;
-      return; // 冷冻中不允许下单
-    }
-
-    setOrderBtnDisabled(true, "下单中…");
-
-    const { data: user } = await supabaseClient
+    // 读取用户信息，包括金币、每日上限、冻结信息
+    const { data: user, error: userErr } = await supabaseClient
       .from("users")
-      .select("coins,daily_order_limit,order_freeze_minutes")
+      .select("coins,daily_order_limit,order_freeze_until,order_freeze_minutes")
       .eq("id", window.currentUserId)
       .single();
 
-    const coins = Number(user?.coins || 0);
-    const dailyOrderLimit = Number(user?.daily_order_limit || 10);
-    const freezeMinutes = Number(user?.order_freeze_minutes || 1);
+    if (userErr || !user) throw new Error("获取用户信息失败");
+
+    const coins = Number(user.coins || 0);
+    const dailyOrderLimit = Number(user.daily_order_limit || 10);
+    const freezeMinutes = Number(user.order_freeze_minutes || 1);
+    const freezeUntil = user.order_freeze_until ? new Date(user.order_freeze_until + 'Z') : null;
+    const now = new Date();
+
+    // 冻结已过期，清空冻结
+    if (freezeUntil && freezeUntil <= now) {
+      await supabaseClient
+        .from("users")
+        .update({ order_freeze_until: null })
+        .eq("id", window.currentUserId);
+    }
+
+    // 冻结未结束，直接提示并返回
+    if (freezeUntil && freezeUntil > now) {
+      const diffMs = freezeUntil - now;
+      const minutes = Math.floor(diffMs / 60000);
+      const seconds = Math.floor((diffMs % 60000) / 1000);
+      alert(`订单冷冻中：${minutes}分${seconds}秒`);
+      ordering = false;
+      return;
+    }
 
     if (coins < 50) {
       alert("余额不足 50 coins");
@@ -223,9 +239,9 @@ async function autoOrder() {
       return;
     }
 
-    // 获取当天订单数
+    // 获取当天订单数（UTC）
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    today.setUTCHours(0, 0, 0, 0);
     const { data: todayOrders } = await supabaseClient
       .from("orders")
       .select("id")
@@ -233,10 +249,11 @@ async function autoOrder() {
       .gte("created_at", today.toISOString());
 
     if ((todayOrders?.length || 0) >= dailyOrderLimit) {
-      const freezeUntil = new Date(Date.now() + freezeMinutes * 60 * 1000);
+      // 超过每日上限，写入冻结时间
+      const freezeDate = new Date(Date.now() + freezeMinutes * 60 * 1000);
       await supabaseClient
         .from("users")
-        .update({ order_freeze_until: freezeUntil.toISOString() })
+        .update({ order_freeze_until: freezeDate.toISOString() })
         .eq("id", window.currentUserId);
 
       alert(`今天订单已达上限 ${dailyOrderLimit} 单，冷冻倒计时 ${freezeMinutes} 分钟`);
@@ -244,7 +261,7 @@ async function autoOrder() {
       return;
     }
 
-    // 检查 pending 订单
+    // 检查是否有未完成订单
     const { data: pend } = await supabaseClient
       .from("orders")
       .select("id")
@@ -259,14 +276,14 @@ async function autoOrder() {
       return;
     }
 
-    // 获取订单序号
+    // 获取订单号
     const { data: orders } = await supabaseClient
       .from("orders")
       .select("id")
       .eq("user_id", window.currentUserId);
     const orderNumber = (orders?.length || 0) + 1;
 
-    // 获取规则或随机产品
+    // 获取规则产品或随机产品
     let product;
     const ruleProductId = await getUserRuleProduct(window.currentUserId, orderNumber);
     if (ruleProductId) {
@@ -313,7 +330,6 @@ async function autoOrder() {
     alert(e.message || "下单失败");
   } finally {
     ordering = false;
-    checkOrderCooldown(); // 下单后立即刷新倒计时显示
   }
 }
 
