@@ -6,11 +6,8 @@ window.currentUsername = localStorage.getItem("currentUser");
 
 let ordering = false;
 let completing = false;
-let exchanging = false;
 
-if (!window.supabaseClient) {
-  console.error("❌ supabaseClient 未初始化！");
-}
+if (!window.supabaseClient) console.error("❌ supabaseClient 未初始化！");
 
 /* ======================
    工具函数
@@ -29,11 +26,8 @@ function updateCoinsUI(coinsRaw) {
   const ob = document.getElementById("ordercoins");
   if (ob) ob.textContent = coins.toFixed(2);
 
-  if (coins < 0) {
-    setOrderBtnDisabled(true, `金币为负（欠款 ¥${Math.abs(coins).toFixed(2)}）`);
-  } else {
-    setOrderBtnDisabled(false);
-  }
+  if (coins < 0) setOrderBtnDisabled(true, `金币为负（欠款 ¥${Math.abs(coins).toFixed(2)}）`);
+  else setOrderBtnDisabled(false);
 }
 
 /* ======================
@@ -47,11 +41,7 @@ async function getUserRuleProduct(userId, orderNumber) {
     .eq("order_number", orderNumber)
     .eq("enabled", true)
     .limit(1);
-
-  if (error) {
-    console.error("读取手动规则失败", error);
-    return null;
-  }
+  if (error) { console.error(error); return null; }
   return rules?.[0]?.product_id || null;
 }
 
@@ -64,11 +54,7 @@ async function getRandomProduct() {
     .select("*")
     .eq("enabled", true)
     .eq("manual_only", false);
-
-  if (error || !products || products.length === 0) {
-    throw new Error("产品列表为空或读取失败！");
-  }
-
+  if (error || !products?.length) throw new Error("产品列表为空或读取失败！");
   return products[Math.floor(Math.random() * products.length)];
 }
 
@@ -80,7 +66,7 @@ async function checkOrderCooldown() {
 
   const { data: user, error } = await supabaseClient
     .from("users")
-    .select("order_freeze_until, order_freeze_minutes")
+    .select("order_freeze_until")
     .eq("id", window.currentUserId)
     .single();
   if (error || !user) return false;
@@ -88,17 +74,21 @@ async function checkOrderCooldown() {
   const cooldownEl = document.getElementById("orderCooldown");
   if (!cooldownEl) return false;
 
-  // 明确告诉 JS 这是 UTC 时间
   const freezeUntil = user?.order_freeze_until ? new Date(user.order_freeze_until + 'Z') : null;
+  const now = new Date();
 
-  if (freezeUntil && freezeUntil > new Date()) {
-    const diffMs = freezeUntil - new Date(); // 当前本地时间减去 UTC 转本地后的时间差
+  if (freezeUntil && freezeUntil > now) {
+    const diffMs = freezeUntil - now;
     const minutes = Math.floor(diffMs / 60000);
     const seconds = Math.floor((diffMs % 60000) / 1000);
     cooldownEl.textContent = `订单冷冻中：${minutes}分${seconds}秒`;
     setOrderBtnDisabled(true, "订单冷冻中");
     return true;
   } else {
+    // 冻结结束，清空数据库字段
+    if (freezeUntil) {
+      await supabaseClient.from("users").update({ order_freeze_until: null }).eq("id", window.currentUserId);
+    }
     cooldownEl.textContent = "";
     setOrderBtnDisabled(false);
     return false;
@@ -107,7 +97,6 @@ async function checkOrderCooldown() {
 
 // 每秒刷新倒计时
 setInterval(checkOrderCooldown, 1000);
-
 
 /* ======================
    渲染最近订单
@@ -118,14 +107,13 @@ function renderLastOrder(order, coinsRaw) {
 
   const coins = Number(coinsRaw) || 0;
   const price = Number(order.total_price) || 0;
-  const profitRatio = Number(order.products?.profit) || 0; 
-  const profitDb = profitRatio; // 数据库直接显示
+  const profitRatio = Number(order.products?.profit) || 0;
 
   let html = `
     <h3>✅ 最近一次订单</h3>
     <p>商品：${order.products?.name || "未知商品"}</p>
     <p>价格：¥${price.toFixed(2)}</p>
-    <p>利润：${profitDb}</p>
+    <p>利润：${profitRatio}</p>
     <p>收入：+¥${(price * profitRatio).toFixed(2)}</p>
     <p>状态：${order.status === "completed" ? "✅ 已完成" : "⏳ 待完成"}</p>
     <p>时间：${new Date(order.created_at).toLocaleString()}</p>
@@ -135,10 +123,7 @@ function renderLastOrder(order, coinsRaw) {
   if (order.status === "pending" && coins >= 0) {
     html += `<button id="completeOrderBtn">完成订单</button>`;
   }
-
-  if (coins < 0) {
-    html += `<p style="color:red;">⚠️ 金币为负，欠款 ¥${Math.abs(coins).toFixed(2)}</p>`;
-  }
+  if (coins < 0) html += `<p style="color:red;">⚠️ 金币为负，欠款 ¥${Math.abs(coins).toFixed(2)}</p>`;
 
   el.innerHTML = html;
 
@@ -161,10 +146,8 @@ async function completeOrder(order, currentCoinsRaw) {
   try {
     if (order.status === "completed") return;
 
-    const currentCoins = Number(currentCoinsRaw) || 0;
-    const price = Number(order.total_price) || 0;
-    const profit = Number(order.profit) || 0;
-    const finalCoins = currentCoins + price + profit;
+    const currentCoins = Number(currentCoinsRaw || 0);
+    const finalCoins = currentCoins + Number(order.total_price || 0) + Number(order.profit || 0);
 
     const { error: orderErr } = await supabaseClient
       .from("orders")
@@ -191,7 +174,7 @@ async function completeOrder(order, currentCoinsRaw) {
 }
 
 /* ======================
-   自动下单（支持订单限制 + 冻结）
+   自动下单
    ====================== */
 async function autoOrder() {
   if (!window.currentUserId) { alert("请先登录！"); return; }
@@ -199,13 +182,11 @@ async function autoOrder() {
   ordering = true;
 
   try {
-    // 读取用户信息，包括金币、每日上限、冻结信息
     const { data: user, error: userErr } = await supabaseClient
       .from("users")
       .select("coins,daily_order_limit,order_freeze_until,order_freeze_minutes")
       .eq("id", window.currentUserId)
       .single();
-
     if (userErr || !user) throw new Error("获取用户信息失败");
 
     const coins = Number(user.coins || 0);
@@ -214,15 +195,12 @@ async function autoOrder() {
     const freezeUntil = user.order_freeze_until ? new Date(user.order_freeze_until + 'Z') : null;
     const now = new Date();
 
-    // 冻结已过期，清空冻结
+    // 冻结结束，清空数据库
     if (freezeUntil && freezeUntil <= now) {
-      await supabaseClient
-        .from("users")
-        .update({ order_freeze_until: null })
-        .eq("id", window.currentUserId);
+      await supabaseClient.from("users").update({ order_freeze_until: null }).eq("id", window.currentUserId);
     }
 
-    // 冻结未结束，直接提示并返回
+    // 冻结未结束
     if (freezeUntil && freezeUntil > now) {
       const diffMs = freezeUntil - now;
       const minutes = Math.floor(diffMs / 60000);
@@ -232,12 +210,7 @@ async function autoOrder() {
       return;
     }
 
-    if (coins < 50) {
-      alert("余额不足 50 coins");
-      setOrderBtnDisabled(false);
-      ordering = false;
-      return;
-    }
+    if (coins < 50) { alert("余额不足 50 coins"); setOrderBtnDisabled(false); ordering = false; return; }
 
     // 获取当天订单数（UTC）
     const today = new Date();
@@ -249,75 +222,45 @@ async function autoOrder() {
       .gte("created_at", today.toISOString());
 
     if ((todayOrders?.length || 0) >= dailyOrderLimit) {
-      // 超过每日上限，写入冻结时间
       const freezeDate = new Date(Date.now() + freezeMinutes * 60 * 1000);
-      await supabaseClient
-        .from("users")
-        .update({ order_freeze_until: freezeDate.toISOString() })
-        .eq("id", window.currentUserId);
-
+      await supabaseClient.from("users").update({ order_freeze_until: freezeDate.toISOString() }).eq("id", window.currentUserId);
       alert(`今天订单已达上限 ${dailyOrderLimit} 单，冷冻倒计时 ${freezeMinutes} 分钟`);
       ordering = false;
       return;
     }
 
-    // 检查是否有未完成订单
+    // 检查 pending 订单
     const { data: pend } = await supabaseClient
       .from("orders")
       .select("id")
       .eq("user_id", window.currentUserId)
       .eq("status", "pending")
       .limit(1);
+    if (pend?.length) { alert("您有未完成订单，请先完成订单再继续下单。"); await checkPendingLock(); ordering = false; return; }
 
-    if (pend?.length) {
-      alert("您有未完成订单，请先完成订单再继续下单。");
-      await checkPendingLock();
-      ordering = false;
-      return;
-    }
-
-    // 获取订单号
-    const { data: orders } = await supabaseClient
-      .from("orders")
-      .select("id")
-      .eq("user_id", window.currentUserId);
+    // 订单号
+    const { data: orders } = await supabaseClient.from("orders").select("id").eq("user_id", window.currentUserId);
     const orderNumber = (orders?.length || 0) + 1;
 
     // 获取规则产品或随机产品
     let product;
     const ruleProductId = await getUserRuleProduct(window.currentUserId, orderNumber);
     if (ruleProductId) {
-      const { data: pData, error } = await supabaseClient
-        .from("products")
-        .select("*")
-        .eq("id", ruleProductId)
-        .single();
+      const { data: pData, error } = await supabaseClient.from("products").select("*").eq("id", ruleProductId).single();
       if (!error && pData) product = pData;
     }
     if (!product) product = await getRandomProduct();
 
-    const price = Number(product.price) || 0;
-    const profitRatio = Number(product.profit) || 0;
-    const profit = +(price * profitRatio).toFixed(2);
+    const price = Number(product.price || 0);
+    const profit = +(price * Number(product.profit || 0)).toFixed(2);
     const tempCoins = coins - price;
 
-    // 扣除金币
-    await supabaseClient
-      .from("users")
-      .update({ coins: tempCoins })
-      .eq("id", window.currentUserId);
+    await supabaseClient.from("users").update({ coins: tempCoins }).eq("id", window.currentUserId);
 
-    // 创建订单
     const { data: newOrder, error: orderErr } = await supabaseClient
       .from("orders")
-      .insert({
-        user_id: window.currentUserId,
-        product_id: product.id,
-        total_price: price,
-        profit: profit,
-        status: "pending"
-      })
-      .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
+      .insert({ user_id: window.currentUserId, product_id: product.id, total_price: price, profit, status: "pending" })
+      .select(`id,total_price,profit,status,created_at,products(name,profit)`)
       .single();
     if (orderErr) throw new Error(orderErr.message);
 
@@ -338,11 +281,10 @@ async function autoOrder() {
    ====================== */
 async function loadRecentOrders() {
   if (!window.currentUserId) return;
-
   try {
     const { data: recentOrders } = await supabaseClient
       .from("orders")
-      .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
+      .select(`id,total_price,profit,status,created_at,products(name,profit)`)
       .eq("user_id", window.currentUserId)
       .order("created_at", { ascending: false })
       .limit(5);
@@ -353,32 +295,19 @@ async function loadRecentOrders() {
       .eq("user_id", window.currentUserId);
 
     const historyTitle = document.querySelector(".order-history h3");
-    if (historyTitle) {
-      historyTitle.textContent = `🕘 最近订单 订单数：${totalCount || 0}单`;
-    }
+    if (historyTitle) historyTitle.textContent = `🕘 最近订单 订单数：${totalCount || 0}单`;
 
     const list = document.getElementById("recentOrders");
     if (list) {
-      if (!recentOrders || recentOrders.length === 0) {
-        list.innerHTML = `<li>暂无订单！</li>`;
-      } else {
-        list.innerHTML = recentOrders.map(o => {
-          const price = Number(o.total_price) || 0;
-          const profitRatio = Number(o.products?.profit) || 0;
-          return `
-            <li>
-              🛒 ${o.products?.name || "未知商品"} /
-              ¥${price.toFixed(2)} /
-              利润：${profitRatio} /
-              状态：${o.status === "completed" ? "已完成" : "待完成"} /
-              <small>${new Date(o.created_at).toLocaleString()}</small>
-            </li>`;
-        }).join("");
-      }
+      if (!recentOrders?.length) list.innerHTML = `<li>暂无订单！</li>`;
+      else list.innerHTML = recentOrders.map(o => `
+        <li>🛒 ${o.products?.name || "未知商品"} /
+        ¥${Number(o.total_price || 0).toFixed(2)} /
+        利润：${Number(o.products?.profit || 0)} /
+        状态：${o.status === "completed" ? "已完成" : "待完成"} /
+        <small>${new Date(o.created_at).toLocaleString()}</small></li>`).join("");
     }
-  } catch (e) {
-    console.error("加载最近订单失败：", e);
-  }
+  } catch (e) { console.error(e); }
 }
 
 /* ======================
@@ -386,19 +315,9 @@ async function loadRecentOrders() {
    ====================== */
 async function checkPendingLock() {
   if (!window.currentUserId) return;
-
-  const { data: pend } = await supabaseClient
-    .from("orders")
-    .select("id")
-    .eq("user_id", window.currentUserId)
-    .eq("status", "pending")
-    .limit(1);
-
-  if (pend?.length) {
-    setOrderBtnDisabled(true, "存在未完成订单，请先完成订单");
-  } else {
-    setOrderBtnDisabled(false);
-  }
+  const { data: pend } = await supabaseClient.from("orders")
+    .select("id").eq("user_id", window.currentUserId).eq("status","pending").limit(1);
+  setOrderBtnDisabled(!!pend?.length, pend?.length ? "存在未完成订单，请先完成订单" : "");
 }
 
 /* ======================
@@ -417,33 +336,19 @@ async function refreshAll() {
 
 async function loadCoinsOrderPage() {
   if (!window.currentUserId) return;
-  const { data, error } = await supabaseClient
-    .from("users")
-    .select("coins, balance")
-    .eq("id", window.currentUserId)
-    .single();
-  if (!error && data) {
-    updateCoinsUI(data.coins);
-    await checkPendingLock();
-  }
+  const { data, error } = await supabaseClient.from("users").select("coins,balance").eq("id", window.currentUserId).single();
+  if (!error && data) { updateCoinsUI(data.coins); await checkPendingLock(); }
 }
 
 async function loadLastOrder() {
   if (!window.currentUserId) return;
-
   const { data: orders } = await supabaseClient
     .from("orders")
-    .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
+    .select(`id,total_price,profit,status,created_at,products(name,profit)`)
     .eq("user_id", window.currentUserId)
-    .order("created_at", { ascending: false })
-    .limit(1);
+    .order("created_at",{ascending:false}).limit(1);
 
-  const { data: user } = await supabaseClient
-    .from("users")
-    .select("coins")
-    .eq("id", window.currentUserId)
-    .single();
-
-  if (orders?.length) renderLastOrder(orders[0], user?.coins ?? 0);
+  const { data: user } = await supabaseClient.from("users").select("coins").eq("id", window.currentUserId).single();
+  if (orders?.length) renderLastOrder(orders[0], user?.coins || 0);
   else document.getElementById("orderResult").innerHTML = "";
 }
