@@ -40,9 +40,28 @@ function updateCoinsUI(coinsRaw) {
 }
 
 /* ======================
-   获取全局规则
+   获取规则（优先用户手动，否则全局）
    ====================== */
-async function getGlobalRule() {
+async function getEffectiveRule(userId, orderNumber) {
+  // 1. 尝试查用户手动规则
+  const { data: rules, error } = await supabaseClient
+    .from("user_product_rules")
+    .select("product_id, max_orders, period_minutes")
+    .eq("user_id", userId)
+    .eq("order_number", orderNumber)
+    .eq("enabled", true)
+    .limit(1);
+
+  if (!error && rules?.length) {
+    return {
+      productId: rules[0].product_id,
+      maxOrders: Number(rules[0].max_orders || 2),
+      periodMinutes: Number(rules[0].period_minutes || 2),
+      source: "user"   // 手动规则
+    };
+  }
+
+  // 2. 否则查全局规则
   try {
     const { data: rule } = await supabaseClient
       .from("user_product_rules")
@@ -50,15 +69,19 @@ async function getGlobalRule() {
       .eq("enabled", true)
       .limit(1)
       .single();
+
     return {
+      productId: null,
       maxOrders: Number(rule?.max_orders || 2),
-      periodMinutes: Number(rule?.period_minutes || 2)
+      periodMinutes: Number(rule?.period_minutes || 2),
+      source: "global"  // 全局规则
     };
   } catch (e) {
     console.error("读取全局规则失败，使用默认值", e);
-    return { maxOrders: 2, periodMinutes: 2 };
+    return { productId: null, maxOrders: 2, periodMinutes: 2, source: "default" };
   }
 }
+
 
 /* ======================
    检查下单限制（倒计时） 
