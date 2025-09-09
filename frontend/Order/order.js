@@ -199,7 +199,7 @@ function showModal(contentHtml) {
 }
 
 /* ======================
-   自动下单
+   自动下单（利润按数据库 profit 字段）
    ====================== */
 async function autoOrder() {
   if (!window.currentUserId) { alert("请先登录！"); return; }
@@ -208,7 +208,7 @@ async function autoOrder() {
   setOrderBtnDisabled(true, "下单中…");
 
   try {
-    // 用户信息
+    // 获取用户信息
     const { data: user } = await supabaseClient
       .from("users")
       .select("coins")
@@ -216,7 +216,6 @@ async function autoOrder() {
       .single();
     const coins = Number(user?.coins || 0);
 
-    // 检查最少 50 coins
     if (coins < 50) {
       showModal(`<p>你的余额不足，最少需要 50 coins</p>`);
       setOrderBtnDisabled(false);
@@ -224,7 +223,7 @@ async function autoOrder() {
       return;
     }
 
-    // 检查 pending
+    // 检查是否存在 pending 订单
     const { data: pend } = await supabaseClient
       .from("orders")
       .select("id")
@@ -244,7 +243,7 @@ async function autoOrder() {
       .eq("user_id", window.currentUserId);
     const orderNumber = (orders?.length || 0) + 1;
 
-    // 检查手动规则
+    // 获取手动规则产品
     let product;
     const ruleProductId = await getUserRuleProduct(window.currentUserId, orderNumber);
     if (ruleProductId) {
@@ -256,10 +255,12 @@ async function autoOrder() {
       if (!error && pData) product = pData;
     }
 
+    // 如果没有手动规则，则随机产品
     if (!product) product = await getRandomProduct();
 
     const price = Number(product.price) || 0;
-    const profit = +(price * 0.1).toFixed(2);
+    const profitRatio = Number(product.profit) || 0;  // 数据库 profit 字段
+    const profit = +(price * profitRatio).toFixed(2);
     const tempCoins = coins - price;
 
     // 扣除金币
@@ -268,7 +269,7 @@ async function autoOrder() {
       .update({ coins: tempCoins })
       .eq("id", window.currentUserId);
 
-    // 下单
+    // 创建订单
     const { data: newOrder, error: orderErr } = await supabaseClient
       .from("orders")
       .insert({
