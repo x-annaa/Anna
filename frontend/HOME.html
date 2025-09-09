@@ -28,61 +28,40 @@
   <div id="infoPage" class="page">💬 MESSAGE</div>
 
   <!-- 订单页面 -->
-<div id="orderPage" class="page">
-  <div class="order-header">
-    <h2>📦 ORDER</h2>
-    <div class="coins-box">
-      💰 Coins: <span id="ordercoins">0</span>
-      <button id="addCoinsBtn" title="从余额兑换Coins">+</button>
+  <div id="orderPage" class="page">
+    <div class="order-header">
+      <h2>📦 ORDER</h2>
+      <div class="coins-box">
+        💰 Coins: <span id="ordercoins">0</span>
+        <button id="addCoinsBtn" title="从余额兑换Coins">+</button>
+      </div>
     </div>
-  </div>
 
-  <div class="order-actions">
-    <!-- 默认显示 开始任务 -->
-    <button id="startTaskBtn">开始任务</button>
-    <!-- 刷单按钮隐藏，等有任务后才显示 -->
-    <button id="autoOrderBtn" style="display:none;">🎲 一键刷单</button>
-  </div>
+    <div class="order-actions">
+      <button id="autoOrderBtn">🎲 一键刷单</button>
+    </div>
 
-  <div id="orderResult" class="order-result"></div>
+    <div id="orderResult" class="order-result"></div>
 
-  <div class="order-history">
-    <h3>🕘 最近订单</h3>
-    <ul id="recentOrders">
-      <li>暂无订单！</li>
-    </ul>
-  </div>
+    <div class="order-history">
+      <h3>🕘 最近订单</h3>
+      <ul id="recentOrders">
+        <li>暂无订单！</li>
+      </ul>
+    </div>
 
-  <!-- 兑换 Coins 弹窗 -->
-  <div id="addCoinsModal" class="modal">
-    <div class="modal-content">
-      <h3>兑换 Coins</h3>
-      <p>请输入要兑换的数量：</p>
-      <input type="number" id="addCoinsInput" min="1" placeholder="输入数量" />
-      <div class="modal-actions">
-        <button id="cancelAddCoins">取消</button>
-        <button id="confirmAddCoins">确认</button>
+    <div id="addCoinsModal" class="modal">
+      <div class="modal-content">
+        <h3>兑换 Coins</h3>
+        <p>请输入要兑换的数量：</p>
+        <input type="number" id="addCoinsInput" min="1" placeholder="输入数量" />
+        <div class="modal-actions">
+          <button id="cancelAddCoins">取消</button>
+          <button id="confirmAddCoins">确认</button>
+        </div>
       </div>
     </div>
   </div>
-
-  <!-- 任务单选择弹窗 -->
-  <div id="taskModal" class="modal">
-    <div class="modal-content">
-      <h3>选择任务单</h3>
-      <p>请选择要开始的任务单金额：</p>
-      <div class="task-options">
-        <button class="task-option" data-amount="50" data-orders="10">50 - 0/10 单</button>
-        <button class="task-option" data-amount="100" data-orders="15">100 - 0/15 单</button>
-        <button class="task-option" data-amount="150" data-orders="20">150 - 0/20 单</button>
-        <button class="task-option" data-amount="200" data-orders="25">200 - 0/25 单</button>
-      </div>
-      <div class="modal-actions">
-        <button id="cancelTask">取消</button>
-      </div>
-    </div>
-  </div>
-</div>
 
   <!-- 关于我们 -->
   <div id="msgPage" class="page">ℹ️ 关于我们</div>
