@@ -6,7 +6,7 @@ window.currentUsername = localStorage.getItem("currentUser");
 
 let ordering = false;      // 下单中的并发保护
 let completing = false;    // 完成订单中的并发保护
-let exchanging = false;    // 兑换中的并发保护
+let exchanging = false;    // Balance -> Coins 兑换中的并发保护
 
 if (!window.supabaseClient) {
   console.error("❌ supabaseClient 未初始化！");
@@ -169,42 +169,6 @@ async function checkPendingLock() {
 }
 
 /* ======================
-   今日任务统计
-   ====================== */
-async function getTodayProgress() {
-  if (!window.currentUserId) return { todayCount: 0, dailyLimit: 0 };
-
-  // 获取用户等级
-  const { data: user, error: userErr } = await supabaseClient
-    .from("users")
-    .select("level_id")
-    .eq("id", window.currentUserId)
-    .single();
-  if (userErr || !user) return { todayCount: 0, dailyLimit: 0 };
-
-  // 获取等级对应 daily_limit
-  const { data: levelData } = await supabaseClient
-    .from("levels")
-    .select("daily_limit")
-    .eq("id", user.level_id)
-    .single();
-  const dailyLimit = levelData?.daily_limit || 10;
-
-  // 今日 00:00 起完成订单数
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
-
-  const { count: todayCount } = await supabaseClient
-    .from("orders")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", window.currentUserId)
-    .eq("status", "completed")
-    .gte("created_at", todayStart.toISOString());
-
-  return { todayCount: todayCount || 0, dailyLimit };
-}
-
-/* ======================
    通用 Modal 管理
    ====================== */
 function showModal(contentHtml) {
@@ -225,6 +189,7 @@ function showModal(contentHtml) {
     modal.remove();
   });
 
+  // ESC 关闭
   document.addEventListener("keydown", function escHandler(e) {
     if (e.key === "Escape") {
       modal.remove();
@@ -243,6 +208,7 @@ async function autoOrder() {
   setOrderBtnDisabled(true, "下单中…");
 
   try {
+    // 用户信息
     const { data: user } = await supabaseClient
       .from("users")
       .select("coins")
@@ -250,6 +216,7 @@ async function autoOrder() {
       .single();
     const coins = Number(user?.coins || 0);
 
+    // 检查最少 50 coins
     if (coins < 50) {
       showModal(`<p>你的余额不足，最少需要 50 coins</p>`);
       setOrderBtnDisabled(false);
@@ -257,14 +224,7 @@ async function autoOrder() {
       return;
     }
 
-    const { todayCount, dailyLimit } = await getTodayProgress();
-    if (todayCount >= dailyLimit) {
-      alert(`⚠️ 今日订单任务已完成 (${todayCount}/${dailyLimit})`);
-      setOrderBtnDisabled(true, "今日任务已完成");
-      ordering = false;
-      return;
-    }
-
+    // 检查 pending
     const { data: pend } = await supabaseClient
       .from("orders")
       .select("id")
@@ -274,16 +234,17 @@ async function autoOrder() {
     if (pend?.length) {
       alert("您有未完成订单，请先完成订单再继续下单。");
       await checkPendingLock();
-      ordering = false;
       return;
     }
 
+    // 当前订单号
     const { data: orders } = await supabaseClient
       .from("orders")
       .select("id")
       .eq("user_id", window.currentUserId);
     const orderNumber = (orders?.length || 0) + 1;
 
+    // 检查手动规则
     let product;
     const ruleProductId = await getUserRuleProduct(window.currentUserId, orderNumber);
     if (ruleProductId) {
@@ -294,17 +255,20 @@ async function autoOrder() {
         .single();
       if (!error && pData) product = pData;
     }
+
     if (!product) product = await getRandomProduct();
 
     const price = Number(product.price) || 0;
-    const profit = +(price * 0.01);
+    const profit = +(price * 0.1).toFixed(2);
     const tempCoins = coins - price;
 
+    // 扣除金币
     await supabaseClient
       .from("users")
       .update({ coins: tempCoins })
       .eq("id", window.currentUserId);
 
+    // 下单
     const { data: newOrder, error: orderErr } = await supabaseClient
       .from("orders")
       .insert({
@@ -331,7 +295,7 @@ async function autoOrder() {
 }
 
 /* ======================
-   最近订单 + 今日任务
+   最近订单
    ====================== */
 async function loadRecentOrders() {
   if (!window.currentUserId) return;
@@ -349,12 +313,9 @@ async function loadRecentOrders() {
       .select("id", { count: "exact", head: true })
       .eq("user_id", window.currentUserId);
 
-    const { todayCount, dailyLimit } = await getTodayProgress();
-
     const historyTitle = document.querySelector(".order-history h3");
     if (historyTitle) {
-      historyTitle.textContent =
-        `🕘 最近订单 ⛞今日订单任务：${todayCount}/${dailyLimit} ♲总共：${totalCount || 0}单`;
+      historyTitle.textContent = `🕘 最近订单 订单数：${totalCount || 0}单`;
     }
 
     const list = document.getElementById("recentOrders");
@@ -380,6 +341,25 @@ async function loadRecentOrders() {
     console.error("加载最近订单失败：", e);
   }
 }
+
+/* ======================
+   页面初始化
+   ====================== */
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
+  document.getElementById("addCoinsBtn")?.addEventListener("click", openExchangeModal);
+  document.getElementById("cancelAddCoins")?.addEventListener("click", closeExchangeModal);
+  document.getElementById("confirmAddCoins")?.addEventListener("click", confirmExchange);
+
+  document.getElementById("addCoinsModal")?.addEventListener("click", (e) => {
+    if (e.target.id === "addCoinsModal") closeExchangeModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeExchangeModal();
+  });
+
+  refreshAll();
+});
 
 /* ======================
    页面刷新工具
@@ -426,109 +406,71 @@ async function loadLastOrder() {
 }
 
 /* ======================
-   Coins / Balance 弹窗
+   Coins 弹窗
    ====================== */
 function openExchangeModal() {
-  const modal = document.getElementById("exchangeModal");
-  if (modal) modal.style.display = "flex";
-
-  document.getElementById("exchangeAmount").value = "";
-  document.getElementById("exchangeType").value = "coins";
-  document.getElementById("orderLimitNotice").style.display = "none";
-
-  loadExchangeInfo();
+  const modal = document.getElementById("addCoinsModal");
+  const input = document.getElementById("addCoinsInput");
+  if (modal) {
+    modal.style.display = "flex";
+    if (input) { input.value = ""; setTimeout(() => input.focus(), 50); }
+  }
 }
 
 function closeExchangeModal() {
-  const modal = document.getElementById("exchangeModal");
+  const modal = document.getElementById("addCoinsModal");
   if (modal) modal.style.display = "none";
-}
-
-async function loadExchangeInfo() {
-  if (!window.currentUserId) return;
-
-  const { data: user } = await supabaseClient
-    .from("users")
-    .select("coins, balance")
-    .eq("id", window.currentUserId)
-    .single();
-
-  if (!user) return;
-
-  const type = document.getElementById("exchangeType").value;
-  const label = document.getElementById("exchangeFromLabel");
-  const available = document.getElementById("exchangeAvailable");
-
-  if (type === "coins") {
-    label.textContent = "Balance";
-    available.textContent = (Number(user.balance) || 0).toFixed(2);
-  } else {
-    label.textContent = "Coins";
-    available.textContent = (Number(user.coins) || 0).toFixed(2);
-  }
 }
 
 async function confirmExchange() {
   if (exchanging) return;
   exchanging = true;
 
-  const type = document.getElementById("exchangeType").value;
-  const amount = parseFloat(document.getElementById("exchangeAmount").value || "0");
-  const notice = document.getElementById("orderLimitNotice");
+  const inputEl = document.getElementById("addCoinsInput");
+  const confirmBtn = document.getElementById("confirmAddCoins");
+  const amount = parseFloat(inputEl?.value || "0");
 
-  if (isNaN(amount) || amount <= 0) { alert("请输入有效数量"); exchanging = false; return; }
+  if (isNaN(amount) || amount <= 0) { alert("输入无效"); exchanging = false; return; }
+  if (!window.currentUserId) { alert("请先登录！"); exchanging = false; return; }
+
+  if (confirmBtn) confirmBtn.disabled = true;
 
   try {
-    const { data: user } = await supabaseClient
+    const { data: user, error } = await supabaseClient
       .from("users")
       .select("coins, balance")
       .eq("id", window.currentUserId)
       .single();
-    if (!user) throw new Error("加载用户信息失败");
+    if (error || !user) throw new Error("加载用户信息失败");
 
-    let coins = Number(user.coins) || 0;
-    let balance = Number(user.balance) || 0;
+    const coins = Number(user.coins) || 0;
+    const balance = Number(user.balance) || 0;
+    if (balance < amount) { alert(`余额不足，当前 Balance：¥${balance.toFixed(2)}`); return; }
 
-    if (type === "coins") {
-      const { todayCount, dailyLimit } = await getTodayProgress();
-      if (todayCount >= dailyLimit) {
-        alert("⚠️ 今日订单任务已完成，无法兑换 Coins → Balance");
-        exchanging = false;
-        return;
-      }
-      if (balance < amount) { alert("Balance 不足"); exchanging = false; return; }
-      balance -= amount;
-      coins += amount;
-    } else {
-      if (coins < amount) { alert("Coins 不足"); exchanging = false; return; }
-      coins -= amount;
-      balance += amount;
-    }
+    const newCoins = coins + amount;
+    const newBalance = balance - amount;
 
-    await supabaseClient
+    const { error: updateErr } = await supabaseClient
       .from("users")
-      .update({ coins, balance })
+      .update({ coins: newCoins, balance: newBalance })
       .eq("id", window.currentUserId);
+    if (updateErr) throw new Error("兑换失败：" + updateErr.message);
 
-    alert(`✅ 成功兑换 ${amount.toFixed(2)} ${type}`);
+    alert(`✅ 成功兑换 ${amount.toFixed(2)} Coins`);
+    document.getElementById("ordercoins").textContent = newCoins.toFixed(2);
+    const balEl = document.getElementById("balance");
+    if (balEl) balEl.textContent = newBalance.toFixed(2);
+
+    updateCoinsUI(newCoins);
+    await checkPendingLock();
+    await loadLastOrder();
+    await loadRecentOrders();
     closeExchangeModal();
-    await refreshAll();
+
   } catch (e) {
     alert(e.message || "兑换失败");
   } finally {
     exchanging = false;
+    if (confirmBtn) confirmBtn.disabled = false;
   }
 }
-
-/* ======================
-   页面事件绑定
-   ====================== */
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
-  document.getElementById("addCoinsBtn")?.addEventListener("click", openExchangeModal);
-  document.getElementById("cancelExchange")?.addEventListener("click", closeExchangeModal);
-  document.getElementById("confirmExchange")?.addEventListener("click", confirmExchange);
-  document.getElementById("exchangeType")?.addEventListener("change", loadExchangeInfo);
-
-  refreshAll();
-});
