@@ -40,36 +40,52 @@ function updateCoinsUI(coinsRaw) {
 }
 
 /* ======================
-   检查最近10单限制
+   获取用户规则产品
    ====================== */
-async function canPlaceOrder(userId) {
+async function getUserRuleProduct(userId, orderNumber) {
+  const { data: rules, error } = await supabaseClient
+    .from("user_product_rules")
+    .select("product_id, max_orders, period_minutes")
+    .eq("user_id", userId)
+    .eq("order_number", orderNumber)
+    .eq("enabled", true)
+    .limit(1);
+
+  if (error) { console.error("读取手动规则失败", error); return null; }
+  return rules?.[0] || null; // 返回完整规则对象
+}
+
+/* ======================
+   检查下单限制（倒计时） 
+   ====================== */
+async function canPlaceOrder(userId, maxOrders = 10, periodMinutes = 1) {
   if (!userId) return false;
   clearInterval(countdownTimer);
 
   try {
-    const { data: last10Orders, error } = await supabaseClient
+    const { data: recentOrders, error } = await supabaseClient
       .from("orders")
       .select("created_at")
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
-      .limit(10);
+      .limit(maxOrders);
 
     if (error) { console.error("获取最近订单失败", error); return false; }
-    if (!last10Orders || last10Orders.length < 10) return true;
+    if (!recentOrders || recentOrders.length < maxOrders) return true;
 
-    const tenthOrderTime = new Date(last10Orders[9].created_at);
+    const oldestTime = new Date(recentOrders[recentOrders.length - 1].created_at);
     const now = new Date();
-    let diff = (now - tenthOrderTime) / 1000; // 秒
+    let diff = (now - oldestTime) / 1000; // 秒
 
-    if (diff < 60) {
+    if (diff < periodMinutes * 60) {
       const btn = document.getElementById("autoOrderBtn");
-      setOrderBtnDisabled(true, `最近10单限制`);
+      setOrderBtnDisabled(true, `最近 ${maxOrders} 单限制`);
 
       countdownTimer = setInterval(() => {
         diff += 1;
-        const left = Math.max(0, Math.ceil(60 - diff));
+        const left = Math.max(0, Math.ceil(periodMinutes * 60 - diff));
         if (btn) btn.textContent = `🎲 一键刷单（请等待 ${left}s）`;
-        if (diff >= 60) {
+        if (diff >= periodMinutes * 60) {
           clearInterval(countdownTimer);
           setOrderBtnDisabled(false);
         }
@@ -82,22 +98,6 @@ async function canPlaceOrder(userId) {
     console.error("检查下单限制失败", e);
     return false;
   }
-}
-
-/* ======================
-   获取用户规则产品
-   ====================== */
-async function getUserRuleProduct(userId, orderNumber) {
-  const { data: rules, error } = await supabaseClient
-    .from("user_product_rules")
-    .select("product_id")
-    .eq("user_id", userId)
-    .eq("order_number", orderNumber)
-    .eq("enabled", true)
-    .limit(1);
-
-  if (error) { console.error("读取手动规则失败", error); return null; }
-  return rules?.[0]?.product_id || null;
 }
 
 /* ======================
@@ -205,41 +205,11 @@ async function checkPendingLock() {
 }
 
 /* ======================
-   通用 Modal 管理
-   ====================== */
-function showModal(contentHtml) {
-  const modal = document.createElement("div");
-  modal.className = "modal";
-  modal.style.display = "flex";
-  modal.innerHTML = `
-    <div class="modal-content">
-      ${contentHtml}
-      <div class="modal-actions">
-        <button id="closeModalBtn">关闭</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(modal);
-
-  document.getElementById("closeModalBtn").addEventListener("click", () => modal.remove());
-  document.addEventListener("keydown", function escHandler(e) {
-    if (e.key === "Escape") {
-      modal.remove();
-      document.removeEventListener("keydown", escHandler);
-    }
-  });
-}
-
-/* ======================
-   自动下单
+   自动下单（含数据库倒计时规则）
    ====================== */
 async function autoOrder() {
   if (!window.currentUserId) { alert("请先登录！"); return; }
   if (ordering) return;
-
-  // 检查最近10单限制
-  const canOrder = await canPlaceOrder(window.currentUserId);
-  if (!canOrder) return;
 
   ordering = true;
   setOrderBtnDisabled(true, "下单中…");
@@ -259,6 +229,34 @@ async function autoOrder() {
       return;
     }
 
+    // 获取订单数量，计算 orderNumber
+    const { data: orders } = await supabaseClient
+      .from("orders")
+      .select("id")
+      .eq("user_id", window.currentUserId);
+    const orderNumber = (orders?.length || 0) + 1;
+
+    // 获取用户规则
+    const rule = await getUserRuleProduct(window.currentUserId, orderNumber);
+    let maxOrders = rule?.max_orders || 10;
+    let periodMinutes = rule?.period_minutes || 1;
+    let product;
+
+    if (rule?.product_id) {
+      const { data: pData, error } = await supabaseClient
+        .from("products")
+        .select("*")
+        .eq("id", rule.product_id)
+        .single();
+      if (!error && pData) product = pData;
+    }
+    if (!product) product = await getRandomProduct();
+
+    // 检查倒计时限制
+    const canOrderNow = await canPlaceOrder(window.currentUserId, maxOrders, periodMinutes);
+    if (!canOrderNow) return;
+
+    // 检查是否有 pending
     const { data: pend } = await supabaseClient
       .from("orders")
       .select("id")
@@ -268,26 +266,9 @@ async function autoOrder() {
     if (pend?.length) {
       alert("您有未完成订单，请先完成订单再继续下单。");
       await checkPendingLock();
+      ordering = false;
       return;
     }
-
-    const { data: orders } = await supabaseClient
-      .from("orders")
-      .select("id")
-      .eq("user_id", window.currentUserId);
-    const orderNumber = (orders?.length || 0) + 1;
-
-    let product;
-    const ruleProductId = await getUserRuleProduct(window.currentUserId, orderNumber);
-    if (ruleProductId) {
-      const { data: pData, error } = await supabaseClient
-        .from("products")
-        .select("*")
-        .eq("id", ruleProductId)
-        .single();
-      if (!error && pData) product = pData;
-    }
-    if (!product) product = await getRandomProduct();
 
     const price = Number(product.price) || 0;
     const profitRatio = Number(product.profit) || 0;
@@ -316,6 +297,7 @@ async function autoOrder() {
     updateCoinsUI(tempCoins);
     await checkPendingLock();
     await loadRecentOrders();
+
   } catch (e) {
     alert(e.message || "下单失败");
   } finally {
@@ -429,6 +411,9 @@ async function loadLastOrder() {
   else document.getElementById("orderResult").innerHTML = "";
 }
 
+/* ======================
+   Coins 弹窗
+   ====================== */
 function openExchangeModal() {
   const modal = document.getElementById("addCoinsModal");
   const input = document.getElementById("addCoinsInput");
