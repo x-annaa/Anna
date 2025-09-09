@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>U9</title>
 
-  <!-- css 部分 -->
+  <!-- css 部分 --> 
   <link rel="stylesheet" href="Home/home.css">
   <link rel="stylesheet" href="About/about.css">
   <link rel="stylesheet" href="Order/order.css">
   <link rel="stylesheet" href="Message/message.css">
   <link rel="stylesheet" href="Me/me.css">
+  <!-- css 底部按钮部分 --> 
   <link rel="stylesheet" href="Button/button.css">
 
   <!-- Supabase SDK -->
@@ -21,14 +22,10 @@
 <body>
 
   <!-- 首页 -->
-  <div id="homePage" class="page active">
-    <h2>🏠 HOME</h2>
-  </div>
+  <div id="homePage" class="page active">🏠 HOME</div>
 
   <!-- 信息页面 -->
-  <div id="infoPage" class="page">
-    <h2>💬 MESSAGE</h2>
-  </div>
+  <div id="infoPage" class="page">💬 MESSAGE</div>
 
   <!-- 订单页面 -->
   <div id="orderPage" class="page">
@@ -36,12 +33,12 @@
       <h2>📦 ORDER</h2>
       <div class="coins-box">
         💰 Coins: <span id="ordercoins">0</span>
-        <button id="addCoinsBtn" type="button" title="账户兑换">⇋</button>
+        <button id="addCoinsBtn" title="从余额兑换Coins">+</button>
       </div>
     </div>
 
     <div class="order-actions">
-      <button id="autoOrderBtn" type="button">🎲 一键刷单</button>
+      <button id="autoOrderBtn">🎲 一键刷单</button>
     </div>
 
     <div id="orderResult" class="order-result"></div>
@@ -53,43 +50,21 @@
       </ul>
     </div>
 
-    <!-- Coins / Balance 兑换弹窗 -->
-    <div id="exchangeModal" class="modal">
+    <div id="addCoinsModal" class="modal">
       <div class="modal-content">
-        <h3>💱 账户兑换</h3>
-
-        <!-- 选择兑换类型 -->
-        <label for="exchangeType">请选择兑换类型：</label>
-        <select id="exchangeType">
-          <option value="coins">兑换到 Coins</option>
-          <option value="balance">兑换到 Balance</option>
-        </select>
-
-        <!-- 显示账户余额 -->
-        <div id="exchangeInfo" class="exchange-info">
-          <p>可用 <span id="exchangeFromLabel">Balance</span>：<span id="exchangeAvailable">0.00</span></p>
-          <p id="orderLimitNotice" style="color:red;display:none;">
-            ⚠️ 请先完成今日订单任务后再进行兑换！
-          </p>
-        </div>
-
-        <!-- 输入兑换数量 -->
-        <label for="exchangeAmount">兑换数量：</label>
-        <input type="number" id="exchangeAmount" min="0.01" step="0.01" placeholder="输入数量" required />
-
-        <!-- 按钮 -->
+        <h3>兑换 Coins</h3>
+        <p>请输入要兑换的数量：</p>
+        <input type="number" id="addCoinsInput" min="1" placeholder="输入数量" />
         <div class="modal-actions">
-          <button id="cancelExchange" type="button">取消</button>
-          <button id="confirmExchange" type="button">确认</button>
+          <button id="cancelAddCoins">取消</button>
+          <button id="confirmAddCoins">确认</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- 关于我们 -->
-  <div id="msgPage" class="page">
-    <h2>ℹ️ 关于我们</h2>
-  </div>
+  <div id="msgPage" class="page">ℹ️ 关于我们</div>
 
   <!-- 我的页面 -->
   <div id="myPage" class="page">
@@ -97,22 +72,21 @@
 
     <!-- 用户信息 -->
     <div class="user-info">
-      <p><strong>用户名：</strong><span id="username">加载中...</span></p>
-      <p><strong>平台账号：</strong><span id="platformAccount">加载中...</span></p>
+      <p class="username"><strong>用户名：</strong><span id="username">加载中...</span></p>
+      <p class="platform"><strong>平台账号：</strong><span id="platformAccount">加载中...</span></p>
     </div>
 
     <!-- 余额和提现区域 -->
     <div class="balance-box">
       <p><strong>Balance：</strong><span id="balance">0.00</span></p>
       <div class="balance-actions">
-        <button id="depositBtn" type="button">充值</button>
-        <button id="withdrawBtn" type="button">提现</button>
+        <button id="depositBtn">充值</button>
+        <button id="withdrawBtn">提现</button>
       </div>
     </div>
 
-    <!-- 账户操作 -->
     <div class="my-buttons">
-      <button id="logoutBtn" type="button">Logout</button>
+      <button id="logoutBtn">Logout</button>
     </div>
   </div>
 
@@ -120,10 +94,8 @@
   <div id="logoutModal" class="modal">
     <div class="modal-content">
       <p>确定要退出吗？</p>
-      <div class="modal-actions">
-        <button id="cancelLogout" type="button">否</button>
-        <button id="confirmLogout" type="button">确定</button>
-      </div>
+      <button id="cancelLogout">否</button>
+      <button id="confirmLogout">确定</button>
     </div>
   </div>
 
@@ -132,12 +104,12 @@
     <div class="modal-content">
       <h3>提现</h3>
       <p>当前余额：<span id="withdrawBalance">0.00</span></p>
-      <input type="number" id="withdrawAmount" placeholder="输入提现金额" min="1" required />
-      <input type="text" id="walletAddress" placeholder="USDT-TRC20钱包地址" required />
-      <button id="setPasswordBtn" type="button">添加提现密码</button>
+      <input type="number" id="withdrawAmount" placeholder="输入提现金额" />
+      <input type="text" id="walletAddress" placeholder="USDT-TRC20钱包地址" />
+      <button id="setPasswordBtn">添加提现密码</button>
       <div class="modal-actions">
-        <button id="cancelWithdraw" type="button">取消</button>
-        <button id="confirmWithdraw" type="button">提交</button>
+        <button id="cancelWithdraw">取消</button>
+        <button id="confirmWithdraw">提交</button>
       </div>
     </div>
   </div>
@@ -146,11 +118,11 @@
   <div id="setPasswordModal" class="modal">
     <div class="modal-content">
       <h3>设置提现密码</h3>
-      <input type="password" id="withdrawPwd" maxlength="6" placeholder="输入6位数字密码" required />
-      <input type="password" id="confirmWithdrawPwd" maxlength="6" placeholder="确认密码" required />
+      <input type="text" id="withdrawPwd" maxlength="6" placeholder="输入6位数字密码" />
+      <input type="text" id="confirmWithdrawPwd" maxlength="6" placeholder="确认密码" />
       <div class="modal-actions">
-        <button id="cancelSetPwd" type="button">取消</button>
-        <button id="saveWithdrawPwd" type="button">保存</button>
+        <button id="cancelSetPwd">取消</button>
+        <button id="saveWithdrawPwd">保存</button>
       </div>
     </div>
   </div>
@@ -159,12 +131,12 @@
   <div id="updatePasswordModal" class="modal">
     <div class="modal-content">
       <h3>更改提现密码</h3>
-      <input type="password" id="oldWithdrawPwd" maxlength="6" placeholder="输入原密码" required />
-      <input type="password" id="newWithdrawPwd" maxlength="6" placeholder="输入新密码" required />
-      <input type="password" id="confirmNewWithdrawPwd" maxlength="6" placeholder="确认新密码" required />
+      <input type="text" id="oldWithdrawPwd" maxlength="6" placeholder="输入原密码" />
+      <input type="text" id="newWithdrawPwd" maxlength="6" placeholder="输入新密码" />
+      <input type="text" id="confirmNewWithdrawPwd" maxlength="6" placeholder="确认新密码" />
       <div class="modal-actions">
-        <button id="cancelUpdatePwd" type="button">取消</button>
-        <button id="saveUpdatePwd" type="button">保存</button>
+        <button id="cancelUpdatePwd">取消</button>
+        <button id="saveUpdatePwd">保存</button>
       </div>
     </div>
   </div>
@@ -173,30 +145,30 @@
   <div id="confirmPwdModal" class="modal">
     <div class="modal-content">
       <h3>输入提现密码</h3>
-      <input type="password" id="inputWithdrawPwd" maxlength="6" placeholder="请输入密码" required />
+      <input type="text" id="inputWithdrawPwd" maxlength="6" placeholder="请输入密码" />
       <div class="modal-actions">
-        <button id="cancelConfirmPwd" type="button">取消</button>
-        <button id="submitWithdrawFinal" type="button">提交</button>
+        <button id="cancelConfirmPwd">取消</button>
+        <button id="submitWithdrawFinal">提交</button>
       </div>
     </div>
   </div>
 
   <!-- 底部导航栏 -->
   <div class="bottom-nav">
-    <button data-page="homePage" class="active" type="button">Home</button>
-    <button data-page="infoPage" type="button">Message</button>
-    <button data-page="orderPage" type="button">Order</button>
-    <button data-page="msgPage" type="button">About</button>
-    <button data-page="myPage" type="button">Me</button>
+    <button data-page="homePage" class="active">Home</button>
+    <button data-page="infoPage">Message</button>
+    <button data-page="orderPage">Order</button>
+    <button data-page="msgPage">About</button>
+    <button data-page="myPage">Me</button>
   </div>
 
-  <!-- JS 部分 -->
+  <!-- JS 部分 --> 
   <script src="Home/home.js"></script>
   <script src="Message/message.js"></script>
   <script src="Order/order.js"></script>
   <script src="About/about.js"></script>
   <script src="Me/me.js"></script>
   <script src="Button/button.js"></script>
-
+  
 </body>
 </html>
