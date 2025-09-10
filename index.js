@@ -92,7 +92,6 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
       password, // ⚠️ 明文存储不安全，建议 hash
       coins: 0,
       balance: 0,
-      traffic: 0,
       platform_account: platformAccount
     })
     .select()
