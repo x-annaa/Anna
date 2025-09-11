@@ -14,10 +14,13 @@
   <!-- css 底部按钮部分 --> 
   <link rel="stylesheet" href="Button/button.css">
 
-  <!-- Supabase SDK -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <!-- 全局 Supabase 初始化 -->
-  <script src="../supabaseClient.js"></script>
+  <!-- Supabase SDK (全局变量 supabase) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.10/dist/umd/supabase.js"></script>
+  <script>
+    const supabaseUrl = "https://你的-supabase-url.supabase.co"
+    const supabaseKey = "你的-public-anon-key"
+    window.supabase = supabase.createClient(supabaseUrl, supabaseKey)
+  </script>
 </head>
 <body>
 
@@ -80,7 +83,7 @@
     <div class="balance-box">
       <p><strong>Balance：</strong><span id="balance">0.00</span></p>
       <div class="balance-actions">
-        <button id="depositBtn">充值</button>
+        <!-- 充值 -->
         <button id="depositBtn">充值</button>
         <input type="file" id="depositFile" accept="image/*" style="display:none;" />
         <!-- 提现 -->
@@ -174,7 +177,6 @@
   <script src="Button/button.js"></script>
   <!-- 充值部分 JS -->
   <script src="Me/recharge.js"></script>
-  <script type="module" src="./Me/recharge.js"></script>
   
 </body>
 </html>
