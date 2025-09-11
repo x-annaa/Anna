@@ -1,20 +1,48 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>充值</title>
-    <link rel="stylesheet" href="recharge.css">
+<meta charset="UTF-8">
+<title>充值</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>充值页面</h1>
-        <input type="file" id="fileInput" />
-        <button id="uploadBtn">充值</button>
-        <p id="status"></p>
-    </div>
+<input type="file" id="fileInput">
+<button id="uploadBtn">充值</button>
+<p id="status"></p>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
-    <script src="recharge.js"></script>
+<script>
+const SUPABASE_URL = 'https://ffdrwsemmfvqlqhyjlnb.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmZHJ3c2VtbWZ2cWxxaHlqbG5iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMDI1ODQsImV4cCI6MjA3MTg3ODU4NH0.x7TQHZ2af8O_f9ye__mT6eVstlH9BiyVkNVaOnL3h74';
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const fileInput = document.getElementById('fileInput');
+const uploadBtn = document.getElementById('uploadBtn');
+const status = document.getElementById('status');
+
+uploadBtn.addEventListener('click', async () => {
+    const file = fileInput.files[0];
+    if (!file) {
+        status.textContent = '请先选择文件！';
+        return;
+    }
+
+    const fileName = `${Date.now()}_${file.name}`;
+
+    status.textContent = '上传中...';
+
+    const { data, error } = await supabaseClient.storage
+        .from('Recharge')
+        .upload(fileName, file);
+
+    if (error) {
+        status.textContent = '上传失败: ' + error.message;
+        return;
+    }
+
+    const publicUrl = supabaseClient.storage.from('Recharge').getPublicUrl(fileName).data.publicUrl;
+    status.textContent = '上传成功！文件 URL: ' + publicUrl;
+});
+</script>
 </body>
 </html>
