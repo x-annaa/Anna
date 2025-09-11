@@ -1,19 +1,10 @@
 // ======================
 // Supabase 初始化
 // ======================
-const SUPABASE_URL = "https://ffdrwsemmfvqlqhyjlnb.supabase.co"; // 替换为你的 URL
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmZHJ3c2VtbWZ2cWxxaHlqbG5iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMDI1ODQsImV4cCI6MjA3MTg3ODU4NH0.x7TQHZ2af8O_f9ye__mT6eVstlH9BiyVkNVaOnL3h74"; // 替换为你的 ANON KEY
+const SUPABASE_URL = "https://ffdrwsemmfvqlqhyjlnb.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmZHJ3c2VtbWZ2cWxxaHlqbG5iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMDI1ODQsImV4cCI6MjA3MTg3ODU4NH0.x7TQHZ2af8O_f9ye__mT6eVstlH9BiyVkNVaOnL3h74";
 
-// V2 SDK 初始化方法
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-window.supabaseClient = supabaseClient;
-
-// 当前登录用户 ID
-const currentUserId = localStorage.getItem("currentUserId");
-if (!currentUserId) {
-  alert("请先登录！");
-  window.location.href = "../index.html";
-}
+window.supabaseClient = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ======================
 // 元素获取
@@ -59,8 +50,7 @@ depositFile.addEventListener("change", async (event) => {
   console.log("文件地址:", publicUrlData.publicUrl);
   alert("充值凭证已上传！");
 
-  if (previewImg) {
-    previewImg.src = publicUrlData.publicUrl;
-    previewImg.style.display = "block";
-  }
+  // 显示预览
+  previewImg.src = publicUrlData.publicUrl;
+  previewImg.style.display = "block";
 });
