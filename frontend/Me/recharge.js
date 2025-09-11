@@ -2,8 +2,9 @@
 // Supabase 初始化
 // ======================
 const SUPABASE_URL = "https://ffdrwsemmfvqlqhyjlnb.supabase.co"; // 替换为你的 URL
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmZHJ3c2VtbWZ2cWxxaHlqbG5iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMDI1ODQsImV4cCI6MjA3MTg3ODU4NH0.x7TQHZ2af8O_f9ye__mT6eVstlH9BiyVkNVaOnL3h74";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmZHJ3c2VtbWZ2cWxxaHlqbG5iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMDI1ODQsImV4cCI6MjA3MTg3ODU4NH0.x7TQHZ2af8O_f9ye__mT6eVstlH9BiyVkNVaOnL3h74"; // 替换为你的 ANON KEY
 
+// V2 SDK 初始化方法
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 window.supabaseClient = supabaseClient;
 
@@ -33,7 +34,6 @@ depositFile.addEventListener("change", async (event) => {
   const file = event.target.files[0];
   if (!file) return;
 
-  // 可选：检查文件类型，只允许图片
   if (!file.type.startsWith("image/")) {
     alert("请选择图片文件！");
     return;
@@ -41,7 +41,6 @@ depositFile.addEventListener("change", async (event) => {
 
   const filePath = `recharges/${Date.now()}-${file.name}`;
 
-  // 上传到 Supabase Storage
   const { data, error } = await supabaseClient.storage
     .from("Recharge")
     .upload(filePath, file, { cacheControl: "3600", upsert: true });
@@ -52,7 +51,6 @@ depositFile.addEventListener("change", async (event) => {
     return;
   }
 
-  // 获取公开访问 URL
   const { data: publicUrlData } = supabaseClient.storage
     .from("Recharge")
     .getPublicUrl(filePath);
@@ -61,12 +59,8 @@ depositFile.addEventListener("change", async (event) => {
   console.log("文件地址:", publicUrlData.publicUrl);
   alert("充值凭证已上传！");
 
-  // 显示预览
   if (previewImg) {
     previewImg.src = publicUrlData.publicUrl;
     previewImg.style.display = "block";
   }
-
-  // 可选：这里暂不写数据库
-  // 后续你可以再把 publicUrlData.publicUrl 写入数据库
 });
