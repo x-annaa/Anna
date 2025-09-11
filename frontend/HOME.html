@@ -14,8 +14,10 @@
   <!-- css 底部按钮部分 --> 
   <link rel="stylesheet" href="Button/button.css">
 
-  <!-- Supabase UMD SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.10/dist/umd/supabase.js"></script>
+  <!-- Supabase SDK -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <!-- 全局 Supabase 初始化 -->
+  <script src="../supabaseClient.js"></script>
 </head>
 <body>
 
@@ -65,7 +67,7 @@
   <div id="msgPage" class="page">ℹ️ 关于我们</div>
 
   <!-- 我的页面 -->
-  <div id="myPage" class="page active">
+  <div id="myPage" class="page">
     <h2>👤 我的页面</h2>
 
     <!-- 用户信息 -->
@@ -74,16 +76,19 @@
       <p class="platform"><strong>平台账号：</strong><span id="platformAccount">加载中...</span></p>
     </div>
 
-    <!-- 余额和充值区域 -->
+    <!-- 余额和提现区域 -->
     <div class="balance-box">
       <p><strong>Balance：</strong><span id="balance">0.00</span></p>
       <div class="balance-actions">
-        <button id="depositBtn">上传充值凭证</button>
-        <input type="file" id="depositFile" accept="image/*" style="display:none;" />
-        <img id="previewImg" style="display:none;width:200px;margin-top:10px;" />
+        <button id="depositBtn">充值</button>
         <button id="withdrawBtn">提现</button>
       </div>
     </div>
+
+    <div class="my-buttons">
+      <button id="logoutBtn">Logout</button>
+    </div>
+  </div>
 
   <!-- Logout 确认弹窗 -->
   <div id="logoutModal" class="modal">
@@ -157,14 +162,13 @@
     <button data-page="myPage">Me</button>
   </div>
 
-  <!-- 引入 JS -->
+  <!-- JS 部分 --> 
   <script src="Home/home.js"></script>
   <script src="Message/message.js"></script>
   <script src="Order/order.js"></script>
   <script src="About/about.js"></script>
   <script src="Me/me.js"></script>
   <script src="Button/button.js"></script>
-  <!-- 充值功能 JS -->
-  <script src="Me/recharge.js"></script>
+  
 </body>
 </html>
