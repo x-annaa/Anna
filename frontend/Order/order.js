@@ -8,8 +8,8 @@ let ordering = false;      // 下单中的并发保护
 let completing = false;    // 完成订单中的并发保护
 let exchanging = false;    // Balance -> Coins 兑换中的并发保护
 
-if (!window.supabaseClient) {
-  console.error("❌ supabaseClient 未初始化！");
+if (!window.supabase) {
+  console.error("❌ supabase 未初始化！");
 }
 
 /* ======================
@@ -40,7 +40,7 @@ function updateCoinsUI(coinsRaw) {
    获取用户规则产品
    ====================== */
 async function getUserRuleProduct(userId, orderNumber) {
-  const { data: rules, error } = await supabaseClient
+  const { data: rules, error } = await supabase
     .from("user_product_rules")
     .select("product_id")
     .eq("user_id", userId)
@@ -59,7 +59,7 @@ async function getUserRuleProduct(userId, orderNumber) {
    获取随机产品
    ====================== */
 async function getRandomProduct() {
-  const { data: products, error } = await supabaseClient
+  const { data: products, error } = await supabase
     .from("products")
     .select("*")
     .eq("enabled", true)
@@ -80,7 +80,7 @@ function renderLastOrder(order, coinsRaw) {
   const coins = Number(coinsRaw) || 0;
   const price = Number(order.total_price) || 0;
   const profit = Number(order.profit) || 0; 
-  const profitRatio = Number(order.products?.profit) || 0; // 数据库设置的比例
+  const profitRatio = Number(order.products?.profit) || 0;
 
   let html = `
     <h3>✅ 最近一次订单</h3>
@@ -126,14 +126,14 @@ async function completeOrder(order, currentCoinsRaw) {
     const profit = Number(order.profit) || 0;
     const finalCoins = currentCoins + price + profit;
 
-    const { error: orderErr } = await supabaseClient
+    const { error: orderErr } = await supabase
       .from("orders")
       .update({ status: "completed" })
       .eq("id", order.id)
       .eq("status", "pending");
     if (orderErr) throw new Error(orderErr.message);
 
-    const { error: coinErr } = await supabaseClient
+    const { error: coinErr } = await supabase
       .from("users")
       .update({ coins: finalCoins })
       .eq("id", window.currentUserId);
@@ -156,7 +156,7 @@ async function completeOrder(order, currentCoinsRaw) {
 async function checkPendingLock() {
   if (!window.currentUserId) return;
 
-  const { data: pend } = await supabaseClient
+  const { data: pend } = await supabase
     .from("orders")
     .select("id")
     .eq("user_id", window.currentUserId)
@@ -209,7 +209,7 @@ async function autoOrder() {
   setOrderBtnDisabled(true, "下单中…");
 
   try {
-    const { data: user } = await supabaseClient
+    const { data: user } = await supabase
       .from("users")
       .select("coins")
       .eq("id", window.currentUserId)
@@ -223,7 +223,7 @@ async function autoOrder() {
       return;
     }
 
-    const { data: pend } = await supabaseClient
+    const { data: pend } = await supabase
       .from("orders")
       .select("id")
       .eq("user_id", window.currentUserId)
@@ -235,7 +235,7 @@ async function autoOrder() {
       return;
     }
 
-    const { data: orders } = await supabaseClient
+    const { data: orders } = await supabase
       .from("orders")
       .select("id")
       .eq("user_id", window.currentUserId);
@@ -244,7 +244,7 @@ async function autoOrder() {
     let product;
     const ruleProductId = await getUserRuleProduct(window.currentUserId, orderNumber);
     if (ruleProductId) {
-      const { data: pData, error } = await supabaseClient
+      const { data: pData, error } = await supabase
         .from("products")
         .select("*")
         .eq("id", ruleProductId)
@@ -258,12 +258,12 @@ async function autoOrder() {
     const profit = +(price * profitRatio).toFixed(2);
     const tempCoins = coins - price;
 
-    await supabaseClient
+    await supabase
       .from("users")
       .update({ coins: tempCoins })
       .eq("id", window.currentUserId);
 
-    const { data: newOrder, error: orderErr } = await supabaseClient
+    const { data: newOrder, error: orderErr } = await supabase
       .from("orders")
       .insert({
         user_id: window.currentUserId,
@@ -295,14 +295,14 @@ async function loadRecentOrders() {
   if (!window.currentUserId) return;
 
   try {
-    const { data: recentOrders } = await supabaseClient
+    const { data: recentOrders } = await supabase
       .from("orders")
       .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
       .eq("user_id", window.currentUserId)
       .order("created_at", { ascending: false })
       .limit(5);
 
-    const { count: totalCount } = await supabaseClient
+    const { count: totalCount } = await supabase
       .from("orders")
       .select("id", { count: "exact", head: true })
       .eq("user_id", window.currentUserId);
@@ -368,7 +368,7 @@ async function refreshAll() {
 
 async function loadCoinsOrderPage() {
   if (!window.currentUserId) return;
-  const { data, error } = await supabaseClient
+  const { data, error } = await supabase
     .from("users")
     .select("coins, balance")
     .eq("id", window.currentUserId)
@@ -384,14 +384,14 @@ async function loadCoinsOrderPage() {
 async function loadLastOrder() {
   if (!window.currentUserId) return;
 
-  const { data: orders } = await supabaseClient
+  const { data: orders } = await supabase
     .from("orders")
     .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
     .eq("user_id", window.currentUserId)
     .order("created_at", { ascending: false })
     .limit(1);
 
-  const { data: user } = await supabaseClient
+  const { data: user } = await supabase
     .from("users")
     .select("coins")
     .eq("id", window.currentUserId)
@@ -432,7 +432,7 @@ async function confirmExchange() {
   if (confirmBtn) confirmBtn.disabled = true;
 
   try {
-    const { data: user, error } = await supabaseClient
+    const { data: user, error } = await supabase
       .from("users")
       .select("coins, balance")
       .eq("id", window.currentUserId)
@@ -446,7 +446,7 @@ async function confirmExchange() {
     const newCoins = coins + amount;
     const newBalance = balance - amount;
 
-    const { error: updateErr } = await supabaseClient
+    const { error: updateErr } = await supabase
       .from("users")
       .update({ coins: newCoins, balance: newBalance })
       .eq("id", window.currentUserId);
