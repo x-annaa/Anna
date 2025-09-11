@@ -1,5 +1,3 @@
-import { supabase } from "./supabaseClient.js"
-
 const depositBtn = document.getElementById("depositBtn")
 const depositFile = document.getElementById("depositFile")
 
@@ -13,9 +11,8 @@ depositFile.addEventListener("change", async (event) => {
 
   const filePath = `recharges/${Date.now()}-${file.name}`
 
-  // 上传文件
   const { data, error } = await supabase.storage
-    .from("Recharge")
+    .from("Recharge")  // bucket 名称
     .upload(filePath, file)
 
   if (error) {
@@ -24,13 +21,12 @@ depositFile.addEventListener("change", async (event) => {
     return
   }
 
-  // 获取公开 URL
   const { data: publicUrlData } = supabase
     .storage
     .from("Recharge")
     .getPublicUrl(filePath)
 
   console.log("上传成功:", data)
-  console.log("文件公开地址:", publicUrlData.publicUrl)
+  console.log("文件地址:", publicUrlData.publicUrl)
   alert("充值凭证已上传！")
 })
