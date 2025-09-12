@@ -46,6 +46,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     withdrawModal.style.display = "flex";
   });
 
+  // ====== 提现取消按钮 ======
+  document.getElementById("cancelWithdraw").addEventListener("click", () => {
+    withdrawModal.style.display = "none";
+  });
+
   document.getElementById("confirmWithdraw").addEventListener("click", () => {
     const amount = document.getElementById("withdrawAmount").value;
     const address = document.getElementById("walletAddress").value;
