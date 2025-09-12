@@ -94,13 +94,7 @@ body {
   color: #555;
 }
 
-/* 消息提示 */
-.form-msg {
-  min-height: 18px;
-  font-size: 13px;
-  color: #d00;
-  margin: 4px 0 8px;
-}
+
 
 /* 按钮 */
 .primary-btn {
