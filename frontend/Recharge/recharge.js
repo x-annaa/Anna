@@ -1,10 +1,33 @@
 // frontend/Recharge/recharge.js
 
 // =============================
-// 充值文件上传逻辑
+// 充值文件上传逻辑 + 模态框控制
 // =============================
 
 document.addEventListener("DOMContentLoaded", () => {
+  // ---- 充值模态框控制 ----
+  const depositBtn = document.getElementById("depositBtn");
+  const rechargeModal = document.getElementById("rechargeModal");
+  const cancelRecharge = document.getElementById("cancelRecharge");
+
+  if (depositBtn && rechargeModal && cancelRecharge) {
+    depositBtn.addEventListener("click", () => {
+      rechargeModal.style.display = "flex";
+    });
+
+    cancelRecharge.addEventListener("click", () => {
+      rechargeModal.style.display = "none";
+    });
+
+    // 点击模态框外部关闭
+    window.addEventListener("click", (e) => {
+      if (e.target === rechargeModal) {
+        rechargeModal.style.display = "none";
+      }
+    });
+  }
+
+  // ---- 文件上传逻辑 ----
   const fileInput = document.getElementById("fileInput");
   const uploadBtn = document.getElementById("uploadBtn");
   const status = document.getElementById("status");
