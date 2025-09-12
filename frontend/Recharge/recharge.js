@@ -1,40 +1,55 @@
-// 前端使用 ES Module + Supabase CDN
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+// frontend/Recharge/recharge.js
 
-const SUPABASE_URL = 'https://ffdrwsemmfvqlqhyjlnb.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmZHJ3c2VtbWZ2cWxxaHlqbG5iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMDI1ODQsImV4cCI6MjA3MTg3ODU4NH0.x7TQHZ2af8O_f9ye__mT6eVstlH9BiyVkNVaOnL3h74';
+// =============================
+// 充值文件上传逻辑
+// =============================
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+document.addEventListener("DOMContentLoaded", () => {
+  const fileInput = document.getElementById("fileInput");
+  const uploadBtn = document.getElementById("uploadBtn");
+  const status = document.getElementById("status");
 
-const fileInput = document.getElementById('fileInput');
-const uploadBtn = document.getElementById('uploadBtn');
-const status = document.getElementById('status');
-
-uploadBtn.addEventListener('click', async () => {
-  const file = fileInput.files[0];
-  if (!file) {
-    status.textContent = '请先选择文件！';
-    status.style.color = 'red';
+  if (!fileInput || !uploadBtn || !status) {
+    console.error("Recharge 页面缺少必要的 DOM 元素！");
     return;
   }
 
-  const fileName = `${Date.now()}_${file.name}`;
-  status.textContent = '上传中...';
-  status.style.color = 'black';
+  uploadBtn.addEventListener("click", async () => {
+    const file = fileInput.files[0];
+    if (!file) {
+      status.textContent = "请先选择文件！";
+      status.style.color = "red";
+      return;
+    }
 
-  try {
-    const { data, error } = await supabase.storage
-      .from('Recharge')
-      .upload(fileName, file);
+    const fileName = `${Date.now()}_${file.name}`;
+    status.textContent = "上传中...";
+    status.style.color = "black";
 
-    if (error) throw error;
+    try {
+      // ⚡ 使用全局 supabaseClient
+      const { error } = await supabaseClient.storage
+        .from("Recharge")
+        .upload(fileName, file);
 
-    const publicUrl = supabase.storage.from('Recharge').getPublicUrl(fileName).data.publicUrl;
-    status.textContent = '上传成功！文件 URL: ' + publicUrl;
-    status.style.color = 'green';
-  } catch (err) {
-    console.error(err);
-    status.textContent = '上传失败: ' + err.message;
-    status.style.color = 'red';
-  }
+      if (error) throw error;
+
+      // 获取文件的公共 URL
+      const { data: publicUrlData } = supabaseClient
+        .storage
+        .from("Recharge")
+        .getPublicUrl(fileName);
+
+      const publicUrl = publicUrlData.publicUrl;
+
+      status.textContent = "上传成功！文件 URL: " + publicUrl;
+      status.style.color = "green";
+
+      console.log("上传成功 ✅ 文件地址：", publicUrl);
+    } catch (err) {
+      console.error("上传失败 ❌", err);
+      status.textContent = "上传失败: " + err.message;
+      status.style.color = "red";
+    }
+  });
 });
