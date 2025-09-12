@@ -80,7 +80,7 @@
     <div class="balance-box">
       <p><strong>Balance：</strong><span id="balance">0.00</span></p>
       <div class="balance-actions">
-        <button id="depositBtn" onclick="window.location.href='Recharge/recharge.html'">充值</button>
+        <button id="depositBtn">充值</button>
         <button id="withdrawBtn">提现</button>
       </div>
     </div>
@@ -149,6 +149,19 @@
       <div class="modal-actions">
         <button id="cancelConfirmPwd">取消</button>
         <button id="submitWithdrawFinal">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 充值窗口 -->
+  <div id="rechargeModal" class="modal">
+    <div class="modal-content">
+      <h3>充值</h3>
+      <input type="file" id="fileInput" />
+      <button id="uploadBtn">上传</button>
+      <p id="status"></p>
+      <div class="modal-actions">
+        <button id="cancelRecharge">取消</button>
       </div>
     </div>
   </div>
