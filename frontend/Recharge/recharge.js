@@ -1,3 +1,10 @@
+// 初始化 //
+const { data, error } = await supabaseClient
+  .from("users")
+  .select("id, username, platform_account, balance, withdraw_password")
+  .eq("username", username)
+  .single();
+
 // 前端使用 ES Module + Supabase CDN
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
