@@ -5,13 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>U9</title>
 
-  <!-- css 部分 --> 
+  <!-- 页面模块 CSS -->
   <link rel="stylesheet" href="Home/home.css">
-  <link rel="stylesheet" href="About/about.css">
-  <link rel="stylesheet" href="Order/order.css">
   <link rel="stylesheet" href="Message/message.css">
+  <link rel="stylesheet" href="Order/order.css">
+  <link rel="stylesheet" href="About/about.css">
   <link rel="stylesheet" href="Me/me.css">
-  <!-- css 底部按钮部分 --> 
   <link rel="stylesheet" href="Button/button.css">
 
   <!-- Supabase SDK -->
@@ -22,10 +21,33 @@
 <body>
 
   <!-- 首页 -->
-  <div id="homePage" class="page active">🏠 HOME</div>
+  <div id="homePage" class="page active">
+    <h2>🏠 HOME</h2>
+    <p>欢迎来到 U9 平台！</p>
+  </div>
 
   <!-- 信息页面 -->
-  <div id="infoPage" class="page">💬 MESSAGE</div>
+  <div id="infoPage" class="page">
+    <h2>💬 MESSAGE</h2>
+    <p>点击左下角客服头像，开始与客服聊天</p>
+
+    <!-- 客服聊天入口头像 -->
+    <img id="chatAvatar" src="https://你的客服头像URL" alt="客服" />
+
+    <!-- 聊天窗口 -->
+    <div id="chatModal">
+      <div class="chat-header">
+        <span>客服聊天</span>
+        <button id="closeChat">返回</button>
+      </div>
+      <ul id="messageList"></ul>
+      <div class="chat-footer">
+        <input type="text" id="messageInput" placeholder="输入消息..." />
+        <input type="file" id="fileInput" />
+        <button id="sendBtn">发送</button>
+      </div>
+    </div>
+  </div>
 
   <!-- 订单页面 -->
   <div id="orderPage" class="page">
@@ -64,7 +86,10 @@
   </div>
 
   <!-- 关于我们 -->
-  <div id="msgPage" class="page">ℹ️ 关于我们</div>
+  <div id="msgPage" class="page">
+    <h2>ℹ️ 关于我们</h2>
+    <p>这里是 U9 平台的介绍信息。</p>
+  </div>
 
   <!-- 我的页面 -->
   <div id="myPage" class="page">
@@ -89,6 +114,8 @@
       <button id="logoutBtn">Logout</button>
     </div>
   </div>
+
+  <!-- ===== 弹窗部分 ===== -->
 
   <!-- Logout 确认弹窗 -->
   <div id="logoutModal" class="modal">
@@ -157,7 +184,7 @@
   <div id="rechargeModal" class="modal">
     <div class="modal-content">
       <h3>充值</h3>
-      <input type="file" id="fileInput" />
+      <input type="file" id="rechargeFileInput" />
       <button id="uploadBtn">上传</button>
       <p id="status"></p>
       <div class="modal-actions">
@@ -166,7 +193,7 @@
     </div>
   </div>
 
-  <!-- 底部导航栏 -->
+  <!-- ===== 底部导航栏 ===== -->
   <div class="bottom-nav">
     <button data-page="homePage" class="active">Home</button>
     <button data-page="infoPage">Message</button>
@@ -175,7 +202,7 @@
     <button data-page="myPage">Me</button>
   </div>
 
-  <!-- JS 部分 --> 
+  <!-- 页面模块 JS -->
   <script src="Home/home.js"></script>
   <script src="Message/message.js"></script>
   <script src="Order/order.js"></script>
@@ -183,6 +210,5 @@
   <script src="Me/me.js"></script>
   <script src="Button/button.js"></script>
   <script src="Recharge/recharge.js"></script>
-  
 </body>
 </html>
