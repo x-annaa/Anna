@@ -2,6 +2,7 @@
 // MESSAGE 聊天逻辑
 // ======================
 
+// 固定客服 ID（你在数据库里插入客服账号时记住它的 id）
 const CUSTOMER_SERVICE_ID = 1;
 
 let currentUserId = localStorage.getItem("currentUserId");
@@ -14,7 +15,6 @@ const closeChatBtn = document.getElementById("closeChat");
 const messageList = document.getElementById("messageList");
 const messageInput = document.getElementById("messageInput");
 const fileInput = document.getElementById("fileInput");
-const fileBtn = document.getElementById("fileBtn");
 const sendBtn = document.getElementById("sendBtn");
 
 // 打开聊天窗口
@@ -27,9 +27,6 @@ chatAvatar.addEventListener("click", () => {
 closeChatBtn.addEventListener("click", () => {
   chatModal.style.display = "none";
 });
-
-// 点击 "+" 按钮触发文件选择
-fileBtn.addEventListener("click", () => fileInput.click());
 
 // 加载历史消息
 async function loadMessages() {
@@ -60,6 +57,7 @@ async function loadMessages() {
     messageList.appendChild(li);
   });
 
+  // 滚动到底部
   messageList.scrollTop = messageList.scrollHeight;
 }
 
@@ -76,6 +74,7 @@ sendBtn.addEventListener("click", async () => {
   let fileUrl = null;
 
   if (file) {
+    // 上传文件到 Supabase Storage (需要在 supabase 上建个 bucket: "chat-files")
     const fileName = `${Date.now()}_${file.name}`;
     const { data, error: uploadError } = await supabaseClient.storage
       .from("chat-files")
@@ -90,6 +89,7 @@ sendBtn.addEventListener("click", async () => {
     fileUrl = publicUrl.publicUrl;
   }
 
+  // 插入数据库
   const { error } = await supabaseClient.from("messages").insert([
     {
       sender_id: currentUserId,
