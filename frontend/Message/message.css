@@ -1,33 +1,23 @@
-/* =======================
-   客服入口头像（右上角）
-======================= */
+/* 聊天入口头像 - 右上角固定 */
 #chatAvatar {
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   cursor: pointer;
   position: fixed;
   top: 20px;
   right: 20px;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
-  object-fit: cover;
-  transition: transform 0.2s;
+  box-shadow: 0 0 8px rgba(0,0,0,0.2);
   z-index: 1000;
 }
 
-#chatAvatar:hover {
-  transform: scale(1.1);
-}
-
-/* =======================
-   聊天窗口（屏幕正中）
-======================= */
+/* 聊天窗口 - 居中弹出 */
 #chatModal {
   display: none; /* 默认隐藏 */
   position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%); /* 居中 */
+  transform: translate(-50%, -50%);
   width: 360px;
   height: 480px;
   background: #fff;
@@ -36,13 +26,11 @@
   flex-direction: column;
   overflow: hidden;
   z-index: 1100;
-  animation: fadeIn 0.2s ease-in-out;
   display: flex;
+  flex-direction: column;
 }
 
-/* =======================
-   顶部栏
-======================= */
+/* 顶部栏 */
 .chat-header {
   background: #4a90e2;
   color: white;
@@ -60,9 +48,7 @@
   cursor: pointer;
 }
 
-/* =======================
-   消息列表
-======================= */
+/* 消息列表 */
 #messageList {
   flex: 1;
   overflow-y: auto;
@@ -111,9 +97,7 @@
   color: gray;
 }
 
-/* =======================
-   底部输入框
-======================= */
+/* 底部输入框 */
 .chat-footer {
   display: flex;
   align-items: center;
@@ -141,12 +125,4 @@
   color: white;
   border-radius: 6px;
   cursor: pointer;
-}
-
-/* =======================
-   动画
-======================= */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translate(-50%, -48%); }
-  to { opacity: 1; transform: translate(-50%, -50%); }
 }
