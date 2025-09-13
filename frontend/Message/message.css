@@ -13,7 +13,7 @@
 
 /* 聊天窗口 - 居中弹出 */
 #chatModal {
-  display: none; /* 默认隐藏 */
+  display: none; 
   position: fixed;
   top: 50%;
   left: 50%;
@@ -147,15 +147,3 @@
   border-radius: 6px;
   cursor: pointer;
 }
-
-#fileBtn {
-  padding: 6px 12px;
-  background-color: #4a90e2;
-  color: white;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-right: 6px;
-  font-size: 14px;
-  border: none;
-}
-
