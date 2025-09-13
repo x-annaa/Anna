@@ -1,12 +1,12 @@
-/* ========== 客服入口头像 ========== */
+/* ========== 客服入口头像（右上角） ========== */
 #chatAvatar {
   width: 60px;
   height: 60px;
   border-radius: 50%;
   cursor: pointer;
   position: fixed;
-  bottom: 20px;
-  left: 20px;
+  top: 20px;
+  right: 20px;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
   object-fit: cover;
   transition: transform 0.2s;
@@ -16,14 +16,15 @@
   transform: scale(1.1);
 }
 
-/* ========== 聊天窗口 ========== */
+/* ========== 聊天窗口（屏幕正中间） ========== */
 #chatModal {
   display: none; /* 默认隐藏 */
   position: fixed;
-  bottom: 90px;
-  left: 20px;
-  width: 320px;
-  height: 420px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* 居中 */
+  width: 360px;
+  height: 480px;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.25);
@@ -33,11 +34,6 @@
   animation: fadeIn 0.2s ease-in-out;
 }
 
-/* 窗口渐入动画 */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
 
 /* ========== 顶部栏 ========== */
 .chat-header {
