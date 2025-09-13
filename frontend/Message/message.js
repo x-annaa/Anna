@@ -81,13 +81,14 @@ sendBtn.addEventListener("click", async () => {
 
   let fileUrl = null;
   if (file) {
-    const fileName = `${Date.now()}_${file.name}`;
+    // 处理文件名空格和特殊字符
+    const safeFileName = `${Date.now()}_${file.name.replace(/\s+/g, "_")}`;
 
     try {
       // 上传到 Supabase Chat bucket
       const { error: uploadError } = await supabaseClient.storage
         .from("Chat")
-        .upload(fileName, file, { upsert: true });
+        .upload(safeFileName, file, { upsert: true });
 
       if (uploadError) {
         alert("文件上传失败: " + uploadError.message);
@@ -97,7 +98,7 @@ sendBtn.addEventListener("click", async () => {
       // 获取公共 URL
       const { data: publicUrlData } = supabaseClient.storage
         .from("Chat")
-        .getPublicUrl(fileName);
+        .getPublicUrl(safeFileName);
 
       fileUrl = publicUrlData.publicUrl;
     } catch (err) {
