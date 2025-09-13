@@ -23,11 +23,11 @@
    聊天窗口（屏幕正中）
 ======================= */
 #chatModal {
-  display: none; /* 默认隐藏 */
+  display: none;
   position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%); /* 居中 */
+  transform: translate(-50%, -50%);
   width: 360px;
   height: 480px;
   background: #fff;
@@ -37,7 +37,6 @@
   overflow: hidden;
   z-index: 1100;
   animation: fadeIn 0.2s ease-in-out;
-  display: flex;
 }
 
 /* =======================
@@ -130,7 +129,23 @@
   margin-right: 6px;
 }
 
+/* 隐藏默认文件输入 */
 #fileInput {
+  display: none;
+}
+
+/* 自定义上传按钮 "+" */
+#fileBtn {
+  width: 30px;
+  height: 30px;
+  background: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 20px;
+  line-height: 30px;
+  text-align: center;
+  cursor: pointer;
   margin-right: 6px;
 }
 
