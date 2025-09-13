@@ -55,6 +55,7 @@ async function loadMessages() {
   data.forEach((msg) => {
     const li = document.createElement("li");
     li.classList.add("message", msg.sender_id == currentUserId ? "sent" : "received");
+
     li.innerHTML = `
       <div class="msg-content">
         ${msg.content ? `<p>${msg.content}</p>` : ""}
@@ -81,19 +82,32 @@ sendBtn.addEventListener("click", async () => {
   let fileUrl = null;
   if (file) {
     const fileName = `${Date.now()}_${file.name}`;
-    const { data, error: uploadError } = await supabaseClient.storage
-      .from("chat-files")
-      .upload(fileName, file);
 
-    if (uploadError) {
-      alert("文件上传失败: " + uploadError.message);
+    try {
+      // 上传到 Supabase Chat bucket
+      const { error: uploadError } = await supabaseClient.storage
+        .from("Chat")
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) {
+        alert("文件上传失败: " + uploadError.message);
+        return;
+      }
+
+      // 获取公共 URL
+      const { data: publicUrlData } = supabaseClient.storage
+        .from("Chat")
+        .getPublicUrl(fileName);
+
+      fileUrl = publicUrlData.publicUrl;
+    } catch (err) {
+      console.error(err);
+      alert("文件上传异常: " + err.message);
       return;
     }
-
-    const { data: publicUrl } = supabaseClient.storage.from("chat-files").getPublicUrl(fileName);
-    fileUrl = publicUrl.publicUrl;
   }
 
+  // 插入消息
   const { error } = await supabaseClient.from("messages").insert([
     {
       sender_id: currentUserId,
@@ -108,8 +122,11 @@ sendBtn.addEventListener("click", async () => {
     return;
   }
 
+  // 清空输入框
   messageInput.value = "";
   fileInput.value = "";
+
+  // 重新加载消息
   loadMessages();
 });
 
