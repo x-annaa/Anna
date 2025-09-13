@@ -14,6 +14,7 @@ const closeChatBtn = document.getElementById("closeChat");
 const messageList = document.getElementById("messageList");
 const messageInput = document.getElementById("messageInput");
 const fileInput = document.getElementById("fileInput");
+const fileBtn = document.getElementById("fileBtn");
 const sendBtn = document.getElementById("sendBtn");
 
 // 默认隐藏聊天窗口
@@ -28,6 +29,11 @@ chatAvatar.addEventListener("click", () => {
 // 关闭聊天窗口
 closeChatBtn.addEventListener("click", () => {
   chatModal.style.display = "none";
+});
+
+// 自定义上传按钮触发隐藏文件输入
+fileBtn.addEventListener("click", () => {
+  fileInput.click();
 });
 
 // 加载历史消息
