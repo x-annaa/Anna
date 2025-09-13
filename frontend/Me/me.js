@@ -1,113 +1,261 @@
 // ======================
-// MESSAGE 聊天逻辑
+// 当前登录用户
 // ======================
+let currentUser = null;
 
-// 固定客服 ID（你在数据库里插入客服账号时记住它的 id）
-const CUSTOMER_SERVICE_ID = 1;
-
-let currentUserId = localStorage.getItem("currentUserId");
-let currentUsername = localStorage.getItem("currentUser");
-
-// DOM 元素
-const chatAvatar = document.getElementById("chatAvatar");
-const chatModal = document.getElementById("chatModal");
-const closeChatBtn = document.getElementById("closeChat");
-const messageList = document.getElementById("messageList");
-const messageInput = document.getElementById("messageInput");
-const fileInput = document.getElementById("fileInput");
-const sendBtn = document.getElementById("sendBtn");
-
-// 打开聊天窗口
-chatAvatar.addEventListener("click", () => {
-  chatModal.style.display = "flex";
-  loadMessages();
-});
-
-// 关闭聊天窗口
-closeChatBtn.addEventListener("click", () => {
-  chatModal.style.display = "none";
-});
-
-// 加载历史消息
-async function loadMessages() {
-  if (!currentUserId) return;
-
-  const { data, error } = await supabaseClient
-    .from("messages")
-    .select("*")
-    .or(`sender_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`)
-    .order("created_at", { ascending: true });
-
-  if (error) {
-    console.error("加载消息失败:", error.message);
+// ======================
+// 页面初始化
+// ======================
+document.addEventListener("DOMContentLoaded", async () => {
+  const username = localStorage.getItem("currentUser");
+  if (!username) {
+    window.location.href = "../index.html";
     return;
   }
 
-  messageList.innerHTML = "";
-  data.forEach((msg) => {
-    const li = document.createElement("li");
-    li.classList.add("message", msg.sender_id == currentUserId ? "sent" : "received");
-    li.innerHTML = `
-      <div class="msg-content">
-        ${msg.content ? `<p>${msg.content}</p>` : ""}
-        ${msg.file_url ? `<a href="${msg.file_url}" target="_blank">📎 文件</a>` : ""}
-      </div>
-      <span class="msg-time">${new Date(msg.created_at).toLocaleTimeString()}</span>
-    `;
-    messageList.appendChild(li);
+  await loadUserInfo(username);
+
+  // ====== Logout 弹窗 ======
+  const logoutBtn = document.getElementById("logoutBtn");
+  const logoutModal = document.getElementById("logoutModal");
+  const cancelLogout = document.getElementById("cancelLogout");
+  const confirmLogout = document.getElementById("confirmLogout");
+
+  logoutBtn.addEventListener("click", () => {
+    logoutModal.style.display = "flex";
   });
 
-  // 滚动到底部
-  messageList.scrollTop = messageList.scrollHeight;
-}
+  cancelLogout.addEventListener("click", () => {
+    logoutModal.style.display = "none";
+  });
 
-// 发送消息
-sendBtn.addEventListener("click", async () => {
-  const text = messageInput.value.trim();
-  const file = fileInput.files[0];
+  confirmLogout.addEventListener("click", () => {
+    localStorage.removeItem("currentUser");
+    localStorage.removeItem("currentUserId");
+    localStorage.removeItem("hasWithdrawPwd");
+    window.location.href = "../index.html";
+  });
 
-  if (!text && !file) {
-    alert("请输入消息或选择文件");
-    return;
-  }
+  // ====== 提现逻辑 ======
+  const withdrawBtn = document.getElementById("withdrawBtn");
+  const withdrawModal = document.getElementById("withdrawModal");
+  const withdrawBalance = document.getElementById("withdrawBalance");
 
-  let fileUrl = null;
+  withdrawBtn.addEventListener("click", () => {
+    withdrawBalance.textContent = document.getElementById("balance").textContent;
+    withdrawModal.style.display = "flex";
+  });
 
-  if (file) {
-    // 上传文件到 Supabase Storage (需要在 supabase 上建个 bucket: "chat-files")
-    const fileName = `${Date.now()}_${file.name}`;
-    const { data, error: uploadError } = await supabaseClient.storage
-      .from("chat-files")
-      .upload(fileName, file);
+  // ====== 提现取消按钮 ======
+  document.getElementById("cancelWithdraw").addEventListener("click", () => {
+    withdrawModal.style.display = "none";
+  });
 
-    if (uploadError) {
-      alert("文件上传失败: " + uploadError.message);
+  document.getElementById("confirmWithdraw").addEventListener("click", () => {
+    const amount = document.getElementById("withdrawAmount").value;
+    const address = document.getElementById("walletAddress").value;
+
+    if (!amount || !address) {
+      alert("请输入金额和钱包地址");
       return;
     }
 
-    const { data: publicUrl } = supabaseClient.storage.from("chat-files").getPublicUrl(fileName);
-    fileUrl = publicUrl.publicUrl;
-  }
+    if (localStorage.getItem("hasWithdrawPwd") === "true") {
+      document.getElementById("confirmPwdModal").style.display = "flex";
+    } else {
+      alert("请先设置提现密码！");
+    }
+  });
 
-  // 插入数据库
-  const { error } = await supabaseClient.from("messages").insert([
-    {
-      sender_id: currentUserId,
-      receiver_id: CUSTOMER_SERVICE_ID,
-      content: text || null,
-      file_url: fileUrl || null,
-    },
-  ]);
+  // ====== 设置/更新提现密码 ======
+  const setPasswordBtn = document.getElementById("setPasswordBtn");
+  const setPasswordModal = document.getElementById("setPasswordModal");
+  const updatePasswordModal = document.getElementById("updatePasswordModal");
 
-  if (error) {
-    alert("发送失败: " + error.message);
-    return;
-  }
+  setPasswordBtn.addEventListener("click", () => {
+    if (localStorage.getItem("hasWithdrawPwd") === "true") {
+      updatePasswordModal.style.display = "flex";
+    } else {
+      setPasswordModal.style.display = "flex";
+    }
+  });
 
-  messageInput.value = "";
-  fileInput.value = "";
-  loadMessages();
+  // ---- 设置密码 ----
+  document.getElementById("saveWithdrawPwd").addEventListener("click", async () => {
+    const pwd = document.getElementById("withdrawPwd").value;
+    const confirmPwd = document.getElementById("confirmWithdrawPwd").value;
+
+    if (!/^\d{6}$/.test(pwd)) {
+      alert("请输入6位数字密码");
+      return;
+    }
+    if (pwd !== confirmPwd) {
+      alert("两次输入的密码不一致");
+      return;
+    }
+
+    const { error } = await supabaseClient
+      .from("users")
+      .update({ withdraw_password: pwd })
+      .eq("id", currentUser.id);
+
+    if (error) {
+      alert("保存密码失败：" + error.message);
+      return;
+    }
+
+    localStorage.setItem("hasWithdrawPwd", "true");
+    setPasswordBtn.textContent = "更新密码";
+    currentUser.withdraw_password = pwd;
+    alert("提现密码设置成功！");
+    setPasswordModal.style.display = "none";
+  });
+
+  document.getElementById("cancelSetPwd").addEventListener("click", () => {
+    setPasswordModal.style.display = "none";
+  });
+
+  // ---- 更新密码 ----
+  document.getElementById("saveUpdatePwd").addEventListener("click", async () => {
+    const oldPwd = document.getElementById("oldWithdrawPwd").value;
+    const newPwd = document.getElementById("newWithdrawPwd").value;
+    const confirmNewPwd = document.getElementById("confirmNewWithdrawPwd").value;
+
+    if (oldPwd !== currentUser.withdraw_password) {
+      alert("原密码错误！");
+      return;
+    }
+    if (!/^\d{6}$/.test(newPwd)) {
+      alert("新密码必须是6位数字");
+      return;
+    }
+    if (newPwd !== confirmNewPwd) {
+      alert("两次新密码不一致");
+      return;
+    }
+
+    const { error } = await supabaseClient
+      .from("users")
+      .update({ withdraw_password: newPwd })
+      .eq("id", currentUser.id);
+
+    if (error) {
+      alert("更新密码失败：" + error.message);
+      return;
+    }
+
+    currentUser.withdraw_password = newPwd;
+    alert("提现密码更新成功！");
+    updatePasswordModal.style.display = "none";
+  });
+
+  document.getElementById("cancelUpdatePwd").addEventListener("click", () => {
+    updatePasswordModal.style.display = "none";
+  });
+
+  // ---- 确认提现密码 & 提交申请 ----
+  document.getElementById("submitWithdrawFinal").addEventListener("click", async () => {
+    const inputPwd = document.getElementById("inputWithdrawPwd").value;
+
+    if (inputPwd !== currentUser.withdraw_password) {
+      alert("密码错误！");
+      return;
+    }
+
+    const amount = parseFloat(document.getElementById("withdrawAmount").value);
+    const address = document.getElementById("walletAddress").value;
+
+    if (!amount || amount < 10) {
+      alert("提现金额必须 ≥ 10");
+      return;
+    }
+    if (!address) {
+      alert("请输入钱包地址");
+      return;
+    }
+    if (amount > Number(currentUser.balance)) {
+      alert("余额不足");
+      return;
+    }
+
+    const { error } = await supabaseClient
+      .from("withdrawals")
+      .insert([{
+        user_id: currentUser.id,
+        amount: amount,
+        wallet_address: address,
+        status: "pending"
+      }]);
+
+    if (error) {
+      alert("提现申请失败：" + error.message);
+      return;
+    }
+
+    alert("提现申请已提交，等待后台审核！");
+
+    withdrawModal.style.display = "none";
+    document.getElementById("confirmPwdModal").style.display = "none";
+
+    currentUser.balance -= amount;
+    document.getElementById("balance").textContent = currentUser.balance.toFixed(2);
+  });
+
+  // ====== 事件代理：点击遮罩层或取消按钮关闭弹窗 ======
+  window.addEventListener("click", (e) => {
+    if (e.target.classList.contains("modal")) {
+      e.target.style.display = "none";
+    }
+    if (e.target.id === "cancelConfirmPwd") {
+      document.getElementById("confirmPwdModal").style.display = "none";
+    }
+  });
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      document.querySelectorAll(".modal").forEach((m) => (m.style.display = "none"));
+    }
+  });
 });
 
-// 每 3 秒刷新一次
-setInterval(loadMessages, 3000);
+// ======================
+// 加载用户信息函数
+// ======================
+async function loadUserInfo(username) {
+  if (!username) return;
+
+  try {
+    const { data, error } = await supabaseClient
+      .from("users")
+      .select("id, username, platform_account, balance, withdraw_password")
+      .eq("username", username)
+      .single();
+
+    if (error || !data) {
+      console.error("加载用户失败：", error?.message);
+      document.getElementById("platformAccount").textContent = "错误";
+      document.getElementById("balance").textContent = "错误";
+      return;
+    }
+
+    currentUser = data;
+
+    document.getElementById("username").textContent = data.username || "未知";
+    document.getElementById("platformAccount").textContent = data.platform_account || "未知";
+    document.getElementById("balance").textContent = (Number(data.balance) || 0).toFixed(2);
+
+    window.currentUserId = data.id;
+    localStorage.setItem("currentUserId", data.id);
+
+    const setPasswordBtn = document.getElementById("setPasswordBtn");
+    if (data.withdraw_password) {
+      localStorage.setItem("hasWithdrawPwd", "true");
+      setPasswordBtn.textContent = "更新密码";
+    } else {
+      localStorage.setItem("hasWithdrawPwd", "false");
+      setPasswordBtn.textContent = "添加提现密码";
+    }
+  } catch (e) {
+    console.error("加载用户信息异常：", e);
+  }
+}
