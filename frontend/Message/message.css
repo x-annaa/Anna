@@ -27,7 +27,6 @@
   overflow: hidden;
   z-index: 1100;
   display: flex;
-  flex-direction: column;
 }
 
 /* 顶部栏 */
@@ -106,6 +105,7 @@
   background: #fff;
 }
 
+/* 消息输入框 */
 #messageInput {
   flex: 1;
   padding: 6px;
@@ -114,10 +114,31 @@
   margin-right: 6px;
 }
 
-#fileInput {
+/* 自定义文件上传按钮 */
+.file-upload-btn {
+  display: inline-block;
+  padding: 6px 12px;
+  background-color: #4a90e2;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
   margin-right: 6px;
+  font-size: 14px;
+  position: relative;
+  overflow: hidden;
 }
 
+.file-upload-btn input[type="file"] {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+/* 发送按钮 */
 #sendBtn {
   padding: 6px 10px;
   background: #4a90e2;
