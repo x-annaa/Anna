@@ -1,35 +1,29 @@
-/* =======================
-   客服入口头像（右上角）
-======================= */
+/* ========== 客服入口头像 ========== */
 #chatAvatar {
   width: 60px;
   height: 60px;
   border-radius: 50%;
   cursor: pointer;
   position: fixed;
-  top: 20px;
-  right: 20px;
+  bottom: 20px;
+  left: 20px;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
   object-fit: cover;
   transition: transform 0.2s;
   z-index: 1000;
 }
-
 #chatAvatar:hover {
   transform: scale(1.1);
 }
 
-/* =======================
-   聊天窗口（屏幕正中）
-======================= */
+/* ========== 聊天窗口 ========== */
 #chatModal {
-  display: none;
+  display: none; /* 默认隐藏 */
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 360px;
-  height: 480px;
+  bottom: 90px;
+  left: 20px;
+  width: 320px;
+  height: 420px;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.25);
@@ -39,18 +33,22 @@
   animation: fadeIn 0.2s ease-in-out;
 }
 
-/* =======================
-   顶部栏
-======================= */
+/* 窗口渐入动画 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========== 顶部栏 ========== */
 .chat-header {
   background: #4a90e2;
   color: white;
-  padding: 10px;
+  padding: 10px 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-weight: bold;
 }
-
 .chat-header button {
   background: transparent;
   border: none;
@@ -59,63 +57,73 @@
   cursor: pointer;
 }
 
-/* =======================
-   消息列表
-======================= */
+/* ========== 消息列表 ========== */
 #messageList {
   flex: 1;
   overflow-y: auto;
-  padding: 10px;
+  padding: 12px;
   background: #f7f7f7;
   list-style: none;
   display: flex;
   flex-direction: column;
+  gap: 8px;
 }
 
+/* 隐藏滚动条（只显示滚动效果） */
+#messageList::-webkit-scrollbar {
+  width: 6px;
+}
+#messageList::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+/* 单条消息 */
 .message {
-  margin-bottom: 10px;
   max-width: 70%;
+  word-wrap: break-word;
 }
-
 .message.sent {
   align-self: flex-end;
   text-align: right;
 }
-
 .message.received {
   align-self: flex-start;
   text-align: left;
 }
 
+/* 消息内容气泡 */
 .msg-content {
   padding: 8px 12px;
   border-radius: 10px;
   display: inline-block;
+  font-size: 14px;
+  line-height: 1.4;
 }
-
 .sent .msg-content {
   background: #4a90e2;
   color: white;
+  border-bottom-right-radius: 2px;
 }
-
 .received .msg-content {
   background: #e5e5ea;
   color: black;
+  border-bottom-left-radius: 2px;
 }
 
+/* 时间戳 */
 .msg-time {
   display: block;
   font-size: 10px;
-  margin-top: 2px;
+  margin-top: 3px;
   color: gray;
 }
 
-/* =======================
-   底部输入框
-======================= */
+/* ========== 底部输入框 ========== */
 .chat-footer {
   display: flex;
   align-items: center;
+  gap: 6px;
   padding: 8px;
   border-top: 1px solid #ddd;
   background: #fff;
@@ -123,45 +131,26 @@
 
 #messageInput {
   flex: 1;
-  padding: 6px;
+  padding: 6px 8px;
   border: 1px solid #ddd;
   border-radius: 6px;
-  margin-right: 6px;
+  font-size: 14px;
 }
 
-/* 隐藏默认文件输入 */
 #fileInput {
-  display: none;
-}
-
-/* 自定义上传按钮 "+" */
-#fileBtn {
-  width: 30px;
-  height: 30px;
-  background: #4a90e2;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  font-size: 20px;
-  line-height: 30px;
-  text-align: center;
-  cursor: pointer;
-  margin-right: 6px;
+  font-size: 12px;
 }
 
 #sendBtn {
-  padding: 6px 10px;
+  padding: 6px 12px;
   background: #4a90e2;
   border: none;
   color: white;
   border-radius: 6px;
+  font-size: 14px;
   cursor: pointer;
+  transition: background 0.2s;
 }
-
-/* =======================
-   动画
-======================= */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translate(-50%, -48%); }
-  to { opacity: 1; transform: translate(-50%, -50%); }
+#sendBtn:hover {
+  background: #3a78c2;
 }
