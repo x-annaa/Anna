@@ -25,7 +25,25 @@
   <div id="homePage" class="page active">🏠 HOME</div>
 
   <!-- 信息页面 -->
-  <div id="infoPage" class="page">💬 MESSAGE</div>
+  <div id="infoPage" class="page">
+    <h2>💬 MESSAGE</h2>
+    <p>点击左上角客服头像开始与客服聊天</p>
+    <!-- 客服头像 -->
+    <img src="你的客服头像URL" id="chatAvatar" alt="客服头像" />
+
+    <!-- 聊天窗口 -->
+    <div id="chatModal" class="modal">
+      <div class="chat-header">
+        <h3>客服</h3>
+        <span id="closeChat">✖</span>
+      </div>
+      <ul id="messageList"></ul>
+      <div class="message-input">
+        <input type="text" id="messageInput" placeholder="输入消息..." />
+        <button id="sendBtn">发送</button>
+      </div>
+    </div>
+  </div>
 
   <!-- 订单页面 -->
   <div id="orderPage" class="page">
@@ -149,19 +167,6 @@
       <div class="modal-actions">
         <button id="cancelConfirmPwd">取消</button>
         <button id="submitWithdrawFinal">提交</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 充值窗口 -->
-  <div id="rechargeModal" class="modal">
-    <div class="modal-content">
-      <h3>充值</h3>
-      <input type="file" id="fileInput" />
-      <button id="uploadBtn">上传</button>
-      <p id="status"></p>
-      <div class="modal-actions">
-        <button id="cancelRecharge">取消</button>
       </div>
     </div>
   </div>
