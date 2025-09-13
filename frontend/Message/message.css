@@ -1,1 +1,122 @@
+/* 聊天入口头像 */
+#chatAvatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.2);
+}
 
+/* 聊天窗口 */
+#chatModal {
+  display: none;
+  position: fixed;
+  bottom: 80px;
+  left: 20px;
+  width: 320px;
+  height: 420px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.2);
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 999;
+}
+
+/* 顶部栏 */
+.chat-header {
+  background: #4a90e2;
+  color: white;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat-header button {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* 消息列表 */
+#messageList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  background: #f7f7f7;
+  list-style: none;
+}
+
+.message {
+  margin-bottom: 10px;
+  max-width: 70%;
+}
+
+.message.sent {
+  align-self: flex-end;
+  text-align: right;
+}
+
+.message.received {
+  align-self: flex-start;
+  text-align: left;
+}
+
+.msg-content {
+  padding: 8px 12px;
+  border-radius: 10px;
+  display: inline-block;
+}
+
+.sent .msg-content {
+  background: #4a90e2;
+  color: white;
+}
+
+.received .msg-content {
+  background: #e5e5ea;
+  color: black;
+}
+
+.msg-time {
+  display: block;
+  font-size: 10px;
+  margin-top: 2px;
+  color: gray;
+}
+
+/* 底部输入框 */
+.chat-footer {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-top: 1px solid #ddd;
+  background: #fff;
+}
+
+#messageInput {
+  flex: 1;
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin-right: 6px;
+}
+
+#fileInput {
+  margin-right: 6px;
+}
+
+#sendBtn {
+  padding: 6px 10px;
+  background: #4a90e2;
+  border: none;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
