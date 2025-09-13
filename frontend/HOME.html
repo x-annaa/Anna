@@ -25,30 +25,7 @@
   <div id="homePage" class="page active">🏠 HOME</div>
 
   <!-- 信息页面 -->
-  <div id="infoPage" class="page">
-    <!-- 客服聊天入口头像 -->
-    <img id="chatAvatar" src="https://ffdrwsemmfvqlqhyjlnb.supabase.co/storage/v1/object/public/Photos/customer%20service.jpg" alt="客服" />
-
-    <!-- 聊天窗口 -->
-    <div id="chatModal">
-      <div class="chat-header">
-        <span>客服聊天</span>
-        <button id="closeChat">返回</button>
-      </div>
-      <ul id="messageList"></ul>
-      <div class="chat-footer">
-        <input type="text" id="messageInput" placeholder="输入消息..." />
-
-        <!-- 隐藏真实文件输入 -->
-        <input type="file" id="fileInput" style="display:none;" />
-
-        <!-- 自定义上传按钮 -->
-        <button id="fileBtn">Add</button>
-
-        <button id="sendBtn">发送</button>
-      </div>
-    </div>
-  </div>
+  <div id="infoPage" class="page">💬 MESSAGE</div>
 
   <!-- 订单页面 -->
   <div id="orderPage" class="page">
@@ -180,7 +157,7 @@
   <div id="rechargeModal" class="modal">
     <div class="modal-content">
       <h3>充值</h3>
-      <input type="file" id="rechargeFileInput" />
+      <input type="file" id="fileInput" />
       <button id="uploadBtn">上传</button>
       <p id="status"></p>
       <div class="modal-actions">
@@ -206,6 +183,6 @@
   <script src="Me/me.js"></script>
   <script src="Button/button.js"></script>
   <script src="Recharge/recharge.js"></script>
-
+  
 </body>
 </html>
