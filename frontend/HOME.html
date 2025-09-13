@@ -25,7 +25,29 @@
   <div id="homePage" class="page active">🏠 HOME</div>
 
   <!-- 信息页面 -->
-  <div id="infoPage" class="page">💬 MESSAGE</div>
+  <div id="infoPage" class="page">
+    💬 MESSAGE
+
+    <!-- 聊天入口按钮 -->
+    <button id="chatAvatar">💬 聊天</button>
+
+    <!-- 聊天窗口 -->
+    <div id="chatModal">
+      <div class="chat-header">
+        <span>客服聊天</span>
+        <button id="closeChat">✖</button>
+      </div>
+      <ul id="messageList"></ul>
+      <div class="chat-footer">
+        <label class="file-upload-btn">
+          📎
+          <input type="file" id="fileInput" />
+        </label>
+        <input type="text" id="messageInput" placeholder="输入消息..." />
+        <button id="sendBtn">发送</button>
+      </div>
+    </div>
+  </div>
 
   <!-- 订单页面 -->
   <div id="orderPage" class="page">
