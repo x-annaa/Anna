@@ -41,7 +41,13 @@
       <ul id="messageList"></ul>
       <div class="chat-footer">
         <input type="text" id="messageInput" placeholder="输入消息..." />
-        <input type="file" id="fileInput" />
+
+        <!-- 隐藏真实文件输入 -->
+        <input type="file" id="fileInput" style="display:none;" />
+
+        <!-- 自定义上传按钮 -->
+        <button id="fileBtn">Add</button>
+
         <button id="sendBtn">发送</button>
       </div>
     </div>
