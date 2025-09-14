@@ -6,6 +6,12 @@ const sendBtn = document.getElementById("sendBtn");
 const chatInput = document.getElementById("chatInput");
 const chatMessages = document.getElementById("chatMessages");
 
+// === 调试用，检查 session 是否存在 ===
+(async () => {
+  const { data, error } = await supabaseClient.auth.getSession();
+  console.log("当前 session 调试：", data, error);
+})();
+
 // 打开聊天窗口
 openChatBtn.addEventListener("click", async () => {
   chatWindow.classList.remove("hidden");
@@ -28,32 +34,40 @@ sendBtn.addEventListener("click", async () => {
   const content = chatInput.value.trim();
   if (!content) return;
 
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  const user = session?.user;
-  if (!user) {
-    alert("请先登录！");
-    return;
+  try {
+    // 获取当前登录用户
+    const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+    if (sessionError || !session) {
+      console.log("session error:", sessionError);
+      alert("请先登录！");
+      return;
+    }
+
+    const user = session.user;
+
+    // 插入消息到 messages 表
+    const { data, error } = await supabaseClient
+      .from("messages")
+      .insert([
+        {
+          sender_id: user.id,
+          receiver_id: 1, // 客服固定 id
+          content: content
+        }
+      ]);
+
+    if (error) {
+      console.error("发送失败:", error);
+      alert("发送失败！");
+      return;
+    }
+
+    console.log("发送成功:", data);
+    appendMessage("我", content);
+    chatInput.value = "";
+  } catch (err) {
+    console.error("未知错误:", err);
   }
-
-  const { error } = await supabaseClient
-    .from("messages")
-    .insert([
-      {
-        sender_id: user.id,
-        receiver_id: 1, // 客服固定 id
-        content: content
-      }
-    ]);
-
-  if (error) {
-    console.error("发送失败:", error);
-    alert("发送失败！");
-    return;
-  }
-
-  // 本地显示
-  appendMessage("我", content);
-  chatInput.value = "";
 });
 
 // 显示消息
@@ -67,9 +81,10 @@ function appendMessage(sender, text) {
 
 // 加载历史消息
 async function loadMessages() {
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  const user = session?.user;
-  if (!user) return;
+  const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+  if (sessionError || !session) return;
+
+  const user = session.user;
 
   const { data, error } = await supabaseClient
     .from("messages")
@@ -90,9 +105,10 @@ async function loadMessages() {
 // 实时监听客服回复
 let chatSubscription = null;
 async function listenForMessages() {
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  const user = session?.user;
-  if (!user) return;
+  const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+  if (sessionError || !session) return;
+
+  const user = session.user;
 
   if (chatSubscription) {
     supabaseClient.removeChannel(chatSubscription);
@@ -117,10 +133,3 @@ async function listenForMessages() {
     )
     .subscribe();
 }
-
-// === 调试用，检查 session 是否存在 ===
-(async () => {
-  const { data, error } = await supabaseClient.auth.getSession();
-  console.log("当前 session 调试：", data, error);
-})();
-
