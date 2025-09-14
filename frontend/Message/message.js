@@ -43,10 +43,10 @@ openChatBtn.addEventListener("click", async () => {
     return;
   }
 
-  chatWindow.style.display = "flex";       // 显示聊天窗口
-  chatMessages.innerHTML = "";              // 清空历史消息
-  await loadMessages();                     // 加载历史消息
-  listenForMessages();                      // 开启实时监听
+  chatWindow.style.display = "flex";
+  chatMessages.innerHTML = "";
+  await loadMessages();
+  listenForMessages();
 
   // 打开窗口后标记未读消息为已读
   await markMessagesAsRead();
@@ -84,7 +84,7 @@ sendBtn.addEventListener("click", async () => {
       .insert([
         {
           sender_id: userId,
-          receiver_id: 1, // 客服固定 ID
+          receiver_id: 1,
           content: content,
           is_read: false
         }
@@ -177,11 +177,14 @@ async function updateUnreadCount() {
   else bottomUnreadEl.classList.add("hidden");
 
   // 客服按钮红点（显示数字）
-  if (count > 0 && chatBtnUnreadEl) {
-    chatBtnUnreadEl.textContent = count;
-    chatBtnUnreadEl.classList.remove("hidden");
-  } else if (chatBtnUnreadEl) {
-    chatBtnUnreadEl.classList.add("hidden");
+  if (chatBtnUnreadEl) {
+    if (count > 0) {
+      chatBtnUnreadEl.textContent = count;
+      chatBtnUnreadEl.classList.remove("hidden");
+    } else {
+      chatBtnUnreadEl.classList.add("hidden");
+      chatBtnUnreadEl.textContent = "";
+    }
   }
 }
 
@@ -210,8 +213,6 @@ function listenForMessages() {
         // 如果聊天窗口打开，显示消息
         if (!chatWindow.classList.contains("hidden") && msg.sender_id === 1) {
           appendMessage("客服", msg.content);
-
-          // 自动标记为已读
           await markMessagesAsRead();
         }
 
