@@ -113,44 +113,66 @@
   font-weight: bold;
 }
 
-/* 客服按钮固定在右上角 */
+/* =====================
+   客服按钮固定在右上角
+   ===================== */
 #openChatBtn {
   position: fixed;
   top: 20px;
   right: 20px;
+  width: 50px;
+  height: 50px;
   background-color: #4e9cff;
   color: white;
   border: none;
   border-radius: 50%;
-  width: 50px;
-  height: 50px;
   font-size: 24px;
   cursor: pointer;
   z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* 滚动条美化 */
-#chatMessages::-webkit-scrollbar {
-  width: 6px;
-}
-#chatMessages::-webkit-scrollbar-thumb {
-  background: rgba(0,0,0,0.2);
-  border-radius: 3px;
+/* 底部导航栏按钮固定尺寸 */
+.bottom-nav button {
+  position: relative;       /* 红点绝对定位的基准 */
+  min-width: 60px;
+  height: 50px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* =====================
-   红点样式
+   红点样式（绝对定位）
    ===================== */
 .unread-dot {
+  position: absolute;
+  top: 2px;
+  right: 2px;
   display: inline-block;
   background-color: red;
   color: white;
   border-radius: 50%;
   font-size: 12px;
   padding: 2px 6px;
-  margin-left: 5px;
+  line-height: 1;
+  pointer-events: none;  /* 不阻挡按钮点击 */
 }
 
 .hidden {
   display: none;
+}
+
+/* =====================
+   滚动条美化
+   ===================== */
+#chatMessages::-webkit-scrollbar {
+  width: 6px;
+}
+#chatMessages::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.2);
+  border-radius: 3px;
 }
