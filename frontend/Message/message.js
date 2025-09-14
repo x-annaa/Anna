@@ -13,16 +13,18 @@ const messageBtn = document.querySelector('button[data-page="infoPage"]');
 
 // 客服按钮红点
 let chatBtnUnreadEl = document.getElementById("chatBtnUnreadCount");
+if (!chatBtnUnreadEl) {
+  chatBtnUnreadEl = document.createElement("span");
+  chatBtnUnreadEl.className = "chat-btn-unread hidden";
+  openChatBtn.appendChild(chatBtnUnreadEl);
+}
 
-// 创建底部红点（小红点，不显示数字）
+// 创建底部小红点
 let bottomUnreadEl = messageBtn.querySelector(".unread-dot");
 if (!bottomUnreadEl) {
   bottomUnreadEl = document.createElement("span");
-  bottomUnreadEl.classList.add("unread-dot", "hidden");
-  bottomUnreadEl.textContent = ""; // **确保无文本内容**
+  bottomUnreadEl.className = "unread-dot hidden";
   messageBtn.appendChild(bottomUnreadEl);
-} else {
-  bottomUnreadEl.textContent = ""; // 初始化清空
 }
 
 // 当前聊天订阅
@@ -41,17 +43,13 @@ function getCurrentUserId() {
 // =======================
 openChatBtn.addEventListener("click", async () => {
   const userId = getCurrentUserId();
-  if (!userId) {
-    alert("请先登录！");
-    return;
-  }
+  if (!userId) return alert("请先登录！");
 
   chatWindow.style.display = "flex";
   chatMessages.innerHTML = "";
   await loadMessages();
   listenForMessages();
 
-  // 打开窗口后标记未读消息为已读
   await markMessagesAsRead();
   updateUnreadCount();
 });
@@ -73,10 +71,7 @@ backBtn.addEventListener("click", () => {
 // =======================
 sendBtn.addEventListener("click", async () => {
   const userId = getCurrentUserId();
-  if (!userId) {
-    alert("请先登录！");
-    return;
-  }
+  if (!userId) return alert("请先登录！");
 
   const content = chatInput.value.trim();
   if (!content) return;
@@ -84,25 +79,14 @@ sendBtn.addEventListener("click", async () => {
   try {
     const { data, error } = await supabaseClient
       .from("messages")
-      .insert([
-        {
-          sender_id: userId,
-          receiver_id: 1,
-          content: content,
-          is_read: false
-        }
-      ]);
+      .insert([{ sender_id: userId, receiver_id: 1, content, is_read: false }]);
 
-    if (error) {
-      console.error("发送失败:", error);
-      alert("发送失败！");
-      return;
-    }
+    if (error) return console.error("发送失败:", error);
 
     appendMessage("我", content);
     chatInput.value = "";
   } catch (err) {
-    console.error("未知错误:", err);
+    console.error(err);
   }
 });
 
@@ -112,12 +96,9 @@ sendBtn.addEventListener("click", async () => {
 function appendMessage(sender, text) {
   const msg = document.createElement("div");
   msg.classList.add("message-item");
-
-  if (sender === "我") msg.classList.add("me");
-  else msg.classList.add("bot");
-
+  msg.classList.add(sender === "我" ? "me" : "bot");
   msg.textContent = text;
-  chatMessages.prepend(msg); // flex-direction: column-reverse
+  chatMessages.prepend(msg);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
@@ -134,14 +115,9 @@ async function loadMessages() {
     .or(`and(sender_id.eq.${userId},receiver_id.eq.1),and(sender_id.eq.1,receiver_id.eq.${userId})`)
     .order("created_at", { ascending: true });
 
-  if (error) {
-    console.error("加载消息失败:", error);
-    return;
-  }
+  if (error) return console.error("加载消息失败:", error);
 
-  data.forEach(msg => {
-    appendMessage(msg.sender_id === userId ? "我" : "客服", msg.content);
-  });
+  data.forEach(msg => appendMessage(msg.sender_id === userId ? "我" : "客服", msg.content));
 }
 
 // =======================
@@ -151,7 +127,7 @@ async function markMessagesAsRead() {
   const userId = getCurrentUserId();
   if (!userId) return;
 
-  const { data, error } = await supabaseClient
+  const { error } = await supabaseClient
     .from("messages")
     .update({ is_read: true })
     .eq("receiver_id", userId)
@@ -161,7 +137,7 @@ async function markMessagesAsRead() {
 }
 
 // =======================
-// 更新未读红点
+// 更新红点
 // =======================
 async function updateUnreadCount() {
   const userId = getCurrentUserId();
@@ -175,24 +151,21 @@ async function updateUnreadCount() {
 
   if (error) return console.error(error);
 
-  // 底部导航栏红点（只显示红点，不显示数字）
+  // 底部小红点（不显示数字）
   if (count > 0) bottomUnreadEl.classList.remove("hidden");
   else bottomUnreadEl.classList.add("hidden");
 
   // 客服按钮红点（显示数字）
-  if (chatBtnUnreadEl) {
-    if (count > 0) {
-      chatBtnUnreadEl.textContent = count;
-      chatBtnUnreadEl.classList.remove("hidden");
-    } else {
-      chatBtnUnreadEl.textContent = "";
-      chatBtnUnreadEl.classList.add("hidden");
-    }
+  if (count > 0) {
+    chatBtnUnreadEl.textContent = count;
+    chatBtnUnreadEl.classList.remove("hidden");
+  } else {
+    chatBtnUnreadEl.classList.add("hidden");
   }
 }
 
 // =======================
-// 全局监听客服消息
+// 实时监听客服消息
 // =======================
 function listenForMessages() {
   const userId = getCurrentUserId();
@@ -210,11 +183,11 @@ function listenForMessages() {
         table: "messages",
         filter: `receiver_id=eq.${userId}`
       },
-      async (payload) => {
+      async payload => {
         const msg = payload.new;
 
         // 如果聊天窗口打开，显示消息
-        if (!chatWindow.classList.contains("hidden") && msg.sender_id === 1) {
+        if (chatWindow.style.display === "flex" && msg.sender_id === 1) {
           appendMessage("客服", msg.content);
           await markMessagesAsRead();
         }
@@ -227,10 +200,9 @@ function listenForMessages() {
 }
 
 // =======================
-// 页面加载时初始化
+// 页面加载初始化
 // =======================
 document.addEventListener("DOMContentLoaded", () => {
-  bottomUnreadEl.textContent = ""; // **确保初始化清空**
   updateUnreadCount();
   listenForMessages();
 });
