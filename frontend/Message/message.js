@@ -18,7 +18,7 @@ openChatBtn.addEventListener("click", async () => {
 backBtn.addEventListener("click", () => {
   chatWindow.classList.add("hidden");
   if (chatSubscription) {
-    supabase.removeChannel(chatSubscription);
+    supabaseClient.removeChannel(chatSubscription);
     chatSubscription = null;
   }
 });
@@ -28,13 +28,13 @@ sendBtn.addEventListener("click", async () => {
   const content = chatInput.value.trim();
   if (!content) return;
 
-  const user = (await supabase.auth.getUser()).data.user;
+  const user = (await supabaseClient.auth.getUser()).data.user;
   if (!user) {
     alert("请先登录！");
     return;
   }
 
-  const { error } = await supabase
+  const { error } = await supabaseClient
     .from("messages")
     .insert([
       {
@@ -66,10 +66,10 @@ function appendMessage(sender, text) {
 
 // 加载历史消息
 async function loadMessages() {
-  const user = (await supabase.auth.getUser()).data.user;
+  const user = (await supabaseClient.auth.getUser()).data.user;
   if (!user) return;
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from("messages")
     .select("*")
     .or(`and(sender_id.eq.${user.id},receiver_id.eq.1),and(sender_id.eq.1,receiver_id.eq.${user.id})`)
@@ -88,14 +88,14 @@ async function loadMessages() {
 // 实时监听客服回复
 let chatSubscription = null;
 async function listenForMessages() {
-  const user = (await supabase.auth.getUser()).data.user;
+  const user = (await supabaseClient.auth.getUser()).data.user;
   if (!user) return;
 
   if (chatSubscription) {
-    supabase.removeChannel(chatSubscription);
+    supabaseClient.removeChannel(chatSubscription);
   }
 
-  chatSubscription = supabase
+  chatSubscription = supabaseClient
     .channel("realtime-messages")
     .on(
       "postgres_changes",
@@ -103,7 +103,7 @@ async function listenForMessages() {
         event: "INSERT",
         schema: "public",
         table: "messages",
-        filter: `receiver_id=eq.${user.id}` // 监听发给当前用户的消息
+        filter: `receiver_id=eq.${user.id}`
       },
       (payload) => {
         const msg = payload.new;
