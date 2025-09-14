@@ -1,4 +1,6 @@
+// =======================
 // DOM 元素
+// =======================
 const openChatBtn = document.getElementById("openChatBtn");
 const chatWindow = document.getElementById("chatWindow");
 const backBtn = document.getElementById("backBtn");
@@ -6,13 +8,20 @@ const sendBtn = document.getElementById("sendBtn");
 const chatInput = document.getElementById("chatInput");
 const chatMessages = document.getElementById("chatMessages");
 
-// 获取当前登录用户 id
+// 当前聊天订阅
+let chatSubscription = null;
+
+// =======================
+// 获取当前登录用户 ID
+// =======================
 function getCurrentUserId() {
   const id = localStorage.getItem("currentUserId");
   return id ? Number(id) : null;
 }
 
+// =======================
 // 打开聊天窗口
+// =======================
 openChatBtn.addEventListener("click", async () => {
   const userId = getCurrentUserId();
   if (!userId) {
@@ -26,16 +35,21 @@ openChatBtn.addEventListener("click", async () => {
   listenForMessages();                   // 开启实时监听
 });
 
+// =======================
 // 返回按钮关闭窗口
+// =======================
 backBtn.addEventListener("click", () => {
   chatWindow.style.display = "none";     // 隐藏窗口
+
   if (chatSubscription) {
     supabaseClient.removeChannel(chatSubscription);
     chatSubscription = null;
   }
 });
 
+// =======================
 // 发送消息
+// =======================
 sendBtn.addEventListener("click", async () => {
   const userId = getCurrentUserId();
   if (!userId) {
@@ -52,7 +66,7 @@ sendBtn.addEventListener("click", async () => {
       .insert([
         {
           sender_id: userId,
-          receiver_id: 1, // 客服固定 id
+          receiver_id: 1, // 客服固定 ID
           content: content
         }
       ]);
@@ -70,7 +84,9 @@ sendBtn.addEventListener("click", async () => {
   }
 });
 
+// =======================
 // 显示消息
+// =======================
 function appendMessage(sender, text) {
   const msg = document.createElement("div");
   msg.classList.add("message-item");
@@ -79,11 +95,13 @@ function appendMessage(sender, text) {
   else msg.classList.add("bot");
 
   msg.textContent = text;
-  chatMessages.prepend(msg); // 因为 flex-direction: column-reverse
+  chatMessages.prepend(msg); // flex-direction: column-reverse
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
+// =======================
 // 加载历史消息
+// =======================
 async function loadMessages() {
   const userId = getCurrentUserId();
   if (!userId) return;
@@ -104,8 +122,9 @@ async function loadMessages() {
   });
 }
 
+// =======================
 // 实时监听客服回复
-let chatSubscription = null;
+// =======================
 async function listenForMessages() {
   const userId = getCurrentUserId();
   if (!userId) return;
