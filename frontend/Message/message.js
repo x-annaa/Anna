@@ -28,7 +28,8 @@ sendBtn.addEventListener("click", async () => {
   const content = chatInput.value.trim();
   if (!content) return;
 
-  const user = (await supabaseClient.auth.getUser()).data.user;
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  const user = session?.user;
   if (!user) {
     alert("请先登录！");
     return;
@@ -66,7 +67,8 @@ function appendMessage(sender, text) {
 
 // 加载历史消息
 async function loadMessages() {
-  const user = (await supabaseClient.auth.getUser()).data.user;
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  const user = session?.user;
   if (!user) return;
 
   const { data, error } = await supabaseClient
@@ -88,7 +90,8 @@ async function loadMessages() {
 // 实时监听客服回复
 let chatSubscription = null;
 async function listenForMessages() {
-  const user = (await supabaseClient.auth.getUser()).data.user;
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  const user = session?.user;
   if (!user) return;
 
   if (chatSubscription) {
