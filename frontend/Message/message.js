@@ -118,7 +118,9 @@ async function listenForMessages() {
     .subscribe();
 }
 
+// === 调试用，检查 session 是否存在 ===
 (async () => {
   const { data, error } = await supabaseClient.auth.getSession();
-  console.log("调试 session:", data, error);
+  console.log("当前 session 调试：", data, error);
 })();
+
