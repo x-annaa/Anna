@@ -38,7 +38,7 @@ openChatBtn.addEventListener("click", async () => {
   await loadMessages();                     // 加载历史消息
   listenForMessages();                      // 开启实时监听
 
-  // 标记未读消息为已读
+  // 打开窗口后标记未读消息为已读
   await markMessagesAsRead();
   updateUnreadCount();
 });
@@ -177,9 +177,9 @@ async function updateUnreadCount() {
 }
 
 // =======================
-// 实时监听客服消息
+// 实时监听客服消息（全局）
 // =======================
-async function listenForMessages() {
+function listenForMessages() {
   const userId = getCurrentUserId();
   if (!userId) return;
 
@@ -197,12 +197,18 @@ async function listenForMessages() {
         table: "messages",
         filter: `receiver_id=eq.${userId}`
       },
-      (payload) => {
+      async (payload) => {
         const msg = payload.new;
 
-        if (msg.sender_id === 1) appendMessage("客服", msg.content);
+        // 如果聊天窗口打开，显示消息
+        if (!chatWindow.classList.contains("hidden") && msg.sender_id === 1) {
+          appendMessage("客服", msg.content);
 
-        // 更新红点数量
+          // 自动标记为已读
+          await markMessagesAsRead();
+        }
+
+        // 更新红点
         updateUnreadCount();
       }
     )
@@ -214,4 +220,7 @@ async function listenForMessages() {
 // =======================
 document.addEventListener("DOMContentLoaded", () => {
   updateUnreadCount();
+
+  // 全局监听消息，无论聊天窗口是否打开
+  listenForMessages();
 });
