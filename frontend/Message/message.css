@@ -6,8 +6,8 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 360px;
-  height: 500px; /* 固定高度 */
+  width: 500px;
+  height: 400px; /* 固定高度 */
   background-color: #f8f8f8;
   border: 1px solid #ddd;
   border-radius: 12px;
