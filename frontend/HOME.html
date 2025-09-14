@@ -11,7 +11,6 @@
   <link rel="stylesheet" href="Order/order.css">
   <link rel="stylesheet" href="Message/message.css">
   <link rel="stylesheet" href="Me/me.css">
-  <!-- css 底部按钮部分 --> 
   <link rel="stylesheet" href="Button/button.css">
 
   <!-- Supabase SDK -->
@@ -28,7 +27,10 @@
   <div id="infoPage" class="page">
     <div class="message-header">
       <h2>💬 MESSAGE</h2>
-      <button id="openChatBtn">⛑︎</button>
+      <button id="openChatBtn">
+        ⛑︎
+        <span id="chatBtnUnreadCount" class="unread-dot hidden">0</span>
+      </button>
     </div>
 
     <!-- 聊天窗口（默认隐藏） -->
@@ -187,7 +189,10 @@
   <!-- 底部导航栏 -->
   <div class="bottom-nav">
     <button data-page="homePage" class="active">Home</button>
-    <button data-page="infoPage">Message</button>
+    <button data-page="infoPage" id="messageBtn">
+      Message
+      <span id="bottomUnreadCount" class="unread-dot hidden">0</span>
+    </button>
     <button data-page="orderPage">Order</button>
     <button data-page="msgPage">About</button>
     <button data-page="myPage">Me</button>
