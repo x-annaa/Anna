@@ -8,12 +8,29 @@ const sendBtn = document.getElementById("sendBtn");
 const chatInput = document.getElementById("chatInput");
 const chatMessages = document.getElementById("chatMessages");
 
+// 新增红点 badge
+let chatBadge = document.getElementById("chatBadge");
+if (!chatBadge) {
+  chatBadge = document.createElement("span");
+  chatBadge.id = "chatBadge";
+  chatBadge.style.cssText = `
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: red;
+    color: white;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 50%;
+    display: none;
+    z-index: 1002;
+  `;
+  openChatBtn.style.position = "relative";
+  openChatBtn.appendChild(chatBadge);
+}
+
 // 当前聊天订阅
 let chatSubscription = null;
-
-// =======================
-// 未读消息状态
-// =======================
 let unreadCount = 0;
 
 // =======================
@@ -28,22 +45,19 @@ function getCurrentUserId() {
 // 播放通知声音
 // =======================
 function playNotificationSound() {
-  const audio = new Audio("/sounds/notify.mp3"); // ⚠️ 需自行放置 notify.mp3
-  audio.play().catch(err => console.warn("通知音播放失败:", err));
+  const audio = new Audio("/sounds/notify.mp3"); // ⚠️ 需要放置 notify.mp3
+  audio.play().catch(err => console.warn("声音播放失败:", err));
 }
 
 // =======================
 // 更新红点显示
 // =======================
 function updateUnreadBadge() {
-  const badge = document.getElementById("chatBadge");
-  if (!badge) return;
-
   if (unreadCount > 0) {
-    badge.style.display = "inline-block";
-    badge.textContent = unreadCount;
+    chatBadge.style.display = "inline-block";
+    chatBadge.textContent = unreadCount;
   } else {
-    badge.style.display = "none";
+    chatBadge.style.display = "none";
   }
 }
 
@@ -52,18 +66,15 @@ function updateUnreadBadge() {
 // =======================
 openChatBtn.addEventListener("click", async () => {
   const userId = getCurrentUserId();
-  if (!userId) {
-    alert("请先登录！");
-    return;
-  }
+  if (!userId) { alert("请先登录！"); return; }
 
-  chatWindow.style.display = "flex";    // 显示窗口
-  chatMessages.innerHTML = "";           // 清空消息
-  unreadCount = 0;                        // 清空未读
+  chatWindow.style.display = "flex";
+  chatMessages.innerHTML = "";
+  unreadCount = 0;
   updateUnreadBadge();
 
-  await loadMessages();                  // 加载历史消息
-  listenForMessages();                   // 开启实时监听
+  await loadMessages();
+  listenForMessages();
 });
 
 // =======================
@@ -71,7 +82,6 @@ openChatBtn.addEventListener("click", async () => {
 // =======================
 backBtn.addEventListener("click", () => {
   chatWindow.style.display = "none";
-
   if (chatSubscription) {
     supabaseClient.removeChannel(chatSubscription);
     chatSubscription = null;
@@ -83,10 +93,7 @@ backBtn.addEventListener("click", () => {
 // =======================
 sendBtn.addEventListener("click", async () => {
   const userId = getCurrentUserId();
-  if (!userId) {
-    alert("请先登录！");
-    return;
-  }
+  if (!userId) { alert("请先登录！"); return; }
 
   const content = chatInput.value.trim();
   if (!content) return;
@@ -94,19 +101,8 @@ sendBtn.addEventListener("click", async () => {
   try {
     const { data, error } = await supabaseClient
       .from("messages")
-      .insert([
-        {
-          sender_id: userId,
-          receiver_id: 1, // 客服固定ID
-          content: content
-        }
-      ]);
-
-    if (error) {
-      console.error("发送失败:", error);
-      alert("发送失败！");
-      return;
-    }
+      .insert([{ sender_id: userId, receiver_id: 1, content }]);
+    if (error) { console.error(error); return; }
 
     appendMessage("我", content);
     chatInput.value = "";
@@ -123,7 +119,7 @@ function appendMessage(sender, text) {
   msg.classList.add("message-item");
   msg.classList.add(sender === "我" ? "me" : "bot");
   msg.textContent = text;
-  chatMessages.prepend(msg); // flex-direction: column-reverse
+  chatMessages.prepend(msg);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
@@ -140,14 +136,9 @@ async function loadMessages() {
     .or(`and(sender_id.eq.${userId},receiver_id.eq.1),and(sender_id.eq.1,receiver_id.eq.${userId})`)
     .order("created_at", { ascending: true });
 
-  if (error) {
-    console.error("加载消息失败:", error);
-    return;
-  }
+  if (error) { console.error(error); return; }
 
-  data.forEach(msg => {
-    appendMessage(msg.sender_id === userId ? "我" : "客服", msg.content);
-  });
+  data.forEach(msg => appendMessage(msg.sender_id === userId ? "我" : "客服", msg.content));
 }
 
 // =======================
@@ -157,28 +148,17 @@ async function listenForMessages() {
   const userId = getCurrentUserId();
   if (!userId) return;
 
-  if (chatSubscription) {
-    supabaseClient.removeChannel(chatSubscription);
-  }
+  if (chatSubscription) supabaseClient.removeChannel(chatSubscription);
 
   chatSubscription = supabaseClient
     .channel("realtime-messages")
     .on(
       "postgres_changes",
-      {
-        event: "INSERT",
-        schema: "public",
-        table: "messages",
-        filter: `receiver_id=eq.${userId}` // 收到客服消息
-      },
-      (payload) => {
+      { event: "INSERT", schema: "public", table: "messages", filter: `receiver_id=eq.${userId}` },
+      payload => {
         const msg = payload.new;
-
-        if (msg.sender_id === 1) {
-          // 当前窗口显示消息
-          appendMessage("客服", msg.content);
-        } else {
-          // 新消息未读
+        if (msg.sender_id === 1) appendMessage("客服", msg.content);
+        else {
           unreadCount++;
           updateUnreadBadge();
           playNotificationSound();
