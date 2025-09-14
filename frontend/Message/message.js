@@ -75,7 +75,6 @@ openChatBtn.addEventListener("click", async () => {
   updateUnreadBadge();
 
   await loadMessages();
-  listenForMessages();
 });
 
 // =======================
@@ -83,10 +82,6 @@ openChatBtn.addEventListener("click", async () => {
 // =======================
 backBtn.addEventListener("click", () => {
   chatWindow.style.display = "none";
-  if (chatSubscription) {
-    supabaseClient.removeChannel(chatSubscription);
-    chatSubscription = null;
-  }
 });
 
 // =======================
@@ -116,7 +111,7 @@ function appendMessage(sender, text) {
   msg.classList.add("message-item");
   msg.classList.add(sender === "我" ? "me" : "bot");
   msg.textContent = text;
-  chatMessages.prepend(msg);
+  chatMessages.appendChild(msg); // 最新消息在下面
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
@@ -139,27 +134,29 @@ async function loadMessages() {
 }
 
 // =======================
-// 实时监听客服回复
+// 实时监听客服回复（始终订阅）
 // =======================
-async function listenForMessages() {
-  const userId = getCurrentUserId();
-  if (!userId) return;
-
-  if (chatSubscription) supabaseClient.removeChannel(chatSubscription);
-
+if (!chatSubscription) {
   chatSubscription = supabaseClient
     .channel("realtime-messages")
     .on(
       "postgres_changes",
-      { event: "INSERT", schema: "public", table: "messages", filter: `receiver_id=eq.${userId}` },
+      { event: "INSERT", schema: "public", table: "messages" },
       payload => {
         const msg = payload.new;
-        if (msg.sender_id === 1) {
+        const userId = getCurrentUserId();
+
+        if (msg.receiver_id !== userId) return;
+
+        // 如果聊天窗口打开且是当前用户
+        if (chatWindow.style.display === "flex") {
           appendMessage("客服", msg.content);
-          unreadCount++;
-          updateUnreadBadge();
-          playNotificationSound();
         }
+
+        // 更新未读红点
+        unreadCount++;
+        updateUnreadBadge();
+        playNotificationSound();
       }
     )
     .subscribe();
