@@ -104,15 +104,17 @@ sendBtn.addEventListener("click", async () => {
 });
 
 // =======================
-// 显示消息（最新消息在下方）
+// 显示消息（左/右对齐，最新消息在下面）
 // =======================
 function appendMessage(sender, text) {
   const msg = document.createElement("div");
   msg.classList.add("message-item");
   msg.classList.add(sender === "我" ? "me" : "bot");
   msg.textContent = text;
-  chatMessages.appendChild(msg); // 改为 appendChild，最新消息在下面
-  chatMessages.scrollTop = chatMessages.scrollHeight; // 滚动到底部
+  msg.style.textAlign = sender === "我" ? "left" : "right"; // 左右对齐
+  msg.style.margin = "5px 0";
+  chatMessages.appendChild(msg); // appendChild 最新消息在下面
+  chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
 // =======================
