@@ -7,13 +7,13 @@
   left: 50%;
   transform: translate(-50%, -50%);
   width: 360px;
-  height: 500px;
+  height: 500px; /* 固定高度 */
   background-color: #f8f8f8;
   border: 1px solid #ddd;
   border-radius: 12px;
-  display: none;
+  display: none; /* 默认隐藏 */
   flex-direction: column;
-  overflow: hidden;
+  overflow: hidden; /* 不让窗口随消息增长 */
   box-shadow: 0 6px 20px rgba(0,0,0,0.2);
   z-index: 1000;
   font-family: "Helvetica", sans-serif;
@@ -42,11 +42,11 @@
 
 /* 消息列表 */
 #chatMessages {
-  flex: 1 1 auto;
+  flex: 1 1 auto;           /* 占据剩余空间 */
   padding: 10px;
   display: flex;
-  flex-direction: column-reverse;
-  overflow-y: auto;
+  flex-direction: column-reverse; /* 消息从下往上显示 */
+  overflow-y: auto;         /* 超出部分滚动 */
   gap: 6px;
   background-color: #f0f0f0;
 }
@@ -86,7 +86,7 @@
 
 /* 输入框区域 */
 .chat-input {
-  flex: 0 0 auto;
+  flex: 0 0 auto;          /* 高度固定 */
   display: flex;
   padding: 8px;
   border-top: 1px solid #ddd;
@@ -136,7 +136,7 @@
 
 /* 底部导航栏按钮固定尺寸 */
 .bottom-nav button {
-  position: relative;       /* 红点绝对定位基准 */
+  position: relative;       /* 红点绝对定位的基准 */
   min-width: 60px;
   height: 50px;
   font-size: 14px;
@@ -146,37 +146,22 @@
 }
 
 /* =====================
-   红点样式
+   红点样式（绝对定位）
    ===================== */
 .unread-dot {
   position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 10px;            /* 固定宽度 */
-  height: 10px;           /* 固定高度 */
-  background-color: red;
-  border-radius: 50%;      /* 完美圆形 */
-  pointer-events: none;    /* 不阻挡点击 */
-}
-
-.chat-btn-unread {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  min-width: 18px;
-  height: 18px;
+  top: 2px;
+  right: 2px;
+  display: inline-block;
   background-color: red;
   color: white;
-  font-size: 12px;
-  font-weight: bold;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
+  font-size: 12px;
+  padding: 2px 6px;
+  line-height: 1;
+  pointer-events: none;  /* 不阻挡按钮点击 */
 }
 
-/* 隐藏 */
 .hidden {
   display: none;
 }
