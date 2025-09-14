@@ -137,3 +137,20 @@
   background: rgba(0,0,0,0.2);
   border-radius: 3px;
 }
+
+/* =====================
+   红点样式
+   ===================== */
+.unread-dot {
+  display: inline-block;
+  background-color: red;
+  color: white;
+  border-radius: 50%;
+  font-size: 12px;
+  padding: 2px 6px;
+  margin-left: 5px;
+}
+
+.hidden {
+  display: none;
+}
