@@ -19,7 +19,10 @@ let bottomUnreadEl = messageBtn.querySelector(".unread-dot");
 if (!bottomUnreadEl) {
   bottomUnreadEl = document.createElement("span");
   bottomUnreadEl.classList.add("unread-dot", "hidden");
+  bottomUnreadEl.textContent = ""; // **确保无文本内容**
   messageBtn.appendChild(bottomUnreadEl);
+} else {
+  bottomUnreadEl.textContent = ""; // 初始化清空
 }
 
 // 当前聊天订阅
@@ -182,8 +185,8 @@ async function updateUnreadCount() {
       chatBtnUnreadEl.textContent = count;
       chatBtnUnreadEl.classList.remove("hidden");
     } else {
-      chatBtnUnreadEl.classList.add("hidden");
       chatBtnUnreadEl.textContent = "";
+      chatBtnUnreadEl.classList.add("hidden");
     }
   }
 }
@@ -227,6 +230,7 @@ function listenForMessages() {
 // 页面加载时初始化
 // =======================
 document.addEventListener("DOMContentLoaded", () => {
+  bottomUnreadEl.textContent = ""; // **确保初始化清空**
   updateUnreadCount();
   listenForMessages();
 });
