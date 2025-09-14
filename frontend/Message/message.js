@@ -8,6 +8,10 @@ const sendBtn = document.getElementById("sendBtn");
 const chatInput = document.getElementById("chatInput");
 const chatMessages = document.getElementById("chatMessages");
 
+const messageBtn = document.getElementById("messageBtn");          // 底部导航栏按钮
+const bottomUnreadEl = document.getElementById("bottomUnreadCount"); // 底部红点
+const chatBtnUnreadEl = document.getElementById("chatBtnUnreadCount"); // ⛑︎按钮红点
+
 // 当前聊天订阅
 let chatSubscription = null;
 
@@ -29,17 +33,21 @@ openChatBtn.addEventListener("click", async () => {
     return;
   }
 
-  chatWindow.style.display = "flex";    // 显示窗口
-  chatMessages.innerHTML = "";           // 清空旧消息
-  await loadMessages();                  // 加载历史消息
-  listenForMessages();                   // 开启实时监听
+  chatWindow.style.display = "flex";       // 显示聊天窗口
+  chatMessages.innerHTML = "";              // 清空历史消息
+  await loadMessages();                     // 加载历史消息
+  listenForMessages();                      // 开启实时监听
+
+  // 标记未读消息为已读
+  await markMessagesAsRead();
+  updateUnreadCount();
 });
 
 // =======================
 // 返回按钮关闭窗口
 // =======================
 backBtn.addEventListener("click", () => {
-  chatWindow.style.display = "none";     // 隐藏窗口
+  chatWindow.style.display = "none";    
 
   if (chatSubscription) {
     supabaseClient.removeChannel(chatSubscription);
@@ -67,7 +75,8 @@ sendBtn.addEventListener("click", async () => {
         {
           sender_id: userId,
           receiver_id: 1, // 客服固定 ID
-          content: content
+          content: content,
+          is_read: false
         }
       ]);
 
@@ -123,7 +132,52 @@ async function loadMessages() {
 }
 
 // =======================
-// 实时监听客服回复
+// 标记消息为已读
+// =======================
+async function markMessagesAsRead() {
+  const userId = getCurrentUserId();
+  if (!userId) return;
+
+  const { data, error } = await supabaseClient
+    .from("messages")
+    .update({ is_read: true })
+    .eq("receiver_id", userId)
+    .eq("is_read", false);
+
+  if (error) console.error("标记已读失败:", error);
+}
+
+// =======================
+// 更新未读数量红点
+// =======================
+async function updateUnreadCount() {
+  const userId = getCurrentUserId();
+  if (!userId) return;
+
+  const { count, error } = await supabaseClient
+    .from("messages")
+    .select("id", { count: "exact", head: true })
+    .eq("receiver_id", userId)
+    .eq("is_read", false);
+
+  if (error) {
+    console.error("获取未读消息失败:", error);
+    return;
+  }
+
+  if (count > 0) {
+    bottomUnreadEl.textContent = count;
+    chatBtnUnreadEl.textContent = count;
+    bottomUnreadEl.classList.remove("hidden");
+    chatBtnUnreadEl.classList.remove("hidden");
+  } else {
+    bottomUnreadEl.classList.add("hidden");
+    chatBtnUnreadEl.classList.add("hidden");
+  }
+}
+
+// =======================
+// 实时监听客服消息
 // =======================
 async function listenForMessages() {
   const userId = getCurrentUserId();
@@ -145,8 +199,19 @@ async function listenForMessages() {
       },
       (payload) => {
         const msg = payload.new;
+
         if (msg.sender_id === 1) appendMessage("客服", msg.content);
+
+        // 更新红点数量
+        updateUnreadCount();
       }
     )
     .subscribe();
 }
+
+// =======================
+// 页面加载时初始化红点
+// =======================
+document.addEventListener("DOMContentLoaded", () => {
+  updateUnreadCount();
+});
