@@ -12,11 +12,39 @@ const chatMessages = document.getElementById("chatMessages");
 let chatSubscription = null;
 
 // =======================
+// 未读消息状态
+// =======================
+let unreadCount = 0;
+
+// =======================
 // 获取当前登录用户 ID
 // =======================
 function getCurrentUserId() {
   const id = localStorage.getItem("currentUserId");
   return id ? Number(id) : null;
+}
+
+// =======================
+// 播放通知声音
+// =======================
+function playNotificationSound() {
+  const audio = new Audio("/sounds/notify.mp3"); // ⚠️ 需自行放置 notify.mp3
+  audio.play().catch(err => console.warn("通知音播放失败:", err));
+}
+
+// =======================
+// 更新红点显示
+// =======================
+function updateUnreadBadge() {
+  const badge = document.getElementById("chatBadge");
+  if (!badge) return;
+
+  if (unreadCount > 0) {
+    badge.style.display = "inline-block";
+    badge.textContent = unreadCount;
+  } else {
+    badge.style.display = "none";
+  }
 }
 
 // =======================
@@ -30,7 +58,10 @@ openChatBtn.addEventListener("click", async () => {
   }
 
   chatWindow.style.display = "flex";    // 显示窗口
-  chatMessages.innerHTML = "";           // 清空旧消息
+  chatMessages.innerHTML = "";           // 清空消息
+  unreadCount = 0;                        // 清空未读
+  updateUnreadBadge();
+
   await loadMessages();                  // 加载历史消息
   listenForMessages();                   // 开启实时监听
 });
@@ -39,7 +70,7 @@ openChatBtn.addEventListener("click", async () => {
 // 返回按钮关闭窗口
 // =======================
 backBtn.addEventListener("click", () => {
-  chatWindow.style.display = "none";     // 隐藏窗口
+  chatWindow.style.display = "none";
 
   if (chatSubscription) {
     supabaseClient.removeChannel(chatSubscription);
@@ -66,7 +97,7 @@ sendBtn.addEventListener("click", async () => {
       .insert([
         {
           sender_id: userId,
-          receiver_id: 1, // 客服固定 ID
+          receiver_id: 1, // 客服固定ID
           content: content
         }
       ]);
@@ -90,10 +121,7 @@ sendBtn.addEventListener("click", async () => {
 function appendMessage(sender, text) {
   const msg = document.createElement("div");
   msg.classList.add("message-item");
-
-  if (sender === "我") msg.classList.add("me");
-  else msg.classList.add("bot");
-
+  msg.classList.add(sender === "我" ? "me" : "bot");
   msg.textContent = text;
   chatMessages.prepend(msg); // flex-direction: column-reverse
   chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -141,12 +169,26 @@ async function listenForMessages() {
         event: "INSERT",
         schema: "public",
         table: "messages",
-        filter: `receiver_id=eq.${userId}`
+        filter: `receiver_id=eq.${userId}` // 收到客服消息
       },
       (payload) => {
         const msg = payload.new;
-        if (msg.sender_id === 1) appendMessage("客服", msg.content);
+
+        if (msg.sender_id === 1) {
+          // 当前窗口显示消息
+          appendMessage("客服", msg.content);
+        } else {
+          // 新消息未读
+          unreadCount++;
+          updateUnreadBadge();
+          playNotificationSound();
+        }
       }
     )
     .subscribe();
 }
+
+// =======================
+// 页面初始化
+// =======================
+updateUnreadBadge();
