@@ -25,8 +25,26 @@
   <div id="homePage" class="page active">🏠 HOME</div>
 
   <!-- 信息页面 -->
-  <div id="infoPage" class="page">💬 MESSAGE</div>
+  <div id="infoPage" class="page">
+    <div class="message-header">
+      <h2>💬 MESSAGE</h2>
+      <button id="openChatBtn">👤 客服</button>
+    </div>
 
+    <!-- 聊天窗口（默认隐藏） -->
+    <div id="chatWindow" class="chat-window hidden">
+      <div class="chat-header">
+        <button id="backBtn">⬅ 返回</button>
+        <h3>客服聊天</h3>
+      </div>
+      <div id="chatMessages" class="chat-messages"></div>
+      <div class="chat-input">
+        <input type="text" id="chatInput" placeholder="输入消息..." />
+        <button id="sendBtn">发送</button>
+      </div>
+    </div>
+  </div>
+   
   <!-- 订单页面 -->
   <div id="orderPage" class="page">
     <div class="order-header">
