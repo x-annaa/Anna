@@ -45,7 +45,7 @@ function getCurrentUserId() {
 // 播放通知声音
 // =======================
 function playNotificationSound() {
-  const audio = new Audio("/sounds/notify.mp3"); // ⚠️ 需要放置 notify.mp3
+  const audio = new Audio("https://freesound.org/data/previews/256/256113_3263906-lq.mp3"); // ⚠️ 需要放置 notify.mp3
   audio.play().catch(err => console.warn("声音播放失败:", err));
 }
 
