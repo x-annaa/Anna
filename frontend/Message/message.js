@@ -6,10 +6,15 @@ const sendBtn = document.getElementById("sendBtn");
 const chatInput = document.getElementById("chatInput");
 const chatMessages = document.getElementById("chatMessages");
 
-// === 调试用，检查 session 是否存在 ===
+// === 自动恢复 session ===
 (async () => {
-  const { data, error } = await supabaseClient.auth.getSession();
-  console.log("当前 session 调试：", data, error);
+  const token = localStorage.getItem("supabase_token");
+  if (token) {
+    await supabaseClient.auth.setSession({ access_token: token });
+  }
+
+  const { data: { session }, error } = await supabaseClient.auth.getSession();
+  console.log("当前 session 调试：", session, error);
 })();
 
 // 打开聊天窗口
@@ -35,7 +40,6 @@ sendBtn.addEventListener("click", async () => {
   if (!content) return;
 
   try {
-    // 获取当前登录用户
     const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
     if (sessionError || !session) {
       console.log("session error:", sessionError);
@@ -45,7 +49,6 @@ sendBtn.addEventListener("click", async () => {
 
     const user = session.user;
 
-    // 插入消息到 messages 表
     const { data, error } = await supabaseClient
       .from("messages")
       .insert([
