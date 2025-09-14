@@ -110,10 +110,10 @@
   font-weight: bold;
 }
 
-/* 客服按钮 */
+/* 客服按钮固定在右上角 */
 #openChatBtn {
   position: fixed;
-  bottom: 20px;
+  top: 20px;
   right: 20px;
   background-color: #4e9cff;
   color: white;
