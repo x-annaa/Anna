@@ -42,11 +42,20 @@ function getCurrentUserId() {
 }
 
 // =======================
-// 播放通知声音
+// 播放通知声音 (解锁浏览器权限)
 // =======================
+let audio;
+document.addEventListener("click", () => {
+  if (!audio) {
+    audio = new Audio("https://freesound.org/data/previews/256/256113_3263906-lq.mp3");
+    audio.volume = 0.5;
+    audio.play().catch(()=>{}); // 解锁播放权限
+  }
+}, { once: true });
+
 function playNotificationSound() {
-  const audio = new Audio("https://freesound.org/data/previews/256/256113_3263906-lq.mp3");
-  audio.volume = 0.5;
+  if (!audio) return;
+  audio.currentTime = 0;
   audio.play().catch(err => console.warn("声音播放失败:", err));
 }
 
@@ -57,9 +66,7 @@ function updateUnreadBadge() {
   if (unreadCount > 0) {
     chatBadge.style.display = "inline-block";
     chatBadge.textContent = unreadCount;
-  } else {
-    chatBadge.style.display = "none";
-  }
+  } else chatBadge.style.display = "none";
 }
 
 // =======================
@@ -148,12 +155,10 @@ if (!chatSubscription) {
 
         if (msg.receiver_id !== userId) return;
 
-        // 如果聊天窗口打开且是当前用户
         if (chatWindow.style.display === "flex") {
           appendMessage("客服", msg.content);
         }
 
-        // 更新未读红点
         unreadCount++;
         updateUnreadBadge();
         playNotificationSound();
