@@ -8,9 +8,19 @@ const sendBtn = document.getElementById("sendBtn");
 const chatInput = document.getElementById("chatInput");
 const chatMessages = document.getElementById("chatMessages");
 
-const messageBtn = document.getElementById("messageBtn");          // 底部导航栏按钮
-const bottomUnreadEl = document.getElementById("bottomUnreadCount"); // 底部红点
-const chatBtnUnreadEl = document.getElementById("chatBtnUnreadCount"); // ⛑︎按钮红点
+// 底部导航栏按钮
+const messageBtn = document.querySelector('button[data-page="infoPage"]');
+
+// 客服按钮红点
+let chatBtnUnreadEl = document.getElementById("chatBtnUnreadCount");
+
+// 创建底部红点（小红点，不显示数字）
+let bottomUnreadEl = messageBtn.querySelector(".unread-dot");
+if (!bottomUnreadEl) {
+  bottomUnreadEl = document.createElement("span");
+  bottomUnreadEl.classList.add("unread-dot", "hidden");
+  messageBtn.appendChild(bottomUnreadEl);
+}
 
 // 当前聊天订阅
 let chatSubscription = null;
@@ -47,7 +57,7 @@ openChatBtn.addEventListener("click", async () => {
 // 返回按钮关闭窗口
 // =======================
 backBtn.addEventListener("click", () => {
-  chatWindow.style.display = "none";    
+  chatWindow.style.display = "none";
 
   if (chatSubscription) {
     supabaseClient.removeChannel(chatSubscription);
@@ -148,7 +158,7 @@ async function markMessagesAsRead() {
 }
 
 // =======================
-// 更新未读数量红点
+// 更新未读红点
 // =======================
 async function updateUnreadCount() {
   const userId = getCurrentUserId();
@@ -160,32 +170,29 @@ async function updateUnreadCount() {
     .eq("receiver_id", userId)
     .eq("is_read", false);
 
-  if (error) {
-    console.error("获取未读消息失败:", error);
-    return;
-  }
+  if (error) return console.error(error);
 
-  if (count > 0) {
-    bottomUnreadEl.textContent = count;
+  // 底部导航栏红点（只显示红点，不显示数字）
+  if (count > 0) bottomUnreadEl.classList.remove("hidden");
+  else bottomUnreadEl.classList.add("hidden");
+
+  // 客服按钮红点（显示数字）
+  if (count > 0 && chatBtnUnreadEl) {
     chatBtnUnreadEl.textContent = count;
-    bottomUnreadEl.classList.remove("hidden");
     chatBtnUnreadEl.classList.remove("hidden");
-  } else {
-    bottomUnreadEl.classList.add("hidden");
+  } else if (chatBtnUnreadEl) {
     chatBtnUnreadEl.classList.add("hidden");
   }
 }
 
 // =======================
-// 实时监听客服消息（全局）
+// 全局监听客服消息
 // =======================
 function listenForMessages() {
   const userId = getCurrentUserId();
   if (!userId) return;
 
-  if (chatSubscription) {
-    supabaseClient.removeChannel(chatSubscription);
-  }
+  if (chatSubscription) supabaseClient.removeChannel(chatSubscription);
 
   chatSubscription = supabaseClient
     .channel("realtime-messages")
@@ -216,11 +223,9 @@ function listenForMessages() {
 }
 
 // =======================
-// 页面加载时初始化红点
+// 页面加载时初始化
 // =======================
 document.addEventListener("DOMContentLoaded", () => {
   updateUnreadCount();
-
-  // 全局监听消息，无论聊天窗口是否打开
   listenForMessages();
 });
