@@ -130,17 +130,3 @@ async function listenForMessages() {
     .subscribe();
 }
 
-function appendMessage(sender, text) {
-  const msg = document.createElement("div");
-  msg.classList.add("message-item");
-
-  if (sender === "我") {
-    msg.classList.add("me");
-  } else {
-    msg.classList.add("bot");
-  }
-
-  msg.textContent = text;
-  chatMessages.prepend(msg); // 因为 flex-direction: column-reverse，所以 prepend 显示在底部
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-}
