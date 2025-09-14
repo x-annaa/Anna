@@ -20,15 +20,15 @@ openChatBtn.addEventListener("click", async () => {
     return;
   }
 
-  chatWindow.classList.remove("hidden");
-  chatMessages.innerHTML = ""; // 清空旧消息
-  await loadMessages();        // 加载历史消息
-  listenForMessages();         // 开启实时监听
+  chatWindow.style.display = "flex";    // 显示窗口
+  chatMessages.innerHTML = "";           // 清空旧消息
+  await loadMessages();                  // 加载历史消息
+  listenForMessages();                   // 开启实时监听
 });
 
-// 返回按钮
+// 返回按钮关闭窗口
 backBtn.addEventListener("click", () => {
-  chatWindow.classList.add("hidden");
+  chatWindow.style.display = "none";     // 隐藏窗口
   if (chatSubscription) {
     supabaseClient.removeChannel(chatSubscription);
     chatSubscription = null;
@@ -74,8 +74,12 @@ sendBtn.addEventListener("click", async () => {
 function appendMessage(sender, text) {
   const msg = document.createElement("div");
   msg.classList.add("message-item");
-  msg.textContent = `${sender}: ${text}`;
-  chatMessages.appendChild(msg);
+
+  if (sender === "我") msg.classList.add("me");
+  else msg.classList.add("bot");
+
+  msg.textContent = text;
+  chatMessages.prepend(msg); // 因为 flex-direction: column-reverse
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
@@ -122,25 +126,8 @@ async function listenForMessages() {
       },
       (payload) => {
         const msg = payload.new;
-        if (msg.sender_id === 1) {
-          appendMessage("客服", msg.content);
-        }
+        if (msg.sender_id === 1) appendMessage("客服", msg.content);
       }
     )
     .subscribe();
-}
-
-function appendMessage(sender, text) {
-  const msg = document.createElement("div");
-  msg.classList.add("message-item");
-
-  if (sender === "我") {
-    msg.classList.add("me");
-  } else {
-    msg.classList.add("bot");
-  }
-
-  msg.textContent = text;
-  chatMessages.prepend(msg); // 因为 flex-direction: column-reverse，所以 prepend 显示在底部
-  chatMessages.scrollTop = chatMessages.scrollHeight;
 }
