@@ -42,20 +42,11 @@ function getCurrentUserId() {
 }
 
 // =======================
-// 播放通知声音 (解锁浏览器权限)
+// 播放通知声音
 // =======================
-let audio;
-document.addEventListener("click", () => {
-  if (!audio) {
-    audio = new Audio("https://freesound.org/data/previews/256/256113_3263906-lq.mp3");
-    audio.volume = 0.5;
-    audio.play().catch(()=>{}); // 解锁播放权限
-  }
-}, { once: true });
-
 function playNotificationSound() {
-  if (!audio) return;
-  audio.currentTime = 0;
+  const audio = new Audio("https://freesound.org/data/previews/256/256113_3263906-lq.mp3");
+  audio.volume = 0.5;
   audio.play().catch(err => console.warn("声音播放失败:", err));
 }
 
@@ -66,7 +57,9 @@ function updateUnreadBadge() {
   if (unreadCount > 0) {
     chatBadge.style.display = "inline-block";
     chatBadge.textContent = unreadCount;
-  } else chatBadge.style.display = "none";
+  } else {
+    chatBadge.style.display = "none";
+  }
 }
 
 // =======================
@@ -111,15 +104,15 @@ sendBtn.addEventListener("click", async () => {
 });
 
 // =======================
-// 显示消息
+// 显示消息（最新消息在下方）
 // =======================
 function appendMessage(sender, text) {
   const msg = document.createElement("div");
   msg.classList.add("message-item");
   msg.classList.add(sender === "我" ? "me" : "bot");
   msg.textContent = text;
-  chatMessages.appendChild(msg); // 最新消息在下面
-  chatMessages.scrollTop = chatMessages.scrollHeight;
+  chatMessages.appendChild(msg); // 改为 appendChild，最新消息在下面
+  chatMessages.scrollTop = chatMessages.scrollHeight; // 滚动到底部
 }
 
 // =======================
@@ -141,7 +134,7 @@ async function loadMessages() {
 }
 
 // =======================
-// 实时监听客服回复（始终订阅）
+// 实时监听客服消息
 // =======================
 if (!chatSubscription) {
   chatSubscription = supabaseClient
@@ -152,13 +145,9 @@ if (!chatSubscription) {
       payload => {
         const msg = payload.new;
         const userId = getCurrentUserId();
-
         if (msg.receiver_id !== userId) return;
 
-        if (chatWindow.style.display === "flex") {
-          appendMessage("客服", msg.content);
-        }
-
+        appendMessage("客服", msg.content);
         unreadCount++;
         updateUnreadBadge();
         playNotificationSound();
