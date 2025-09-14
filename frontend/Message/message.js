@@ -117,3 +117,8 @@ async function listenForMessages() {
     )
     .subscribe();
 }
+
+(async () => {
+  const { data, error } = await supabaseClient.auth.getSession();
+  console.log("调试 session:", data, error);
+})();
