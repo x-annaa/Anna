@@ -7,7 +7,7 @@ window.currentUsername = localStorage.getItem("currentUser");
 let ordering = false;
 let completing = false;
 let exchanging = false;
-const ORDERS_PER_GROUP = 15;      // 一轮订单数量
+const ORDERS_PER_GROUP = 3;      // 一轮订单数量
 const COOLDOWN_TIME = 60 * 1000;  // 1分钟倒计时
 
 if (!window.supabaseClient) {
