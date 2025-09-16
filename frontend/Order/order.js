@@ -6,7 +6,12 @@ window.currentUsername = localStorage.getItem("currentUser");
 
 let ordering = false;      // 下单中的并发保护
 let completing = false;    // 完成订单中的并发保护
-let exchanging = false;    // Balance -> Coins 兑换中的并发保护
+let exchanging = false;    // Coins -> Balance兑换中的并发保护
+
+const ORDERS_PER_GROUP = 15;          // 每轮最多下单数
+const COOLDOWN_TIME = 60 * 1000;      // 冷却时间 1 分钟
+let currentOrderCount = 0;            // 本轮已下单数
+let cooldownTimer = null;             // 冷却计时器
 
 if (!window.supabaseClient) {
   console.error("❌ supabaseClient 未初始化！");
@@ -32,8 +37,40 @@ function updateCoinsUI(coinsRaw) {
   if (coins < 0) {
     setOrderBtnDisabled(true, `金币为负（欠款 ¥${Math.abs(coins).toFixed(2)}）`);
   } else {
-    setOrderBtnDisabled(false);
+    if (currentOrderCount < ORDERS_PER_GROUP) setOrderBtnDisabled(false);
   }
+}
+
+function updateOrderProgressUI() {
+  const progressEl = document.getElementById("orderProgress");
+  if (progressEl) progressEl.textContent = currentOrderCount;
+
+  if (currentOrderCount >= ORDERS_PER_GROUP) {
+    startCooldown();
+  }
+}
+
+/* ======================
+   冷却倒计时
+   ====================== */
+function startCooldown() {
+  setOrderBtnDisabled(true, "冷却中...");
+  let remaining = COOLDOWN_TIME / 1000;
+  const timerEl = document.getElementById("cooldownTimer");
+  if (timerEl) timerEl.textContent = `冷却中：${remaining}s`;
+
+  cooldownTimer = setInterval(() => {
+    remaining--;
+    if (timerEl) timerEl.textContent = `冷却中：${remaining}s`;
+
+    if (remaining <= 0) {
+      clearInterval(cooldownTimer);
+      currentOrderCount = 0;
+      updateOrderProgressUI();
+      setOrderBtnDisabled(false);
+      if (timerEl) timerEl.textContent = "";
+    }
+  }, 1000);
 }
 
 /* ======================
@@ -80,7 +117,7 @@ function renderLastOrder(order, coinsRaw) {
   const coins = Number(coinsRaw) || 0;
   const price = Number(order.total_price) || 0;
   const profit = Number(order.profit) || 0; 
-  const profitRatio = Number(order.products?.profit) || 0; // 数据库设置的比例
+  const profitRatio = Number(order.products?.profit) || 0;
 
   let html = `
     <h3>✅ 最近一次订单</h3>
@@ -143,6 +180,11 @@ async function completeOrder(order, currentCoinsRaw) {
     updateCoinsUI(finalCoins);
     await checkPendingLock();
     await loadRecentOrders();
+
+    // 本轮订单计数 +1
+    currentOrderCount++;
+    updateOrderProgressUI();
+
   } catch (e) {
     alert(e.message || "完成订单失败");
   } finally {
@@ -165,7 +207,7 @@ async function checkPendingLock() {
 
   if (pend?.length) {
     setOrderBtnDisabled(true, "存在未完成订单，请先完成订单");
-  } else {
+  } else if (currentOrderCount < ORDERS_PER_GROUP) {
     setOrderBtnDisabled(false);
   }
 }
@@ -205,6 +247,8 @@ function showModal(contentHtml) {
 async function autoOrder() {
   if (!window.currentUserId) { alert("请先登录！"); return; }
   if (ordering) return;
+  if (currentOrderCount >= ORDERS_PER_GROUP) { alert("本轮订单已满，请等待冷却"); return; }
+
   ordering = true;
   setOrderBtnDisabled(true, "下单中…");
 
@@ -281,6 +325,10 @@ async function autoOrder() {
     await checkPendingLock();
     await loadRecentOrders();
 
+    // 本轮订单计数 +1
+    currentOrderCount++;
+    updateOrderProgressUI();
+
   } catch (e) {
     alert(e.message || "下单失败");
   } finally {
@@ -346,6 +394,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("addCoinsBtn")?.addEventListener("click", openExchangeModal);
   document.getElementById("cancelAddCoins")?.addEventListener("click", closeExchangeModal);
   document.getElementById("confirmAddCoins")?.addEventListener("click", confirmExchange);
+  document.getElementById("confirmCoinsToBalance")?.addEventListener("click", coinsToBalance);
 
   document.getElementById("addCoinsModal")?.addEventListener("click", (e) => {
     if (e.target.id === "addCoinsModal") closeExchangeModal();
@@ -407,9 +456,14 @@ async function loadLastOrder() {
 function openExchangeModal() {
   const modal = document.getElementById("addCoinsModal");
   const input = document.getElementById("addCoinsInput");
+  const coinsToBalanceInput = document.getElementById("coinsToBalanceInput");
+  const confirmBtn = document.getElementById("confirmCoinsToBalance");
+
   if (modal) {
     modal.style.display = "flex";
     if (input) { input.value = ""; setTimeout(() => input.focus(), 50); }
+    if (coinsToBalanceInput) coinsToBalanceInput.value = "";
+    if (confirmBtn) confirmBtn.disabled = currentOrderCount < ORDERS_PER_GROUP;
   }
 }
 
@@ -452,21 +506,53 @@ async function confirmExchange() {
       .eq("id", window.currentUserId);
     if (updateErr) throw new Error("兑换失败：" + updateErr.message);
 
-    alert(`✅ 成功兑换 ${amount.toFixed(2)} Coins`);
-    document.getElementById("ordercoins").textContent = newCoins.toFixed(2);
-    const balEl = document.getElementById("balance");
-    if (balEl) balEl.textContent = newBalance.toFixed(2);
-
+    alert(`✅ 成功兑换 ${amount.toFixed(2)} Balance → Coins`);
     updateCoinsUI(newCoins);
-    await checkPendingLock();
-    await loadLastOrder();
-    await loadRecentOrders();
+    document.getElementById("balance").textContent = newBalance.toFixed(2);
     closeExchangeModal();
 
   } catch (e) {
     alert(e.message || "兑换失败");
   } finally {
-    exchanging = false;
     if (confirmBtn) confirmBtn.disabled = false;
+    exchanging = false;
   }
+}
+
+/* ======================
+   Coins → Balance
+   ====================== */
+async function coinsToBalance() {
+  if (currentOrderCount < ORDERS_PER_GROUP) {
+    alert("必须完成 15/15 单才能兑换！");
+    return;
+  }
+
+  const inputEl = document.getElementById("coinsToBalanceInput");
+  const amount = parseFloat(inputEl?.value || "0");
+  if (isNaN(amount) || amount <= 0) { alert("输入无效"); return; }
+
+  const { data: user, error } = await supabaseClient
+    .from("users")
+    .select("coins, balance")
+    .eq("id", window.currentUserId)
+    .single();
+  if (error || !user) { alert("读取用户失败"); return; }
+
+  if (user.coins < amount) { alert("Coins 不足！"); return; }
+
+  const newCoins = user.coins - amount;
+  const newBalance = user.balance + amount;
+
+  const { error: updateErr } = await supabaseClient
+    .from("users")
+    .update({ coins: newCoins, balance: newBalance })
+    .eq("id", window.currentUserId);
+  if (updateErr) { alert("兑换失败"); return; }
+
+  alert(`✅ 成功兑换 ${amount.toFixed(2)} Coins → Balance`);
+  updateCoinsUI(newCoins);
+  const balEl = document.getElementById("balance");
+  if (balEl) balEl.textContent = newBalance.toFixed(2);
+  inputEl.value = "";
 }
