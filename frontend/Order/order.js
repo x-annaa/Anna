@@ -4,9 +4,13 @@
 window.currentUserId = localStorage.getItem("currentUserId");
 window.currentUsername = localStorage.getItem("currentUser");
 
-let ordering = false;      // 下单中的并发保护
-let completing = false;    // 完成订单中的并发保护
-let exchanging = false;    // Balance -> Coins 兑换中的并发保护
+let ordering = false;      
+let completing = false;    
+let exchanging = false;    
+
+// [新增逻辑]
+const ORDERS_PER_GROUP = 15;
+const COOLDOWN_TIME = 60 * 1000; // 1分钟，改成 60*60*1000 就是1小时
 
 if (!window.supabaseClient) {
   console.error("❌ supabaseClient 未初始化！");
@@ -80,7 +84,7 @@ function renderLastOrder(order, coinsRaw) {
   const coins = Number(coinsRaw) || 0;
   const price = Number(order.total_price) || 0;
   const profit = Number(order.profit) || 0; 
-  const profitRatio = Number(order.products?.profit) || 0; // 数据库设置的比例
+  const profitRatio = Number(order.products?.profit) || 0; 
 
   let html = `
     <h3>✅ 最近一次订单</h3>
@@ -209,6 +213,21 @@ async function autoOrder() {
   setOrderBtnDisabled(true, "下单中…");
 
   try {
+    // [新增逻辑] 检查冷却时间
+    const { data: userCooldown } = await supabaseClient
+      .from("users")
+      .select("cooldown_until")
+      .eq("id", window.currentUserId)
+      .single();
+    const now = Date.now();
+    if (userCooldown?.cooldown_until && now < new Date(userCooldown.cooldown_until).getTime()) {
+      const remain = Math.ceil((new Date(userCooldown.cooldown_until).getTime() - now) / 1000);
+      alert(`请等待 ${remain} 秒后再开始下一组任务！`);
+      ordering = false;
+      setOrderBtnDisabled(false);
+      return;
+    }
+
     const { data: user } = await supabaseClient
       .from("users")
       .select("coins")
@@ -232,6 +251,23 @@ async function autoOrder() {
     if (pend?.length) {
       alert("您有未完成订单，请先完成订单再继续下单。");
       await checkPendingLock();
+      return;
+    }
+
+    // [新增逻辑] 检查已完成订单数
+    const { count: completedCount } = await supabaseClient
+      .from("orders")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", window.currentUserId)
+      .eq("status", "completed");
+
+    if (completedCount % ORDERS_PER_GROUP === 0 && completedCount !== 0) {
+      // 设置冷却时间
+      const cooldownUntil = new Date(Date.now() + COOLDOWN_TIME).toISOString();
+      await supabaseClient.from("users").update({ cooldown_until: cooldownUntil }).eq("id", window.currentUserId);
+      alert(`已完成一组任务，请等待冷却结束再下单！`);
+      ordering = false;
+      setOrderBtnDisabled(false);
       return;
     }
 
@@ -438,6 +474,17 @@ async function confirmExchange() {
       .eq("id", window.currentUserId)
       .single();
     if (error || !user) throw new Error("加载用户信息失败");
+
+    // [新增逻辑] 限制兑换必须完成整组
+    const { count: completedCount } = await supabaseClient
+      .from("orders")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", window.currentUserId)
+      .eq("status", "completed");
+    if (completedCount % ORDERS_PER_GROUP !== 0) {
+      alert(`⚠️ 你必须完成 ${ORDERS_PER_GROUP} 的倍数单数后，才能兑换！`);
+      return;
+    }
 
     const coins = Number(user.coins) || 0;
     const balance = Number(user.balance) || 0;
