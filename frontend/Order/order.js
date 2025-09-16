@@ -44,9 +44,10 @@ function updateOrderProgress(count) {
 ====================== */
 function startCooldownTimer(cooldownEndStr) {
   const timerEl = document.getElementById("cooldownTimer");
-  if (!timerEl) return;
+  if (!timerEl || !cooldownEndStr) return;
 
-  const cooldownEnd = new Date(cooldownEndStr + "Z"); // 强制 UTC
+  const cooldownEnd = new Date(cooldownEndStr);
+  if (isNaN(cooldownEnd.getTime())) return;
 
   if (cooldownInterval) clearInterval(cooldownInterval);
 
@@ -54,13 +55,8 @@ function startCooldownTimer(cooldownEndStr) {
     const diff = cooldownEnd.getTime() - Date.now();
     if (diff <= 0) {
       timerEl.textContent = "";
-      updateOrderProgress(0);
       setOrderBtnDisabled(false);
-
-      // 倒计时结束，清空数据库 cooldown_end
-      supabaseClient.from("users")
-        .update({ cooldown_end: null, current_order_count: 0 })
-        .eq("id", window.currentUserId);
+      updateOrderProgress(ORDERS_PER_GROUP); // 倒计时结束仍显示满
 
       clearInterval(cooldownInterval);
     } else {
@@ -95,11 +91,14 @@ async function loadUserOrderStatus() {
 
   updateOrderProgress(user.current_order_count || 0);
 
-  if (user.cooldown_end && new Date(user.cooldown_end) > new Date() &&
-      (user.current_order_count || 0) >= ORDERS_PER_GROUP) {
+  if (user.cooldown_end &&
+      !isNaN(new Date(user.cooldown_end).getTime()) &&
+      user.current_order_count >= ORDERS_PER_GROUP &&
+      new Date(user.cooldown_end) > new Date()) {
     startCooldownTimer(user.cooldown_end);
   } else {
     setOrderBtnDisabled(false);
+    if (cooldownInterval) clearInterval(cooldownInterval);
   }
 }
 
@@ -191,7 +190,7 @@ function renderLastOrder(order, coinsRaw) {
     <p>当前金币：¥${coins.toFixed(2)}</p>
   `;
 
-  if (order.status === "pending" && coins >= 0) {
+  if (order.status === "pending") {
     html += `<button id="completeOrderBtn">完成订单</button>`;
   }
 
@@ -295,12 +294,10 @@ async function autoOrder() {
     const profit = +(price * Number(product.profit || 0)).toFixed(2);
     const tempCoins = coins - price;
 
-    // 扣 Coins
     await supabaseClient.from("users")
       .update({ coins: tempCoins })
       .eq("id", window.currentUserId);
 
-    // 插入订单
     const { data: newOrder, error: orderErr } = await supabaseClient
       .from("orders")
       .insert({
@@ -318,28 +315,14 @@ async function autoOrder() {
     renderLastOrder(newOrder, tempCoins);
     updateCoinsUI(tempCoins);
 
+    await loadUserOrderStatus();
+    await loadRecentOrders();
+
   } catch (e) {
     alert(e.message || "下单失败");
   } finally {
     ordering = false;
-    await loadUserOrderStatus();
-    await loadRecentOrders();
   }
-}
-
-/* ======================
-   获取随机产品
-====================== */
-async function getRandomProduct() {
-  const { data: products, error } = await supabaseClient
-    .from("products")
-    .select("*")
-    .eq("enabled", true)
-    .eq("manual_only", false);
-
-  if (error || !products || products.length === 0) throw new Error("无可下单产品");
-
-  return products[Math.floor(Math.random() * products.length)];
 }
 
 /* ======================
@@ -360,11 +343,9 @@ async function confirmExchange() {
       .eq("id", window.currentUserId)
       .single();
 
-    if (!user) throw new Error("加载用户信息失败");
-
-    const coins = Number(user.coins || 0);
-    const balance = Number(user.balance || 0);
-    const orderCount = Number(user.current_order_count || 0);
+    const coins = Number(user?.coins || 0);
+    const balance = Number(user?.balance || 0);
+    const orderCount = Number(user?.current_order_count || 0);
 
     if (orderCount < ORDERS_PER_GROUP) {
       alert(`必须完成 ${ORDERS_PER_GROUP} 单才能兑换 Coins`);
@@ -393,10 +374,39 @@ async function confirmExchange() {
 }
 
 /* ======================
+   随机产品
+====================== */
+async function getRandomProduct() {
+  const { data: products, error } = await supabaseClient
+    .from("products")
+    .select("*")
+    .eq("enabled", true)
+    .eq("manual_only", false);
+
+  if (error || !products || products.length === 0) throw new Error("无可下单产品");
+
+  return products[Math.floor(Math.random() * products.length)];
+}
+
+/* ======================
+   弹窗
+====================== */
+function openExchangeModal() {
+  const modal = document.getElementById("addCoinsModal");
+  if (modal) modal.style.display = "flex";
+}
+
+function closeExchangeModal() {
+  const modal = document.getElementById("addCoinsModal");
+  if (modal) modal.style.display = "none";
+}
+
+/* ======================
    页面初始化
 ====================== */
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
+  document.getElementById("addCoinsBtn")?.addEventListener("click", openExchangeModal);
   document.getElementById("confirmAddCoins")?.addEventListener("click", confirmExchange);
 
   loadUserOrderStatus();
