@@ -16,6 +16,10 @@ if (!window.supabaseClient) {
 /* ======================
    工具函数
    ====================== */
+function normalizeUserId(id) {
+  return id ? String(id) : null; // 确保 UUID 是字符串
+}
+
 function setOrderBtnDisabled(disabled, reason = "") {
   const btn = document.getElementById("autoOrderBtn");
   if (btn) {
@@ -41,17 +45,20 @@ function updateCoinsUI(coinsRaw) {
    确保 order_limits 存在
    ====================== */
 async function ensureOrderLimits(userId) {
+  const uid = normalizeUserId(userId);
+  if (!uid) return;
+
   const { data, error } = await supabaseClient
     .from("order_limits")
     .select("*")
-    .eq("user_id", userId)
+    .eq("user_id", uid)
     .single();
 
   if (!data) {
     await supabaseClient
       .from("order_limits")
       .insert({
-        user_id: userId,
+        user_id: uid,
         max_orders: 5,
         cooldown_seconds: 60,
         orders_completed: 0,
@@ -64,10 +71,11 @@ async function ensureOrderLimits(userId) {
    获取用户规则产品
    ====================== */
 async function getUserRuleProduct(userId, orderNumber) {
+  const uid = normalizeUserId(userId);
   const { data: rules, error } = await supabaseClient
     .from("user_product_rules")
     .select("product_id")
-    .eq("user_id", userId)
+    .eq("user_id", uid)
     .eq("order_number", orderNumber)
     .eq("enabled", true)
     .limit(1);
@@ -123,13 +131,14 @@ function startCooldownTimer(seconds) {
    检查冷却
    ====================== */
 async function checkOrderCooldown() {
-  if (!window.currentUserId) return { allowed: true };
-  await ensureOrderLimits(window.currentUserId);
+  const uid = normalizeUserId(window.currentUserId);
+  if (!uid) return { allowed: true };
+  await ensureOrderLimits(uid);
 
   const { data: limitData } = await supabaseClient
     .from("order_limits")
     .select("max_orders, cooldown_seconds, orders_completed, last_reset")
-    .eq("user_id", window.currentUserId)
+    .eq("user_id", uid)
     .single();
 
   if (!limitData) return { allowed: true };
@@ -140,7 +149,7 @@ async function checkOrderCooldown() {
     const { data: serverTime } = await supabaseClient.rpc("get_server_time");
     const now = new Date(serverTime);
     const last = new Date(last_reset);
-    const diff = (now - last) / 1000; // 秒
+    const diff = (now - last) / 1000;
 
     if (diff < cooldown_seconds) {
       const remaining = Math.ceil(cooldown_seconds - diff);
@@ -149,7 +158,7 @@ async function checkOrderCooldown() {
       await supabaseClient
         .from("order_limits")
         .update({ orders_completed: 0, last_reset: now.toISOString() })
-        .eq("user_id", window.currentUserId);
+        .eq("user_id", uid);
       return { allowed: true };
     }
   }
@@ -165,7 +174,7 @@ function renderLastOrder(order, coinsRaw) {
 
   const coins = Number(coinsRaw) || 0;
   const price = Number(order.total_price) || 0;
-  const profit = Number(order.profit) || 0; 
+  const profit = Number(order.profit) || 0;
   const profitRatio = Number(order.products?.profit) || 0;
 
   let html = `
@@ -207,6 +216,7 @@ async function completeOrder(order, currentCoinsRaw) {
   try {
     if (order.status === "completed") return;
 
+    const uid = normalizeUserId(window.currentUserId);
     const currentCoins = Number(currentCoinsRaw) || 0;
     const price = Number(order.total_price) || 0;
     const profit = Number(order.profit) || 0;
@@ -222,13 +232,13 @@ async function completeOrder(order, currentCoinsRaw) {
     const { error: coinErr } = await supabaseClient
       .from("users")
       .update({ coins: finalCoins })
-      .eq("id", window.currentUserId);
+      .eq("id", uid);
     if (coinErr) throw new Error(coinErr.message);
 
     const { data: limitData } = await supabaseClient
       .from("order_limits")
       .select("orders_completed, max_orders, cooldown_seconds")
-      .eq("user_id", window.currentUserId)
+      .eq("user_id", uid)
       .single();
 
     if (limitData) {
@@ -236,7 +246,7 @@ async function completeOrder(order, currentCoinsRaw) {
       await supabaseClient
         .from("order_limits")
         .update({ orders_completed: newCount, last_reset: new Date().toISOString() })
-        .eq("user_id", window.currentUserId);
+        .eq("user_id", uid);
 
       const cooldown = await checkOrderCooldown();
       if (!cooldown.allowed) {
@@ -263,12 +273,13 @@ async function completeOrder(order, currentCoinsRaw) {
    检查 pending
    ====================== */
 async function checkPendingLock() {
-  if (!window.currentUserId) return;
+  const uid = normalizeUserId(window.currentUserId);
+  if (!uid) return;
 
   const { data: pend } = await supabaseClient
     .from("orders")
     .select("id")
-    .eq("user_id", window.currentUserId)
+    .eq("user_id", uid)
     .eq("status", "pending")
     .limit(1);
 
@@ -286,36 +297,11 @@ async function checkPendingLock() {
 }
 
 /* ======================
-   Modal 弹窗
-   ====================== */
-function showModal(contentHtml) {
-  const modal = document.createElement("div");
-  modal.className = "modal";
-  modal.style.display = "flex";
-  modal.innerHTML = `
-    <div class="modal-content">
-      ${contentHtml}
-      <div class="modal-actions">
-        <button id="closeModalBtn">关闭</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(modal);
-
-  document.getElementById("closeModalBtn").addEventListener("click", () => modal.remove());
-  document.addEventListener("keydown", function escHandler(e) {
-    if (e.key === "Escape") {
-      modal.remove();
-      document.removeEventListener("keydown", escHandler);
-    }
-  });
-}
-
-/* ======================
    自动下单
    ====================== */
 async function autoOrder() {
-  if (!window.currentUserId) { alert("请先登录！"); return; }
+  const uid = normalizeUserId(window.currentUserId);
+  if (!uid) { alert("请先登录！"); return; }
 
   const cooldown = await checkOrderCooldown();
   if (!cooldown.allowed) {
@@ -333,7 +319,7 @@ async function autoOrder() {
     const { data: user } = await supabaseClient
       .from("users")
       .select("coins")
-      .eq("id", window.currentUserId)
+      .eq("id", uid)
       .single();
     const coins = Number(user?.coins || 0);
 
@@ -347,7 +333,7 @@ async function autoOrder() {
     const { data: pend } = await supabaseClient
       .from("orders")
       .select("id")
-      .eq("user_id", window.currentUserId)
+      .eq("user_id", uid)
       .eq("status", "pending")
       .limit(1);
     if (pend?.length) {
@@ -360,11 +346,11 @@ async function autoOrder() {
     const { data: orders } = await supabaseClient
       .from("orders")
       .select("id")
-      .eq("user_id", window.currentUserId);
+      .eq("user_id", uid);
     const orderNumber = (orders?.length || 0) + 1;
 
     let product;
-    const ruleProductId = await getUserRuleProduct(window.currentUserId, orderNumber);
+    const ruleProductId = await getUserRuleProduct(uid, orderNumber);
     if (ruleProductId) {
       const { data: pData, error } = await supabaseClient
         .from("products")
@@ -383,12 +369,12 @@ async function autoOrder() {
     await supabaseClient
       .from("users")
       .update({ coins: tempCoins })
-      .eq("id", window.currentUserId);
+      .eq("id", uid);
 
     const { data: newOrder, error: orderErr } = await supabaseClient
       .from("orders")
       .insert({
-        user_id: window.currentUserId,
+        user_id: uid,
         product_id: product.id,
         total_price: price,
         profit: profit,
@@ -414,20 +400,21 @@ async function autoOrder() {
    最近订单
    ====================== */
 async function loadRecentOrders() {
-  if (!window.currentUserId) return;
+  const uid = normalizeUserId(window.currentUserId);
+  if (!uid) return;
 
   try {
     const { data: recentOrders } = await supabaseClient
       .from("orders")
       .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
-      .eq("user_id", window.currentUserId)
+      .eq("user_id", uid)
       .order("created_at", { ascending: false })
       .limit(5);
 
     const { count: totalCount } = await supabaseClient
       .from("orders")
       .select("id", { count: "exact", head: true })
-      .eq("user_id", window.currentUserId);
+      .eq("user_id", uid);
 
     const historyTitle = document.querySelector(".order-history h3");
     if (historyTitle) {
@@ -486,7 +473,8 @@ async function confirmExchange() {
   const amount = parseFloat(inputEl?.value || "0");
 
   if (isNaN(amount) || amount <= 0) { alert("输入无效"); exchanging = false; return; }
-  if (!window.currentUserId) { alert("请先登录！"); exchanging = false; return; }
+  const uid = normalizeUserId(window.currentUserId);
+  if (!uid) { alert("请先登录！"); exchanging = false; return; }
 
   if (confirmBtn) confirmBtn.disabled = true;
 
@@ -494,7 +482,7 @@ async function confirmExchange() {
     const { data: user } = await supabaseClient
       .from("users")
       .select("coins, balance")
-      .eq("id", window.currentUserId)
+      .eq("id", uid)
       .single();
 
     const coins = Number(user?.coins) || 0;
@@ -508,7 +496,7 @@ async function confirmExchange() {
     const { error: updateErr } = await supabaseClient
       .from("users")
       .update({ coins: newCoins, balance: newBalance })
-      .eq("id", window.currentUserId);
+      .eq("id", uid);
     if (updateErr) throw new Error("兑换失败：" + updateErr.message);
 
     alert(`✅ 成功兑换 ${amount.toFixed(2)} Coins`);
@@ -540,11 +528,12 @@ async function refreshAll() {
 }
 
 async function loadCoinsOrderPage() {
-  if (!window.currentUserId) return;
+  const uid = normalizeUserId(window.currentUserId);
+  if (!uid) return;
   const { data } = await supabaseClient
     .from("users")
     .select("coins, balance")
-    .eq("id", window.currentUserId)
+    .eq("id", uid)
     .single();
   if (data) {
     updateCoinsUI(data.coins);
@@ -555,19 +544,20 @@ async function loadCoinsOrderPage() {
 }
 
 async function loadLastOrder() {
-  if (!window.currentUserId) return;
+  const uid = normalizeUserId(window.currentUserId);
+  if (!uid) return;
 
   const { data: orders } = await supabaseClient
     .from("orders")
     .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
-    .eq("user_id", window.currentUserId)
+    .eq("user_id", uid)
     .order("created_at", { ascending: false })
     .limit(1);
 
   const { data: user } = await supabaseClient
     .from("users")
     .select("coins")
-    .eq("id", window.currentUserId)
+    .eq("id", uid)
     .single();
 
   if (orders?.length) renderLastOrder(orders[0], user?.coins ?? 0);
