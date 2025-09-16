@@ -4,10 +4,10 @@
 window.currentUserId = localStorage.getItem("currentUserId"); // UUID
 window.currentUsername = localStorage.getItem("currentUser");
 
-let ordering = false;      // 下单中的并发保护
-let completing = false;    // 完成订单中的并发保护
-let exchanging = false;    // Balance -> Coins 兑换中的并发保护
-let cooldownInterval = null; // 冷却倒计时 Interval
+let ordering = false;
+let completing = false;
+let exchanging = false;
+let cooldownInterval = null;
 
 if (!window.supabaseClient) {
   console.error("❌ supabaseClient 未初始化！");
@@ -17,7 +17,7 @@ if (!window.supabaseClient) {
    工具函数
    ====================== */
 function normalizeUserId(id) {
-  return id ? String(id) : null; // 确保 UUID 是字符串
+  return id ? String(id) : null;
 }
 
 function setOrderBtnDisabled(disabled, reason = "") {
@@ -146,7 +146,8 @@ async function checkOrderCooldown() {
   const { max_orders, cooldown_seconds, orders_completed, last_reset } = limitData;
 
   if (orders_completed >= max_orders) {
-    const now = new Date();
+    const { data: serverTime } = await supabaseClient.rpc("get_server_time");
+    const now = new Date(serverTime);
     const last = new Date(last_reset);
     const diff = (now - last) / 1000;
 
@@ -174,12 +175,11 @@ function renderLastOrder(order, coinsRaw) {
   const coins = Number(coinsRaw) || 0;
   const price = Number(order.total_price) || 0;
   const profit = Number(order.profit) || 0;
-  const productName = order.products?.name || "未知商品";
   const profitRatio = Number(order.products?.profit) || 0;
 
   let html = `
     <h3>✅ 最近一次订单</h3>
-    <p>商品：${productName}</p>
+    <p>商品：${order.products?.name || "未知商品"}</p>
     <p>价格：¥${price.toFixed(2)}</p>
     <p>利润：${profitRatio}</p>
     <p>收入：+¥${profit.toFixed(2)}</p>
@@ -380,7 +380,7 @@ async function autoOrder() {
         profit: profit,
         status: "pending"
       })
-      .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
+      .select(`id, total_price, profit, status, created_at, products(id,name,profit)`)
       .single();
     if (orderErr) throw new Error(orderErr.message);
 
@@ -406,7 +406,7 @@ async function loadRecentOrders() {
   try {
     const { data: recentOrders } = await supabaseClient
       .from("orders")
-      .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
+      .select(`id, total_price, profit, status, created_at, products(id,name,profit)`)
       .eq("user_id", uid)
       .order("created_at", { ascending: false })
       .limit(5);
@@ -549,7 +549,7 @@ async function loadLastOrder() {
 
   const { data: orders } = await supabaseClient
     .from("orders")
-    .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
+    .select(`id, total_price, profit, status, created_at, products(id,name,profit)`)
     .eq("user_id", uid)
     .order("created_at", { ascending: false })
     .limit(1);
