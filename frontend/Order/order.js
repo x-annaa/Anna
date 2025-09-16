@@ -72,6 +72,8 @@ async function ensureOrderLimits(userId) {
    ====================== */
 async function getUserRuleProduct(userId, orderNumber) {
   const uid = normalizeUserId(userId);
+  if (!uid) return null;
+
   const { data: rules, error } = await supabaseClient
     .from("user_product_rules")
     .select("product_id")
