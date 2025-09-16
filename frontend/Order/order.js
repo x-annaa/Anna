@@ -72,8 +72,6 @@ async function ensureOrderLimits(userId) {
    ====================== */
 async function getUserRuleProduct(userId, orderNumber) {
   const uid = normalizeUserId(userId);
-  if (!uid) return null;
-
   const { data: rules, error } = await supabaseClient
     .from("user_product_rules")
     .select("product_id")
@@ -148,8 +146,7 @@ async function checkOrderCooldown() {
   const { max_orders, cooldown_seconds, orders_completed, last_reset } = limitData;
 
   if (orders_completed >= max_orders) {
-    const { data: serverTime } = await supabaseClient.rpc("get_server_time");
-    const now = new Date(serverTime);
+    const now = new Date();
     const last = new Date(last_reset);
     const diff = (now - last) / 1000;
 
@@ -177,11 +174,12 @@ function renderLastOrder(order, coinsRaw) {
   const coins = Number(coinsRaw) || 0;
   const price = Number(order.total_price) || 0;
   const profit = Number(order.profit) || 0;
+  const productName = order.products?.name || "未知商品";
   const profitRatio = Number(order.products?.profit) || 0;
 
   let html = `
     <h3>✅ 最近一次订单</h3>
-    <p>商品：${order.products?.name || "未知商品"}</p>
+    <p>商品：${productName}</p>
     <p>价格：¥${price.toFixed(2)}</p>
     <p>利润：${profitRatio}</p>
     <p>收入：+¥${profit.toFixed(2)}</p>
@@ -326,7 +324,7 @@ async function autoOrder() {
     const coins = Number(user?.coins || 0);
 
     if (coins < 50) {
-      showModal(`<p>你的余额不足，最少需要 50 coins</p>`);
+      alert(`<p>你的余额不足，最少需要 50 coins</p>`);
       setOrderBtnDisabled(false);
       ordering = false;
       return;
