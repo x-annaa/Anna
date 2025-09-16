@@ -1,13 +1,13 @@
 /* ======================
    初始化用户信息
    ====================== */
-window.currentUserId = localStorage.getItem("currentUserId");
+window.currentUserId = localStorage.getItem("currentUserId"); // UUID
 window.currentUsername = localStorage.getItem("currentUser");
 
 let ordering = false;      // 下单中的并发保护
 let completing = false;    // 完成订单中的并发保护
 let exchanging = false;    // Balance -> Coins 兑换中的并发保护
-let cooldownInterval = null; // 倒计时 Interval
+let cooldownInterval = null; // 冷却倒计时 Interval
 
 if (!window.supabaseClient) {
   console.error("❌ supabaseClient 未初始化！");
@@ -21,7 +21,7 @@ function setOrderBtnDisabled(disabled, reason = "") {
   if (btn) {
     btn.disabled = disabled;
     btn.title = reason || "";
-    if (!disabled) btn.textContent = "🎲 一键刷单";
+    btn.textContent = disabled ? `🎲 一键刷单（不可用）` : "🎲 一键刷单";
   }
 }
 
@@ -65,6 +65,7 @@ async function getRandomProduct() {
     .select("*")
     .eq("enabled", true)
     .eq("manual_only", false);
+
   if (error || !products || products.length === 0) {
     throw new Error("产品列表为空或读取失败！");
   }
@@ -96,7 +97,7 @@ function startCooldownTimer(seconds) {
 }
 
 /* ======================
-   检查是否达到冷却
+   检查冷却限制
    ====================== */
 async function checkOrderCooldown() {
   if (!window.currentUserId) return { allowed: true };
@@ -267,7 +268,7 @@ async function checkPendingLock() {
 }
 
 /* ======================
-   通用 Modal 管理
+   通用 Modal
    ====================== */
 function showModal(contentHtml) {
   const modal = document.createElement("div");
@@ -283,10 +284,7 @@ function showModal(contentHtml) {
   `;
   document.body.appendChild(modal);
 
-  document.getElementById("closeModalBtn").addEventListener("click", () => {
-    modal.remove();
-  });
-
+  document.getElementById("closeModalBtn").addEventListener("click", () => modal.remove());
   document.addEventListener("keydown", function escHandler(e) {
     if (e.key === "Escape") {
       modal.remove();
@@ -301,7 +299,6 @@ function showModal(contentHtml) {
 async function autoOrder() {
   if (!window.currentUserId) { alert("请先登录！"); return; }
 
-  // 检查冷却
   const cooldown = await checkOrderCooldown();
   if (!cooldown.allowed) {
     alert(`已完成 ${cooldown.max_orders} 单，请等待 ${cooldown.remaining} 秒`);
@@ -446,69 +443,6 @@ async function loadRecentOrders() {
 }
 
 /* ======================
-   页面初始化
-   ====================== */
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
-  document.getElementById("addCoinsBtn")?.addEventListener("click", openExchangeModal);
-  document.getElementById("cancelAddCoins")?.addEventListener("click", closeExchangeModal);
-  document.getElementById("confirmAddCoins")?.addEventListener("click", confirmExchange);
-
-  document.getElementById("addCoinsModal")?.addEventListener("click", (e) => {
-    if (e.target.id === "addCoinsModal") closeExchangeModal();
-  });
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeExchangeModal();
-  });
-
-  refreshAll();
-});
-
-/* ======================
-   页面刷新工具
-   ====================== */
-async function refreshAll() {
-  await loadCoinsOrderPage();
-  await loadLastOrder();
-  await loadRecentOrders();
-}
-
-async function loadCoinsOrderPage() {
-  if (!window.currentUserId) return;
-  const { data, error } = await supabaseClient
-    .from("users")
-    .select("coins, balance")
-    .eq("id", window.currentUserId)
-    .single();
-  if (!error && data) {
-    updateCoinsUI(data.coins);
-    const balEl = document.getElementById("balance");
-    if (balEl) balEl.textContent = (Number(data.balance) || 0).toFixed(2);
-    await checkPendingLock();
-  }
-}
-
-async function loadLastOrder() {
-  if (!window.currentUserId) return;
-
-  const { data: orders } = await supabaseClient
-    .from("orders")
-    .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
-    .eq("user_id", window.currentUserId)
-    .order("created_at", { ascending: false })
-    .limit(1);
-
-  const { data: user } = await supabaseClient
-    .from("users")
-    .select("coins")
-    .eq("id", window.currentUserId)
-    .single();
-
-  if (orders?.length) renderLastOrder(orders[0], user?.coins ?? 0);
-  else document.getElementById("orderResult").innerHTML = "";
-}
-
-/* ======================
    Coins 弹窗
    ====================== */
 function openExchangeModal() {
@@ -576,4 +510,67 @@ async function confirmExchange() {
     exchanging = false;
     if (confirmBtn) confirmBtn.disabled = false;
   }
+}
+
+/* ======================
+   页面初始化
+   ====================== */
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
+  document.getElementById("addCoinsBtn")?.addEventListener("click", openExchangeModal);
+  document.getElementById("cancelAddCoins")?.addEventListener("click", closeExchangeModal);
+  document.getElementById("confirmAddCoins")?.addEventListener("click", confirmExchange);
+
+  document.getElementById("addCoinsModal")?.addEventListener("click", (e) => {
+    if (e.target.id === "addCoinsModal") closeExchangeModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeExchangeModal();
+  });
+
+  refreshAll();
+});
+
+/* ======================
+   页面刷新工具
+   ====================== */
+async function refreshAll() {
+  await loadCoinsOrderPage();
+  await loadLastOrder();
+  await loadRecentOrders();
+}
+
+async function loadCoinsOrderPage() {
+  if (!window.currentUserId) return;
+  const { data, error } = await supabaseClient
+    .from("users")
+    .select("coins, balance")
+    .eq("id", window.currentUserId)
+    .single();
+  if (!error && data) {
+    updateCoinsUI(data.coins);
+    const balEl = document.getElementById("balance");
+    if (balEl) balEl.textContent = (Number(data.balance) || 0).toFixed(2);
+    await checkPendingLock();
+  }
+}
+
+async function loadLastOrder() {
+  if (!window.currentUserId) return;
+
+  const { data: orders } = await supabaseClient
+    .from("orders")
+    .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
+    .eq("user_id", window.currentUserId)
+    .order("created_at", { ascending: false })
+    .limit(1);
+
+  const { data: user } = await supabaseClient
+    .from("users")
+    .select("coins")
+    .eq("id", window.currentUserId)
+    .single();
+
+  if (orders?.length) renderLastOrder(orders[0], user?.coins ?? 0);
+  else document.getElementById("orderResult").innerHTML = "";
 }
