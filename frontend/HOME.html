@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>U9</title>
 
-  <!-- css 部分 --> 
+  <!-- CSS -->
   <link rel="stylesheet" href="Home/home.css">
-  <link rel="stylesheet" href="About/about.css">
   <link rel="stylesheet" href="Order/order.css">
   <link rel="stylesheet" href="Message/message.css">
+  <link rel="stylesheet" href="About/about.css">
   <link rel="stylesheet" href="Me/me.css">
   <link rel="stylesheet" href="Button/button.css">
 
@@ -33,7 +33,6 @@
       </button>
     </div>
 
-    <!-- 聊天窗口（默认隐藏） -->
     <div id="chatWindow" class="chat-window hidden">
       <div class="chat-header">
         <button id="backBtn">⬅ 返回</button>
@@ -46,7 +45,7 @@
       </div>
     </div>
   </div>
-   
+
   <!-- 订单页面 -->
   <div id="orderPage" class="page">
     <div class="order-header">
@@ -54,6 +53,10 @@
       <div class="coins-box">
         💰 Coins: <span id="ordercoins">0</span>
         <button id="addCoinsBtn" title="从余额兑换Coins">+</button>
+      </div>
+      <div>
+        <span>订单进度：</span><span id="orderProgress">0</span>/15
+        <span id="cooldownTimer" style="color:red; margin-left:10px;"></span>
       </div>
     </div>
 
@@ -70,14 +73,22 @@
       </ul>
     </div>
 
+    <!-- 兑换 Coins / Balance 弹窗 -->
     <div id="addCoinsModal" class="modal">
       <div class="modal-content">
-        <h3>兑换 Coins</h3>
-        <p>请输入要兑换的数量：</p>
+        <h3>兑换 Coins / Balance</h3>
+        <p>从 Balance 兑换 Coins：</p>
         <input type="number" id="addCoinsInput" min="1" placeholder="输入数量" />
+        <button id="confirmAddCoins">确认兑换 Coins</button>
+
+        <hr>
+
+        <p>从 Coins 兑换 Balance（必须完成 15/15 单）：</p>
+        <input type="number" id="coinsToBalanceInput" min="1" placeholder="输入数量" />
+        <button id="confirmCoinsToBalance">兑换 Coins → Balance</button>
+
         <div class="modal-actions">
-          <button id="cancelAddCoins">取消</button>
-          <button id="confirmAddCoins">确认</button>
+          <button id="cancelAddCoins">关闭</button>
         </div>
       </div>
     </div>
@@ -90,13 +101,11 @@
   <div id="myPage" class="page">
     <h2>👤 我的页面</h2>
 
-    <!-- 用户信息 -->
     <div class="user-info">
       <p class="username"><strong>用户名：</strong><span id="username">加载中...</span></p>
       <p class="platform"><strong>平台账号：</strong><span id="platformAccount">加载中...</span></p>
     </div>
 
-    <!-- 余额和提现区域 -->
     <div class="balance-box">
       <p><strong>Balance：</strong><span id="balance">0.00</span></p>
       <div class="balance-actions">
@@ -107,82 +116,6 @@
 
     <div class="my-buttons">
       <button id="logoutBtn">Logout</button>
-    </div>
-  </div>
-
-  <!-- Logout 确认弹窗 -->
-  <div id="logoutModal" class="modal">
-    <div class="modal-content">
-      <p>确定要退出吗？</p>
-      <button id="cancelLogout">否</button>
-      <button id="confirmLogout">确定</button>
-    </div>
-  </div>
-
-  <!-- 提现窗口 -->
-  <div id="withdrawModal" class="modal">
-    <div class="modal-content">
-      <h3>提现</h3>
-      <p>当前余额：<span id="withdrawBalance">0.00</span></p>
-      <input type="number" id="withdrawAmount" placeholder="输入提现金额" />
-      <input type="text" id="walletAddress" placeholder="USDT-TRC20钱包地址" />
-      <button id="setPasswordBtn">添加提现密码</button>
-      <div class="modal-actions">
-        <button id="cancelWithdraw">取消</button>
-        <button id="confirmWithdraw">提交</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 设置密码窗口 -->
-  <div id="setPasswordModal" class="modal">
-    <div class="modal-content">
-      <h3>设置提现密码</h3>
-      <input type="text" id="withdrawPwd" maxlength="6" placeholder="输入6位数字密码" />
-      <input type="text" id="confirmWithdrawPwd" maxlength="6" placeholder="确认密码" />
-      <div class="modal-actions">
-        <button id="cancelSetPwd">取消</button>
-        <button id="saveWithdrawPwd">保存</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 更新密码窗口 -->
-  <div id="updatePasswordModal" class="modal">
-    <div class="modal-content">
-      <h3>更改提现密码</h3>
-      <input type="text" id="oldWithdrawPwd" maxlength="6" placeholder="输入原密码" />
-      <input type="text" id="newWithdrawPwd" maxlength="6" placeholder="输入新密码" />
-      <input type="text" id="confirmNewWithdrawPwd" maxlength="6" placeholder="确认新密码" />
-      <div class="modal-actions">
-        <button id="cancelUpdatePwd">取消</button>
-        <button id="saveUpdatePwd">保存</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 确认提现密码窗口 -->
-  <div id="confirmPwdModal" class="modal">
-    <div class="modal-content">
-      <h3>输入提现密码</h3>
-      <input type="text" id="inputWithdrawPwd" maxlength="6" placeholder="请输入密码" />
-      <div class="modal-actions">
-        <button id="cancelConfirmPwd">取消</button>
-        <button id="submitWithdrawFinal">提交</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 充值窗口 -->
-  <div id="rechargeModal" class="modal">
-    <div class="modal-content">
-      <h3>充值</h3>
-      <input type="file" id="fileInput" />
-      <button id="uploadBtn">上传</button>
-      <p id="status"></p>
-      <div class="modal-actions">
-        <button id="cancelRecharge">取消</button>
-      </div>
     </div>
   </div>
 
@@ -198,14 +131,12 @@
     <button data-page="myPage">Me</button>
   </div>
 
-  <!-- JS 部分 --> 
+  <!-- JS -->
   <script src="Home/home.js"></script>
   <script src="Message/message.js"></script>
   <script src="Order/order.js"></script>
   <script src="About/about.js"></script>
   <script src="Me/me.js"></script>
   <script src="Button/button.js"></script>
-  <script src="Recharge/recharge.js"></script>
-  
 </body>
 </html>
