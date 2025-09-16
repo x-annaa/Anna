@@ -7,6 +7,7 @@ window.currentUsername = localStorage.getItem("currentUser");
 let ordering = false;      // 下单中的并发保护
 let completing = false;    // 完成订单中的并发保护
 let exchanging = false;    // Balance -> Coins 兑换中的并发保护
+let cooldownInterval = null; // 倒计时 Interval
 
 if (!window.supabaseClient) {
   console.error("❌ supabaseClient 未初始化！");
@@ -20,7 +21,7 @@ function setOrderBtnDisabled(disabled, reason = "") {
   if (btn) {
     btn.disabled = disabled;
     btn.title = reason || "";
-    btn.textContent = disabled ? "🎲 一键刷单（不可用）" : "🎲 一键刷单";
+    if (!disabled) btn.textContent = "🎲 一键刷单";
   }
 }
 
@@ -71,6 +72,68 @@ async function getRandomProduct() {
 }
 
 /* ======================
+   倒计时相关
+   ====================== */
+function startCooldownTimer(seconds) {
+  const btn = document.getElementById("autoOrderBtn");
+  if (!btn) return;
+
+  clearInterval(cooldownInterval);
+  let remaining = seconds;
+  btn.disabled = true;
+  btn.textContent = `🎲 冷却中 ${remaining}s`;
+
+  cooldownInterval = setInterval(() => {
+    remaining -= 1;
+    if (remaining <= 0) {
+      clearInterval(cooldownInterval);
+      btn.disabled = false;
+      btn.textContent = "🎲 一键刷单";
+    } else {
+      btn.textContent = `🎲 冷却中 ${remaining}s`;
+    }
+  }, 1000);
+}
+
+/* ======================
+   检查是否达到冷却
+   ====================== */
+async function checkOrderCooldown() {
+  if (!window.currentUserId) return { allowed: true };
+
+  const { data: limitData, error } = await supabaseClient
+    .from("order_limits")
+    .select("max_orders, cooldown_seconds, orders_completed, last_reset")
+    .eq("user_id", window.currentUserId)
+    .single();
+
+  if (error || !limitData) return { allowed: true };
+
+  const { max_orders, cooldown_seconds, orders_completed, last_reset } = limitData;
+
+  if (orders_completed >= max_orders) {
+    // 获取服务器时间
+    const { data: serverTime } = await supabaseClient.rpc("get_server_time");
+    const now = new Date(serverTime);
+    const last = new Date(last_reset);
+    const diff = (now - last) / 1000; // 秒
+
+    if (diff < cooldown_seconds) {
+      const remaining = Math.ceil(cooldown_seconds - diff);
+      return { allowed: false, remaining, max_orders, cooldown_seconds };
+    } else {
+      // 重置计数
+      await supabaseClient
+        .from("order_limits")
+        .update({ orders_completed: 0, last_reset: now.toISOString() })
+        .eq("user_id", window.currentUserId);
+      return { allowed: true };
+    }
+  }
+  return { allowed: true };
+}
+
+/* ======================
    渲染最近订单
    ====================== */
 function renderLastOrder(order, coinsRaw) {
@@ -80,7 +143,7 @@ function renderLastOrder(order, coinsRaw) {
   const coins = Number(coinsRaw) || 0;
   const price = Number(order.total_price) || 0;
   const profit = Number(order.profit) || 0; 
-  const profitRatio = Number(order.products?.profit) || 0; // 数据库设置的比例
+  const profitRatio = Number(order.products?.profit) || 0;
 
   let html = `
     <h3>✅ 最近一次订单</h3>
@@ -126,6 +189,7 @@ async function completeOrder(order, currentCoinsRaw) {
     const profit = Number(order.profit) || 0;
     const finalCoins = currentCoins + price + profit;
 
+    // 完成订单
     const { error: orderErr } = await supabaseClient
       .from("orders")
       .update({ status: "completed" })
@@ -133,16 +197,42 @@ async function completeOrder(order, currentCoinsRaw) {
       .eq("status", "pending");
     if (orderErr) throw new Error(orderErr.message);
 
+    // 更新用户金币
     const { error: coinErr } = await supabaseClient
       .from("users")
       .update({ coins: finalCoins })
       .eq("id", window.currentUserId);
     if (coinErr) throw new Error(coinErr.message);
 
+    // 更新 order_limits 完成计数
+    const { data: limitData } = await supabaseClient
+      .from("order_limits")
+      .select("orders_completed, max_orders, cooldown_seconds")
+      .eq("user_id", window.currentUserId)
+      .single();
+
+    if (limitData) {
+      const newCount = (limitData.orders_completed || 0) + 1;
+      await supabaseClient
+        .from("order_limits")
+        .update({ orders_completed: newCount, last_reset: new Date().toISOString() })
+        .eq("user_id", window.currentUserId);
+
+      // 检查冷却
+      const cooldown = await checkOrderCooldown();
+      if (!cooldown.allowed) {
+        setOrderBtnDisabled(true, `已完成 ${limitData.max_orders} 单，请等待 ${cooldown.remaining} 秒`);
+        startCooldownTimer(cooldown.remaining);
+      } else {
+        setOrderBtnDisabled(false);
+      }
+    }
+
     renderLastOrder({ ...order, status: "completed" }, finalCoins);
     updateCoinsUI(finalCoins);
     await checkPendingLock();
     await loadRecentOrders();
+
   } catch (e) {
     alert(e.message || "完成订单失败");
   } finally {
@@ -166,7 +256,13 @@ async function checkPendingLock() {
   if (pend?.length) {
     setOrderBtnDisabled(true, "存在未完成订单，请先完成订单");
   } else {
-    setOrderBtnDisabled(false);
+    const cooldown = await checkOrderCooldown();
+    if (!cooldown.allowed) {
+      setOrderBtnDisabled(true, `已完成 ${cooldown.max_orders} 单，请等待 ${cooldown.remaining} 秒`);
+      startCooldownTimer(cooldown.remaining);
+    } else {
+      setOrderBtnDisabled(false);
+    }
   }
 }
 
@@ -204,6 +300,16 @@ function showModal(contentHtml) {
    ====================== */
 async function autoOrder() {
   if (!window.currentUserId) { alert("请先登录！"); return; }
+
+  // 检查冷却
+  const cooldown = await checkOrderCooldown();
+  if (!cooldown.allowed) {
+    alert(`已完成 ${cooldown.max_orders} 单，请等待 ${cooldown.remaining} 秒`);
+    setOrderBtnDisabled(true);
+    startCooldownTimer(cooldown.remaining);
+    return;
+  }
+
   if (ordering) return;
   ordering = true;
   setOrderBtnDisabled(true, "下单中…");
@@ -232,6 +338,7 @@ async function autoOrder() {
     if (pend?.length) {
       alert("您有未完成订单，请先完成订单再继续下单。");
       await checkPendingLock();
+      ordering = false;
       return;
     }
 
