@@ -70,16 +70,11 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   }
 
   // 检查是否已有用户
-  const { data: exist, error: existErr } = await supabaseClient
+  const { data: exist } = await supabaseClient
     .from("users")
     .select("id")
     .eq("username", username)
     .maybeSingle();
-
-  if (existErr) {
-    alert("检查用户名失败: " + existErr.message);
-    return;
-  }
 
   if (exist) {
     alert("该用户名已存在，请换一个");
@@ -107,8 +102,8 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  // 保存到 localStorage （uuid 转字符串）
-  localStorage.setItem("currentUserId", String(data.id));
+  // 保存到 localStorage
+  localStorage.setItem("currentUserId", data.id);
   localStorage.setItem("currentUser", data.username);
   localStorage.setItem("platformAccount", data.platform_account);
 
@@ -147,8 +142,8 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     return;
   }
 
-  // 保存到 localStorage （uuid 转字符串）
-  localStorage.setItem("currentUserId", String(data.id));
+  // 保存到 localStorage
+  localStorage.setItem("currentUserId", data.id);
   localStorage.setItem("currentUser", data.username);
   localStorage.setItem("platformAccount", data.platform_account);
 
