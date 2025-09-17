@@ -4,9 +4,9 @@
 window.currentUserId = localStorage.getItem("currentUserId");
 window.currentUsername = localStorage.getItem("currentUser");
 
-let ordering = false;      // 下单中的并发保护
-let completing = false;    // 完成订单中的并发保护
-let exchanging = false;    // Balance -> Coins 兑换中的并发保护
+let ordering = false;
+let completing = false;
+let exchanging = false;
 
 if (!window.supabaseClient) {
   console.error("❌ supabaseClient 未初始化！");
@@ -71,6 +71,26 @@ async function getRandomProduct() {
 }
 
 /* ======================
+   检查订单限制
+   ====================== */
+async function checkOrderLimit(userId, productId) {
+  const { data, error } = await supabaseClient
+    .rpc("check_user_order_limit", { p_user_id: userId, p_product_id: productId });
+
+  if (error) {
+    console.error("检查订单限制失败", error);
+    return { allowed: true };
+  }
+
+  if (!data || data.length === 0) return { allowed: true };
+
+  return {
+    allowed: data[0].allowed,
+    nextAllowedTime: data[0].next_allowed ? new Date(data[0].next_allowed) : null
+  };
+}
+
+/* ======================
    渲染最近订单
    ====================== */
 function renderLastOrder(order, coinsRaw) {
@@ -80,13 +100,13 @@ function renderLastOrder(order, coinsRaw) {
   const coins = Number(coinsRaw) || 0;
   const price = Number(order.total_price) || 0;
   const profit = Number(order.profit) || 0; 
-  const profitRatio = Number(order.products?.profit) || 0; // 数据库设置的比例
+  const profitRatio = Number(order.products?.profit) || 0;
 
   let html = `
     <h3>✅ 最近一次订单</h3>
     <p>商品：${order.products?.name || "未知商品"}</p>
     <p>价格：¥${price.toFixed(2)}</p>
-    <p>利润：${profitRatio}</p>
+    <p>利润比例：${profitRatio}</p>
     <p>收入：+¥${profit.toFixed(2)}</p>
     <p>状态：${order.status === "completed" ? "✅ 已完成" : "⏳ 待完成"}</p>
     <p>时间：${new Date(order.created_at).toLocaleString()}</p>
@@ -232,6 +252,7 @@ async function autoOrder() {
     if (pend?.length) {
       alert("您有未完成订单，请先完成订单再继续下单。");
       await checkPendingLock();
+      ordering = false;
       return;
     }
 
@@ -241,6 +262,7 @@ async function autoOrder() {
       .eq("user_id", window.currentUserId);
     const orderNumber = (orders?.length || 0) + 1;
 
+    // 获取产品
     let product;
     const ruleProductId = await getUserRuleProduct(window.currentUserId, orderNumber);
     if (ruleProductId) {
@@ -252,6 +274,16 @@ async function autoOrder() {
       if (!error && pData) product = pData;
     }
     if (!product) product = await getRandomProduct();
+
+    // 检查订单数量限制
+    const limitCheck = await checkOrderLimit(window.currentUserId, product.id);
+    if (!limitCheck.allowed) {
+      const waitMinutes = Math.ceil((limitCheck.nextAllowedTime - Date.now()) / 60000);
+      showModal(`<p>⚠️ 本周期已达最大订单数，请等待 ${waitMinutes} 分钟再下单</p>`);
+      setOrderBtnDisabled(true, `等待 ${waitMinutes} 分钟`);
+      ordering = false;
+      return;
+    }
 
     const price = Number(product.price) || 0;
     const profitRatio = Number(product.profit) || 0;
