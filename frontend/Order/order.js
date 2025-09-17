@@ -8,7 +8,6 @@ let ordering = false;      // 下单中的并发保护
 let completing = false;    // 完成订单中的并发保护
 let exchanging = false;    // Balance -> Coins 兑换中的并发保护
 let cooldownTimer = null;  // 冷却倒计时
-const COOLDOWN_INTERVAL = 5 * 60; // 5 分钟冷却，单位秒
 
 if (!window.supabaseClient) {
   console.error("❌ supabaseClient 未初始化！");
@@ -24,6 +23,7 @@ function setOrderBtnDisabled(disabled, reason = "", cooldownText = "") {
     btn.title = reason || "";
     btn.textContent = disabled ? `🎲 一键刷单（不可用）` : "🎲 一键刷单";
   }
+
   const cdEl = document.getElementById("cooldownDisplay");
   if (cdEl) cdEl.textContent = cooldownText;
 }
@@ -76,27 +76,17 @@ async function getRandomProduct() {
 }
 
 /* ======================
-   检查冷却（从最后一单计算）
+   检查冷却
    ====================== */
 async function checkOrderCooldown() {
   if (!window.currentUserId) return { allowed: true, next_allowed: null };
-
   try {
-    // 取最后一单
-    const { data: lastOrders } = await supabaseClient
-      .from("orders")
-      .select("created_at")
-      .eq("user_id", window.currentUserId)
-      .order("created_at", { ascending: false })
-      .limit(1);
-
-    if (!lastOrders?.length) return { allowed: true, next_allowed: null };
-
-    const lastOrderTime = new Date(lastOrders[0].created_at);
-    const nextAllowed = new Date(lastOrderTime.getTime() + COOLDOWN_INTERVAL * 1000);
-    const now = new Date();
-
-    return { allowed: now >= nextAllowed, next_allowed: nextAllowed };
+    const { data, error } = await supabaseClient
+      .rpc("check_user_order_cooldown", { p_user_id: window.currentUserId });
+    if (error) throw error;
+    if (!data?.length) return { allowed: true, next_allowed: null };
+    const row = data[0];
+    return { allowed: row.allowed, next_allowed: row.next_allowed };
   } catch (e) {
     console.error("检查冷却失败", e);
     return { allowed: true, next_allowed: null };
@@ -213,9 +203,9 @@ async function autoOrder() {
 
   try {
     const cooldown = await checkOrderCooldown();
-    if (!cooldown.allowed && cooldown.next_allowed) {
+    if (!cooldown.allowed) {
       const updateCooldown = () => {
-        const sec = Math.ceil((cooldown.next_allowed - new Date()) / 1000);
+        const sec = Math.ceil((new Date(cooldown.next_allowed) - new Date()) / 1000);
         if (sec <= 0) {
           clearInterval(cooldownTimer);
           setOrderBtnDisabled(false, "", "");
@@ -227,7 +217,7 @@ async function autoOrder() {
       if (cooldownTimer) clearInterval(cooldownTimer);
       cooldownTimer = setInterval(updateCooldown, 1000);
 
-      alert(`⚠️ 已达到下单上限，请等待 ${formatTime(Math.ceil((cooldown.next_allowed - new Date()) / 1000))}`);
+      alert(`⚠️ 已达到下单上限，请等待 ${formatTime(Math.ceil((new Date(cooldown.next_allowed) - new Date()) / 1000))}`);
       ordering = false;
       return;
     }
