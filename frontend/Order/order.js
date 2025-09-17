@@ -21,9 +21,7 @@ function setOrderBtnDisabled(disabled, reason = "") {
   if (btn) {
     btn.disabled = disabled;
     btn.title = reason || "";
-    btn.textContent = disabled
-      ? `🎲 一键刷单（不可用）`
-      : "🎲 一键刷单";
+    btn.textContent = disabled ? `🎲 一键刷单（不可用）` : "🎲 一键刷单";
   }
 }
 
@@ -81,11 +79,13 @@ async function checkOrderCooldown() {
 
   try {
     const { data, error } = await supabaseClient
-      .rpc("check_user_order_cooldown", { p_user_id: window.currentUserId })
-      .single();
+      .rpc("check_user_order_cooldown", { p_user_id: window.currentUserId });
 
     if (error) throw error;
-    return data;
+    if (!data || data.length === 0) return { allowed: true, next_allowed: null };
+
+    // Supabase 返回的是数组形式
+    return { allowed: data[0].allowed, next_allowed: data[0].next_allowed };
   } catch (e) {
     console.error("检查冷却限制失败", e);
     return { allowed: true, next_allowed: null };
@@ -200,32 +200,31 @@ async function autoOrder() {
   if (ordering) return;
   ordering = true;
 
-  // 先检查冷却
-  const cooldown = await checkOrderCooldown();
-  if (!cooldown.allowed) {
-    const waitSec = Math.ceil((new Date(cooldown.next_allowed) - new Date()) / 1000);
-    setOrderBtnDisabled(true, `冷却中，请等待 ${waitSec} 秒`);
-    alert(`⚠️ 已达到下单上限，请等待 ${waitSec} 秒`);
-    ordering = false;
-
-    // 启动倒计时刷新
-    if (cooldownTimer) clearInterval(cooldownTimer);
-    cooldownTimer = setInterval(() => {
-      const sec = Math.ceil((new Date(cooldown.next_allowed) - new Date()) / 1000);
-      if (sec <= 0) {
-        clearInterval(cooldownTimer);
-        setOrderBtnDisabled(false);
-      } else {
-        setOrderBtnDisabled(true, `冷却中，请等待 ${sec} 秒`);
-      }
-    }, 1000);
-
-    return;
-  }
-
-  setOrderBtnDisabled(true, "下单中…");
-
   try {
+    // 1️⃣ 检查冷却
+    const cooldown = await checkOrderCooldown();
+    if (!cooldown.allowed) {
+      const waitSec = Math.ceil((new Date(cooldown.next_allowed) - new Date()) / 1000);
+      setOrderBtnDisabled(true, `冷却中，请等待 ${waitSec} 秒`);
+      alert(`⚠️ 已达到下单上限，请等待 ${waitSec} 秒`);
+      ordering = false;
+
+      if (cooldownTimer) clearInterval(cooldownTimer);
+      cooldownTimer = setInterval(() => {
+        const sec = Math.ceil((new Date(cooldown.next_allowed) - new Date()) / 1000);
+        if (sec <= 0) {
+          clearInterval(cooldownTimer);
+          setOrderBtnDisabled(false);
+        } else {
+          setOrderBtnDisabled(true, `冷却中，请等待 ${sec} 秒`);
+        }
+      }, 1000);
+      return;
+    }
+
+    setOrderBtnDisabled(true, "下单中…");
+
+    // 2️⃣ 检查金币
     const { data: user } = await supabaseClient
       .from("users")
       .select("coins")
@@ -240,6 +239,7 @@ async function autoOrder() {
       return;
     }
 
+    // 3️⃣ 检查 pending 订单
     const { data: pend } = await supabaseClient
       .from("orders")
       .select("id")
@@ -253,6 +253,7 @@ async function autoOrder() {
       return;
     }
 
+    // 4️⃣ 获取订单号 & 产品
     const { data: orders } = await supabaseClient
       .from("orders")
       .select("id")
@@ -276,11 +277,13 @@ async function autoOrder() {
     const profit = +(price * profitRatio).toFixed(2);
     const tempCoins = coins - price;
 
+    // 5️⃣ 扣金币
     await supabaseClient
       .from("users")
       .update({ coins: tempCoins })
       .eq("id", window.currentUserId);
 
+    // 6️⃣ 插入订单
     const { data: newOrder, error: orderErr } = await supabaseClient
       .from("orders")
       .insert({
