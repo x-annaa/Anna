@@ -1,109 +1,127 @@
 /* ======================
-   order2.js - 订单限制 & 倒计时
+   下单限制检查 + 倒计时
    ====================== */
+async function checkOrderLimit() {
+  if (!window.currentUserId) return { canOrder: true };
 
-if (!window.supabaseClient) {
-  console.error("❌ supabaseClient 未初始化！");
-}
-
-let orderCooldownTimer = null; // 倒计时定时器
-let ordering2 = false; // 下单保护
-
-/* ======================
-   按钮状态控制
-   ====================== */
-function setOrder2BtnDisabled(disabled, reason = "") {
-  const btn = document.getElementById("autoOrderBtn");
-  if (!btn) return;
-  btn.disabled = disabled;
-  btn.title = reason;
-  btn.textContent = disabled ? `🎲 一键刷单（${reason}）` : "🎲 一键刷单";
-}
-
-/* ======================
-   检查用户下单限制（通过 Supabase RPC）
-   ====================== */
-async function checkOrderLimit(userId) {
   try {
-    const { data, error } = await supabaseClient.rpc("can_user_order", {
-      p_user_id: userId
-    });
+    const { data, error } = await supabaseClient
+      .rpc("can_user_order", { p_user_uuid: window.currentUserId }) // UUID
+      .single();
 
     if (error) throw error;
-    // 返回 { can_order: boolean, cooldown_seconds: int, remaining_count: int }
-    return data?.[0] || { can_order: true, cooldown_seconds: 0, remaining_count: 3 };
+
+    const canOrder = data?.can_order ?? true;
+    const nextAvailable = data?.next_available ? new Date(data.next_available) : null;
+
+    if (!canOrder && nextAvailable) {
+      const now = new Date();
+      let diff = Math.floor((nextAvailable - now) / 1000);
+      setOrderBtnDisabled(true, `⚠️ 下单过于频繁，${diff}s 后可下单`);
+
+      // 倒计时更新
+      const interval = setInterval(() => {
+        diff -= 1;
+        if (diff <= 0) {
+          clearInterval(interval);
+          setOrderBtnDisabled(false);
+        } else {
+          setOrderBtnDisabled(true, `⚠️ 下单过于频繁，${diff}s 后可下单`);
+        }
+      }, 1000);
+
+      return { canOrder: false };
+    }
+
+    setOrderBtnDisabled(false);
+    return { canOrder: true };
   } catch (err) {
     console.error("检查下单限制失败", err);
-    return { can_order: true, cooldown_seconds: 0, remaining_count: 3 };
+    return { canOrder: true };
   }
 }
 
 /* ======================
-   开启倒计时
-   ====================== */
-function startCooldown(seconds) {
-  clearInterval(orderCooldownTimer);
-  const btn = document.getElementById("autoOrderBtn");
-  let remaining = seconds;
-
-  if (!btn) return;
-
-  setOrder2BtnDisabled(true, `请稍等 ${remaining}s`);
-
-  orderCooldownTimer = setInterval(() => {
-    remaining--;
-    if (remaining <= 0) {
-      clearInterval(orderCooldownTimer);
-      setOrder2BtnDisabled(false);
-    } else {
-      setOrder2BtnDisabled(true, `请稍等 ${remaining}s`);
-    }
-  }, 1000);
-}
-
-/* ======================
-   自动下单（替代 order.js 下单前检查）
+   自动下单（结合限制）
    ====================== */
 async function autoOrder2() {
   if (!window.currentUserId) { alert("请先登录！"); return; }
-  if (ordering2) return;
-  ordering2 = true;
+  if (ordering) return;
+  ordering = true;
+
+  // 先检查限制
+  const { canOrder } = await checkOrderLimit();
+  if (!canOrder) { ordering = false; return; }
+
+  setOrderBtnDisabled(true, "下单中…");
 
   try {
-    const limitInfo = await checkOrderLimit(window.currentUserId);
-    if (!limitInfo.can_order) {
-      startCooldown(limitInfo.cooldown_seconds);
-      alert(`⚠️ 下单过于频繁\n限制：${limitInfo.remaining_count}/3 单\n请稍后再试！`);
-      return;
-    }
+    // 获取随机产品或规则产品
+    let product;
+    const { data: orders } = await supabaseClient
+      .from("orders")
+      .select("id")
+      .eq("user_id", window.currentUserId)
+      .order("created_at", { ascending: false })
+      .limit(1);
 
-    // ✅ 可以下单时，触发 order.js 的 autoOrder
-    if (typeof window.autoOrder === "function") {
-      await window.autoOrder();
+    const orderNumber = (orders?.length || 0) + 1;
+
+    const ruleProductId = await getUserRuleProduct(window.currentUserId, orderNumber);
+    if (ruleProductId) {
+      const { data: pData } = await supabaseClient
+        .from("products")
+        .select("*")
+        .eq("id", ruleProductId)
+        .single();
+      if (pData) product = pData;
     }
+    if (!product) product = await getRandomProduct();
+
+    // 扣 Coins & 创建订单
+    const { data: user } = await supabaseClient
+      .from("users")
+      .select("coins")
+      .eq("uuid", window.currentUserId)
+      .single();
+    const coins = Number(user?.coins || 0);
+    if (coins < product.price) { alert("金币不足！"); return; }
+
+    const tempCoins = coins - Number(product.price);
+    await supabaseClient
+      .from("users")
+      .update({ coins: tempCoins })
+      .eq("uuid", window.currentUserId);
+
+    const { data: newOrder } = await supabaseClient
+      .from("orders")
+      .insert({
+        user_id: user.id,
+        product_id: product.id,
+        total_price: Number(product.price),
+        profit: +(Number(product.price) * Number(product.profit)).toFixed(2),
+        status: "pending"
+      })
+      .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
+      .single();
+
+    renderLastOrder(newOrder, tempCoins);
+    updateCoinsUI(tempCoins);
+    await checkPendingLock();
+    await loadRecentOrders();
 
   } catch (err) {
-    console.error("自动下单失败", err);
-    alert("自动下单失败，请重试！");
+    console.error("下单失败", err);
+    alert("下单失败");
   } finally {
-    ordering2 = false;
+    ordering = false;
   }
 }
 
 /* ======================
    页面初始化
    ====================== */
-document.addEventListener("DOMContentLoaded", async () => {
-  const btn = document.getElementById("autoOrderBtn");
-  if (btn) btn.addEventListener("click", autoOrder2);
-
-  // 页面加载时检查限制
-  if (window.currentUserId) {
-    const limitInfo = await checkOrderLimit(window.currentUserId);
-    if (!limitInfo.can_order && limitInfo.cooldown_seconds > 0) {
-      startCooldown(limitInfo.cooldown_seconds);
-    }
-  }
-
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder2);
   console.log("✅ order2.js 已加载，按钮倒计时功能启用");
 });
