@@ -7,6 +7,7 @@ window.currentUsername = localStorage.getItem("currentUser");
 let ordering = false;      // 下单中的并发保护
 let completing = false;    // 完成订单中的并发保护
 let exchanging = false;    // Balance -> Coins 兑换中的并发保护
+let cooldownTimer = null;  // 冷却倒计时
 
 if (!window.supabaseClient) {
   console.error("❌ supabaseClient 未初始化！");
@@ -20,7 +21,9 @@ function setOrderBtnDisabled(disabled, reason = "") {
   if (btn) {
     btn.disabled = disabled;
     btn.title = reason || "";
-    btn.textContent = disabled ? "🎲 一键刷单（不可用）" : "🎲 一键刷单";
+    btn.textContent = disabled
+      ? `🎲 一键刷单（不可用）`
+      : "🎲 一键刷单";
   }
 }
 
@@ -71,6 +74,25 @@ async function getRandomProduct() {
 }
 
 /* ======================
+   检查冷却
+   ====================== */
+async function checkOrderCooldown() {
+  if (!window.currentUserId) return { allowed: true, next_allowed: null };
+
+  try {
+    const { data, error } = await supabaseClient
+      .rpc("check_user_order_cooldown", { p_user_id: window.currentUserId })
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (e) {
+    console.error("检查冷却限制失败", e);
+    return { allowed: true, next_allowed: null };
+  }
+}
+
+/* ======================
    渲染最近订单
    ====================== */
 function renderLastOrder(order, coinsRaw) {
@@ -80,7 +102,7 @@ function renderLastOrder(order, coinsRaw) {
   const coins = Number(coinsRaw) || 0;
   const price = Number(order.total_price) || 0;
   const profit = Number(order.profit) || 0; 
-  const profitRatio = Number(order.products?.profit) || 0; // 数据库设置的比例
+  const profitRatio = Number(order.products?.profit) || 0; 
 
   let html = `
     <h3>✅ 最近一次订单</h3>
@@ -171,71 +193,46 @@ async function checkPendingLock() {
 }
 
 /* ======================
-   检查冷却限制（3单后等待30秒）
-   ====================== */
-async function checkOrderCooldown(userId) {
-  const { data, error } = await supabaseClient
-    .rpc("check_user_order_cooldown", { p_user_id: userId });
-
-  if (error) {
-    console.error("检查冷却限制失败", error);
-    return { allowed: true };
-  }
-
-  if (!data || data.length === 0) return { allowed: true };
-
-  return {
-    allowed: data[0].allowed,
-    nextAllowedTime: data[0].next_allowed ? new Date(data[0].next_allowed) : null
-  };
-}
-
-/* ======================
-   通用 Modal 管理
-   ====================== */
-function showModal(contentHtml) {
-  const modal = document.createElement("div");
-  modal.className = "modal";
-  modal.style.display = "flex";
-  modal.innerHTML = `
-    <div class="modal-content">
-      ${contentHtml}
-      <div class="modal-actions">
-        <button id="closeModalBtn">关闭</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(modal);
-
-  document.getElementById("closeModalBtn").addEventListener("click", () => {
-    modal.remove();
-  });
-
-  document.addEventListener("keydown", function escHandler(e) {
-    if (e.key === "Escape") {
-      modal.remove();
-      document.removeEventListener("keydown", escHandler);
-    }
-  });
-}
-
-/* ======================
    自动下单
    ====================== */
 async function autoOrder() {
   if (!window.currentUserId) { alert("请先登录！"); return; }
   if (ordering) return;
   ordering = true;
+
+  // 先检查冷却
+  const cooldown = await checkOrderCooldown();
+  if (!cooldown.allowed) {
+    const waitSec = Math.ceil((new Date(cooldown.next_allowed) - new Date()) / 1000);
+    setOrderBtnDisabled(true, `冷却中，请等待 ${waitSec} 秒`);
+    alert(`⚠️ 已达到下单上限，请等待 ${waitSec} 秒`);
+    ordering = false;
+
+    // 启动倒计时刷新
+    if (cooldownTimer) clearInterval(cooldownTimer);
+    cooldownTimer = setInterval(() => {
+      const sec = Math.ceil((new Date(cooldown.next_allowed) - new Date()) / 1000);
+      if (sec <= 0) {
+        clearInterval(cooldownTimer);
+        setOrderBtnDisabled(false);
+      } else {
+        setOrderBtnDisabled(true, `冷却中，请等待 ${sec} 秒`);
+      }
+    }, 1000);
+
+    return;
+  }
+
   setOrderBtnDisabled(true, "下单中…");
 
   try {
-    // 1️⃣ 检查金币
     const { data: user } = await supabaseClient
       .from("users")
       .select("coins")
       .eq("id", window.currentUserId)
       .single();
     const coins = Number(user?.coins || 0);
+
     if (coins < 50) {
       showModal(`<p>你的余额不足，最少需要 50 coins</p>`);
       setOrderBtnDisabled(false);
@@ -243,7 +240,6 @@ async function autoOrder() {
       return;
     }
 
-    // 2️⃣ 检查 pending
     const { data: pend } = await supabaseClient
       .from("orders")
       .select("id")
@@ -253,20 +249,10 @@ async function autoOrder() {
     if (pend?.length) {
       alert("您有未完成订单，请先完成订单再继续下单。");
       await checkPendingLock();
-      return;
-    }
-
-    // 3️⃣ 检查冷却（3单后30秒）
-    const cooldownCheck = await checkOrderCooldown(window.currentUserId);
-    if (!cooldownCheck.allowed) {
-      const waitSeconds = Math.ceil((cooldownCheck.nextAllowedTime - Date.now()) / 1000);
-      showModal(`<p>⚠️ 已下满 3 单，请等待 ${waitSeconds} 秒再下单</p>`);
-      setOrderBtnDisabled(true, `等待 ${waitSeconds} 秒`);
       ordering = false;
       return;
     }
 
-    // 4️⃣ 获取产品
     const { data: orders } = await supabaseClient
       .from("orders")
       .select("id")
@@ -290,13 +276,11 @@ async function autoOrder() {
     const profit = +(price * profitRatio).toFixed(2);
     const tempCoins = coins - price;
 
-    // 5️⃣ 扣除金币
     await supabaseClient
       .from("users")
       .update({ coins: tempCoins })
       .eq("id", window.currentUserId);
 
-    // 6️⃣ 创建订单
     const { data: newOrder, error: orderErr } = await supabaseClient
       .from("orders")
       .insert({
