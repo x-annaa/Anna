@@ -44,6 +44,14 @@ function updateCoinsUI(coinsRaw) {
   }
 }
 
+// 新增格式化函数
+function formatTime(sec) {
+  const h = String(Math.floor(sec / 3600)).padStart(2, "0");
+  const m = String(Math.floor((sec % 3600) / 60)).padStart(2, "0");
+  const s = String(sec % 60).padStart(2, "0");
+  return `${h}:${m}:${s}`;
+}
+
 /* ======================
    获取用户规则产品
    ====================== */
@@ -216,7 +224,11 @@ async function autoOrder() {
         clearInterval(cooldownTimer);
         setOrderBtnDisabled(false, "", "");
       } else {
-        setOrderBtnDisabled(true, `冷却中，请等待 ${sec} 秒`, `冷却剩余时间：${sec}s`);
+        setOrderBtnDisabled(
+          true,
+          `冷却中，请等待 ${formatTime(sec)}`,
+          `冷却剩余时间：${formatTime(sec)}`
+        );
       }
     };
 
@@ -224,7 +236,7 @@ async function autoOrder() {
     if (cooldownTimer) clearInterval(cooldownTimer);
     cooldownTimer = setInterval(updateCooldown, 1000);
 
-    alert(`⚠️ 已达到下单上限，请等待 ${Math.ceil((new Date(cooldown.next_allowed) - new Date()) / 1000)} 秒`);
+    alert(`⚠️ 已达到下单上限，请等待 ${formatTime(Math.ceil((new Date(cooldown.next_allowed) - new Date()) / 1000))}`);
     ordering = false;
     return;
   }
