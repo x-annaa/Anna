@@ -264,28 +264,26 @@ async function autoOrder() {
   ordering = true;
 
   try {
-    // 1. 读取轮次配置（从数据库取最新配置）
+    // 1. 加载配置（每轮多少单 & 冷却时间）
     await loadRoundConfig();
 
     // 2. 检查冷却
     const cooldown = await checkOrderCooldown();
     if (!cooldown.allowed) {
-      // 冷却中 → 显示倒计时
       const updateCooldown = () => {
         const sec = Math.ceil((new Date(cooldown.next_allowed) - new Date()) / 1000);
-
         if (sec <= 0) {
           clearInterval(cooldownTimer);
           setOrderBtnDisabled(false, "", "");
 
-          // 冷却结束 → 新开一轮
+          // 开启新一轮
           startNewRound();
 
-          // 强制 UI 置零
+          // 🔥 强制 UI 重置为 0 / ORDERS_PER_ROUND
           const el = document.getElementById("roundProgress");
           if (el) el.textContent = `本轮已完成订单：0 / ${window.ORDERS_PER_ROUND}`;
 
-          // 再查数据库，保持一致
+          // 再查数据库，保证同步
           updateRoundProgress();
         } else {
           setOrderBtnDisabled(
@@ -305,15 +303,13 @@ async function autoOrder() {
           Math.ceil((new Date(cooldown.next_allowed) - new Date()) / 1000)
         )}`
       );
-
       ordering = false;
       return;
     }
 
-    // 3. 进入下单流程
+    // 3. 扣款 & 下单
     setOrderBtnDisabled(true, "下单中…");
 
-    // 查询用户 Coins
     const { data: user } = await supabaseClient
       .from("users")
       .select("coins")
@@ -322,7 +318,7 @@ async function autoOrder() {
     const coins = Number(user?.coins || 0);
 
     if (coins < 50) {
-      alert("你的余额不足，最少需要 50 coins");
+      alert(`你的余额不足，最少需要 50 coins`);
       setOrderBtnDisabled(false);
       ordering = false;
       return;
@@ -342,12 +338,12 @@ async function autoOrder() {
       return;
     }
 
-    // 没有轮次 → 创建一个
+    // 没有轮次 → 开启新一轮
     if (!window.currentRoundId) {
       startNewRound();
     }
 
-    // 查询当前轮次已下订单
+    // 查询当前轮次订单数
     const { data: orders } = await supabaseClient
       .from("orders")
       .select("id,status")
@@ -358,7 +354,7 @@ async function autoOrder() {
     const pendingCount = orders?.filter(o => o.status === "pending").length || 0;
     const orderNumber = completedCount + pendingCount + 1;
 
-    // 确定商品
+    // 按规则选商品
     let product;
     const ruleProductId = await getUserRuleProduct(window.currentUserId, orderNumber);
     if (ruleProductId) {
@@ -369,23 +365,17 @@ async function autoOrder() {
         .single();
       if (!error && pData) product = pData;
     }
-    if (!product) {
-      product = await getRandomProduct();
-    }
+    if (!product) product = await getRandomProduct();
 
-    // 计算价格 & 利润
     const price = Number(product.price) || 0;
     const profitRatio = Number(product.profit) || 0;
     const profit = +(price * profitRatio).toFixed(2);
     const tempCoins = coins - price;
 
-    // 扣除用户 Coins
-    await supabaseClient
-      .from("users")
-      .update({ coins: tempCoins })
-      .eq("id", window.currentUserId);
+    // 扣掉 Coins
+    await supabaseClient.from("users").update({ coins: tempCoins }).eq("id", window.currentUserId);
 
-    // 插入新订单
+    // 插入订单
     const { data: newOrder, error: orderErr } = await supabaseClient
       .from("orders")
       .insert({
@@ -394,11 +384,9 @@ async function autoOrder() {
         total_price: price,
         profit: profit,
         status: "pending",
-        round_id: window.currentRoundId
+        round_id: window.currentRoundId,
       })
-      .select(
-        `id, total_price, profit, status, created_at, products ( name, profit )`
-      )
+      .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
       .single();
     if (orderErr) throw new Error(orderErr.message);
 
