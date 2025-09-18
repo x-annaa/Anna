@@ -277,24 +277,23 @@ async function autoOrder() {
   ordering = true;
 
   try {
-    // 1. 加载配置（每轮多少单 & 冷却时间）
+    // 1. 加载轮次配置
     await loadRoundConfig();
 
-    // 2. 检查冷却
-    const cooldown = await checkOrderCooldown();
+    // 2. 检查用户冷却
+    let cooldown = await checkOrderCooldown();
     if (!cooldown.allowed) {
-      // 根据数据库 next_allowed 动态显示剩余时间
-      const updateCooldown = () => {
+      // 启动倒计时显示
+      const startCooldown = () => {
         if (!cooldown.next_allowed) return;
         const sec = Math.ceil((new Date(cooldown.next_allowed).getTime() - Date.now()) / 1000);
         if (sec <= 0) {
           clearInterval(cooldownTimer);
           setOrderBtnDisabled(false, "", "");
-
-          // 开启新一轮
           startNewRound();
           updateRoundProgress();
           loadRecentOrders();
+          cooldown = { allowed: true, next_allowed: null }; // 更新状态
         } else {
           setOrderBtnDisabled(
             true,
@@ -304,9 +303,9 @@ async function autoOrder() {
         }
       };
 
-      updateCooldown();
+      startCooldown();
       if (cooldownTimer) clearInterval(cooldownTimer);
-      cooldownTimer = setInterval(updateCooldown, 1000);
+      cooldownTimer = setInterval(startCooldown, 1000);
 
       alert(
         `⚠️ 已达到下单上限，请等待 ${formatTime(
@@ -317,8 +316,9 @@ async function autoOrder() {
       return;
     }
 
-    // 3. 获取用户余额
+    // 3. 获取用户 Coins
     setOrderBtnDisabled(true, "下单中…");
+
     const { data: user } = await supabaseClient
       .from("users")
       .select("coins")
@@ -333,7 +333,7 @@ async function autoOrder() {
       return;
     }
 
-    // 4. 检查是否有未完成订单
+    // 4. 检查未完成订单
     const { data: pend } = await supabaseClient
       .from("orders")
       .select("id")
@@ -347,10 +347,12 @@ async function autoOrder() {
       return;
     }
 
-    // 5. 没有轮次 → 开启新一轮
-    if (!window.currentRoundId) startNewRound();
+    // 5. 如果没有轮次，开启新轮次
+    if (!window.currentRoundId) {
+      startNewRound();
+    }
 
-    // 6. 查询当前轮次订单数
+    // 6. 查询当前轮次订单
     const { data: orders } = await supabaseClient
       .from("orders")
       .select("id,status")
@@ -361,9 +363,11 @@ async function autoOrder() {
     const pendingCount = orders?.filter(o => o.status === "pending").length || 0;
     const orderNumber = completedCount + pendingCount + 1;
 
+    // 7. 本轮已完成，触发冷却
     if (completedCount >= window.ORDERS_PER_ROUND) {
-      // 已完成本轮订单 → 触发冷却
-      const cooldown = await checkOrderCooldown();
+      // 调用 RPC 检查或设置 next_allowed
+      cooldown = await checkOrderCooldown();
+
       if (cooldown.next_allowed) {
         const startCooldown = () => {
           const sec = Math.ceil((new Date(cooldown.next_allowed).getTime() - Date.now()) / 1000);
@@ -373,6 +377,7 @@ async function autoOrder() {
             startNewRound();
             updateRoundProgress();
             loadRecentOrders();
+            cooldown = { allowed: true, next_allowed: null };
           } else {
             setOrderBtnDisabled(
               true,
@@ -381,16 +386,18 @@ async function autoOrder() {
             );
           }
         };
+
         startCooldown();
         if (cooldownTimer) clearInterval(cooldownTimer);
         cooldownTimer = setInterval(startCooldown, 1000);
       }
+
       alert("本轮已完成全部订单，进入冷却…");
       ordering = false;
       return;
     }
 
-    // 7. 按规则选商品
+    // 8. 按规则或随机选择商品
     let product;
     const ruleProductId = await getUserRuleProduct(window.currentUserId, orderNumber);
     if (ruleProductId) {
@@ -408,10 +415,10 @@ async function autoOrder() {
     const profit = +(price * profitRatio).toFixed(2);
     const tempCoins = coins - price;
 
-    // 8. 扣掉 Coins
+    // 扣 Coins
     await supabaseClient.from("users").update({ coins: tempCoins }).eq("id", window.currentUserId);
 
-    // 9. 插入订单
+    // 插入订单
     const { data: newOrder, error: orderErr } = await supabaseClient
       .from("orders")
       .insert({
@@ -426,7 +433,7 @@ async function autoOrder() {
       .single();
     if (orderErr) throw new Error(orderErr.message);
 
-    // 10. 更新 UI
+    // 更新 UI
     renderLastOrder(newOrder, tempCoins);
     updateCoinsUI(tempCoins);
     await checkPendingLock();
