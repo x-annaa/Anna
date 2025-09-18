@@ -204,6 +204,10 @@ async function completeOrder(order, currentCoinsRaw) {
     updateCoinsUI(finalCoins);
     await checkPendingLock();
     await loadRecentOrders();
+
+    // ✅ 刷新本轮完成状态
+    await renderCurrentRoundStatus();
+
   } catch (e) {
     alert(e.message || "完成订单失败");
   } finally {
@@ -340,6 +344,9 @@ async function autoOrder() {
     await checkPendingLock();
     await loadRecentOrders();
 
+    // ✅ 自动下单后刷新本轮完成状态
+    await renderCurrentRoundStatus();
+
   } catch (e) {
     alert(e.message || "下单失败");
   } finally {
@@ -348,10 +355,11 @@ async function autoOrder() {
 }
 
 /* ======================
-   检查本轮 Coins → Balance 是否可用
+   显示当前轮次完成情况
    ====================== */
-async function canExchangeThisRound() {
-  if (!window.currentUserId || !window.currentRoundId) return false;
+async function renderCurrentRoundStatus() {
+  if (!window.currentUserId || !window.currentRoundId) return;
+
   try {
     const { data: completedOrders, error } = await supabaseClient
       .from("orders")
@@ -359,118 +367,27 @@ async function canExchangeThisRound() {
       .eq("user_id", window.currentUserId)
       .eq("round_id", window.currentRoundId)
       .eq("status", "completed");
+
     if (error) throw error;
-    return (completedOrders?.length || 0) >= window.ORDERS_PER_ROUND;
-  } catch (e) {
-    console.error("检查本轮兑换条件失败", e);
-    return false;
-  }
-}
 
-/* ======================
-   兑换逻辑 Coins ↔ Balance
-   ====================== */
-let currentExchangeDirection = "toCoins";
+    const doneCount = completedOrders?.length || 0;
+    const totalCount = window.ORDERS_PER_ROUND;
 
-function toggleExchangeDirection(dir) {
-  currentExchangeDirection = dir;
-  document.getElementById("balanceToCoinsBtn")?.classList.toggle("active", dir === "toCoins");
-  document.getElementById("coinsToBalanceBtn")?.classList.toggle("active", dir === "toBalance");
-}
-
-function openExchangeModal() {
-  const modal = document.getElementById("addCoinsModal");
-  const input = document.getElementById("addCoinsInput");
-  if (modal) {
-    modal.style.display = "flex";
-    if (input) { input.value = ""; setTimeout(() => input.focus(), 50); }
-  }
-}
-
-function closeExchangeModal() {
-  const modal = document.getElementById("addCoinsModal");
-  if (modal) modal.style.display = "none";
-}
-
-async function confirmExchange() {
-  if (exchanging) return;
-  exchanging = true;
-
-  const inputEl = document.getElementById("addCoinsInput");
-  const amount = parseFloat(inputEl?.value || "0");
-  if (isNaN(amount) || amount <= 0) { 
-    alert("输入无效，请输入大于0的数值"); 
-    exchanging = false; 
-    return; 
-  }
-
-  let filterCol = window.currentUserUUID ? "uuid" : "id";
-  let filterVal = window.currentUserUUID || window.currentUserId;
-
-  if (!filterVal) { 
-    alert("请先登录！"); 
-    exchanging = false; 
-    return; 
-  }
-
-  const isUUID = !!window.currentUserUUID;
-
-  try {
-    if (currentExchangeDirection === "toBalance" && !isUUID) {
-      alert("⚠️ Coins → Balance 功能仅支持 UUID 用户！");
-      exchanging = false;
-      return;
+    let roundEl = document.getElementById("roundStatusDisplay");
+    if (!roundEl) {
+      const container = document.getElementById("orderResult");
+      if (!container) return;
+      roundEl = document.createElement("p");
+      roundEl.id = "roundStatusDisplay";
+      roundEl.style.fontWeight = "bold";
+      roundEl.style.marginBottom = "8px";
+      container.prepend(roundEl);
     }
 
-    if (currentExchangeDirection === "toBalance") {
-      const canEx = await canExchangeThisRound();
-      if (!canEx) {
-        alert(`⚠️ 需要完成本轮 ${window.ORDERS_PER_ROUND}/${window.ORDERS_PER_ROUND} 订单才能使用 Coins → Balance 功能！`);
-        exchanging = false;
-        return;
-      }
-    }
-
-    const { data: user, error } = await supabaseClient
-      .from("users")
-      .select("coins,balance")
-      .eq(filterCol, filterVal)
-      .single();
-    if (error || !user) throw new Error("加载用户信息失败");
-
-    let coins = Number(user.coins) || 0;
-    let balance = Number(user.balance) || 0;
-
-    if (currentExchangeDirection === "toCoins") {
-      if (balance < amount) throw new Error(`余额不足，当前 Balance：¥${balance.toFixed(2)}`);
-      coins += amount;
-      balance -= amount;
-    } else {
-      if (coins < amount) throw new Error(`Coins 不足，当前 Coins：${coins.toFixed(2)}`);
-      coins -= amount;
-      balance += amount;
-    }
-
-    const { error: updErr } = await supabaseClient
-      .from("users")
-      .update({ coins, balance })
-      .eq(filterCol, filterVal);
-    if (updErr) throw new Error("兑换失败：" + updErr.message);
-
-    alert(`✅ 成功兑换 ${amount.toFixed(2)} ${currentExchangeDirection === "toCoins" ? "Coins" : "Balance"}`);
-    document.getElementById("ordercoins").textContent = coins.toFixed(2);
-    document.getElementById("balance").textContent = balance.toFixed(2);
-    updateCoinsUI(coins);
-
-    await checkPendingLock();
-    await loadLastOrder();
-    await loadRecentOrders();
-    closeExchangeModal();
+    roundEl.textContent = `🌀 本轮完成 ${doneCount} / ${totalCount} 订单`;
 
   } catch (e) {
-    alert(e.message || "兑换失败");
-  } finally {
-    exchanging = false;
+    console.error("加载本轮完成状态失败", e);
   }
 }
 
@@ -505,120 +422,4 @@ async function refreshAll() {
   await loadLastOrder();
   await loadRecentOrders();
   await renderCurrentRoundStatus();
-}
-
-async function loadCoinsOrderPage() {
-  if (!window.currentUserId) return;
-
-  let filterCol = window.currentUserUUID ? "uuid" : "id";
-  let filterVal = window.currentUserUUID || window.currentUserId;
-
-  const { data, error } = await supabaseClient
-    .from("users")
-    .select("coins, balance")
-    .eq(filterCol, filterVal)
-    .single();
-
-  if (!error && data) {
-    updateCoinsUI(data.coins);
-    const balEl = document.getElementById("balance");
-    if (balEl) balEl.textContent = (Number(data.balance) || 0).toFixed(2);
-    await checkPendingLock();
-  }
-}
-
-async function loadLastOrder() {
-  if (!window.currentUserId) return;
-
-  const { data: orders } = await supabaseClient
-    .from("orders")
-    .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
-    .eq("user_id", window.currentUserId)
-    .order("created_at", { ascending: false })
-    .limit(1);
-
-  let filterCol = window.currentUserUUID ? "uuid" : "id";
-  let filterVal = window.currentUserUUID || window.currentUserId;
-
-  const { data: user } = await supabaseClient
-    .from("users")
-    .select("coins")
-    .eq(filterCol, filterVal)
-    .single();
-
-  if (orders?.length) renderLastOrder(orders[0], user?.coins ?? 0);
-  else document.getElementById("orderResult").innerHTML = "";
-}
-
-async function loadRecentOrders() {
-  if (!window.currentUserId) return;
-
-  try {
-    const { data: recentOrders } = await supabaseClient
-      .from("orders")
-      .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
-      .eq("user_id", window.currentUserId)
-      .order("created_at", { ascending: false })
-      .limit(5);
-
-    const { count: totalCount } = await supabaseClient
-      .from("orders")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", window.currentUserId);
-
-    const historyTitle = document.querySelector(".order-history h3");
-    if (historyTitle) historyTitle.textContent = `🕘 最近订单 订单数：${totalCount || 0}单`;
-
-    const list = document.getElementById("recentOrders");
-    if (list) {
-      if (!recentOrders?.length) list.innerHTML = `<li>暂无订单！</li>`;
-      else list.innerHTML = recentOrders.map(o => {
-        const price = Number(o.total_price) || 0;
-        const profit = Number(o.profit) || 0;
-        const profitRatio = Number(o.products?.profit) || 0;
-        return `<li>🛒 ${o.products?.name || "未知商品"} / ¥${price.toFixed(2)} / 利润：${profitRatio} / 收入：+¥${profit.toFixed(2)} / 状态：${o.status === "completed" ? "已完成" : "待完成"} / <small>${new Date(o.created_at).toLocaleString()}</small></li>`;
-      }).join("");
-    }
-  } catch (e) {
-    console.error("加载最近订单失败：", e);
-  }
-}
-
-/* ======================
-   显示当前轮次完成情况
-   ====================== */
-async function renderCurrentRoundStatus() {
-  if (!window.currentUserId || !window.currentRoundId) return;
-
-  try {
-    const { data: completedOrders, error } = await supabaseClient
-      .from("orders")
-      .select("id")
-      .eq("user_id", window.currentUserId)
-      .eq("round_id", window.currentRoundId)
-      .eq("status", "completed");
-
-    if (error) throw error;
-
-    const doneCount = completedOrders?.length || 0;
-    const totalCount = window.ORDERS_PER_ROUND;
-
-    // 找到显示位置
-    let roundEl = document.getElementById("roundStatusDisplay");
-    if (!roundEl) {
-      // 如果没有 DOM 元素，则创建一个
-      const container = document.getElementById("orderResult");
-      if (!container) return;
-      roundEl = document.createElement("p");
-      roundEl.id = "roundStatusDisplay";
-      roundEl.style.fontWeight = "bold";
-      roundEl.style.marginBottom = "8px";
-      container.prepend(roundEl);
-    }
-
-    roundEl.textContent = `🌀 本轮完成 ${doneCount} / ${totalCount} 订单`;
-
-  } catch (e) {
-    console.error("加载本轮完成状态失败", e);
-  }
 }
