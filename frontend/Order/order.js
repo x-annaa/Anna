@@ -132,6 +132,35 @@ async function checkOrderCooldown() {
 }
 
 /* ======================
+   本轮完成订单数显示
+   ====================== */
+async function updateRoundProgress() {
+  if (!window.currentUserId || !window.currentRoundId) return;
+
+  try {
+    const { data: completedOrders, error } = await supabaseClient
+      .from("orders")
+      .select("id")
+      .eq("user_id", window.currentUserId)
+      .eq("round_id", window.currentRoundId)
+      .eq("status", "completed");
+    if (error) throw error;
+
+    const doneCount = completedOrders?.length || 0;
+    const totalCount = window.ORDERS_PER_ROUND;
+
+    const el = document.getElementById("roundProgress");
+    if (el) el.textContent = `本轮完成订单：${doneCount} / ${totalCount}`;
+
+    // 自动控制 Coins -> Balance 按钮可用状态
+    const coinsToBalanceBtn = document.getElementById("coinsToBalanceBtn");
+    if (coinsToBalanceBtn) coinsToBalanceBtn.disabled = doneCount < totalCount;
+  } catch (e) {
+    console.error("更新本轮进度失败：", e);
+  }
+}
+
+/* ======================
    渲染最近订单
    ====================== */
 function renderLastOrder(order, coinsRaw) {
@@ -204,6 +233,7 @@ async function completeOrder(order, currentCoinsRaw) {
     updateCoinsUI(finalCoins);
     await checkPendingLock();
     await loadRecentOrders();
+    await updateRoundProgress(); // 更新本轮完成数
   } catch (e) {
     alert(e.message || "完成订单失败");
   } finally {
@@ -240,7 +270,7 @@ async function autoOrder() {
   ordering = true;
 
   try {
-    await loadRoundConfig(); // 动态加载轮次配置
+    await loadRoundConfig();
 
     const cooldown = await checkOrderCooldown();
     if (!cooldown.allowed) {
@@ -256,7 +286,6 @@ async function autoOrder() {
       updateCooldown();
       if (cooldownTimer) clearInterval(cooldownTimer);
       cooldownTimer = setInterval(updateCooldown, 1000);
-
       alert(`⚠️ 已达到下单上限，请等待 ${formatTime(Math.ceil((new Date(cooldown.next_allowed) - new Date()) / 1000))}`);
       ordering = false;
       return;
@@ -339,6 +368,7 @@ async function autoOrder() {
     updateCoinsUI(tempCoins);
     await checkPendingLock();
     await loadRecentOrders();
+    await updateRoundProgress();
 
   } catch (e) {
     alert(e.message || "下单失败");
@@ -504,6 +534,7 @@ async function refreshAll() {
   await loadCoinsOrderPage();
   await loadLastOrder();
   await loadRecentOrders();
+  await updateRoundProgress();
 }
 
 async function loadCoinsOrderPage() {
