@@ -350,28 +350,86 @@ async function autoOrder() {
 /* ======================
    检查本轮 Coins → Balance 是否可用（前端兜底版）
    ====================== */
-async function canExchangeThisRound() {
-  if (!window.currentUserId || !window.currentRoundId) return false;
+async function confirmExchange() {
+  if (exchanging) return;
+  exchanging = true;
+
+  const inputEl = document.getElementById("addCoinsInput");
+  const amount = parseFloat(inputEl?.value || "0");
+  if (isNaN(amount) || amount <= 0) { 
+    alert("输入无效，请输入大于0的数值"); 
+    exchanging = false; 
+    return; 
+  }
+
+  let filterCol = window.currentUserUUID ? "uuid" : "id";
+  let filterVal = window.currentUserUUID || window.currentUserId;
+
+  if (!filterVal) { 
+    alert("请先登录！"); 
+    exchanging = false; 
+    return; 
+  }
+
+  const isUUID = !!window.currentUserUUID;
 
   try {
-    // 获取当前轮次所有订单
-    const { data: orders, error } = await supabaseClient
-      .from("orders")
-      .select("id,status")
-      .eq("user_id", window.currentUserId)
-      .eq("round_id", window.currentRoundId);
+    if (currentExchangeDirection === "toBalance" && !isUUID) {
+      alert("⚠️ Coins → Balance 功能仅支持 UUID 用户！");
+      exchanging = false;
+      return;
+    }
 
-    if (error) throw error;
+    if (currentExchangeDirection === "toBalance") {
+      // 使用前端兜底判断
+      const canEx = await canExchangeThisRound();
+      if (!canEx) {
+        alert(`⚠️ 需要完成本轮 ${window.ORDERS_PER_ROUND}/${window.ORDERS_PER_ROUND} 订单才能使用 Coins → Balance 功能！`);
+        exchanging = false;
+        return;
+      }
+    }
 
-    // 统计已完成订单数量
-    const completedCount = (orders || []).filter(o => o.status === "completed").length;
+    const { data: user, error } = await supabaseClient
+      .from("users")
+      .select("coins,balance")
+      .eq(filterCol, filterVal)
+      .single();
+    if (error || !user) throw new Error("加载用户信息失败");
 
-    // 如果已完成订单 >= ORDERS_PER_ROUND，则可以兑换
-    return completedCount >= window.ORDERS_PER_ROUND;
+    let coins = Number(user.coins) || 0;
+    let balance = Number(user.balance) || 0;
+
+    if (currentExchangeDirection === "toCoins") {
+      if (balance < amount) throw new Error(`余额不足，当前 Balance：¥${balance.toFixed(2)}`);
+      coins += amount;
+      balance -= amount;
+    } else {
+      if (coins < amount) throw new Error(`Coins 不足，当前 Coins：${coins.toFixed(2)}`);
+      coins -= amount;
+      balance += amount;
+    }
+
+    const { error: updErr } = await supabaseClient
+      .from("users")
+      .update({ coins, balance })
+      .eq(filterCol, filterVal);
+    if (updErr) throw new Error("兑换失败：" + updErr.message);
+
+    alert(`✅ 成功兑换 ${amount.toFixed(2)} ${currentExchangeDirection === "toCoins" ? "Coins" : "Balance"}`);
+    document.getElementById("ordercoins").textContent = coins.toFixed(2);
+    document.getElementById("balance").textContent = balance.toFixed(2);
+    updateCoinsUI(coins);
+
+    await checkPendingLock();
+    await loadLastOrder();
+    await loadRecentOrders();
+    closeExchangeModal();
 
   } catch (e) {
-    console.error("检查本轮兑换条件失败", e);
-    return false;
+    alert(e.message || "兑换失败");
+  } finally {
+    exchanging = false;
   }
 }
 
