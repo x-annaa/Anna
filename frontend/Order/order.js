@@ -574,6 +574,7 @@ async function refreshAll() {
   await loadCoinsOrderPage();
   await loadLastOrder();
   await loadRecentOrders();
+  await checkPendingLock();
   await updateRoundProgress();
 }
 
