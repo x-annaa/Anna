@@ -367,6 +367,13 @@ async function autoOrder() {
     const pendingCount = orders?.filter(o => o.status === "pending").length || 0;
     const orderNumber = completedCount + pendingCount + 1;
 
+    if (completedCount >= window.ORDERS_PER_ROUND) {
+       alert("本轮已完成全部订单，进入冷却…");
+       // 调用后台 RPC 设置冷却时间
+       ordering = false;
+       return; // 不再下单
+    }
+
     // 按规则选商品
     let product;
     const ruleProductId = await getUserRuleProduct(window.currentUserId, orderNumber);
