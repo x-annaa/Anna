@@ -14,7 +14,7 @@ let cooldownTimer = null;  // 冷却倒计时
 
 // 默认轮次配置
 window.ORDERS_PER_ROUND = 3;
-window.ROUND_DURATION = 1 * 60 * 1000; // 毫秒
+window.ROUND_DURATION = 5 * 60 * 1000; // 毫秒
 
 if (!window.supabaseClient) {
   console.error("❌ supabaseClient 未初始化！");
@@ -284,7 +284,7 @@ async function autoOrder() {
     const cooldown = await checkOrderCooldown();
     if (!cooldown.allowed) {
       const updateCooldown = async () => {
-        const cooldownMinutes = window.ROUND_DURATION_MINUTES || 1; // 取数据库配置，默认 5 分钟
+        const cooldownMinutes = window.ROUND_DURATION_MINUTES || 5; // 取数据库配置，默认 5 分钟
         const sec = Math.ceil((new Date(cooldown.next_allowed).getTime() - Date.now()) / 1000);
         if (sec <= 0) {
           clearInterval(cooldownTimer);
