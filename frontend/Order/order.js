@@ -329,7 +329,6 @@ async function autoOrder() {
       .eq("user_id", window.currentUserId)
       .eq("round_id", window.currentRoundId);
 
-    const completedCount = orders?.filter(o => o.status === "completed").length || 0;
     const pendingCount = orders?.filter(o => o.status === "pending").length || 0;
     const orderNumber = completedCount + pendingCount + 1;
 
