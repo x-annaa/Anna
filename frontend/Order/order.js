@@ -3,6 +3,7 @@
    ====================== */
 window.currentUserId = localStorage.getItem("currentUserId");
 window.currentUsername = localStorage.getItem("currentUser");
+window.currentUserUUID = localStorage.getItem("currentUserUUID"); // 新增 UUID
 
 let ordering = false;      // 下单中的并发保护
 let completing = false;    // 完成订单中的并发保护
@@ -156,10 +157,11 @@ async function completeOrder(order, currentCoinsRaw) {
       .eq("status", "pending");
     if (orderErr) throw new Error(orderErr.message);
 
-    const { error: coinErr } = await supabaseClient
-      .from("users")
-      .update({ coins: finalCoins })
-      .eq("id", window.currentUserId);
+    const userQuery = window.currentUserUUID
+      ? supabaseClient.from("users").update({ coins: finalCoins }).eq("uuid", window.currentUserUUID)
+      : supabaseClient.from("users").update({ coins: finalCoins }).eq("id", window.currentUserId);
+
+    const { error: coinErr } = await userQuery;
     if (coinErr) throw new Error(coinErr.message);
 
     renderLastOrder({ ...order, status: "completed" }, finalCoins);
@@ -178,6 +180,8 @@ async function completeOrder(order, currentCoinsRaw) {
    ====================== */
 async function checkPendingLock() {
   if (!window.currentUserId) return;
+
+  const userFilter = window.currentUserUUID ? { uuid: window.currentUserUUID } : { id: window.currentUserId };
 
   const { data: pend } = await supabaseClient
     .from("orders")
@@ -224,11 +228,11 @@ async function autoOrder() {
 
     setOrderBtnDisabled(true, "下单中…");
 
-    const { data: user } = await supabaseClient
-      .from("users")
-      .select("coins")
-      .eq("id", window.currentUserId)
-      .single();
+    const userQuery = window.currentUserUUID
+      ? supabaseClient.from("users").select("coins").eq("uuid", window.currentUserUUID).single()
+      : supabaseClient.from("users").select("coins").eq("id", window.currentUserId).single();
+
+    const { data: user } = await userQuery;
     const coins = Number(user?.coins || 0);
 
     if (coins < 50) {
@@ -274,7 +278,10 @@ async function autoOrder() {
     const profit = +(price * profitRatio).toFixed(2);
     const tempCoins = coins - price;
 
-    await supabaseClient.from("users").update({ coins: tempCoins }).eq("id", window.currentUserId);
+    const updateUserQuery = window.currentUserUUID
+      ? supabaseClient.from("users").update({ coins: tempCoins }).eq("uuid", window.currentUserUUID)
+      : supabaseClient.from("users").update({ coins: tempCoins }).eq("id", window.currentUserId);
+    await updateUserQuery;
 
     const { data: newOrder, error: orderErr } = await supabaseClient
       .from("orders")
@@ -299,87 +306,6 @@ async function autoOrder() {
   } finally {
     ordering = false;
   }
-}
-
-/* ======================
-   最近订单
-   ====================== */
-async function loadRecentOrders() {
-  if (!window.currentUserId) return;
-
-  try {
-    const { data: recentOrders } = await supabaseClient
-      .from("orders")
-      .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
-      .eq("user_id", window.currentUserId)
-      .order("created_at", { ascending: false })
-      .limit(5);
-
-    const { count: totalCount } = await supabaseClient
-      .from("orders")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", window.currentUserId);
-
-    const historyTitle = document.querySelector(".order-history h3");
-    if (historyTitle) historyTitle.textContent = `🕘 最近订单 订单数：${totalCount || 0}单`;
-
-    const list = document.getElementById("recentOrders");
-    if (list) {
-      if (!recentOrders?.length) list.innerHTML = `<li>暂无订单！</li>`;
-      else list.innerHTML = recentOrders.map(o => {
-        const price = Number(o.total_price) || 0;
-        const profit = Number(o.profit) || 0;
-        const profitRatio = Number(o.products?.profit) || 0;
-        return `<li>🛒 ${o.products?.name || "未知商品"} / ¥${price.toFixed(2)} / 利润：${profitRatio} / 收入：+¥${profit.toFixed(2)} / 状态：${o.status === "completed" ? "已完成" : "待完成"} / <small>${new Date(o.created_at).toLocaleString()}</small></li>`;
-      }).join("");
-    }
-  } catch (e) {
-    console.error("加载最近订单失败：", e);
-  }
-}
-
-/* ======================
-   页面刷新工具
-   ====================== */
-async function refreshAll() {
-  await loadCoinsOrderPage();
-  await loadLastOrder();
-  await loadRecentOrders();
-}
-
-async function loadCoinsOrderPage() {
-  if (!window.currentUserId) return;
-  const { data, error } = await supabaseClient
-    .from("users")
-    .select("coins, balance")
-    .eq("id", window.currentUserId)
-    .single();
-  if (!error && data) {
-    updateCoinsUI(data.coins);
-    const balEl = document.getElementById("balance");
-    if (balEl) balEl.textContent = (Number(data.balance) || 0).toFixed(2);
-    await checkPendingLock();
-  }
-}
-
-async function loadLastOrder() {
-  if (!window.currentUserId) return;
-
-  const { data: orders } = await supabaseClient
-    .from("orders")
-    .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
-    .eq("user_id", window.currentUserId)
-    .order("created_at", { ascending: false })
-    .limit(1);
-
-  const { data: user } = await supabaseClient
-    .from("users")
-    .select("coins")
-    .eq("id", window.currentUserId)
-    .single();
-
-  if (orders?.length) renderLastOrder(orders[0], user?.coins ?? 0);
-  else document.getElementById("orderResult").innerHTML = "";
 }
 
 /* ======================
@@ -422,52 +348,31 @@ async function confirmExchange() {
     return; 
   }
 
+  const userUUID = window.currentUserUUID;
   const userId = window.currentUserId;
+
   if (!userId) { 
     alert("请先登录！"); 
     exchanging = false; 
     return; 
   }
 
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  const isUUID = uuidRegex.test(userId);
-
   try {
-    if (currentExchangeDirection === "toBalance" && !isUUID) {
+    if (currentExchangeDirection === "toBalance" && !userUUID) {
       alert("⚠️ Coins → Balance 功能仅支持 UUID 用户！");
       exchanging = false;
       return;
     }
 
-    if (currentExchangeDirection === "toBalance") {
-      const { data: canEx, error: canErr } = await supabaseClient
-        .rpc("can_exchange", { p_user_id: userId });
-      if (canErr) throw new Error("检查兑换条件失败：" + canErr.message);
-      if (!canEx) {
-        alert("⚠️ 需要完成任务进度才能使用 Coins → Balance 功能！");
-        exchanging = false;
-        return;
-      }
+    let userQuery;
+    if (userUUID) {
+      userQuery = supabaseClient.from("users").select("coins,balance").eq("uuid", userUUID).single();
+    } else {
+      userQuery = supabaseClient.from("users").select("coins,balance").eq("id", parseInt(userId)).single();
     }
 
-    let user;
-    if (isUUID) {
-      const { data, error } = await supabaseClient
-        .from("users")
-        .select("coins,balance")
-        .eq("uuid", userId)
-        .single();
-      if (error || !data) throw new Error("加载用户信息失败");
-      user = data;
-    } else {
-      const { data, error } = await supabaseClient
-        .from("users")
-        .select("coins,balance")
-        .eq("id", parseInt(userId))
-        .single();
-      if (error || !data) throw new Error("加载用户信息失败");
-      user = data;
-    }
+    const { data: user, error: userErr } = await userQuery;
+    if (userErr || !user) throw new Error("加载用户信息失败");
 
     let coins = Number(user.coins) || 0;
     let balance = Number(user.balance) || 0;
@@ -482,19 +387,12 @@ async function confirmExchange() {
       balance += amount;
     }
 
-    if (isUUID) {
-      const { error } = await supabaseClient
-        .from("users")
-        .update({ coins, balance })
-        .eq("uuid", userId);
-      if (error) throw new Error("兑换失败：" + error.message);
-    } else {
-      const { error } = await supabaseClient
-        .from("users")
-        .update({ coins, balance })
-        .eq("id", parseInt(userId));
-      if (error) throw new Error("兑换失败：" + error.message);
-    }
+    const updateQuery = userUUID
+      ? supabaseClient.from("users").update({ coins, balance }).eq("uuid", userUUID)
+      : supabaseClient.from("users").update({ coins, balance }).eq("id", parseInt(userId));
+
+    const { error: updateErr } = await updateQuery;
+    if (updateErr) throw new Error("兑换失败：" + updateErr.message);
 
     alert(`✅ 成功兑换 ${amount.toFixed(2)} ${currentExchangeDirection === "toCoins" ? "Coins" : "Balance"}`);
 
