@@ -320,8 +320,8 @@ async function autoOrder() {
       return;
     }
 
-    if (!window.currentRoundId || isRoundExpired()) {
-      startNewRound();
+    if (!window.currentRoundId) {
+      startNewRound(); // 第一次访问或没有轮次才创建
     }
 
     const { data: orders } = await supabaseClient
