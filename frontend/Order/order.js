@@ -418,7 +418,13 @@ function toggleExchangeDirection(dir) {
 function openExchangeModal() {
   const modal = document.getElementById("addCoinsModal");
   const input = document.getElementById("addCoinsInput");
-  if (modal) { modal.style.display = "flex"; if (input) { input.value = ""; setTimeout(() => input.focus(), 50); } }
+  if (modal) { 
+    modal.style.display = "flex"; 
+    if (input) { 
+      input.value = ""; 
+      setTimeout(() => input.focus(), 50); 
+    } 
+  }
 }
 
 function closeExchangeModal() {
@@ -432,10 +438,30 @@ async function confirmExchange() {
 
   const inputEl = document.getElementById("addCoinsInput");
   const amount = parseFloat(inputEl?.value || "0");
-  if (isNaN(amount) || amount <= 0) { alert("输入无效"); exchanging = false; return; }
-  if (!window.currentUserId) { alert("请先登录！"); exchanging = false; return; }
+  if (isNaN(amount) || amount <= 0) { 
+    alert("输入无效"); 
+    exchanging = false; 
+    return; 
+  }
+  if (!window.currentUserId) { 
+    alert("请先登录！"); 
+    exchanging = false; 
+    return; 
+  }
 
   try {
+    // ✅ 如果是 Coins → Balance，需要先校验任务进度
+    if (currentExchangeDirection === "toBalance") {
+      const { data: canEx, error: canErr } = await supabaseClient
+        .rpc("can_exchange", { p_user_id: window.currentUserId });
+      if (canErr) throw new Error("检查兑换条件失败：" + canErr.message);
+      if (!canEx) {
+        alert("⚠️ 需要完成任务进度才能使用 Coins → Balance 功能！");
+        exchanging = false;
+        return;
+      }
+    }
+
     const { data: user, error } = await supabaseClient
       .from("users")
       .select("coins, balance")
@@ -447,11 +473,19 @@ async function confirmExchange() {
     let balance = Number(user.balance) || 0;
 
     if (currentExchangeDirection === "toCoins") {
-      if (balance < amount) { alert(`余额不足，当前 Balance：¥${balance.toFixed(2)}`); exchanging = false; return; }
+      if (balance < amount) { 
+        alert(`余额不足，当前 Balance：¥${balance.toFixed(2)}`); 
+        exchanging = false; 
+        return; 
+      }
       coins += amount;
       balance -= amount;
     } else {
-      if (coins < amount) { alert(`Coins 不足，当前 Coins：${coins.toFixed(2)}`); exchanging = false; return; }
+      if (coins < amount) { 
+        alert(`Coins 不足，当前 Coins：${coins.toFixed(2)}`); 
+        exchanging = false; 
+        return; 
+      }
       coins -= amount;
       balance += amount;
     }
