@@ -293,8 +293,8 @@ async function autoOrder() {
           startNewRound();
 
           // 🔥 强制 UI 重置为 0 / ORDERS_PER_ROUND
-          const el = document.getElementById("roundProgress");
-          if (el) el.textContent = `本轮已完成订单：0 / ${window.ORDERS_PER_ROUND}`;
+          await updateRoundProgress();
+          await loadRecentOrders();
 
           // 再查数据库，保证同步
           updateRoundProgress();
