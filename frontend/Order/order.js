@@ -102,16 +102,21 @@ function startNewRound() {
    获取用户规则产品
    ====================== */
 async function getUserRuleProduct(userId, orderNumber) {
+  const filterCol = window.currentUserUUID ? "user_uuid" : "user_id";
+  const filterVal = window.currentUserUUID || userId;
+
   const { data: rules, error } = await supabaseClient
     .from("user_product_rules")
     .select("product_id")
-    .eq("user_id", userId)
+    .eq(filterCol, filterVal)
     .eq("order_number", orderNumber)
     .eq("enabled", true)
     .limit(1);
+
   if (error) { console.error("读取手动规则失败", error); return null; }
   return rules?.[0]?.product_id || null;
 }
+
 
 /* ======================
    获取随机产品
