@@ -278,3 +278,33 @@ button:disabled {
   from { opacity: 0; transform: scale(0.9); }
   to { opacity: 1; transform: scale(1); }
 }
+
+/* 横排切换按钮 */
+.exchange-toggle {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #1976d2;
+}
+
+.exchange-btn {
+  flex: 1;
+  padding: 10px 0;
+  border: none;
+  background-color: #e0e0e0;
+  color: #555;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.exchange-btn.active {
+  background-color: #1976d2;
+  color: #fff;
+}
+
+.exchange-btn:not(.active):hover {
+  background-color: #bdbdbd;
+}
