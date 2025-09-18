@@ -277,13 +277,18 @@ async function autoOrder() {
     await loadRoundConfig();
 
     // 🔹 检查冷却
-    let cooldown = await checkOrderCooldown();
-    console.log("冷却检查结果：", cooldown);
-    if (!cooldown.allowed) {
-      startCooldownTimer(cooldown.next_allowed, "已达到下单上限，冷却中，请等待");
-      ordering = false;
-      return;
+    const completedCount = orders?.filter(o => o.status === "completed").length || 0;
+    console.log("本轮已完成订单数：", completedCount, "/", window.ORDERS_PER_ROUND);
+     
+    if (completedCount >= window.ORDERS_PER_ROUND) {
+      cooldown = await checkOrderCooldown();
+      if (cooldown.next_allowed) {
+         startCooldownTimer(cooldown.next_allowed, "本轮已完成全部订单，冷却中，请等待");
     }
+    alert("本轮已完成全部订单，进入冷却…");
+    ordering = false;
+    return;
+   }
 
     // 🔹 获取用户 Coins
     const { data: user } = await supabaseClient
