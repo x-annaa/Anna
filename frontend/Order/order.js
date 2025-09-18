@@ -283,7 +283,7 @@ async function autoOrder() {
     // 2. 检查冷却
     const cooldown = await checkOrderCooldown();
     if (!cooldown.allowed) {
-      const updateCooldown = () => {
+      const updateCooldown = async () => {
         const sec = Math.ceil((new Date(cooldown.next_allowed) - new Date()) / 1000);
         if (sec <= 0) {
           clearInterval(cooldownTimer);
