@@ -265,6 +265,9 @@ async function checkPendingLock() {
   }
 }
 
+/* ======================
+   订单
+   ====================== */
 async function autoOrder() {
   if (!window.currentUserId) {
     alert("请先登录！");
@@ -276,19 +279,32 @@ async function autoOrder() {
   try {
     await loadRoundConfig();
 
-    // 🔹 检查冷却
+    // 🔹 开启新轮次（如不存在）
+    if (!window.currentRoundId) startNewRound();
+
+    // 🔹 查询当前轮次订单
+    const { data: orders } = await supabaseClient
+      .from("orders")
+      .select("id,status")
+      .eq("user_id", window.currentUserId)
+      .eq("round_id", window.currentRoundId);
+
     const completedCount = orders?.filter(o => o.status === "completed").length || 0;
+    const pendingCount = orders?.filter(o => o.status === "pending").length || 0;
+    const orderNumber = completedCount + pendingCount + 1;
+
     console.log("本轮已完成订单数：", completedCount, "/", window.ORDERS_PER_ROUND);
-     
+
+    // 🔹 本轮已完成，触发冷却
     if (completedCount >= window.ORDERS_PER_ROUND) {
-      cooldown = await checkOrderCooldown();
+      const cooldown = await checkOrderCooldown();
       if (cooldown.next_allowed) {
-         startCooldownTimer(cooldown.next_allowed, "本轮已完成全部订单，冷却中，请等待");
+        startCooldownTimer(cooldown.next_allowed, "本轮已完成全部订单，冷却中，请等待");
+      }
+      alert("本轮已完成全部订单，进入冷却…");
+      ordering = false;
+      return;
     }
-    alert("本轮已完成全部订单，进入冷却…");
-    ordering = false;
-    return;
-   }
 
     // 🔹 获取用户 Coins
     const { data: user } = await supabaseClient
@@ -315,30 +331,6 @@ async function autoOrder() {
     if (pend?.length) {
       alert("您有未完成订单，请先完成订单再继续下单。");
       await checkPendingLock();
-      ordering = false;
-      return;
-    }
-
-    // 🔹 开启新轮次（如不存在）
-    if (!window.currentRoundId) startNewRound();
-
-    // 🔹 查询当前轮次订单
-    const { data: orders } = await supabaseClient
-      .from("orders")
-      .select("id,status")
-      .eq("user_id", window.currentUserId)
-      .eq("round_id", window.currentRoundId);
-
-    const pendingCount = orders?.filter(o => o.status === "pending").length || 0;
-    const orderNumber = completedCount + pendingCount + 1;
-
-    // 🔹 本轮已完成，触发冷却
-    if (completedCount >= window.ORDERS_PER_ROUND) {
-      cooldown = await checkOrderCooldown();
-      if (cooldown.next_allowed) {
-        startCooldownTimer(cooldown.next_allowed, "本轮已完成全部订单，冷却中，请等待");
-      }
-      alert("本轮已完成全部订单，进入冷却…");
       ordering = false;
       return;
     }
@@ -392,6 +384,7 @@ async function autoOrder() {
     ordering = false;
   }
 }
+
 
 /* ======================
    冷却倒计时函数
