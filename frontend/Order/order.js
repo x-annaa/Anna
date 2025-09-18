@@ -442,30 +442,21 @@ async function confirmExchange() {
 
   const inputEl = document.getElementById("addCoinsInput");
   const amount = parseFloat(inputEl?.value || "0");
-
-  if (isNaN(amount) || amount <= 0) {
-    alert("输入无效，请输入大于0的数值");
-    exchanging = false;
-    return;
+  if (isNaN(amount) || amount <= 0) { 
+    alert("输入无效，请输入大于0的数值"); 
+    exchanging = false; 
+    return; 
   }
 
   const userId = window.currentUserId;
-  if (!userId) {
-    alert("请先登录！");
-    exchanging = false;
-    return;
-  }
-
-  // UUID 检查
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  if (!uuidRegex.test(userId)) {
-    alert("用户ID格式错误，请使用 UUID 登录");
-    exchanging = false;
-    return;
+  if (!userId) { 
+    alert("请先登录！"); 
+    exchanging = false; 
+    return; 
   }
 
   try {
-    // Coins -> Balance 需要任务检查
+    // Coins -> Balance 需要检查任务进度
     if (currentExchangeDirection === "toBalance") {
       const { data: canEx, error: canErr } = await supabaseClient
         .rpc("can_exchange", { p_user_id: userId });
@@ -478,18 +469,28 @@ async function confirmExchange() {
       }
     }
 
-    // 获取用户最新数据
+    // 获取用户信息
     const { data: user, error } = await supabaseClient
       .from("users")
       .select("coins, balance")
-      .eq("id", userId)
+      .eq("uuid", userId)  // 优先用 uuid 查询
       .single();
-    if (error || !user) throw new Error("加载用户信息失败");
+
+    if (!user) {
+      // 如果 uuid 查不到，再用 id 查询（兼容老数据）
+      const { data: userOld, error: err2 } = await supabaseClient
+        .from("users")
+        .select("coins, balance")
+        .eq("id", parseInt(userId))
+        .single();
+      if (err2 || !userOld) throw new Error("加载用户信息失败");
+      user = userOld;
+    }
 
     let coins = Number(user.coins) || 0;
     let balance = Number(user.balance) || 0;
 
-    // 兑换逻辑
+    // 执行兑换
     if (currentExchangeDirection === "toCoins") {
       if (balance < amount) throw new Error(`余额不足，当前 Balance：¥${balance.toFixed(2)}`);
       coins += amount;
@@ -504,8 +505,15 @@ async function confirmExchange() {
     const { error: updateErr } = await supabaseClient
       .from("users")
       .update({ coins, balance })
-      .eq("id", userId);
-    if (updateErr) throw new Error("兑换失败：" + updateErr.message);
+      .eq("uuid", userId);  // 优先用 uuid 更新
+    if (updateErr) {
+      // 如果 uuid 更新失败，再尝试用整数 id 更新
+      const { error: updateOldErr } = await supabaseClient
+        .from("users")
+        .update({ coins, balance })
+        .eq("id", parseInt(userId));
+      if (updateOldErr) throw new Error("兑换失败：" + updateOldErr.message);
+    }
 
     alert(`✅ 成功兑换 ${amount.toFixed(2)} ${currentExchangeDirection === "toCoins" ? "Coins" : "Balance"}`);
 
@@ -514,7 +522,7 @@ async function confirmExchange() {
     document.getElementById("balance").textContent = balance.toFixed(2);
     updateCoinsUI(coins);
 
-    // 刷新订单与状态
+    // 刷新状态
     await checkPendingLock();
     await loadLastOrder();
     await loadRecentOrders();
