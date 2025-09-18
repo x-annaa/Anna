@@ -278,6 +278,7 @@ async function autoOrder() {
 
     // 🔹 检查冷却
     let cooldown = await checkOrderCooldown();
+    console.log("冷却检查结果：", cooldown);
     if (!cooldown.allowed) {
       startCooldownTimer(cooldown.next_allowed, "已达到下单上限，冷却中，请等待");
       ordering = false;
