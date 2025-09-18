@@ -270,6 +270,7 @@ async function autoOrder() {
         if (sec <= 0) {
           clearInterval(cooldownTimer);
           setOrderBtnDisabled(false, "", "");
+          startNewRound();
           updateRoundProgress(); 
         } else {
           setOrderBtnDisabled(true, `冷却中，请等待 ${formatTime(sec)}`, `冷却剩余时间：${formatTime(sec)}`);
