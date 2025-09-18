@@ -137,27 +137,18 @@ async function checkOrderCooldown() {
 async function updateRoundProgress() {
   if (!window.currentUserId || !window.currentRoundId) return;
 
-  try {
-    const { data: completedOrders, error } = await supabaseClient
-      .from("orders")
-      .select("id")
-      .eq("user_id", window.currentUserId)
-      .eq("round_id", window.currentRoundId)
-      .eq("status", "completed");
-    if (error) throw error;
+  const { data: completedOrders, error } = await supabaseClient
+    .from("orders")
+    .select("id")
+    .eq("user_id", window.currentUserId)
+    .eq("round_id", window.currentRoundId)
+    .eq("status", "completed");
 
-    const doneCount = completedOrders?.length || 0;
-    const totalCount = window.ORDERS_PER_ROUND;
+  const doneCount = completedOrders?.length || 0;
+  const totalCount = window.ORDERS_PER_ROUND;
 
-    const el = document.getElementById("roundProgress");
-    if (el) el.textContent = `本轮完成订单：${doneCount} / ${totalCount}`;
-
-    // 自动控制 Coins -> Balance 按钮可用状态
-    const coinsToBalanceBtn = document.getElementById("coinsToBalanceBtn");
-    if (coinsToBalanceBtn) coinsToBalanceBtn.disabled = doneCount < totalCount;
-  } catch (e) {
-    console.error("更新本轮进度失败：", e);
-  }
+  const el = document.getElementById("roundProgress");
+  if (el) el.textContent = `本轮已完成订单：${doneCount} / ${totalCount}`;
 }
 
 /* ======================
