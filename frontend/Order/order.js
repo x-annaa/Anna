@@ -21,7 +21,7 @@ if (!window.supabaseClient) {
 }
 
 /* ======================
-   加载轮次配置
+   读取轮次配置 (每轮单数 & 冷却分钟)
    ====================== */
 async function loadRoundConfig() {
   try {
@@ -30,14 +30,25 @@ async function loadRoundConfig() {
       .select("orders_per_round, round_duration")
       .limit(1)
       .single();
-    if (!error && data) {
-      window.ORDERS_PER_ROUND = Number(data.orders_per_round) || 3;
-      window.ROUND_DURATION = (Number(data.round_duration) || 5 * 60) * 1000;
+
+    if (error) throw error;
+    if (data) {
+      window.ORDERS_PER_ROUND = Number(data.orders_per_round);
+      window.ROUND_DURATION_MINUTES = Number(data.round_duration);
+      console.log("✅ 配置已加载：", window.ORDERS_PER_ROUND, window.ROUND_DURATION_MINUTES);
+    } else {
+      // 没有配置就用默认值
+      window.ORDERS_PER_ROUND = 3;
+      window.ROUND_DURATION_MINUTES = 5;
     }
   } catch (e) {
-    console.error("加载轮次配置失败，使用默认值", e);
+    console.error("❌ 读取配置失败", e.message);
+    // 防止出错导致 undefined
+    if (!window.ORDERS_PER_ROUND) window.ORDERS_PER_ROUND = 3;
+    if (!window.ROUND_DURATION_MINUTES) window.ROUND_DURATION_MINUTES = 5;
   }
 }
+
 
 /* ======================
    工具函数
