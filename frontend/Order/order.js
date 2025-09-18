@@ -130,10 +130,10 @@ async function getRandomProduct() {
    检查冷却
    ====================== */
 async function checkOrderCooldown() {
-  if (!window.currentUserId) return { allowed: true, next_allowed: null };
+  if (!window.currentUserUUID) return { allowed: true, next_allowed: null };
   try {
     const { data, error } = await supabaseClient
-      .rpc("check_user_order_cooldown", { p_user_id: window.currentUserId });
+      .rpc("check_user_order_cooldown", { p_user_uuid: window.currentUserUUID });
     if (error) throw error;
     if (!data?.length) return { allowed: true, next_allowed: null };
     const row = data[0];
