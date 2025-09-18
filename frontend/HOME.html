@@ -74,16 +74,25 @@
     <div id="addCoinsModal" class="modal">
       <div class="modal-content">
         <h3>兑换 Coins</h3>
+        <h3>兑换 Coins / Balance</h3>
+
+        <label>
+          <input type="radio" name="exchangeType" value="toCoins" checked> Balance → Coins
+        </label>
+        <label>
+          <input type="radio" name="exchangeType" value="toBalance"> Coins → Balance
+        </label>
+
         <p>请输入要兑换的数量：</p>
         <input type="number" id="addCoinsInput" min="1" placeholder="输入数量" />
-        <div class="modal-actions">
+
+        <div class="modal-actions"></div>
           <button id="cancelAddCoins">取消</button>
           <button id="confirmAddCoins">确认</button>
         </div>
       </div>
     </div>
-  </div>
-
+        
   <!-- 关于我们 -->
   <div id="msgPage" class="page">ℹ️ 关于我们</div>
 
