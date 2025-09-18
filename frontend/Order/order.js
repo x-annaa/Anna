@@ -326,10 +326,12 @@ async function autoOrder() {
 
     const { data: orders } = await supabaseClient
       .from("orders")
-      .select("id")
+      .select("id,status")
       .eq("user_id", window.currentUserId)
       .eq("round_id", window.currentRoundId);
-    const orderNumber = (orders?.length || 0) + 1;
+    const completedCount = orders?.filter(o => o.status === "completed").length || 0;
+    const pendingCount = orders?.filter(o => o.status === "pending").length || 0;
+    const orderNumber = completedCount + pendingCount + 1; // 当前要下的订单编号
 
     let product;
     const ruleProductId = await getUserRuleProduct(window.currentUserId, orderNumber);
