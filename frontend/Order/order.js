@@ -344,6 +344,7 @@ async function autoOrder() {
     updateCoinsUI(tempCoins);
     await checkPendingLock();
     await loadRecentOrders();
+    await renderCurrentRoundStatus();
 
   } catch (e) {
     alert(e.message || "下单失败");
