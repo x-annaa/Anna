@@ -6,7 +6,7 @@ window.currentUsername = localStorage.getItem("currentUser");
 
 let ordering = false;      // 下单中的并发保护
 let completing = false;    // 完成订单中的并发保护
-let exchanging = false;    // Balance -> Coins 兑换中的并发保护
+let exchanging = false;    // Balance <-> Coins 兑换中的并发保护
 let cooldownTimer = null;  // 冷却倒计时
 
 if (!window.supabaseClient) {
@@ -109,7 +109,7 @@ function renderLastOrder(order, coinsRaw) {
     <h3>✅ 最近一次订单</h3>
     <p>商品：${order.products?.name || "未知商品"}</p>
     <p>价格：¥${price.toFixed(2)}</p>
-    <p>利润：${profitRatio}</p>
+    <p>利润率：${profitRatio}</p>
     <p>收入：+¥${profit.toFixed(2)}</p>
     <p>状态：${order.status === "completed" ? "✅ 已完成" : "⏳ 待完成"}</p>
     <p>时间：${new Date(order.created_at).toLocaleString()}</p>
@@ -232,7 +232,7 @@ async function autoOrder() {
     const coins = Number(user?.coins || 0);
 
     if (coins < 50) {
-      alert(`<p>你的余额不足，最少需要 50 coins</p>`);
+      alert(`你的余额不足，最少需要 50 coins`);
       setOrderBtnDisabled(false);
       ordering = false;
       return;
@@ -344,8 +344,11 @@ async function loadRecentOrders() {
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
   document.getElementById("addCoinsBtn")?.addEventListener("click", openExchangeModal);
-  document.getElementById("cancelAddCoins")?.addEventListener("click", closeExchangeModal);
-  document.getElementById("confirmAddCoins")?.addEventListener("click", confirmExchange);
+  document.getElementById("cancelExchange")?.addEventListener("click", closeExchangeModal);
+  document.getElementById("confirmExchange")?.addEventListener("click", confirmExchange);
+
+  document.getElementById("balanceToCoinsBtn")?.addEventListener("click", () => toggleExchangeDirection("toCoins"));
+  document.getElementById("coinsToBalanceBtn")?.addEventListener("click", () => toggleExchangeDirection("toBalance"));
 
   document.getElementById("addCoinsModal")?.addEventListener("click", (e) => {
     if (e.target.id === "addCoinsModal") closeExchangeModal();
@@ -402,8 +405,16 @@ async function loadLastOrder() {
 }
 
 /* ======================
-   Coins 弹窗
+   兑换弹窗逻辑
    ====================== */
+let currentExchangeDirection = "toCoins"; // 默认 Balance -> Coins
+
+function toggleExchangeDirection(dir) {
+  currentExchangeDirection = dir;
+  document.getElementById("balanceToCoinsBtn").classList.toggle("active", dir === "toCoins");
+  document.getElementById("coinsToBalanceBtn").classList.toggle("active", dir === "toBalance");
+}
+
 function openExchangeModal() {
   const modal = document.getElementById("addCoinsModal");
   const input = document.getElementById("addCoinsInput");
@@ -424,9 +435,6 @@ async function confirmExchange() {
   if (isNaN(amount) || amount <= 0) { alert("输入无效"); exchanging = false; return; }
   if (!window.currentUserId) { alert("请先登录！"); exchanging = false; return; }
 
-  // 判断兑换方向
-  const exchangeType = document.querySelector('input[name="exchangeType"]:checked')?.value || "toCoins";
-
   try {
     const { data: user, error } = await supabaseClient
       .from("users")
@@ -438,14 +446,12 @@ async function confirmExchange() {
     let coins = Number(user.coins) || 0;
     let balance = Number(user.balance) || 0;
 
-    if (exchangeType === "toCoins") {
-      // Balance -> Coins
-      if (balance < amount) { alert(`余额不足，当前 Balance：¥${balance.toFixed(2)}`); return; }
+    if (currentExchangeDirection === "toCoins") {
+      if (balance < amount) { alert(`余额不足，当前 Balance：¥${balance.toFixed(2)}`); exchanging = false; return; }
       coins += amount;
       balance -= amount;
     } else {
-      // Coins -> Balance
-      if (coins < amount) { alert(`Coins 不足，当前 Coins：${coins.toFixed(2)}`); return; }
+      if (coins < amount) { alert(`Coins 不足，当前 Coins：${coins.toFixed(2)}`); exchanging = false; return; }
       coins -= amount;
       balance += amount;
     }
@@ -456,10 +462,9 @@ async function confirmExchange() {
       .eq("id", window.currentUserId);
     if (updateErr) throw new Error("兑换失败：" + updateErr.message);
 
-    alert(`✅ 成功兑换 ${amount.toFixed(2)} ${exchangeType === "toCoins" ? "Coins" : "Balance"}`);
+    alert(`✅ 成功兑换 ${amount.toFixed(2)} ${currentExchangeDirection === "toCoins" ? "Coins" : "Balance"}`);
     document.getElementById("ordercoins").textContent = coins.toFixed(2);
-    const balEl = document.getElementById("balance");
-    if (balEl) balEl.textContent = balance.toFixed(2);
+    document.getElementById("balance").textContent = balance.toFixed(2);
 
     updateCoinsUI(coins);
     await checkPendingLock();
