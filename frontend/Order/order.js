@@ -11,10 +11,32 @@ let ordering = false;      // 下单中的并发保护
 let completing = false;    // 完成订单中的并发保护
 let exchanging = false;    // Balance <-> Coins 兑换中的并发保护
 let cooldownTimer = null;  // 冷却倒计时
-const ROUND_DURATION = 5 * 60 * 1000; // 每轮 5 分钟
+
+// 默认配置，如果数据库未加载成功则使用
+window.ORDERS_PER_ROUND = 3;
+window.ROUND_DURATION = 5 * 60 * 1000; // 毫秒
 
 if (!window.supabaseClient) {
   console.error("❌ supabaseClient 未初始化！");
+}
+
+/* ======================
+   加载轮次配置（数据库）
+   ====================== */
+async function loadRoundConfig() {
+  try {
+    const { data, error } = await supabaseClient
+      .from("round_config")
+      .select("orders_per_round, round_duration")
+      .limit(1)
+      .single();
+    if (!error && data) {
+      window.ORDERS_PER_ROUND = Number(data.orders_per_round) || 3;
+      window.ROUND_DURATION = (Number(data.round_duration) || 5 * 60) * 1000;
+    }
+  } catch (e) {
+    console.error("加载轮次配置失败，使用默认值", e);
+  }
 }
 
 /* ======================
@@ -53,7 +75,7 @@ function formatTime(sec) {
 
 function isRoundExpired() {
   if (!window.roundStartTime) return true;
-  return (Date.now() - Number(window.roundStartTime)) > ROUND_DURATION;
+  return (Date.now() - Number(window.roundStartTime)) > window.ROUND_DURATION;
 }
 
 function startNewRound() {
@@ -219,7 +241,8 @@ async function autoOrder() {
   ordering = true;
 
   try {
-    // 冷却检查
+    await loadRoundConfig(); // 动态加载轮次配置
+
     const cooldown = await checkOrderCooldown();
     if (!cooldown.allowed) {
       const updateCooldown = () => {
@@ -269,7 +292,6 @@ async function autoOrder() {
       return;
     }
 
-    // 轮次管理
     if (!window.currentRoundId || isRoundExpired()) {
       startNewRound();
     }
@@ -277,7 +299,8 @@ async function autoOrder() {
     const { data: orders } = await supabaseClient
       .from("orders")
       .select("id")
-      .eq("user_id", window.currentUserId);
+      .eq("user_id", window.currentUserId)
+      .eq("round_id", window.currentRoundId);
     const orderNumber = (orders?.length || 0) + 1;
 
     let product;
@@ -307,7 +330,7 @@ async function autoOrder() {
         total_price: price,
         profit: profit,
         status: "pending",
-        round_id: window.currentRoundId // 保存轮次
+        round_id: window.currentRoundId
       })
       .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
       .single();
@@ -340,7 +363,7 @@ async function canExchangeThisRound() {
       .eq("status", "completed");
     if (error) throw error;
 
-    return (countData?.length || 0) >= 3;
+    return (countData?.length || 0) >= window.ORDERS_PER_ROUND;
   } catch (e) {
     console.error("检查本轮兑换条件失败", e);
     return false;
@@ -405,7 +428,7 @@ async function confirmExchange() {
     if (currentExchangeDirection === "toBalance") {
       const canEx = await canExchangeThisRound();
       if (!canEx) {
-        alert("⚠️ 需要完成本轮 3/3 订单才能使用 Coins → Balance 功能！");
+        alert(`⚠️ 需要完成本轮 ${window.ORDERS_PER_ROUND}/${window.ORDERS_PER_ROUND} 订单才能使用 Coins → Balance 功能！`);
         exchanging = false;
         return;
       }
@@ -480,6 +503,7 @@ document.addEventListener("DOMContentLoaded", () => {
    页面刷新工具
    ====================== */
 async function refreshAll() {
+  await loadRoundConfig();
   await loadCoinsOrderPage();
   await loadLastOrder();
   await loadRecentOrders();
@@ -528,9 +552,6 @@ async function loadLastOrder() {
   else document.getElementById("orderResult").innerHTML = "";
 }
 
-/* ======================
-   最近订单
-   ====================== */
 async function loadRecentOrders() {
   if (!window.currentUserId) return;
 
