@@ -146,20 +146,20 @@ async function checkOrderCooldown() {
    本轮完成订单数显示
    ====================== */
 async function updateRoundProgress() {
-  if (!window.currentUserId || !window.currentRoundId) return;
+  // 确保配置已加载
+  if (!window.ORDERS_PER_ROUND || !window.ROUND_DURATION_MINUTES) {
+    await loadRoundConfig();
+  }
 
-  const { data: completedOrders, error } = await supabaseClient
+  const { data: orders } = await supabaseClient
     .from("orders")
-    .select("id")
+    .select("id, status")
     .eq("user_id", window.currentUserId)
-    .eq("round_id", window.currentRoundId)
-    .eq("status", "completed");
+    .eq("round_id", window.currentRoundId);
 
-  const doneCount = completedOrders?.length || 0;
-  const totalCount = window.ORDERS_PER_ROUND;
-
+  const completed = orders?.filter(o => o.status === "completed").length || 0;
   const el = document.getElementById("roundProgress");
-  if (el) el.textContent = `本轮已完成订单：${doneCount} / ${totalCount}`;
+  if (el) el.textContent = `本轮已完成订单：${completed} / ${window.ORDERS_PER_ROUND}`;
 }
 
 /* ======================
