@@ -585,11 +585,3 @@ async function loadRecentOrders() {
     console.error("加载最近订单失败：", e);
   }
 }
-
-const { data } = await supabaseClient
-  .from('orders')
-  .select('*')
-  .eq('user_id', window.currentUserId)
-  .eq('round_id', window.currentRoundId)
-  .eq('status', 'completed');
-console.log(data);
