@@ -606,3 +606,15 @@ async function loadRecentOrders() {
     console.error("加载最近订单失败：", e);
   }
 }
+
+const updateCooldown = () => {
+  const sec = Math.ceil((new Date(cooldown.next_allowed) - new Date()) / 1000);
+  if (sec <= 0) {
+    clearInterval(cooldownTimer);
+    setOrderBtnDisabled(false, "", "");
+    updateRoundProgress(); // ✅ 冷却结束后刷新轮次显示
+  } else {
+    setOrderBtnDisabled(true, `冷却中，请等待 ${formatTime(sec)}`, `冷却剩余时间：${formatTime(sec)}`);
+  }
+};
+
