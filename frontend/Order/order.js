@@ -11,6 +11,7 @@ let ordering = false;      // 下单中的并发保护
 let completing = false;    // 完成订单中的并发保护
 let exchanging = false;    // Balance <-> Coins 兑换中的并发保护
 let cooldownTimer = null;  // 冷却倒计时
+let currentExchangeDirection = "toCoins"; // 默认兑换方向
 
 // 默认轮次配置
 window.ORDERS_PER_ROUND = 3;
@@ -240,7 +241,7 @@ async function autoOrder() {
   ordering = true;
 
   try {
-    await loadRoundConfig(); // 动态加载轮次配置
+    await loadRoundConfig(); 
 
     const cooldown = await checkOrderCooldown();
     if (!cooldown.allowed) {
@@ -256,7 +257,6 @@ async function autoOrder() {
       updateCooldown();
       if (cooldownTimer) clearInterval(cooldownTimer);
       cooldownTimer = setInterval(updateCooldown, 1000);
-
       alert(`⚠️ 已达到下单上限，请等待 ${formatTime(Math.ceil((new Date(cooldown.next_allowed) - new Date()) / 1000))}`);
       ordering = false;
       return;
@@ -348,7 +348,30 @@ async function autoOrder() {
 }
 
 /* ======================
-   检查本轮 Coins → Balance 是否可用（前端兜底版）
+   检查本轮 Coins → Balance 是否可用
+   ====================== */
+async function canExchangeThisRound() {
+  if (!window.currentUserId || !window.currentRoundId) return false;
+
+  try {
+    const { data: completedOrders, error } = await supabaseClient
+      .from("orders")
+      .select("id")
+      .eq("user_id", window.currentUserId)
+      .eq("round_id", window.currentRoundId)
+      .eq("status", "completed");
+
+    if (error) throw error;
+
+    return (completedOrders?.length || 0) >= window.ORDERS_PER_ROUND;
+  } catch (e) {
+    console.error("检查本轮兑换条件失败", e);
+    return false;
+  }
+}
+
+/* ======================
+   兑换逻辑 Coins ↔ Balance
    ====================== */
 async function confirmExchange() {
   if (exchanging) return;
@@ -371,17 +394,14 @@ async function confirmExchange() {
     return; 
   }
 
-  const isUUID = !!window.currentUserUUID;
-
   try {
-    if (currentExchangeDirection === "toBalance" && !isUUID) {
+    if (currentExchangeDirection === "toBalance" && !window.currentUserUUID) {
       alert("⚠️ Coins → Balance 功能仅支持 UUID 用户！");
       exchanging = false;
       return;
     }
 
     if (currentExchangeDirection === "toBalance") {
-      // 使用前端兜底判断
       const canEx = await canExchangeThisRound();
       if (!canEx) {
         alert(`⚠️ 需要完成本轮 ${window.ORDERS_PER_ROUND}/${window.ORDERS_PER_ROUND} 订单才能使用 Coins → Balance 功能！`);
@@ -434,16 +454,17 @@ async function confirmExchange() {
 }
 
 /* ======================
-   兑换逻辑 Coins ↔ Balance
+   切换兑换方向
    ====================== */
-let currentExchangeDirection = "toCoins";
-
 function toggleExchangeDirection(dir) {
   currentExchangeDirection = dir;
   document.getElementById("balanceToCoinsBtn")?.classList.toggle("active", dir === "toCoins");
   document.getElementById("coinsToBalanceBtn")?.classList.toggle("active", dir === "toBalance");
 }
 
+/* ======================
+   打开 / 关闭兑换弹窗
+   ====================== */
 function openExchangeModal() {
   const modal = document.getElementById("addCoinsModal");
   const input = document.getElementById("addCoinsInput");
@@ -458,120 +479,9 @@ function closeExchangeModal() {
   if (modal) modal.style.display = "none";
 }
 
-async function confirmExchange() {
-  if (exchanging) return;
-  exchanging = true;
-
-  const inputEl = document.getElementById("addCoinsInput");
-  const amount = parseFloat(inputEl?.value || "0");
-  if (isNaN(amount) || amount <= 0) { 
-    alert("输入无效，请输入大于0的数值"); 
-    exchanging = false; 
-    return; 
-  }
-
-  let filterCol = window.currentUserUUID ? "uuid" : "id";
-  let filterVal = window.currentUserUUID || window.currentUserId;
-
-  if (!filterVal) { 
-    alert("请先登录！"); 
-    exchanging = false; 
-    return; 
-  }
-
-  const isUUID = !!window.currentUserUUID;
-
-  try {
-    if (currentExchangeDirection === "toBalance" && !isUUID) {
-      alert("⚠️ Coins → Balance 功能仅支持 UUID 用户！");
-      exchanging = false;
-      return;
-    }
-
-    if (currentExchangeDirection === "toBalance") {
-      const canEx = await canExchangeThisRound();
-      if (!canEx) {
-        alert(`⚠️ 需要完成本轮 ${window.ORDERS_PER_ROUND}/${window.ORDERS_PER_ROUND} 订单才能使用 Coins → Balance 功能！`);
-        exchanging = false;
-        return;
-      }
-    }
-
-    const { data: user, error } = await supabaseClient
-      .from("users")
-      .select("coins,balance")
-      .eq(filterCol, filterVal)
-      .single();
-    if (error || !user) throw new Error("加载用户信息失败");
-
-    let coins = Number(user.coins) || 0;
-    let balance = Number(user.balance) || 0;
-
-    if (currentExchangeDirection === "toCoins") {
-      if (balance < amount) throw new Error(`余额不足，当前 Balance：¥${balance.toFixed(2)}`);
-      coins += amount;
-      balance -= amount;
-    } else {
-      if (coins < amount) throw new Error(`Coins 不足，当前 Coins：${coins.toFixed(2)}`);
-      coins -= amount;
-      balance += amount;
-    }
-
-    const { error: updErr } = await supabaseClient
-      .from("users")
-      .update({ coins, balance })
-      .eq(filterCol, filterVal);
-    if (updErr) throw new Error("兑换失败：" + updErr.message);
-
-    alert(`✅ 成功兑换 ${amount.toFixed(2)} ${currentExchangeDirection === "toCoins" ? "Coins" : "Balance"}`);
-    document.getElementById("ordercoins").textContent = coins.toFixed(2);
-    document.getElementById("balance").textContent = balance.toFixed(2);
-    updateCoinsUI(coins);
-
-    await checkPendingLock();
-    await loadLastOrder();
-    await loadRecentOrders();
-    closeExchangeModal();
-
-  } catch (e) {
-    alert(e.message || "兑换失败");
-  } finally {
-    exchanging = false;
-  }
-}
-
-/* ======================
-   页面事件绑定
-   ====================== */
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
-  document.getElementById("addCoinsBtn")?.addEventListener("click", openExchangeModal);
-  document.getElementById("cancelExchange")?.addEventListener("click", closeExchangeModal);
-  document.getElementById("confirmExchange")?.addEventListener("click", confirmExchange);
-
-  document.getElementById("balanceToCoinsBtn")?.addEventListener("click", () => toggleExchangeDirection("toCoins"));
-  document.getElementById("coinsToBalanceBtn")?.addEventListener("click", () => toggleExchangeDirection("toBalance"));
-
-  document.getElementById("addCoinsModal")?.addEventListener("click", (e) => {
-    if (e.target.id === "addCoinsModal") closeExchangeModal();
-  });
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeExchangeModal();
-  });
-
-  refreshAll();
-});
-
 /* ======================
    页面刷新工具
    ====================== */
-async function refreshAll() {
-  await loadRoundConfig();
-  await loadCoinsOrderPage();
-  await loadLastOrder();
-  await loadRecentOrders();
-}
-
 async function loadCoinsOrderPage() {
   if (!window.currentUserId) return;
 
@@ -648,3 +558,32 @@ async function loadRecentOrders() {
     console.error("加载最近订单失败：", e);
   }
 }
+
+async function refreshAll() {
+  await loadRoundConfig();
+  await loadCoinsOrderPage();
+  await loadLastOrder();
+  await loadRecentOrders();
+}
+
+/* ======================
+   页面事件绑定
+   ====================== */
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
+  document.getElementById("addCoinsBtn")?.addEventListener("click", openExchangeModal);
+  document.getElementById("cancelExchange")?.addEventListener("click", closeExchangeModal);
+  document.getElementById("confirmExchange")?.addEventListener("click", confirmExchange);
+
+  document.getElementById("balanceToCoinsBtn")?.addEventListener("click", () => toggleExchangeDirection("toCoins"));
+  document.getElementById("coinsToBalanceBtn")?.addEventListener("click", () => toggleExchangeDirection("toBalance"));
+
+  document.getElementById("addCoinsModal")?.addEventListener("click", (e) => {
+    if (e.target.id === "addCoinsModal") closeExchangeModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeExchangeModal();
+  });
+
+  refreshAll();
+});
