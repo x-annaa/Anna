@@ -205,7 +205,7 @@ async function completeOrder(order, currentCoinsRaw) {
     await checkPendingLock();
     await loadRecentOrders();
 
-    // ✅ 刷新本轮完成状态
+    // ✅ 新增：刷新本轮完成状态
     await renderCurrentRoundStatus();
 
   } catch (e) {
