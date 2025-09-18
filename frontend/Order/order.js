@@ -265,9 +265,9 @@ async function checkPendingLock() {
   }
 }
 
-/* ======================
-   自动下单
-   ====================== */
+// ======================
+// 自动下单
+// ======================
 async function autoOrder() {
   if (!window.currentUserId) {
     alert("请先登录！");
@@ -283,8 +283,9 @@ async function autoOrder() {
     // 2. 检查冷却
     const cooldown = await checkOrderCooldown();
     if (!cooldown.allowed) {
-      const updateCooldown = async () => {
-        const cooldownMinutes = window.ROUND_DURATION_MINUTES || 5; // 取数据库配置，默认 5 分钟
+      // 根据数据库 next_allowed 动态显示剩余时间
+      const updateCooldown = () => {
+        if (!cooldown.next_allowed) return;
         const sec = Math.ceil((new Date(cooldown.next_allowed).getTime() - Date.now()) / 1000);
         if (sec <= 0) {
           clearInterval(cooldownTimer);
@@ -294,11 +295,8 @@ async function autoOrder() {
           startNewRound();
 
           // 🔥 强制 UI 重置为 0 / ORDERS_PER_ROUND
-          await updateRoundProgress();
-          await loadRecentOrders();
-
-          // 再查数据库，保证同步
           updateRoundProgress();
+          loadRecentOrders();
         } else {
           setOrderBtnDisabled(
             true,
@@ -314,14 +312,14 @@ async function autoOrder() {
 
       alert(
         `⚠️ 已达到下单上限，请等待 ${formatTime(
-          Math.ceil((new Date(cooldown.next_allowed) - new Date()) / 1000)
+          Math.ceil((new Date(cooldown.next_allowed).getTime() - Date.now()) / 1000)
         )}`
       );
       ordering = false;
       return;
     }
 
-    // 3. 扣款 & 下单
+    // 下面是原有下单逻辑...
     setOrderBtnDisabled(true, "下单中…");
 
     const { data: user } = await supabaseClient
@@ -370,7 +368,6 @@ async function autoOrder() {
 
     if (completedCount >= window.ORDERS_PER_ROUND) {
        alert("本轮已完成全部订单，进入冷却…");
-       // 调用后台 RPC 设置冷却时间
        ordering = false;
        return; // 不再下单
     }
