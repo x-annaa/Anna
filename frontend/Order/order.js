@@ -1,11 +1,8 @@
 /* ======================
    初始化用户信息
    ====================== */
-let currentUserId = localStorage.getItem("currentUserId");
-let currentUsername = localStorage.getItem("currentUser");
-
-window.currentUserId = currentUserId;
-window.currentUsername = currentUsername;
+window.currentUserId = localStorage.getItem("currentUserId");
+window.currentUsername = localStorage.getItem("currentUser");
 
 let ordering = false;      // 下单中的并发保护
 let completing = false;    // 完成订单中的并发保护
@@ -523,8 +520,8 @@ async function confirmExchange() {
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
   document.getElementById("addCoinsBtn")?.addEventListener("click", openExchangeModal);
-  document.getElementById("cancelAddCoins")?.addEventListener("click", closeExchangeModal);
-  document.getElementById("confirmAddCoins")?.addEventListener("click", confirmExchange);
+  document.getElementById("cancelExchange")?.addEventListener("click", closeExchangeModal);
+  document.getElementById("confirmExchange")?.addEventListener("click", confirmExchange);
 
   document.getElementById("balanceToCoinsBtn")?.addEventListener("click", () => toggleExchangeDirection("toCoins"));
   document.getElementById("coinsToBalanceBtn")?.addEventListener("click", () => toggleExchangeDirection("toBalance"));
