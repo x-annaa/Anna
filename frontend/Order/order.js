@@ -11,7 +11,6 @@ let ordering = false;      // 下单中的并发保护
 let completing = false;    // 完成订单中的并发保护
 let exchanging = false;    // Balance <-> Coins 兑换中的并发保护
 let cooldownTimer = null;  // 冷却倒计时
-let currentExchangeDirection = "toCoins"; // 默认兑换方向
 
 // 默认轮次配置
 window.ORDERS_PER_ROUND = 3;
@@ -241,7 +240,7 @@ async function autoOrder() {
   ordering = true;
 
   try {
-    await loadRoundConfig(); 
+    await loadRoundConfig(); // 动态加载轮次配置
 
     const cooldown = await checkOrderCooldown();
     if (!cooldown.allowed) {
@@ -257,6 +256,7 @@ async function autoOrder() {
       updateCooldown();
       if (cooldownTimer) clearInterval(cooldownTimer);
       cooldownTimer = setInterval(updateCooldown, 1000);
+
       alert(`⚠️ 已达到下单上限，请等待 ${formatTime(Math.ceil((new Date(cooldown.next_allowed) - new Date()) / 1000))}`);
       ordering = false;
       return;
@@ -352,7 +352,6 @@ async function autoOrder() {
    ====================== */
 async function canExchangeThisRound() {
   if (!window.currentUserId || !window.currentRoundId) return false;
-
   try {
     const { data: completedOrders, error } = await supabaseClient
       .from("orders")
@@ -360,9 +359,7 @@ async function canExchangeThisRound() {
       .eq("user_id", window.currentUserId)
       .eq("round_id", window.currentRoundId)
       .eq("status", "completed");
-
     if (error) throw error;
-
     return (completedOrders?.length || 0) >= window.ORDERS_PER_ROUND;
   } catch (e) {
     console.error("检查本轮兑换条件失败", e);
@@ -373,6 +370,28 @@ async function canExchangeThisRound() {
 /* ======================
    兑换逻辑 Coins ↔ Balance
    ====================== */
+let currentExchangeDirection = "toCoins";
+
+function toggleExchangeDirection(dir) {
+  currentExchangeDirection = dir;
+  document.getElementById("balanceToCoinsBtn")?.classList.toggle("active", dir === "toCoins");
+  document.getElementById("coinsToBalanceBtn")?.classList.toggle("active", dir === "toBalance");
+}
+
+function openExchangeModal() {
+  const modal = document.getElementById("addCoinsModal");
+  const input = document.getElementById("addCoinsInput");
+  if (modal) {
+    modal.style.display = "flex";
+    if (input) { input.value = ""; setTimeout(() => input.focus(), 50); }
+  }
+}
+
+function closeExchangeModal() {
+  const modal = document.getElementById("addCoinsModal");
+  if (modal) modal.style.display = "none";
+}
+
 async function confirmExchange() {
   if (exchanging) return;
   exchanging = true;
@@ -394,8 +413,10 @@ async function confirmExchange() {
     return; 
   }
 
+  const isUUID = !!window.currentUserUUID;
+
   try {
-    if (currentExchangeDirection === "toBalance" && !window.currentUserUUID) {
+    if (currentExchangeDirection === "toBalance" && !isUUID) {
       alert("⚠️ Coins → Balance 功能仅支持 UUID 用户！");
       exchanging = false;
       return;
@@ -454,34 +475,37 @@ async function confirmExchange() {
 }
 
 /* ======================
-   切换兑换方向
+   页面事件绑定
    ====================== */
-function toggleExchangeDirection(dir) {
-  currentExchangeDirection = dir;
-  document.getElementById("balanceToCoinsBtn")?.classList.toggle("active", dir === "toCoins");
-  document.getElementById("coinsToBalanceBtn")?.classList.toggle("active", dir === "toBalance");
-}
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
+  document.getElementById("addCoinsBtn")?.addEventListener("click", openExchangeModal);
+  document.getElementById("cancelExchange")?.addEventListener("click", closeExchangeModal);
+  document.getElementById("confirmExchange")?.addEventListener("click", confirmExchange);
 
-/* ======================
-   打开 / 关闭兑换弹窗
-   ====================== */
-function openExchangeModal() {
-  const modal = document.getElementById("addCoinsModal");
-  const input = document.getElementById("addCoinsInput");
-  if (modal) {
-    modal.style.display = "flex";
-    if (input) { input.value = ""; setTimeout(() => input.focus(), 50); }
-  }
-}
+  document.getElementById("balanceToCoinsBtn")?.addEventListener("click", () => toggleExchangeDirection("toCoins"));
+  document.getElementById("coinsToBalanceBtn")?.addEventListener("click", () => toggleExchangeDirection("toBalance"));
 
-function closeExchangeModal() {
-  const modal = document.getElementById("addCoinsModal");
-  if (modal) modal.style.display = "none";
-}
+  document.getElementById("addCoinsModal")?.addEventListener("click", (e) => {
+    if (e.target.id === "addCoinsModal") closeExchangeModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeExchangeModal();
+  });
+
+  refreshAll();
+});
 
 /* ======================
    页面刷新工具
    ====================== */
+async function refreshAll() {
+  await loadRoundConfig();
+  await loadCoinsOrderPage();
+  await loadLastOrder();
+  await loadRecentOrders();
+}
+
 async function loadCoinsOrderPage() {
   if (!window.currentUserId) return;
 
@@ -558,32 +582,3 @@ async function loadRecentOrders() {
     console.error("加载最近订单失败：", e);
   }
 }
-
-async function refreshAll() {
-  await loadRoundConfig();
-  await loadCoinsOrderPage();
-  await loadLastOrder();
-  await loadRecentOrders();
-}
-
-/* ======================
-   页面事件绑定
-   ====================== */
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
-  document.getElementById("addCoinsBtn")?.addEventListener("click", openExchangeModal);
-  document.getElementById("cancelExchange")?.addEventListener("click", closeExchangeModal);
-  document.getElementById("confirmExchange")?.addEventListener("click", confirmExchange);
-
-  document.getElementById("balanceToCoinsBtn")?.addEventListener("click", () => toggleExchangeDirection("toCoins"));
-  document.getElementById("coinsToBalanceBtn")?.addEventListener("click", () => toggleExchangeDirection("toBalance"));
-
-  document.getElementById("addCoinsModal")?.addEventListener("click", (e) => {
-    if (e.target.id === "addCoinsModal") closeExchangeModal();
-  });
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeExchangeModal();
-  });
-
-  refreshAll();
-});
