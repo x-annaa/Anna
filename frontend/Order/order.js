@@ -35,11 +35,13 @@ async function loadRoundConfig() {
     if (data) {
       window.ORDERS_PER_ROUND = Number(data.orders_per_round);
       window.ROUND_DURATION_MINUTES = Number(data.round_duration);
+      window.ROUND_DURATION = window.ROUND_DURATION_MINUTES * 60 * 1000; // 🔥 这里新增
       console.log("✅ 配置已加载：", window.ORDERS_PER_ROUND, window.ROUND_DURATION_MINUTES);
     } else {
       // 没有配置就用默认值
       window.ORDERS_PER_ROUND = 3;
       window.ROUND_DURATION_MINUTES = 5;
+      window.ROUND_DURATION = window.ROUND_DURATION_MINUTES * 60 * 1000; // 🔥 新增
     }
   } catch (e) {
     console.error("❌ 读取配置失败", e.message);
