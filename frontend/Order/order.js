@@ -265,9 +265,9 @@ async function checkPendingLock() {
   }
 }
 
-// ======================
-// 自动下单
-// ======================
+/* ======================
+   自动下单
+   ====================== */
 async function autoOrder() {
   if (!window.currentUserId) {
     alert("请先登录！");
@@ -277,14 +277,14 @@ async function autoOrder() {
   ordering = true;
 
   try {
-    await loadRoundConfig(); // 确保配置已加载
+    // 1. 加载配置（每轮多少单 & 冷却时间）
+    await loadRoundConfig();
 
-    // 检查冷却
+    // 2. 检查冷却
     const cooldown = await checkOrderCooldown();
     if (!cooldown.allowed) {
-      const updateCooldown = () => {
-        if (!cooldown.next_allowed) return;
-
+      const updateCooldown = async () => {
+        const cooldownMinutes = window.ROUND_DURATION_MINUTES || 5; // 取数据库配置，默认 5 分钟
         const sec = Math.ceil((new Date(cooldown.next_allowed).getTime() - Date.now()) / 1000);
         if (sec <= 0) {
           clearInterval(cooldownTimer);
@@ -293,9 +293,12 @@ async function autoOrder() {
           // 开启新一轮
           startNewRound();
 
-          // 强制 UI 重置
+          // 🔥 强制 UI 重置为 0 / ORDERS_PER_ROUND
+          await updateRoundProgress();
+          await loadRecentOrders();
+
+          // 再查数据库，保证同步
           updateRoundProgress();
-          loadRecentOrders();
         } else {
           setOrderBtnDisabled(
             true,
@@ -311,7 +314,7 @@ async function autoOrder() {
 
       alert(
         `⚠️ 已达到下单上限，请等待 ${formatTime(
-          Math.ceil((new Date(cooldown.next_allowed) - Date.now()) / 1000)
+          Math.ceil((new Date(cooldown.next_allowed) - new Date()) / 1000)
         )}`
       );
       ordering = false;
