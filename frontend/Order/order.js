@@ -504,7 +504,6 @@ async function refreshAll() {
   await loadCoinsOrderPage();
   await loadLastOrder();
   await loadRecentOrders();
-  await renderCurrentRoundStatus();
 }
 
 async function loadCoinsOrderPage() {
@@ -583,43 +582,3 @@ async function loadRecentOrders() {
     console.error("加载最近订单失败：", e);
   }
 }
-
-/* ======================
-   显示当前轮次完成情况
-   ====================== */
-async function renderCurrentRoundStatus() {
-  if (!window.currentUserId || !window.currentRoundId) return;
-
-  try {
-    const { data: completedOrders, error } = await supabaseClient
-      .from("orders")
-      .select("id")
-      .eq("user_id", window.currentUserId)
-      .eq("round_id", window.currentRoundId)
-      .eq("status", "completed");
-
-    if (error) throw error;
-
-    const doneCount = completedOrders?.length || 0;
-    const totalCount = window.ORDERS_PER_ROUND;
-
-    // 找到显示位置
-    let roundEl = document.getElementById("roundStatusDisplay");
-    if (!roundEl) {
-      // 如果没有 DOM 元素，则创建一个
-      const container = document.getElementById("orderResult");
-      if (!container) return;
-      roundEl = document.createElement("p");
-      roundEl.id = "roundStatusDisplay";
-      roundEl.style.fontWeight = "bold";
-      roundEl.style.marginBottom = "8px";
-      container.prepend(roundEl);
-    }
-
-    roundEl.textContent = `🌀 本轮完成 ${doneCount} / ${totalCount} 订单`;
-
-  } catch (e) {
-    console.error("加载本轮完成状态失败", e);
-  }
-}
-
