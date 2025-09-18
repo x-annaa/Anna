@@ -348,21 +348,27 @@ async function autoOrder() {
 }
 
 /* ======================
-   检查本轮 Coins → Balance 是否可用
+   检查本轮 Coins → Balance 是否可用（前端兜底版）
    ====================== */
 async function canExchangeThisRound() {
-  if (!window.currentUserUUID || !window.currentRoundId) return false;
+  if (!window.currentUserId || !window.currentRoundId) return false;
 
   try {
-    const { data: countData, error } = await supabaseClient
+    // 获取当前轮次所有订单
+    const { data: orders, error } = await supabaseClient
       .from("orders")
-      .select("id", { count: "exact" })
+      .select("id,status")
       .eq("user_id", window.currentUserId)
-      .eq("round_id", window.currentRoundId)
-      .eq("status", "completed");
+      .eq("round_id", window.currentRoundId);
+
     if (error) throw error;
 
-    return (countData?.length || 0) >= window.ORDERS_PER_ROUND;
+    // 统计已完成订单数量
+    const completedCount = (orders || []).filter(o => o.status === "completed").length;
+
+    // 如果已完成订单 >= ORDERS_PER_ROUND，则可以兑换
+    return completedCount >= window.ORDERS_PER_ROUND;
+
   } catch (e) {
     console.error("检查本轮兑换条件失败", e);
     return false;
