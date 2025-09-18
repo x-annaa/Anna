@@ -14,7 +14,7 @@ let cooldownTimer = null;  // 冷却倒计时
 
 // 默认轮次配置
 window.ORDERS_PER_ROUND = 3;
-window.ROUND_DURATION = 5 * 60 * 1000; // 毫秒
+window.ROUND_DURATION = 1 * 60 * 1000; // 毫秒
 
 if (!window.supabaseClient) {
   console.error("❌ supabaseClient 未初始化！");
