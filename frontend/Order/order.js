@@ -283,17 +283,22 @@ async function autoOrder() {
     if (!window.currentRoundId) startNewRound();
 
     // 🔹 查询当前轮次订单
-    const { data: orders } = await supabaseClient
+    const { count: totalOrders } = await supabaseClient
+      .from("orders")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", window.currentUserId);
+      
+    // 用户的累计第几单（包括历史所有订单）
+    const orderNumber = (totalOrders || 0) + 1;
+
+    // 🔹 本轮订单统计还是需要单独算，用于轮次冷却
+    const { data: roundOrders } = await supabaseClient
       .from("orders")
       .select("id,status")
       .eq("user_id", window.currentUserId)
       .eq("round_id", window.currentRoundId);
-
-    const completedCount = orders?.filter(o => o.status === "completed").length || 0;
-    const pendingCount = orders?.filter(o => o.status === "pending").length || 0;
-    const orderNumber = completedCount + pendingCount + 1;
-
-    console.log("本轮已完成订单数：", completedCount, "/", window.ORDERS_PER_ROUND);
+     
+    const completedCount = roundOrders?.filter(o => o.status === "completed").length || 0;
 
     // 🔹 本轮已完成，触发冷却
     if (completedCount >= window.ORDERS_PER_ROUND) {
