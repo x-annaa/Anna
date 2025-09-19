@@ -752,7 +752,7 @@ function setMatchingState(isMatching) {
 }
 
 /* ======================
-   页面初始化读取轮次状态下单时创建/更新轮次
+   页面初始化读取轮次状态
    ====================== */
 async function loadCurrentRound(userId) {
   const { data, error } = await supabaseClient
@@ -787,27 +787,3 @@ async function loadCurrentRound(userId) {
     updateRoundProgressUI();
   }
 }
-
-/* ======================
-   下单时创建/更新轮次
-   ====================== */
-async function startNewRoundServer(userId) {
-  const roundId = crypto.randomUUID();
-  const startTime = Date.now();
-
-  await supabaseClient
-    .from("user_rounds")
-    .upsert({
-      user_id: userId,
-      round_id: roundId,
-      start_time: startTime,
-      completed_orders: 0,
-      matching_end_time: null,
-      matching_product_id: null
-    }, { onConflict: "user_id" });
-
-  window.currentRoundId = roundId;
-  window.roundStartTime = startTime;
-  window.completedOrders = 0;
-}
-
