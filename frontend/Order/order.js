@@ -539,3 +539,20 @@ function closeExchangeModal() {
   if (modal) modal.style.display = "none";
 }
 
+/* ======================
+   刷新 Coins 和订单页面数据
+   ====================== */
+async function loadCoinsOrderPage() {
+  // 获取用户 Coins 并更新 UI
+  if (!window.currentUserId) return;
+  const { data: user, error } = await supabaseClient
+    .from("users")
+    .select("coins,balance")
+    .eq("id", window.currentUserId)
+    .single();
+  if (!error && user) {
+    updateCoinsUI(user.coins);
+    const balanceEl = document.getElementById("balance");
+    if (balanceEl) balanceEl.textContent = Number(user.balance || 0).toFixed(2);
+  }
+}
