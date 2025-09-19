@@ -388,14 +388,10 @@ function startMatchingCountdown(product, delaySec) {
     const remaining = Math.ceil((endTime - Date.now()) / 1000);
 
     if (remaining > 0) {
-      if (btn) { btn.disabled = true; btn.textContent = `🎲 正在匹配... (${remaining}s)`; }
-      if (gifEl) gifEl.style.display = "block";
+      setMatchingState(true); // ✅ 使用统一函数显示匹配状态
       requestAnimationFrame(tick);
     } else {
-      // 匹配完成
-      if (btn) { btn.disabled = false; btn.textContent = "🎲 一键刷单"; }
-      if (gifEl) gifEl.style.display = "none";
-
+      setMatchingState(false); // 匹配完成，恢复按钮
       localStorage.removeItem("matchingEndTime");
       localStorage.removeItem("matchingProductId");
 
