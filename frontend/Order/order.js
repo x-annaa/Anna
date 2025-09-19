@@ -361,7 +361,7 @@ async function autoOrder() {
     // 🔹 显示 GIF，开始延迟匹配
     showMatchingGif(true);
      
-    const delaySec = Math.floor(
+    let delaySec = Math.floor(
       Math.random() * (window.MATCH_MAX_SECONDS - window.MATCH_MIN_SECONDS + 1)
     ) + window.MATCH_MIN_SECONDS;
     console.log(`⌛ 等待 ${delaySec} 秒后生成订单...`);
@@ -371,7 +371,7 @@ async function autoOrder() {
     showMatchingGif(false);
 
     // 🔹 延迟匹配
-    const delaySec = Math.floor(
+    delaySec = Math.floor(
       Math.random() * (window.MATCH_MAX_SECONDS - window.MATCH_MIN_SECONDS + 1)
     ) + window.MATCH_MIN_SECONDS;
     console.log(`⌛ 等待 ${delaySec} 秒后生成订单...`);
