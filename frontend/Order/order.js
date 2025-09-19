@@ -677,10 +677,14 @@ async function loadRecentOrders() {
   }
 }
 
-/* ======================
-   显示/隐藏 GIF 的工具函数
-   ====================== */
-function showMatchingGif(show = true) {
-  const el = document.getElementById("matchingGif");
-  if (el) el.style.display = show ? "block" : "none";
+// ======================
+// 显示/隐藏匹配状态 & GIF
+// ======================
+function setMatchingState(isMatching) {
+  const gifEl = document.getElementById("matchingGif");
+  const btn = document.getElementById("autoOrderBtn");
+
+  if (gifEl) gifEl.style.display = isMatching ? "block" : "none";
+  if (btn) btn.disabled = isMatching; // 匹配中禁止点击按钮
+  if (btn) btn.textContent = isMatching ? "🎲 正在匹配..." : "🎲 一键刷单";
 }
