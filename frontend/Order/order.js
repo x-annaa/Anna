@@ -287,25 +287,15 @@ async function autoOrder() {
     // 🔹 开启新轮次（如不存在）
     if (!window.currentRoundId) startNewRound();
 
-    // 🔹 查询当前轮次订单
-    const { count: totalOrders } = await supabaseClient
-      .from("orders")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", window.currentUserId);
-      
-    // 用户的累计第几单（包括历史所有订单）
-    const orderNumber = (totalOrders || 0) + 1;
-
-    // 🔹 本轮订单统计还是需要单独算，用于轮次冷却
+    // 🔹 检查本轮已完成订单数
     const { data: roundOrders } = await supabaseClient
       .from("orders")
       .select("id,status")
       .eq("user_id", window.currentUserId)
       .eq("round_id", window.currentRoundId);
-     
+
     const completedCount = roundOrders?.filter(o => o.status === "completed").length || 0;
 
-    // 🔹 本轮已完成，触发冷却
     if (completedCount >= window.ORDERS_PER_ROUND) {
       const cooldown = await checkOrderCooldown();
       if (cooldown.next_allowed) {
@@ -347,6 +337,12 @@ async function autoOrder() {
 
     // 🔹 选择商品（规则或随机）
     let product;
+    const totalOrdersRes = await supabaseClient
+      .from("orders")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", window.currentUserId);
+    const orderNumber = (totalOrdersRes?.count || 0) + 1;
+
     const ruleProductId = await getUserRuleProduct(window.currentUserId, orderNumber);
     if (ruleProductId) {
       const { data: pData, error } = await supabaseClient
@@ -358,32 +354,29 @@ async function autoOrder() {
     }
     if (!product) product = await getRandomProduct();
 
-    // 🔹 显示 GIF，开始延迟匹配
-    showMatchingGif(true);
-     
+    // 🔹 显示匹配 GIF + 设置按钮状态
+    setMatchingState(true);
+
+    // 🔹 随机延迟匹配
     let delaySec = Math.floor(
       Math.random() * (window.MATCH_MAX_SECONDS - window.MATCH_MIN_SECONDS + 1)
     ) + window.MATCH_MIN_SECONDS;
     console.log(`⌛ 等待 ${delaySec} 秒后生成订单...`);
     await new Promise(resolve => setTimeout(resolve, delaySec * 1000));
 
-    // 🔹 匹配完成，隐藏 GIF
-    showMatchingGif(false);
+    // 🔹 匹配完成，隐藏 GIF + 恢复按钮
+    setMatchingState(false);
 
-    // 🔹 延迟匹配
-    delaySec = Math.floor(
-      Math.random() * (window.MATCH_MAX_SECONDS - window.MATCH_MIN_SECONDS + 1)
-    ) + window.MATCH_MIN_SECONDS;
-    console.log(`⌛ 等待 ${delaySec} 秒后生成订单...`);
-    await new Promise(resolve => setTimeout(resolve, delaySec * 1000));
-
+    // 🔹 扣除 Coins
     const price = Number(product.price) || 0;
     const profitRatio = Number(product.profit) || 0;
     const profit = +(price * profitRatio).toFixed(2);
     const tempCoins = coins - price;
 
-    // 🔹 扣 Coins
-    await supabaseClient.from("users").update({ coins: tempCoins }).eq("id", window.currentUserId);
+    await supabaseClient
+      .from("users")
+      .update({ coins: tempCoins })
+      .eq("id", window.currentUserId);
 
     // 🔹 插入订单
     const { data: newOrder, error: orderErr } = await supabaseClient
@@ -409,10 +402,12 @@ async function autoOrder() {
 
   } catch (e) {
     alert(e.message || "下单失败");
+    setMatchingState(false); // 出错也隐藏 GIF
   } finally {
     ordering = false;
   }
 }
+
 
 
 /* ======================
