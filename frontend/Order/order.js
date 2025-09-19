@@ -664,3 +664,11 @@ async function loadRecentOrders() {
     console.error("加载最近订单失败：", e);
   }
 }
+
+/* ======================
+   显示/隐藏 GIF 的工具函数
+   ====================== */
+function showMatchingGif(show = true) {
+  const el = document.getElementById("matchingGif");
+  if (el) el.style.display = show ? "block" : "none";
+}
