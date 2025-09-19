@@ -273,6 +273,9 @@ async function checkPendingLock() {
 /* ======================
    订单
    ====================== */
+/* ======================
+   自动下单（支持刷新保持匹配倒计时）
+   ====================== */
 async function autoOrder() {
   if (!window.currentUserId) {
     alert("请先登录！");
@@ -295,7 +298,6 @@ async function autoOrder() {
       .eq("round_id", window.currentRoundId);
 
     const completedCount = roundOrders?.filter(o => o.status === "completed").length || 0;
-
     if (completedCount >= window.ORDERS_PER_ROUND) {
       const cooldown = await checkOrderCooldown();
       if (cooldown.next_allowed) {
@@ -313,7 +315,6 @@ async function autoOrder() {
       .eq("id", window.currentUserId)
       .single();
     const coins = Number(user?.coins || 0);
-
     if (coins < 50) {
       alert("你的余额不足，最少需要 50 coins");
       setOrderBtnDisabled(false);
@@ -354,20 +355,93 @@ async function autoOrder() {
     }
     if (!product) product = await getRandomProduct();
 
-    // 🔹 显示匹配 GIF + 设置按钮状态
-    setMatchingState(true);
-
-    // 🔹 随机延迟匹配
+    // 🔹 生成随机匹配时间
     let delaySec = Math.floor(
       Math.random() * (window.MATCH_MAX_SECONDS - window.MATCH_MIN_SECONDS + 1)
     ) + window.MATCH_MIN_SECONDS;
-    console.log(`⌛ 等待 ${delaySec} 秒后生成订单...`);
-    await new Promise(resolve => setTimeout(resolve, delaySec * 1000));
 
-    // 🔹 匹配完成，隐藏 GIF + 恢复按钮
-    setMatchingState(false);
+    // 🔹 保存匹配结束时间和产品信息（本地存储，刷新保持状态）
+    const matchingEndTime = Date.now() + delaySec * 1000;
+    localStorage.setItem("matchingEndTime", matchingEndTime);
+    localStorage.setItem("matchingProductId", product.id);
 
-    // 🔹 扣除 Coins
+    // 🔹 启动匹配倒计时
+    startMatchingCountdown(product, delaySec);
+
+  } catch (e) {
+    alert(e.message || "下单失败");
+    setMatchingState(false); // 出错也隐藏 GIF
+  } finally {
+    ordering = false;
+  }
+}
+
+/* ======================
+   匹配倒计时函数（刷新保持状态）
+   ====================== */
+function startMatchingCountdown(product, delaySec) {
+  const endTime = Date.now() + delaySec * 1000;
+  const btn = document.getElementById("autoOrderBtn");
+  const gifEl = document.getElementById("matchingGif");
+
+  const tick = () => {
+    const remaining = Math.ceil((endTime - Date.now()) / 1000);
+
+    if (remaining > 0) {
+      if (btn) { btn.disabled = true; btn.textContent = `🎲 正在匹配... (${remaining}s)`; }
+      if (gifEl) gifEl.style.display = "block";
+      requestAnimationFrame(tick);
+    } else {
+      // 匹配完成
+      if (btn) { btn.disabled = false; btn.textContent = "🎲 一键刷单"; }
+      if (gifEl) gifEl.style.display = "none";
+
+      localStorage.removeItem("matchingEndTime");
+      localStorage.removeItem("matchingProductId");
+
+      // 下单逻辑
+      finalizeMatchedOrder(product);
+    }
+  };
+
+  tick();
+}
+
+/* ======================
+   页面刷新恢复匹配状态
+   ====================== */
+function restoreMatchingIfAny() {
+  const endTime = Number(localStorage.getItem("matchingEndTime"));
+  const productId = localStorage.getItem("matchingProductId");
+
+  if (endTime && productId && endTime > Date.now()) {
+    const delaySec = Math.ceil((endTime - Date.now()) / 1000);
+    // 获取产品信息再启动倒计时
+    supabaseClient.from("products").select("*").eq("id", productId).single()
+      .then(({ data, error }) => {
+        if (!error && data) startMatchingCountdown(data, delaySec);
+      });
+  } else if (endTime && productId) {
+    // 匹配已结束但可能未生成订单
+    supabaseClient.from("products").select("*").eq("id", productId).single()
+      .then(({ data, error }) => { if (!error && data) finalizeMatchedOrder(data); });
+    localStorage.removeItem("matchingEndTime");
+    localStorage.removeItem("matchingProductId");
+  }
+}
+
+/* ======================
+   匹配完成后的订单生成
+   ====================== */
+async function finalizeMatchedOrder(product) {
+  try {
+    const { data: user } = await supabaseClient
+      .from("users")
+      .select("coins")
+      .eq("id", window.currentUserId)
+      .single();
+    let coins = Number(user?.coins || 0);
+
     const price = Number(product.price) || 0;
     const profitRatio = Number(product.profit) || 0;
     const profit = +(price * profitRatio).toFixed(2);
@@ -378,8 +452,7 @@ async function autoOrder() {
       .update({ coins: tempCoins })
       .eq("id", window.currentUserId);
 
-    // 🔹 插入订单
-    const { data: newOrder, error: orderErr } = await supabaseClient
+    const { data: newOrder } = await supabaseClient
       .from("orders")
       .insert({
         user_id: window.currentUserId,
@@ -391,9 +464,7 @@ async function autoOrder() {
       })
       .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
       .single();
-    if (orderErr) throw new Error(orderErr.message);
 
-    // 🔹 更新 UI
     renderLastOrder(newOrder, tempCoins);
     updateCoinsUI(tempCoins);
     await checkPendingLock();
@@ -401,14 +472,12 @@ async function autoOrder() {
     await updateRoundProgress();
 
   } catch (e) {
-    alert(e.message || "下单失败");
-    setMatchingState(false); // 出错也隐藏 GIF
-  } finally {
-    ordering = false;
+    alert(e.message || "生成订单失败");
   }
 }
 
-
+// 页面加载时恢复匹配状态
+document.addEventListener("DOMContentLoaded", restoreMatchingIfAny);
 
 /* ======================
    冷却倒计时函数
