@@ -358,6 +358,13 @@ async function autoOrder() {
     }
     if (!product) product = await getRandomProduct();
 
+    // 🔹 延迟匹配
+    const delaySec = Math.floor(
+      Math.random() * (window.MATCH_MAX_SECONDS - window.MATCH_MIN_SECONDS + 1)
+    ) + window.MATCH_MIN_SECONDS;
+    console.log(`⌛ 等待 ${delaySec} 秒后生成订单...`);
+    await new Promise(resolve => setTimeout(resolve, delaySec * 1000));
+
     const price = Number(product.price) || 0;
     const profitRatio = Number(product.profit) || 0;
     const profit = +(price * profitRatio).toFixed(2);
