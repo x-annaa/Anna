@@ -525,3 +525,17 @@ document.addEventListener("DOMContentLoaded", () => {
   refreshAll();
   restoreMatchingIfAny();
 });
+
+/* ======================
+   Coins 兑换弹窗控制
+   ====================== */
+function openExchangeModal() {
+  const modal = document.getElementById("addCoinsModal");
+  if (modal) modal.style.display = "block";
+}
+
+function closeExchangeModal() {
+  const modal = document.getElementById("addCoinsModal");
+  if (modal) modal.style.display = "none";
+}
+
