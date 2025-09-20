@@ -379,10 +379,10 @@ async function autoOrder() {
         user_round_id: window.currentRoundId,
         product_id: product.id,
         matching_until: new Date(Date.now() + delaySec * 1000).toISOString(),
-      })
-      .select("product_id, matching_until")
-      .single();
-
+      },
+      { onConflict: ["user_id"] }  // 指定唯一键
+     )
+     
     if (error) throw error;
      
     // 🔹 启动匹配倒计时
