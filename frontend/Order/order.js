@@ -28,41 +28,38 @@ async function loadRoundConfig() {
       .single();
 
     if (error) throw error;
-    if (data) {
-      window.ORDERS_PER_ROUND = Number(data.orders_per_round);
-      window.ROUND_DURATION_MINUTES = Number(data.round_duration);
-      window.ROUND_DURATION = window.ROUND_DURATION_MINUTES * 60 * 1000;
 
-      // 🔥 新增：匹配时间区间
-      window.MATCH_MIN_SECONDS = Number(data.match_min_seconds) || 5;
-      window.MATCH_MAX_SECONDS = Number(data.match_max_seconds) || 15;
+    const cfg = data || {};
+    window.RoundConfig.ordersPerRound = Number(cfg.orders_per_round) || 3;
+    window.RoundConfig.roundDurationMinutes = Number(cfg.round_duration) || 5;
+    window.RoundConfig.roundDurationMs = window.RoundConfig.roundDurationMinutes * 60 * 1000;
+    window.RoundConfig.matchMinSec = Number(cfg.match_min_seconds) || 5;
+    window.RoundConfig.matchMaxSec = Number(cfg.match_max_seconds) || 15;
 
-      console.log("✅ 配置已加载：", {
-        ORDERS_PER_ROUND: window.ORDERS_PER_ROUND,
-        ROUND_DURATION_MINUTES: window.ROUND_DURATION_MINUTES,
-        MATCH_MIN: window.MATCH_MIN_SECONDS,
-        MATCH_MAX: window.MATCH_MAX_SECONDS,
-      });
-    }
+    console.log("✅ 轮次配置已加载", window.RoundConfig);
+
   } catch (e) {
-    console.error("❌ 读取配置失败", e.message);
-    if (!window.ORDERS_PER_ROUND) window.ORDERS_PER_ROUND = 3;
-    if (!window.ROUND_DURATION_MINUTES) window.ROUND_DURATION_MINUTES = 5;
-    if (!window.MATCH_MIN_SECONDS) window.MATCH_MIN_SECONDS = 5;
-    if (!window.MATCH_MAX_SECONDS) window.MATCH_MAX_SECONDS = 15;
+    console.warn("❌ 读取轮次配置失败，使用默认值", e.message);
+    window.RoundConfig.ordersPerRound = 3;
+    window.RoundConfig.roundDurationMinutes = 5;
+    window.RoundConfig.roundDurationMs = 5 * 60 * 1000;
+    window.RoundConfig.matchMinSec = 5;
+    window.RoundConfig.matchMaxSec = 15;
   }
 }
 
 /* ====================== 工具函数 ====================== */
-function setOrderBtnDisabled(disabled, reason = "", cooldownText = "") {
+function updateOrderButtonState({ disabled = false, text = "🎲 一键刷单", title = "" } = {}) {
   const btn = document.getElementById("autoOrderBtn");
-  if (btn) {
-    btn.disabled = disabled;
-    btn.title = reason || "";
-    btn.textContent = disabled ? `🎲 一键刷单（不可用）` : "🎲 一键刷单";
-  }
+  if (!btn) return;
+  btn.disabled = disabled;
+  btn.textContent = text;
+  btn.title = title;
+}
+
+function updateCooldownDisplay(text = "") {
   const cdEl = document.getElementById("cooldownDisplay");
-  if (cdEl) cdEl.textContent = cooldownText;
+  if (cdEl) cdEl.textContent = text;
 }
 
 function updateCoinsUI(coinsRaw) {
@@ -71,22 +68,26 @@ function updateCoinsUI(coinsRaw) {
   if (ob) ob.textContent = coins.toFixed(2);
 
   if (coins < 0) {
-    setOrderBtnDisabled(true, `金币为负（欠款 ¥${Math.abs(coins).toFixed(2)}）`);
+    updateOrderButtonState({
+      disabled: true,
+      text: "🎲 一键刷单（不可用）",
+      title: `金币为负（欠款 ¥${Math.abs(coins).toFixed(2)}）`
+    });
   } else {
-    setOrderBtnDisabled(false);
+    updateOrderButtonState({ disabled: false });
   }
 }
 
-function formatTime(sec) {
-  const h = String(Math.floor(sec / 3600)).padStart(2, "0");
-  const m = String(Math.floor((sec % 3600) / 60)).padStart(2, "0");
-  const s = String(sec % 60).padStart(2, "0");
+function formatTime(seconds) {
+  const h = String(Math.floor(seconds / 3600)).padStart(2, "0");
+  const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, "0");
+  const s = String(seconds % 60).padStart(2, "0");
   return `${h}:${m}:${s}`;
 }
 
-function isRoundExpired() {
-  if (!window.roundStartTime) return true;
-  return (Date.now() - Number(window.roundStartTime)) > window.ROUND_DURATION;
+function isRoundExpired(roundStartTime = window.roundStartTime) {
+  if (!roundStartTime) return true;
+  return (Date.now() - Number(roundStartTime)) > window.RoundConfig.roundDurationMs;
 }
 
 function startNewRound() {
@@ -97,42 +98,87 @@ function startNewRound() {
   localStorage.setItem("roundStartTime", window.roundStartTime);
 }
 
-/* ====================== 获取用户规则产品 ====================== */
+/* ====================== 获取用户规则产品 & 随机产品 ====================== */
+
+/**
+ * 获取用户手动规则产品（如果存在）
+ * @param {string|number} userId
+ * @param {number} orderNumber
+ * @returns {object|null} 产品对象 或 null
+ */
 async function getUserRuleProduct(userId, orderNumber) {
-  const { data: rules, error } = await supabaseClient
-    .from("user_product_rules")
-    .select("product_id")
-    .eq("user_id", userId)
-    .eq("order_number", orderNumber)
-    .eq("enabled", true)
-    .limit(1);
-  if (error) { console.error("读取手动规则失败", error); return null; }
-  return rules?.[0]?.product_id || null;
+  try {
+    const { data: rules, error } = await supabaseClient
+      .from("user_product_rules")
+      .select("product_id")
+      .eq("user_id", userId)
+      .eq("order_number", orderNumber)
+      .eq("enabled", true)
+      .limit(1);
+
+    if (error) throw error;
+    if (!rules?.length) return null;
+
+    const productId = rules[0].product_id;
+    const { data: product, error: pErr } = await supabaseClient
+      .from("products")
+      .select("*")
+      .eq("id", productId)
+      .single();
+
+    if (pErr || !product) return null;
+    return product;
+
+  } catch (e) {
+    console.error("读取手动规则产品失败:", e);
+    return null;
+  }
 }
 
-/* ====================== 获取随机产品 ====================== */
+/**
+ * 获取随机产品
+ * @returns {object} 产品对象
+ */
 async function getRandomProduct() {
-  const { data: products, error } = await supabaseClient
-    .from("products")
-    .select("*")
-    .eq("enabled", true)
-    .eq("manual_only", false);
-  if (error || !products?.length) throw new Error("产品列表为空或读取失败！");
-  return products[Math.floor(Math.random() * products.length)];
+  try {
+    const { data: products, error } = await supabaseClient
+      .from("products")
+      .select("*")
+      .eq("enabled", true)
+      .eq("manual_only", false);
+
+    if (error) throw error;
+    if (!products?.length) throw new Error("产品列表为空！");
+
+    return products[Math.floor(Math.random() * products.length)];
+  } catch (e) {
+    console.error("获取随机产品失败:", e);
+    throw e;
+  }
 }
 
-/* ====================== 检查冷却 ====================== */
-async function checkOrderCooldown() {
-  if (!window.currentUserUUID) return { allowed: true, next_allowed: null };
+/* ====================== 检查订单冷却状态 ====================== */
+
+/**
+ * 检查用户是否处于下单冷却
+ * @param {string} userUUID 用户 UUID
+ * @returns {Promise<{allowed: boolean, next_allowed: string|null}>}
+ */
+async function checkOrderCooldown(userUUID) {
+  if (!userUUID) return { allowed: true, next_allowed: null };
+
   try {
     const { data, error } = await supabaseClient
-      .rpc("check_user_order_cooldown", { p_user_uuid: window.currentUserUUID });
+      .rpc("check_user_order_cooldown", { p_user_uuid: userUUID });
+
     if (error) throw error;
     if (!data?.length) return { allowed: true, next_allowed: null };
-    const row = data[0];
-    return { allowed: row.allowed, next_allowed: row.next_allowed };
+
+    const { allowed, next_allowed } = data[0];
+    return { allowed: Boolean(allowed), next_allowed: next_allowed || null };
+
   } catch (e) {
-    console.error("检查冷却失败", e);
+    console.error("检查用户冷却状态失败:", e);
     return { allowed: true, next_allowed: null };
   }
 }
