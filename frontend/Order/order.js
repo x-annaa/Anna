@@ -393,7 +393,7 @@ function startMatchingCountdown(product, delaySec) {
   const btn = document.getElementById("autoOrderBtn");
   const gifEl = document.getElementById("matchingGif");
 
-  const tick = () => {
+  const tick = async () => {
     const remaining = Math.ceil((endTime - Date.now()) / 1000);
 
     if (remaining > 0) {
