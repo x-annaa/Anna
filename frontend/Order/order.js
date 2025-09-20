@@ -391,103 +391,68 @@ async function checkPendingLock() {
 
 
 /* ====================== 订单 ====================== */
+/* ====================== 自动下单 ====================== */
 async function autoOrder() {
-  if (!window.currentUserId) {
-    alert("请先登录！");
-    return;
-  }
+  if (!window.currentUserId) return alert("请先登录！");
   if (ordering) return;
+
   ordering = true;
+  setMatchingState(true);
 
   try {
+    // 1️⃣ 加载轮次配置 & 新轮次
     await loadRoundConfig();
-
-    // 🔹 开启新轮次（如不存在）
     if (!window.currentRoundId) startNewRound();
 
-    // 🔹 检查本轮已完成订单数
-    const { data: roundOrders } = await supabaseClient
-      .from("orders")
-      .select("id,status")
-      .eq("user_id", window.currentUserId)
-      .eq("round_id", window.currentRoundId);
-
-    const completedCount = roundOrders?.filter(o => o.status === "completed").length || 0;
-    if (completedCount >= window.ORDERS_PER_ROUND) {
-      const cooldown = await checkOrderCooldown();
-      if (cooldown.next_allowed) {
-        startCooldownTimer(cooldown.next_allowed, "本轮已完成全部订单，冷却中，请等待");
-      }
-      alert("本轮已完成全部订单，进入冷却…");
-      ordering = false;
-      return;
-    }
-
-    // 🔹 获取用户 Coins
+    // 2️⃣ 获取用户信息 & 检查 Coins
     const { data: user } = await supabaseClient
       .from("users")
       .select("coins")
       .eq("id", window.currentUserId)
       .single();
     const coins = Number(user?.coins || 0);
-    if (coins < 50) {
-      alert("你的余额不足，最少需要 50 coins");
-      setOrderBtnDisabled(false);
-      ordering = false;
-      return;
-    }
+    if (coins < 50) throw new Error("你的余额不足，最少需要 50 coins");
 
-    // 🔹 检查未完成订单
-    const { data: pend } = await supabaseClient
+    // 3️⃣ 检查 pending & 本轮完成订单数
+    const { data: orders } = await supabaseClient
       .from("orders")
-      .select("id")
-      .eq("user_id", window.currentUserId)
-      .eq("status", "pending")
-      .limit(1);
-    if (pend?.length) {
-      alert("您有未完成订单，请先完成订单再继续下单。");
-      await checkPendingLock();
-      ordering = false;
-      return;
-    }
-
-    // 🔹 选择商品（规则或随机）
-    let product;
-    const totalOrdersRes = await supabaseClient
-      .from("orders")
-      .select("id", { count: "exact", head: true })
+      .select("id,status,round_id")
       .eq("user_id", window.currentUserId);
-    const orderNumber = (totalOrdersRes?.count || 0) + 1;
-
-    const ruleProductId = await getUserRuleProduct(window.currentUserId, orderNumber);
-    if (ruleProductId) {
-      const { data: pData, error } = await supabaseClient
-        .from("products")
-        .select("*")
-        .eq("id", ruleProductId)
-        .single();
-      if (!error && pData) product = pData;
+    
+    const pendingOrders = orders.filter(o => o.status === "pending");
+    if (pendingOrders.length) {
+      await checkPendingLock();
+      throw new Error("您有未完成订单，请先完成订单再继续下单。");
     }
+
+    const currentRoundOrders = orders.filter(o => o.round_id === window.currentRoundId);
+    const completedCount = currentRoundOrders.filter(o => o.status === "completed").length;
+    if (completedCount >= window.ORDERS_PER_ROUND) {
+      const cooldown = await checkOrderCooldown();
+      if (cooldown.next_allowed) startCooldownTimer(cooldown.next_allowed, "本轮已完成全部订单，冷却中，请等待");
+      throw new Error("本轮已完成全部订单，进入冷却…");
+    }
+
+    // 4️⃣ 选择商品（规则优先，随机备用）
+    const orderNumber = orders.length + 1;
+    let product = await getUserRuleProduct(window.currentUserId, orderNumber)
+      .then(async pid => pid ? (await supabaseClient.from("products").select("*").eq("id", pid).single()).data : null);
     if (!product) product = await getRandomProduct();
 
-    // 🔹 生成随机匹配时间
-    let delaySec = Math.floor(
-      Math.random() * (window.MATCH_MAX_SECONDS - window.MATCH_MIN_SECONDS + 1)
-    ) + window.MATCH_MIN_SECONDS;
-
-    // 🔹 保存匹配开始时间和匹配时长（本地存储，刷新保持状态）
+    // 5️⃣ 生成随机匹配时间
+    const delaySec = Math.floor(Math.random() * (window.MATCH_MAX_SECONDS - window.MATCH_MIN_SECONDS + 1)) + window.MATCH_MIN_SECONDS;
     const matchingStartedAt = Date.now();
-    localStorage.setItem("matchingEndTime", matchingStartedAt + delaySec * 1000);
-    localStorage.setItem("matchingProductId", product.id);
-    localStorage.setItem("matchingStartedAt", matchingStartedAt);
-    localStorage.setItem("matchingDuration", delaySec);
 
-    // 🔹 启动匹配倒计时
+    // 6️⃣ 保存匹配信息 & 启动倒计时
+    ["matchingEndTime", "matchingProductId", "matchingStartedAt", "matchingDuration"].forEach((key, idx) => {
+      localStorage.setItem(key, idx === 1 ? product.id : idx === 3 ? delaySec : matchingStartedAt);
+    });
+
     startMatchingCountdown(product, delaySec);
 
   } catch (e) {
     alert(e.message || "下单失败");
-    setMatchingState(false); // 出错也隐藏 GIF
+    setMatchingState(false);
   } finally {
     ordering = false;
   }
