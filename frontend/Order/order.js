@@ -458,64 +458,47 @@ async function autoOrder() {
   }
 }
 
-/* ====================== 匹配倒计时函数（刷新保持状态）====================== */
+/* ====================== 匹配倒计时 ====================== */
 function startMatchingCountdown(product, delaySec) {
+  if (!product || delaySec <= 0) return;
+
   const endTime = Date.now() + delaySec * 1000;
-  const btn = document.getElementById("autoOrderBtn");
+  setMatchingState(true); // 开始匹配显示
 
-  const tick = () => {
-    const remaining = Math.ceil((endTime - Date.now()) / 1000);
-
-    if (remaining > 0) {
-      // 显示匹配中状态
-      setMatchingState(true);
-      requestAnimationFrame(tick);
-    } else {
-      // 匹配完成，恢复按钮
-      setMatchingState(false);
-
-      // 清理本地存储
-      localStorage.removeItem("matchingEndTime");
-      localStorage.removeItem("matchingProductId");
-      localStorage.removeItem("matchingStartedAt");
-      localStorage.removeItem("matchingDuration");
-
-      // 下单逻辑
-      finalizeMatchedOrder(product, Date.now() - (Date.now() - delaySec * 1000)); // 传入匹配开始时间和时长
-    }
+  const clearMatchingLocalStorage = () => {
+    ["matchingEndTime", "matchingProductId", "matchingStartedAt", "matchingDuration"].forEach(key =>
+      localStorage.removeItem(key)
+    );
   };
 
-  tick();
+  const interval = setInterval(() => {
+    const remainingSec = Math.ceil((endTime - Date.now()) / 1000);
+
+    if (remainingSec > 0) {
+      const btn = document.getElementById("autoOrderBtn");
+      if (btn) btn.textContent = `🎲 匹配中... (${remainingSec}s)`;
+    } else {
+      clearInterval(interval);
+      setMatchingState(false);
+      clearMatchingLocalStorage();
+
+      // 下单逻辑，传入匹配时长
+      finalizeMatchedOrder(product, delaySec * 1000);
+    }
+  }, 1000);
 }
 
 /* ====================== 匹配完成后的订单生成 ====================== */
 async function finalizeMatchedOrder(product, matchingDurationMs = null) {
-  if (!window.currentUserId) return;
+  if (!window.currentUserId || !product) return;
 
   try {
-    // 获取当前用户 Coins
-    const { data: user } = await supabaseClient
-      .from("users")
-      .select("coins")
-      .eq("id", window.currentUserId)
-      .single();
-
-    let coins = Number(user?.coins || 0);
     const price = Number(product.price) || 0;
-    const profitRatio = Number(product.profit) || 0;
-    const profit = +(price * profitRatio).toFixed(2);
-
-    const matchingStartedAt = matchingDurationMs ? new Date(Date.now() - matchingDurationMs) : new Date();
+    const profit = +(price * (Number(product.profit) || 0)).toFixed(2);
     const matchingDuration = matchingDurationMs ? Math.ceil(matchingDurationMs / 1000) : 0;
+    const matchingStartedAt = matchingDurationMs ? new Date(Date.now() - matchingDurationMs) : new Date();
 
-    // 扣除 Coins
-    const tempCoins = coins - price;
-    await supabaseClient
-      .from("users")
-      .update({ coins: tempCoins })
-      .eq("id", window.currentUserId);
-
-    // 创建订单
+    // 扣 Coins 并创建订单（RPC 或事务更安全）
     const { data: newOrder, error } = await supabaseClient
       .from("orders")
       .insert({
@@ -528,85 +511,35 @@ async function finalizeMatchedOrder(product, matchingDurationMs = null) {
         matching_started_at: matchingStartedAt.toISOString(),
         matching_duration: matchingDuration,
       })
-      .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
+      .select(`
+        id, total_price, profit, status, created_at, 
+        products ( name, profit )
+      `)
       .single();
 
-    if (error) throw new Error(error.message);
+    if (error || !newOrder) throw new Error(error?.message || "生成订单失败");
 
-    // 更新页面 UI
-    renderLastOrder(newOrder, tempCoins);
-    updateCoinsUI(tempCoins);
+    // 更新 Coins
+    const { data: userData, error: coinErr } = await supabaseClient
+      .from("users")
+      .update({ coins: supabaseClient.rpc('coins_minus', { user_id: window.currentUserId, amount: price }) })
+      .eq("id", window.currentUserId)
+      .select("coins")
+      .single();
+
+    const currentCoins = Number(userData?.coins || 0);
+
+    // 更新 UI
+    renderLastOrder(newOrder, currentCoins);
+    updateCoinsUI(currentCoins);
     await checkPendingLock();
     await loadRecentOrders();
     await updateRoundProgress();
 
   } catch (e) {
+    console.error("生成订单失败", e);
     alert(e.message || "生成订单失败");
   }
-}
-
-/* ====================== 页面刷新恢复匹配状态 ====================== */
-async function restoreMatchingIfAny() {
-  const productId = localStorage.getItem("matchingProductId");
-  if (!productId) return;
-
-  try {
-    // 查询用户最新的 pending 订单，获取匹配时间信息
-    const { data: pendingOrders, error } = await supabaseClient
-      .from("orders")
-      .select("id, product_id, matching_started_at, matching_duration, products ( name, profit, price )")
-      .eq("user_id", window.currentUserId)
-      .eq("status", "pending")
-      .order("created_at", { ascending: false })
-      .limit(1);
-
-    if (error) throw error;
-    if (!pendingOrders?.length) return;
-
-    const order = pendingOrders[0];
-    const product = order.products;
-    if (!product) return;
-
-    const startedAt = new Date(order.matching_started_at).getTime();
-    const durationMs = Number(order.matching_duration) * 1000 || 0;
-    const endTime = startedAt + durationMs;
-    const remainingSec = Math.ceil((endTime - Date.now()) / 1000);
-
-    if (remainingSec > 0) {
-      // 匹配尚未完成，启动倒计时
-      startMatchingCountdown(product, remainingSec);
-    } else {
-      // 匹配已结束，但订单可能还未渲染
-      finalizeMatchedOrder(product, durationMs);
-      localStorage.removeItem("matchingEndTime");
-      localStorage.removeItem("matchingProductId");
-    }
-
-  } catch (e) {
-    console.error("恢复匹配状态失败", e);
-  }
-}
-
-/* ====================== 冷却倒计时函数 ====================== */
-function startCooldownTimer(nextAllowed, messagePrefix = "冷却中，请等待") {
-  if (!nextAllowed) return;
-
-  const tick = () => {
-    const sec = Math.ceil((new Date(nextAllowed).getTime() - Date.now()) / 1000);
-    if (sec <= 0) {
-      clearInterval(cooldownTimer);
-      setOrderBtnDisabled(false, "", "");
-      startNewRound();
-      updateRoundProgress();
-      loadRecentOrders();
-    } else {
-      setOrderBtnDisabled(true, `${messagePrefix} ${formatTime(sec)}`, `冷却剩余时间：${formatTime(sec)}`);
-    }
-  };
-
-  tick();
-  if (cooldownTimer) clearInterval(cooldownTimer);
-  cooldownTimer = setInterval(tick, 1000);
 }
 
 /* ====================== 兑换逻辑 Coins ↔ Balance ====================== */
