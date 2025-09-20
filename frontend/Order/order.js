@@ -357,69 +357,61 @@ async function autoOrder() {
 function startMatchingCountdown(product, delaySec) {
   const endTime = Date.now() + delaySec * 1000;
   const btn = document.getElementById("autoOrderBtn");
-  const gifEl = document.getElementById("matchingGif");
 
   const tick = () => {
     const remaining = Math.ceil((endTime - Date.now()) / 1000);
 
     if (remaining > 0) {
-      setMatchingState(true); // ✅ 使用统一函数显示匹配状态
+      // 显示匹配中状态
+      setMatchingState(true);
       requestAnimationFrame(tick);
     } else {
-      setMatchingState(false); // 匹配完成，恢复按钮
+      // 匹配完成，恢复按钮
+      setMatchingState(false);
+
+      // 清理本地存储
       localStorage.removeItem("matchingEndTime");
       localStorage.removeItem("matchingProductId");
+      localStorage.removeItem("matchingStartedAt");
+      localStorage.removeItem("matchingDuration");
 
       // 下单逻辑
-      finalizeMatchedOrder(product);
+      finalizeMatchedOrder(product, Date.now() - (Date.now() - delaySec * 1000)); // 传入匹配开始时间和时长
     }
   };
 
   tick();
 }
 
-/* ====================== 页面刷新恢复匹配状态 ====================== */
-function restoreMatchingIfAny() {
-  const endTime = Number(localStorage.getItem("matchingEndTime"));
-  const productId = localStorage.getItem("matchingProductId");
-
-  if (endTime && productId && endTime > Date.now()) {
-    const delaySec = Math.ceil((endTime - Date.now()) / 1000);
-    // 获取产品信息再启动倒计时
-    supabaseClient.from("products").select("*").eq("id", productId).single()
-      .then(({ data, error }) => {
-        if (!error && data) startMatchingCountdown(data, delaySec);
-      });
-  } else if (endTime && productId) {
-    // 匹配已结束但可能未生成订单
-    supabaseClient.from("products").select("*").eq("id", productId).single()
-      .then(({ data, error }) => { if (!error && data) finalizeMatchedOrder(data); });
-    localStorage.removeItem("matchingEndTime");
-    localStorage.removeItem("matchingProductId");
-  }
-}
-
 /* ====================== 匹配完成后的订单生成 ====================== */
-async function finalizeMatchedOrder(product) {
+async function finalizeMatchedOrder(product, matchingDurationMs = null) {
+  if (!window.currentUserId) return;
+
   try {
+    // 获取当前用户 Coins
     const { data: user } = await supabaseClient
       .from("users")
       .select("coins")
       .eq("id", window.currentUserId)
       .single();
-    let coins = Number(user?.coins || 0);
 
+    let coins = Number(user?.coins || 0);
     const price = Number(product.price) || 0;
     const profitRatio = Number(product.profit) || 0;
     const profit = +(price * profitRatio).toFixed(2);
-    const tempCoins = coins - price;
 
+    const matchingStartedAt = matchingDurationMs ? new Date(Date.now() - matchingDurationMs) : new Date();
+    const matchingDuration = matchingDurationMs ? Math.ceil(matchingDurationMs / 1000) : 0;
+
+    // 扣除 Coins
+    const tempCoins = coins - price;
     await supabaseClient
       .from("users")
       .update({ coins: tempCoins })
       .eq("id", window.currentUserId);
 
-    const { data: newOrder } = await supabaseClient
+    // 创建订单
+    const { data: newOrder, error } = await supabaseClient
       .from("orders")
       .insert({
         user_id: window.currentUserId,
@@ -428,10 +420,15 @@ async function finalizeMatchedOrder(product) {
         profit: profit,
         status: "pending",
         round_id: window.currentRoundId,
+        matching_started_at: matchingStartedAt.toISOString(),
+        matching_duration: matchingDuration,
       })
       .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
       .single();
 
+    if (error) throw new Error(error.message);
+
+    // 更新页面 UI
     renderLastOrder(newOrder, tempCoins);
     updateCoinsUI(tempCoins);
     await checkPendingLock();
@@ -443,8 +440,47 @@ async function finalizeMatchedOrder(product) {
   }
 }
 
-// 页面加载时恢复匹配状态
-document.addEventListener("DOMContentLoaded", restoreMatchingIfAny);
+/* ====================== 页面刷新恢复匹配状态 ====================== */
+async function restoreMatchingIfAny() {
+  const productId = localStorage.getItem("matchingProductId");
+  if (!productId) return;
+
+  try {
+    // 查询用户最新的 pending 订单，获取匹配时间信息
+    const { data: pendingOrders, error } = await supabaseClient
+      .from("orders")
+      .select("id, product_id, matching_started_at, matching_duration, products ( name, profit, price )")
+      .eq("user_id", window.currentUserId)
+      .eq("status", "pending")
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    if (error) throw error;
+    if (!pendingOrders?.length) return;
+
+    const order = pendingOrders[0];
+    const product = order.products;
+    if (!product) return;
+
+    const startedAt = new Date(order.matching_started_at).getTime();
+    const durationMs = Number(order.matching_duration) * 1000 || 0;
+    const endTime = startedAt + durationMs;
+    const remainingSec = Math.ceil((endTime - Date.now()) / 1000);
+
+    if (remainingSec > 0) {
+      // 匹配尚未完成，启动倒计时
+      startMatchingCountdown(product, remainingSec);
+    } else {
+      // 匹配已结束，但订单可能还未渲染
+      finalizeMatchedOrder(product, durationMs);
+      localStorage.removeItem("matchingEndTime");
+      localStorage.removeItem("matchingProductId");
+    }
+
+  } catch (e) {
+    console.error("恢复匹配状态失败", e);
+  }
+}
 
 /* ====================== 冷却倒计时函数 ====================== */
 function startCooldownTimer(nextAllowed, messagePrefix = "冷却中，请等待") {
