@@ -247,7 +247,7 @@ async function completeOrder(order, currentCoinsRaw) {
     const { error: coinErr } = await supabaseClient
       .from("users")
       .update({ coins: finalCoins })
-      .eq("id", window.currentUserId);
+      .eq("uuid", window.currentUserUUID)  // ✅ UUID
     if (coinErr) throw new Error(coinErr.message);
 
     renderLastOrder({ ...order, status: "completed" }, finalCoins);
@@ -324,7 +324,7 @@ async function autoOrder() {
     const { data: user } = await supabaseClient
       .from("users")
       .select("coins")
-      .eq("id", window.currentUserId)
+      .eq("uuid", window.currentUserUUID)  // ✅ UUID
       .single();
     const coins = Number(user?.coins || 0);
     if (coins < 50) {
@@ -471,7 +471,7 @@ async function finalizeMatchedOrder(product) {
     const { data: user } = await supabaseClient
       .from("users")
       .select("coins")
-      .eq("id", window.currentUserId)
+      .eq("uuid", window.currentUserUUID)  // ✅ UUID
       .single();
     let coins = Number(user?.coins || 0);
 
