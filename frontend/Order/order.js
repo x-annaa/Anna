@@ -184,23 +184,39 @@ async function checkOrderCooldown() {
   }
 }
 
-/* ====================== 本轮完成订单数显示 ====================== */
+/* ====================== 本轮完成订单数显示（多设备同步） ====================== */
 async function updateRoundProgress() {
-  // 确保配置已加载
-  if (!window.ORDERS_PER_ROUND || !window.ROUND_DURATION_MINUTES) {
-    await loadRoundConfig();
+  if (!window.currentUserId || !window.currentRoundId) return;
+
+  try {
+    // 从数据库读取当前轮次已完成订单数
+    const { data: orders, error } = await supabaseClient
+      .from("orders")
+      .select("id,status")
+      .eq("user_id", window.currentUserId)
+      .eq("round_id", window.currentRoundId);
+
+    if (error) throw error;
+
+    const completed = orders?.filter(o => o.status === "completed").length || 0;
+    const el = document.getElementById("roundProgress");
+    if (el) el.textContent = `本轮已完成订单：${completed} / ${window.ORDERS_PER_ROUND}`;
+  } catch (e) {
+    console.error("更新轮次进度失败", e);
   }
-
-  const { data: orders } = await supabaseClient
-    .from("orders")
-    .select("id, status")
-    .eq("user_id", window.currentUserId)
-    .eq("round_id", window.currentRoundId);
-
-  const completed = orders?.filter(o => o.status === "completed").length || 0;
-  const el = document.getElementById("roundProgress");
-  if (el) el.textContent = `本轮已完成订单：${completed} / ${window.ORDERS_PER_ROUND}`;
 }
+
+/* ====================== 自动刷新轮次进度 ====================== */
+function startRoundProgressAutoRefresh(intervalSec = 5) {
+  updateRoundProgress(); // 先执行一次
+  setInterval(updateRoundProgress, intervalSec * 1000);
+}
+
+// 页面加载时启动轮次进度刷新
+document.addEventListener("DOMContentLoaded", () => {
+  startRoundProgressAutoRefresh(5); // 每 5 秒刷新一次
+});
+
 
 /* ====================== 渲染最近订单 ====================== */
 function renderLastOrder(order, coinsRaw) {
