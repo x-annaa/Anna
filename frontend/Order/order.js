@@ -360,11 +360,20 @@ async function autoOrder() {
       Math.random() * (window.MATCH_MAX_SECONDS - window.MATCH_MIN_SECONDS + 1)
     ) + window.MATCH_MIN_SECONDS;
 
-    // 🔹 保存匹配结束时间和产品信息（本地存储，刷新保持状态）
-    const matchingEndTime = Date.now() + delaySec * 1000;
-    localStorage.setItem("matchingEndTime", matchingEndTime);
-    localStorage.setItem("matchingProductId", product.id);
+    // 🔹 保存匹配状态到数据库
+    const { data, error } = await supabaseClient
+      .from("user_matching_status")
+      .upsert({
+        user_id: window.currentUserUUID,
+        user_round_id: window.currentRoundId,
+        product_id: product.id,
+        matching_until: new Date(Date.now() + delaySec * 1000).toISOString(),
+      })
+      .select("product_id, matching_until")
+      .single();
 
+    if (error) throw error;
+     
     // 🔹 启动匹配倒计时
     startMatchingCountdown(product, delaySec);
 
