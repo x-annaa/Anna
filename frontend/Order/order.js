@@ -1,10 +1,9 @@
-window.UserState = {
-  id: localStorage.getItem("currentUserId") || null,
-  username: localStorage.getItem("currentUser") || "",
-  uuid: localStorage.getItem("currentUserUUID") || null,
-  currentRoundId: localStorage.getItem("currentRoundId") || null,
-  roundStartTime: Number(localStorage.getItem("roundStartTime")) || null
-};
+/* ====================== 初始化用户信息 ====================== */
+window.currentUserId = localStorage.getItem("currentUserId");
+window.currentUsername = localStorage.getItem("currentUser");
+window.currentUserUUID = localStorage.getItem("currentUserUUID"); // 新增 UUID
+window.currentRoundId = localStorage.getItem("currentRoundId");   // 当前轮次
+window.roundStartTime = localStorage.getItem("roundStartTime");   // 当前轮次开始时间
 
 let ordering = false;      // 下单中的并发保护
 let completing = false;    // 完成订单中的并发保护
@@ -12,10 +11,8 @@ let exchanging = false;    // Balance-Coins兑换中的并发保护
 let cooldownTimer = null;  // 冷却倒计时
 
 // 默认轮次配置
-window.RoundConfig = {
-  ordersPerRound: 3,
-  roundDurationMs: 5 * 60 * 1000 // 毫秒
-};
+window.ORDERS_PER_ROUND = 3;
+window.ROUND_DURATION = 5 * 60 * 1000; // 毫秒
 
 if (!window.supabaseClient) {
   console.error("❌ supabaseClient 未初始化！");
