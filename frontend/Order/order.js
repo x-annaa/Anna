@@ -401,14 +401,15 @@ function startMatchingCountdown(product, delaySec) {
       requestAnimationFrame(tick);
     } else {
       setMatchingState(false); // 匹配完成，恢复按钮
-      localStorage.removeItem("matchingEndTime");
-      localStorage.removeItem("matchingProductId");
+
+      // 删除数据库里的匹配状态
+      await supabaseClient
+        .from("user_matching_status")
+        .delete()
+        .eq("user_id", window.currentUserUUID);
 
       // 下单逻辑
       finalizeMatchedOrder(product);
-    }
-  };
-
   tick();
 }
 
