@@ -104,12 +104,13 @@ function isRoundExpired() {
 }
 
 function startNewRound() {
-  const uuid = crypto.randomUUID();
-  window.currentRoundId = uuid;
-  window.roundStartTime = Date.now();
-  localStorage.setItem("currentRoundId", uuid);
-  localStorage.setItem("roundStartTime", window.roundStartTime);
 }
+
+function isRoundExpired() {
+  if (!window.roundStartTime) return true;
+  return (Date.now() - Number(window.roundStartTime)) > window.ROUND_DURATION;
+}
+
 
 /* ====================== 获取用户规则产品 ====================== */
 async function getUserRuleProduct(userId, orderNumber) {
