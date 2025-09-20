@@ -409,7 +409,10 @@ function startMatchingCountdown(product, delaySec) {
         .eq("user_id", window.currentUserUUID);
 
       // 下单逻辑
-      finalizeMatchedOrder(product);
+      await finalizeMatchedOrder(product);
+    }
+  };
+
   tick();
 }
 
