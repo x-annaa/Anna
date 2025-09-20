@@ -173,8 +173,7 @@ async function updateRoundProgress() {
   const { data: orders } = await supabaseClient
     .from("orders")
     .select("id, status")
-    .eq("user_id", window.currentUserUUID || window.currentUserId)
-    .eq("round_id", window.currentRoundId);
+    .eq("user_id", window.currentUserUUID)
 
   const completed = orders?.filter(o => o.status === "completed").length || 0;
   const el = document.getElementById("roundProgress");
