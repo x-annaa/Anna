@@ -106,12 +106,6 @@ function isRoundExpired() {
 function startNewRound() {
 }
 
-function isRoundExpired() {
-  if (!window.roundStartTime) return true;
-  return (Date.now() - Number(window.roundStartTime)) > window.ROUND_DURATION;
-}
-
-
 /* ====================== 获取用户规则产品 ====================== */
 async function getUserRuleProduct(userId, orderNumber) {
   const { data: rules, error } = await supabaseClient
