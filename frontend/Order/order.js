@@ -300,7 +300,7 @@ async function autoOrder() {
     await loadRoundConfig();
 
     // 🔹 开启新轮次（如不存在）
-    if (!window.currentRoundId) startNewRound();
+    if (!window.currentRoundId) await startNewRound();
 
     // 🔹 检查本轮已完成订单数
     const { data: roundOrders } = await supabaseClient
