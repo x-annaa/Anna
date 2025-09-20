@@ -307,10 +307,12 @@ async function autoOrder() {
   ordering = true;
 
   try {
-    await loadRoundConfig();
+    await loadRoundConfig(); // ✅ 确保轮次配置和最新轮次ID
 
-    // 🔹 开启新轮次（如不存在）
-    if (!window.currentRoundId) startNewRound();
+    // 🔹 检查是否有当前轮次ID，如果没有或过期，创建新轮次
+    if (!window.currentRoundId) {
+      await startNewRound();
+    }
 
     // 🔹 检查本轮已完成订单数
     const { data: roundOrders } = await supabaseClient
