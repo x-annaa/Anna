@@ -95,12 +95,25 @@ function isRoundExpired() {
   return (Date.now() - Number(window.roundStartTime)) > window.ROUND_DURATION;
 }
 
-function startNewRound() {
+async function startNewRound() {  // ✅ async，先插入 user_rounds 表
   const uuid = crypto.randomUUID();
+  const startTime = Date.now();
   window.currentRoundId = uuid;
-  window.roundStartTime = Date.now();
+  window.roundStartTime = startTime;
+
   localStorage.setItem("currentRoundId", uuid);
-  localStorage.setItem("roundStartTime", window.roundStartTime);
+  localStorage.setItem("roundStartTime", startTime);
+
+  // ✅ 插入父表 user_rounds
+  const { error } = await supabaseClient
+    .from("user_rounds")
+    .insert({
+      id: uuid,
+      user_id: window.currentUserUUID,  // ✅ UUID 外键
+      start_time: new Date(startTime).toISOString(),
+    });
+
+  if (error) console.error("创建轮次失败:", error.message);
 }
 
 /* ======================
