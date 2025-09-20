@@ -19,21 +19,21 @@ if (!window.supabaseClient) {
 /* ====================== 读取轮次配置 (每轮单数 & 冷却分钟) ====================== */
 async function loadRoundConfig() {
   try {
-    const { data, error } = await supabaseClient
+    // 1️⃣ 读取轮次配置表 round_config
+    const { data: configData, error: configError } = await supabaseClient
       .from("round_config")
       .select("orders_per_round, round_duration, match_min_seconds, match_max_seconds")
       .limit(1)
       .single();
 
-    if (error) throw error;
-    if (data) {
-      window.ORDERS_PER_ROUND = Number(data.orders_per_round);
-      window.ROUND_DURATION_MINUTES = Number(data.round_duration);
-      window.ROUND_DURATION = window.ROUND_DURATION_MINUTES * 60 * 1000;
+    if (configError) throw configError;
 
-      // 🔥 新增：匹配时间区间
-      window.MATCH_MIN_SECONDS = Number(data.match_min_seconds) || 5;
-      window.MATCH_MAX_SECONDS = Number(data.match_max_seconds) || 15;
+    if (configData) {
+      window.ORDERS_PER_ROUND = Number(configData.orders_per_round) || 3;
+      window.ROUND_DURATION_MINUTES = Number(configData.round_duration) || 5;
+      window.ROUND_DURATION = window.ROUND_DURATION_MINUTES * 60 * 1000;
+      window.MATCH_MIN_SECONDS = Number(configData.match_min_seconds) || 5;
+      window.MATCH_MAX_SECONDS = Number(configData.match_max_seconds) || 15;
 
       console.log("✅ 配置已加载：", {
         ORDERS_PER_ROUND: window.ORDERS_PER_ROUND,
@@ -42,28 +42,66 @@ async function loadRoundConfig() {
         MATCH_MAX: window.MATCH_MAX_SECONDS,
       });
     }
+
+    // 2️⃣ 获取最新轮次 ID（全局轮次）
+    const { data: latestRound, error: roundError } = await supabaseClient
+      .from("rounds")
+      .select("id, start_time")
+      .order("start_time", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (roundError) throw roundError;
+
+    if (latestRound) {
+      window.currentRoundId = latestRound.id;
+      window.roundStartTime = latestRound.start_time;
+
+      // 检查轮次是否过期
+      const roundExpired = (Date.now() - new Date(window.roundStartTime).getTime()) > window.ROUND_DURATION;
+      if (roundExpired) {
+        console.log("⚠️ 当前轮次已过期，创建新轮次...");
+        await startNewRound();
+      }
+    } else {
+      // 没有轮次记录，创建新轮次
+      console.log("⚠️ 未找到轮次记录，创建新轮次...");
+      await startNewRound();
+    }
+
   } catch (e) {
-    console.error("❌ 读取配置失败", e.message);
+    console.error("❌ 读取轮次配置失败", e.message);
+    // 设置默认值
     if (!window.ORDERS_PER_ROUND) window.ORDERS_PER_ROUND = 3;
     if (!window.ROUND_DURATION_MINUTES) window.ROUND_DURATION_MINUTES = 5;
+    if (!window.ROUND_DURATION) window.ROUND_DURATION = 5 * 60 * 1000;
     if (!window.MATCH_MIN_SECONDS) window.MATCH_MIN_SECONDS = 5;
     if (!window.MATCH_MAX_SECONDS) window.MATCH_MAX_SECONDS = 15;
+
+    // 创建新轮次
+    await startNewRound();
   }
 }
 
-  // ⚠️ 新增：从后端获取最新轮次ID（全局轮次）
-  const { data: rounds, error: rError } = await supabaseClient
-    .from("rounds")  // 建议新建一个 rounds 表存轮次 id 和 start_time
-    .select("id, start_time")
-    .order("start_time", { ascending: false })
-    .limit(1)
-    .single();
+/* ====================== 创建新轮次 ====================== */
+async function startNewRound() {
+  try {
+    const { data, error } = await supabaseClient
+      .from("rounds")
+      .insert({ start_time: new Date().toISOString() })
+      .select("id, start_time")
+      .single();
+    if (error) throw error;
 
-  if (!rError && rounds) {
-    window.currentRoundId = rounds.id;
-    window.roundStartTime = rounds.start_time;
-  } else {
-    console.warn("⚠️ 无法获取全局轮次，可能需要手动创建轮次！");
+    window.currentRoundId = data.id;
+    window.roundStartTime = data.start_time;
+    console.log("✅ 新轮次已创建：", data);
+
+    // 刷新本轮进度
+    await updateRoundProgress();
+
+  } catch (e) {
+    console.error("❌ 创建新轮次失败", e.message);
   }
 }
 
