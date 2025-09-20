@@ -20,14 +20,14 @@ if (!window.supabaseClient) {
 async function loadRoundConfig() {
   try {
     // 1️⃣ 读取轮次配置表 round_config
-    const { data: configData, error: configError } = await supabaseClient
+    const { data: configDataArr, error: configError } = await supabaseClient
       .from("round_config")
       .select("orders_per_round, round_duration, match_min_seconds, match_max_seconds")
-      .limit(1)
-      .single();
+      .limit(1); // 不用 .single()
 
     if (configError) throw configError;
 
+    const configData = configDataArr?.[0] || null;
     if (configData) {
       window.ORDERS_PER_ROUND = Number(configData.orders_per_round) || 3;
       window.ROUND_DURATION_MINUTES = Number(configData.round_duration) || 5;
@@ -44,14 +44,15 @@ async function loadRoundConfig() {
     }
 
     // 2️⃣ 获取最新轮次 ID（全局轮次）
-    const { data: latestRound, error: roundError } = await supabaseClient
+    const { data: latestRounds, error: roundError } = await supabaseClient
       .from("rounds")
       .select("id, start_time")
       .order("start_time", { ascending: false })
-      .limit(1)
-      .single();
+      .limit(1); // 不用 .single()
 
     if (roundError) throw roundError;
+
+    const latestRound = latestRounds?.[0] || null;
 
     if (latestRound) {
       window.currentRoundId = latestRound.id;
@@ -71,12 +72,13 @@ async function loadRoundConfig() {
 
   } catch (e) {
     console.error("❌ 读取轮次配置失败", e.message);
+
     // 设置默认值
-    if (!window.ORDERS_PER_ROUND) window.ORDERS_PER_ROUND = 3;
-    if (!window.ROUND_DURATION_MINUTES) window.ROUND_DURATION_MINUTES = 5;
-    if (!window.ROUND_DURATION) window.ROUND_DURATION = 5 * 60 * 1000;
-    if (!window.MATCH_MIN_SECONDS) window.MATCH_MIN_SECONDS = 5;
-    if (!window.MATCH_MAX_SECONDS) window.MATCH_MAX_SECONDS = 15;
+    window.ORDERS_PER_ROUND = window.ORDERS_PER_ROUND || 3;
+    window.ROUND_DURATION_MINUTES = window.ROUND_DURATION_MINUTES || 5;
+    window.ROUND_DURATION = window.ROUND_DURATION || 5 * 60 * 1000;
+    window.MATCH_MIN_SECONDS = window.MATCH_MIN_SECONDS || 5;
+    window.MATCH_MAX_SECONDS = window.MATCH_MAX_SECONDS || 15;
 
     // 创建新轮次
     await startNewRound();
