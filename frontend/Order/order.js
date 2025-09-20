@@ -389,8 +389,6 @@ async function checkPendingLock() {
   }
 }
 
-
-/* ====================== 订单 ====================== */
 /* ====================== 自动下单 ====================== */
 async function autoOrder() {
   if (!window.currentUserId) return alert("请先登录！");
