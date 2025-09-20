@@ -99,7 +99,6 @@ function startNewRound() {
 }
 
 /* ====================== 获取用户规则产品 & 随机产品 ====================== */
-
 /**
  * 获取用户手动规则产品（如果存在）
  * @param {string|number} userId
@@ -158,7 +157,6 @@ async function getRandomProduct() {
 }
 
 /* ====================== 检查订单冷却状态 ====================== */
-
 /**
  * 检查用户是否处于下单冷却
  * @param {string} userUUID 用户 UUID
@@ -183,33 +181,69 @@ async function checkOrderCooldown(userUUID) {
   }
 }
 
-/* ====================== 本轮完成订单数显示 ====================== */
-async function updateRoundProgress() {
-  // 确保配置已加载
-  if (!window.ORDERS_PER_ROUND || !window.ROUND_DURATION_MINUTES) {
+/* ====================== 更新本轮订单完成进度 ====================== */
+/**
+ * 获取本轮完成订单数量
+ * @param {string} userId 用户 ID
+ * @param {string} roundId 当前轮次 ID
+ * @returns {Promise<number>} 已完成订单数
+ */
+async function getCompletedOrdersCount(userId, roundId) {
+  if (!userId || !roundId) return 0;
+
+  try {
+    const { data: orders, error } = await supabaseClient
+      .from("orders")
+      .select("id, status")
+      .eq("user_id", userId)
+      .eq("round_id", roundId);
+
+    if (error) throw error;
+    return orders?.filter(o => o.status === "completed").length || 0;
+
+  } catch (e) {
+    console.error("获取本轮完成订单数失败:", e);
+    return 0;
+  }
+}
+
+/**
+ * 渲染本轮进度到 UI
+ * @param {number} completed 已完成订单数
+ * @param {number} total 总订单数
+ */
+function renderRoundProgress(completed, total) {
+  const el = document.getElementById("roundProgress");
+  if (el) el.textContent = `本轮已完成订单：${completed} / ${total}`;
+}
+
+/**
+ * 更新本轮订单完成进度（封装逻辑 + UI）
+ * @param {string} userId 
+ * @param {string} roundId 
+ * @param {number} ordersPerRound 
+ */
+async function updateRoundProgress(userId, roundId, ordersPerRound) {
+  if (!ordersPerRound) {
     await loadRoundConfig();
+    ordersPerRound = window.ORDERS_PER_ROUND;
   }
 
-  const { data: orders } = await supabaseClient
-    .from("orders")
-    .select("id, status")
-    .eq("user_id", window.currentUserId)
-    .eq("round_id", window.currentRoundId);
-
-  const completed = orders?.filter(o => o.status === "completed").length || 0;
-  const el = document.getElementById("roundProgress");
-  if (el) el.textContent = `本轮已完成订单：${completed} / ${window.ORDERS_PER_ROUND}`;
+  const completed = await getCompletedOrdersCount(userId, roundId);
+  renderRoundProgress(completed, ordersPerRound);
 }
 
 /* ====================== 渲染最近订单 ====================== */
-function renderLastOrder(order, coinsRaw) {
-  const el = document.getElementById("orderResult");
-  if (!el || !order) return;
-
-  const coins = Number(coinsRaw) || 0;
+/**
+ * 构建订单 HTML 字符串
+ * @param {Object} order 订单对象
+ * @param {number} coins 用户当前金币
+ * @returns {string} HTML 字符串
+ */
+function buildOrderHTML(order, coins) {
   const price = Number(order.total_price) || 0;
-  const profit = Number(order.profit) || 0; 
-  const profitRatio = Number(order.products?.profit) || 0; 
+  const profit = Number(order.profit) || 0;
+  const profitRatio = Number(order.products?.profit) || 0;
 
   let html = `
     <h3>Order results</h3>
@@ -229,14 +263,29 @@ function renderLastOrder(order, coinsRaw) {
     html += `<p style="color:red;">⚠️ 金币为负，欠款 ¥${Math.abs(coins).toFixed(2)}</p>`;
   }
 
-  el.innerHTML = html;
+  return html;
+}
 
+/**
+ * 渲染单个订单到页面
+ * @param {Object} order 订单对象
+ * @param {number} coins 用户当前金币
+ */
+function renderLastOrder(order, coins) {
+  const el = document.getElementById("orderResult");
+  if (!el || !order) return;
+
+  el.innerHTML = buildOrderHTML(order, Number(coins) || 0);
+
+  // 绑定完成订单按钮事件
   const compBtn = document.getElementById("completeOrderBtn");
   if (compBtn) {
-    compBtn.addEventListener("click", async () => {
+    const handler = async () => {
       compBtn.disabled = true;
       await completeOrder(order, coins);
-    });
+    };
+    compBtn.removeEventListener("click", handler); // 防止重复绑定
+    compBtn.addEventListener("click", handler);
   }
 }
 
