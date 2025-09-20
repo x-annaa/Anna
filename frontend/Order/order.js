@@ -290,18 +290,37 @@ function renderLastOrder(order, coins) {
 }
 
 /* ====================== 完成订单 ====================== */
+/**
+ * 刷新完成订单后的 UI
+ * @param {Object} order 订单对象
+ * @param {number} coins 用户当前 Coins
+ */
+async function refreshOrderUI(order, coins) {
+  renderLastOrder(order, coins);
+  updateCoinsUI(coins);
+  await checkPendingLock();
+  await loadRecentOrders();
+  await updateRoundProgress();
+}
+
+/**
+ * 完成订单
+ * @param {Object} order 待完成订单对象
+ * @param {number} currentCoinsRaw 当前 Coins
+ */
 async function completeOrder(order, currentCoinsRaw) {
   if (completing) return;
   completing = true;
 
   try {
-    if (order.status === "completed") return;
+    if (!order || order.status === "completed") return;
 
     const currentCoins = Number(currentCoinsRaw) || 0;
     const price = Number(order.total_price) || 0;
     const profit = Number(order.profit) || 0;
     const finalCoins = currentCoins + price + profit;
 
+    // 🔹 更新订单状态
     const { error: orderErr } = await supabaseClient
       .from("orders")
       .update({ status: "completed" })
@@ -309,41 +328,67 @@ async function completeOrder(order, currentCoinsRaw) {
       .eq("status", "pending");
     if (orderErr) throw new Error(orderErr.message);
 
+    // 🔹 更新用户 Coins
     const { error: coinErr } = await supabaseClient
       .from("users")
       .update({ coins: finalCoins })
       .eq("id", window.currentUserId);
     if (coinErr) throw new Error(coinErr.message);
 
-    renderLastOrder({ ...order, status: "completed" }, finalCoins);
-    updateCoinsUI(finalCoins);
-    await checkPendingLock();
-    await loadRecentOrders();
-    await updateRoundProgress(); // 更新本轮完成数
+    // 🔹 刷新页面 UI
+    await refreshOrderUI({ ...order, status: "completed" }, finalCoins);
+
   } catch (e) {
-    alert(e.message || "完成订单失败");
+    showAlert(e.message || "完成订单失败");
   } finally {
     completing = false;
   }
 }
 
+/**
+ * 统一提示函数
+ * @param {string} msg 提示信息
+ */
+function showAlert(msg) {
+  alert(msg); // 可进一步封装为弹窗或 toast
+}
+
 /* ====================== 检查 pending 锁定 ====================== */
+/**
+ * 检查当前用户是否存在未完成订单
+ * @returns {Promise<boolean>} 是否存在 pending 订单
+ */
+async function hasPendingOrders() {
+  if (!window.currentUserId) return false;
+
+  try {
+    const { data: pendingOrders, error } = await supabaseClient
+      .from("orders")
+      .select("id")
+      .eq("user_id", window.currentUserId)
+      .eq("status", "pending")
+      .limit(1);
+
+    if (error) throw error;
+    return pendingOrders?.length > 0;
+  } catch (e) {
+    console.error("检查 pending 锁定失败", e);
+    return false;
+  }
+}
+
+/**
+ * 根据 pending 状态更新下单按钮
+ */
 async function checkPendingLock() {
-  if (!window.currentUserId) return;
-
-  const { data: pend } = await supabaseClient
-    .from("orders")
-    .select("id")
-    .eq("user_id", window.currentUserId)
-    .eq("status", "pending")
-    .limit(1);
-
-  if (pend?.length) {
+  const hasPending = await hasPendingOrders();
+  if (hasPending) {
     setOrderBtnDisabled(true, "存在未完成订单，请先完成订单");
   } else {
     setOrderBtnDisabled(false);
   }
 }
+
 
 /* ====================== 订单 ====================== */
 async function autoOrder() {
