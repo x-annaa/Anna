@@ -51,6 +51,22 @@ async function loadRoundConfig() {
   }
 }
 
+  // ⚠️ 新增：从后端获取最新轮次ID（全局轮次）
+  const { data: rounds, error: rError } = await supabaseClient
+    .from("rounds")  // 建议新建一个 rounds 表存轮次 id 和 start_time
+    .select("id, start_time")
+    .order("start_time", { ascending: false })
+    .limit(1)
+    .single();
+
+  if (!rError && rounds) {
+    window.currentRoundId = rounds.id;
+    window.roundStartTime = rounds.start_time;
+  } else {
+    console.warn("⚠️ 无法获取全局轮次，可能需要手动创建轮次！");
+  }
+}
+
 /* ====================== 工具函数 ====================== */
 function setOrderBtnDisabled(disabled, reason = "", cooldownText = "") {
   const btn = document.getElementById("autoOrderBtn");
