@@ -1,6 +1,7 @@
 /* ======================
    初始化用户信息
    ====================== */
+window.currentUserId = localStorage.getItem("currentUserId");
 window.currentUsername = localStorage.getItem("currentUser");
 window.currentUserUUID = localStorage.getItem("currentUserUUID"); // 新增 UUID
 window.currentRoundId = localStorage.getItem("currentRoundId");   // 当前轮次
@@ -94,25 +95,12 @@ function isRoundExpired() {
   return (Date.now() - Number(window.roundStartTime)) > window.ROUND_DURATION;
 }
 
-async function startNewRound() {  // ✅ async，先插入 user_rounds 表
+function startNewRound() {
   const uuid = crypto.randomUUID();
-  const startTime = Date.now();
   window.currentRoundId = uuid;
-  window.roundStartTime = startTime;
-
+  window.roundStartTime = Date.now();
   localStorage.setItem("currentRoundId", uuid);
-  localStorage.setItem("roundStartTime", startTime);
-
-  // ✅ 插入父表 user_rounds
-  const { error } = await supabaseClient
-    .from("user_rounds")
-    .insert({
-      id: uuid,
-      user_id: window.currentUserUUID,  // ✅ UUID 外键
-      start_time: new Date(startTime).toISOString(),
-    });
-
-  if (error) console.error("创建轮次失败:", error.message);
+  localStorage.setItem("roundStartTime", window.roundStartTime);
 }
 
 /* ======================
@@ -173,7 +161,8 @@ async function updateRoundProgress() {
   const { data: orders } = await supabaseClient
     .from("orders")
     .select("id, status")
-    .eq("user_id", window.currentUserUUID)
+    .eq("user_id", window.currentUserId)
+    .eq("round_id", window.currentRoundId);
 
   const completed = orders?.filter(o => o.status === "completed").length || 0;
   const el = document.getElementById("roundProgress");
@@ -246,7 +235,7 @@ async function completeOrder(order, currentCoinsRaw) {
     const { error: coinErr } = await supabaseClient
       .from("users")
       .update({ coins: finalCoins })
-      .eq("uuid", window.currentUserUUID)  // ✅ UUID
+      .eq("id", window.currentUserId);
     if (coinErr) throw new Error(coinErr.message);
 
     renderLastOrder({ ...order, status: "completed" }, finalCoins);
@@ -299,7 +288,7 @@ async function autoOrder() {
     await loadRoundConfig();
 
     // 🔹 开启新轮次（如不存在）
-    if (!window.currentRoundId) await startNewRound();
+    if (!window.currentRoundId) startNewRound();
 
     // 🔹 检查本轮已完成订单数
     const { data: roundOrders } = await supabaseClient
@@ -323,7 +312,7 @@ async function autoOrder() {
     const { data: user } = await supabaseClient
       .from("users")
       .select("coins")
-      .eq("uuid", window.currentUserUUID)  // ✅ UUID
+      .eq("id", window.currentUserId)
       .single();
     const coins = Number(user?.coins || 0);
     if (coins < 50) {
@@ -371,20 +360,11 @@ async function autoOrder() {
       Math.random() * (window.MATCH_MAX_SECONDS - window.MATCH_MIN_SECONDS + 1)
     ) + window.MATCH_MIN_SECONDS;
 
-    // 🔹 保存匹配状态到数据库
-    const { data, error } = await supabaseClient
-      .from("user_matching_status")
-      .upsert({
-        user_id: window.currentUserUUID,
-        user_round_id: window.currentRoundId,
-        product_id: product.id,
-        matching_until: new Date(Date.now() + delaySec * 1000).toISOString(),
-      },
-      { onConflict: ["user_id"] }  // 指定唯一键
-     )
-     
-    if (error) throw error;
-     
+    // 🔹 保存匹配结束时间和产品信息（本地存储，刷新保持状态）
+    const matchingEndTime = Date.now() + delaySec * 1000;
+    localStorage.setItem("matchingEndTime", matchingEndTime);
+    localStorage.setItem("matchingProductId", product.id);
+
     // 🔹 启动匹配倒计时
     startMatchingCountdown(product, delaySec);
 
@@ -404,7 +384,7 @@ function startMatchingCountdown(product, delaySec) {
   const btn = document.getElementById("autoOrderBtn");
   const gifEl = document.getElementById("matchingGif");
 
-  const tick = async () => {
+  const tick = () => {
     const remaining = Math.ceil((endTime - Date.now()) / 1000);
 
     if (remaining > 0) {
@@ -412,15 +392,11 @@ function startMatchingCountdown(product, delaySec) {
       requestAnimationFrame(tick);
     } else {
       setMatchingState(false); // 匹配完成，恢复按钮
-
-      // 删除数据库里的匹配状态
-      await supabaseClient
-        .from("user_matching_status")
-        .delete()
-        .eq("user_id", window.currentUserUUID);
+      localStorage.removeItem("matchingEndTime");
+      localStorage.removeItem("matchingProductId");
 
       // 下单逻辑
-      await finalizeMatchedOrder(product);
+      finalizeMatchedOrder(product);
     }
   };
 
@@ -430,37 +406,25 @@ function startMatchingCountdown(product, delaySec) {
 /* ======================
    页面刷新恢复匹配状态
    ====================== */
-async function restoreMatchingIfAny() {
-  if (!window.currentUserUUID) return;
+function restoreMatchingIfAny() {
+  const endTime = Number(localStorage.getItem("matchingEndTime"));
+  const productId = localStorage.getItem("matchingProductId");
 
-  const { data, error } = await supabaseClient
-    .from("user_matching_status")
-    .select("product_id, matching_until")
-    .eq("user_id", window.currentUserUUID)
-    .single();
-
-  if (error || !data) return;
-
-  const endTime = new Date(data.matching_until).getTime();
-  if (endTime > Date.now()) {
+  if (endTime && productId && endTime > Date.now()) {
     const delaySec = Math.ceil((endTime - Date.now()) / 1000);
-    const { data: product } = await supabaseClient
-      .from("products").select("*").eq("id", data.product_id).single();
-    if (product) startMatchingCountdown(product, delaySec);
-  } else {
-    // 匹配已结束但未生成订单
-    const { data: product } = await supabaseClient
-      .from("products").select("*").eq("id", data.product_id).single();
-    if (product) finalizeMatchedOrder(product);
-
-    // 清理数据库里的状态
-    await supabaseClient
-      .from("user_matching_status")
-      .delete()
-      .eq("user_id", window.currentUserUUID);
+    // 获取产品信息再启动倒计时
+    supabaseClient.from("products").select("*").eq("id", productId).single()
+      .then(({ data, error }) => {
+        if (!error && data) startMatchingCountdown(data, delaySec);
+      });
+  } else if (endTime && productId) {
+    // 匹配已结束但可能未生成订单
+    supabaseClient.from("products").select("*").eq("id", productId).single()
+      .then(({ data, error }) => { if (!error && data) finalizeMatchedOrder(data); });
+    localStorage.removeItem("matchingEndTime");
+    localStorage.removeItem("matchingProductId");
   }
 }
-
 
 /* ======================
    匹配完成后的订单生成
@@ -470,7 +434,7 @@ async function finalizeMatchedOrder(product) {
     const { data: user } = await supabaseClient
       .from("users")
       .select("coins")
-      .eq("uuid", window.currentUserUUID)  // ✅ UUID
+      .eq("id", window.currentUserId)
       .single();
     let coins = Number(user?.coins || 0);
 
@@ -479,17 +443,15 @@ async function finalizeMatchedOrder(product) {
     const profit = +(price * profitRatio).toFixed(2);
     const tempCoins = coins - price;
 
-    // 🔹 扣 coins
     await supabaseClient
       .from("users")
       .update({ coins: tempCoins })
-      .eq("uuid", window.currentUserUUID);
+      .eq("id", window.currentUserId);
 
-    // 🔹 插入订单（注意用 uuid）
     const { data: newOrder } = await supabaseClient
       .from("orders")
       .insert({
-        user_id: window.currentUserUUID,
+        user_id: window.currentUserId,
         product_id: product.id,
         total_price: price,
         profit: profit,
@@ -498,7 +460,7 @@ async function finalizeMatchedOrder(product) {
       })
       .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
       .single();
-     
+
     renderLastOrder(newOrder, tempCoins);
     updateCoinsUI(tempCoins);
     await checkPendingLock();
