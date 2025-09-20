@@ -1,21 +1,31 @@
 /* ====================== 初始化用户信息 ====================== */
-window.currentUserId = localStorage.getItem("currentUserId");
-window.currentUsername = localStorage.getItem("currentUser");
-window.currentUserUUID = localStorage.getItem("currentUserUUID"); // 新增 UUID
-window.currentRoundId = localStorage.getItem("currentRoundId");   // 当前轮次
-window.roundStartTime = localStorage.getItem("roundStartTime");   // 当前轮次开始时间
+// 全局应用状态对象
+window.appState = {
+  user: {
+    id: localStorage.getItem("currentUserId") || null,
+    username: localStorage.getItem("currentUser") || null,
+    uuid: localStorage.getItem("currentUserUUID") || null,
+  },
+  round: {
+    id: localStorage.getItem("currentRoundId") || null,
+    startTime: Number(localStorage.getItem("roundStartTime")) || null,
+  },
+  flags: {
+    ordering: false,
+    completing: false,
+    exchanging: false,
+  },
+  cooldownTimer: null,
+  config: {
+    ORDERS_PER_ROUND: 3,
+    ROUND_DURATION: 5 * 60 * 1000,
+  }
+};
 
-let ordering = false;      // 下单中的并发保护
-let completing = false;    // 完成订单中的并发保护
-let exchanging = false;    // Balance-Coins兑换中的并发保护
-let cooldownTimer = null;  // 冷却倒计时
-
-// 默认轮次配置
-window.ORDERS_PER_ROUND = 3;
-window.ROUND_DURATION = 5 * 60 * 1000; // 毫秒
-
+// 检查 supabaseClient 是否初始化
 if (!window.supabaseClient) {
   console.error("❌ supabaseClient 未初始化！");
+  // 可选择抛出异常或显示 UI 提示
 }
 
 /* ====================== 读取轮次配置 (每轮单数 & 冷却分钟) ====================== */
