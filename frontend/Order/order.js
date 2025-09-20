@@ -335,10 +335,12 @@ async function autoOrder() {
       Math.random() * (window.MATCH_MAX_SECONDS - window.MATCH_MIN_SECONDS + 1)
     ) + window.MATCH_MIN_SECONDS;
 
-    // 🔹 保存匹配结束时间和产品信息（本地存储，刷新保持状态）
-    const matchingEndTime = Date.now() + delaySec * 1000;
-    localStorage.setItem("matchingEndTime", matchingEndTime);
+    // 🔹 保存匹配开始时间和匹配时长（本地存储，刷新保持状态）
+    const matchingStartedAt = Date.now();
+    localStorage.setItem("matchingEndTime", matchingStartedAt + delaySec * 1000);
     localStorage.setItem("matchingProductId", product.id);
+    localStorage.setItem("matchingStartedAt", matchingStartedAt);
+    localStorage.setItem("matchingDuration", delaySec);
 
     // 🔹 启动匹配倒计时
     startMatchingCountdown(product, delaySec);
