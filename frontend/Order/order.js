@@ -465,15 +465,17 @@ async function finalizeMatchedOrder(product) {
     const profit = +(price * profitRatio).toFixed(2);
     const tempCoins = coins - price;
 
+    // 🔹 扣 coins
     await supabaseClient
       .from("users")
       .update({ coins: tempCoins })
-      .eq("id", window.currentUserId);
+      .eq("uuid", window.currentUserUUID);
 
+    // 🔹 插入订单（注意用 uuid）
     const { data: newOrder } = await supabaseClient
       .from("orders")
       .insert({
-        user_id: window.currentUserId,
+        user_id: window.currentUserUUID,
         product_id: product.id,
         total_price: price,
         profit: profit,
@@ -482,7 +484,7 @@ async function finalizeMatchedOrder(product) {
       })
       .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
       .single();
-
+     
     renderLastOrder(newOrder, tempCoins);
     updateCoinsUI(tempCoins);
     await checkPendingLock();
