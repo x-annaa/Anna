@@ -1,7 +1,6 @@
 /* ======================
    初始化用户信息
    ====================== */
-window.currentUserId = localStorage.getItem("currentUserId");
 window.currentUsername = localStorage.getItem("currentUser");
 window.currentUserUUID = localStorage.getItem("currentUserUUID"); // 新增 UUID
 window.currentRoundId = localStorage.getItem("currentRoundId");   // 当前轮次
