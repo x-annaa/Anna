@@ -137,7 +137,7 @@ async function checkPendingLock() {
 }
 
 /* ======================
-   自动下单（改用存储过程）
+   自动下单（整合 getRandomProduct）
    ====================== */
 async function autoOrder() {
   if (!window.currentUserId) { alert("请先登录！"); return; }
@@ -146,10 +146,26 @@ async function autoOrder() {
   setOrderBtnDisabled(true, "下单中…");
 
   try {
-    // 直接调用数据库存储过程
+    // 内部定义 getRandomProduct，保证作用域内可用
+    const getRandomProduct = async () => {
+      const { data: products, error } = await supabaseClient
+        .from("products")
+        .select("*")
+        .eq("enabled", true)
+        .eq("manual_only", false);
+
+      if (error || !products || products.length === 0) {
+        throw new Error("产品列表为空或读取失败！");
+      }
+
+      return products[Math.floor(Math.random() * products.length)];
+    };
+
+    // 直接调用数据库存储过程，传入随机产品 ID
+    const randomProduct = await getRandomProduct();
     const { data, error } = await supabaseClient.rpc("try_create_order", {
       p_user_id: window.currentUserId,
-      p_product_id: (await getRandomProduct()).id
+      p_product_id: randomProduct.id
     });
 
     if (error) throw new Error(error.message);
