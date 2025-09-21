@@ -734,17 +734,19 @@ async function loadRecentOrders() {
   if (!window.currentUserId) return;
 
   try {
-    const { data: recentOrders } = await supabaseClient
+    const { data: recentOrders, error: recentOrdersError } = await supabaseClient
       .from("orders")
       .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
       .eq("user_id", window.currentUserId)
       .order("created_at", { ascending: false })
       .limit(5);
+    if (recentOrdersError) throw recentOrdersError;
 
-    const { count: totalCount } = await supabaseClient
+    const { count: totalCount, error: totalCountError } = await supabaseClient
       .from("orders")
       .select("id", { count: "exact", head: true })
       .eq("user_id", window.currentUserId);
+    if (totalCountError) throw totalCountError;
 
     const historyTitle = document.querySelector(".order-history h3");
     if (historyTitle) historyTitle.textContent = `🕘 最近订单 订单数：${totalCount || 0}单`;
