@@ -182,21 +182,26 @@ async function checkOrderCooldown() {
    本轮完成订单数显示
    ====================== */
 async function updateRoundProgress() {
-  // 确保配置已加载
-  if (!window.ORDERS_PER_ROUND || !window.ROUND_DURATION_MINUTES) {
-    await loadRoundConfig();
+  if (!window.currentRoundId) await startNewRound();
+
+  try {
+    const { data: completedOrders, error } = await supabaseClient
+      .from("orders")
+      .select("id")
+      .eq("user_id", window.currentUserId)
+      .eq("round_id", window.currentRoundId)
+      .eq("status", "completed");
+
+    if (error) throw error;
+
+    const completed = completedOrders?.length || 0;
+    const el = document.getElementById("roundProgress");
+    if (el) el.textContent = `本轮已完成订单：${completed} / ${window.ORDERS_PER_ROUND}`;
+  } catch (e) {
+    console.error("⚠️ 更新本轮进度失败：", e.message);
   }
-
-  const { data: orders } = await supabaseClient
-    .from("orders")
-    .select("id, status")
-    .eq("user_id", window.currentUserId)
-    .eq("round_id", window.currentRoundId);
-
-  const completed = orders?.filter(o => o.status === "completed").length || 0;
-  const el = document.getElementById("roundProgress");
-  if (el) el.textContent = `本轮已完成订单：${completed} / ${window.ORDERS_PER_ROUND}`;
 }
+
 
 /* ======================
    渲染最近订单
