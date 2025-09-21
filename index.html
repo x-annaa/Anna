@@ -1,1 +1,103 @@
 
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>U9 - 注册/登录</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f2f2f2; display:flex; justify-content:center; align-items:center; height:100vh; }
+    .container { background:#fff; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); width:300px; }
+    input { width:100%; padding:10px; margin:5px 0; }
+    button { width:100%; padding:10px; margin:10px 0; cursor:pointer; }
+    .message { color:red; margin-top:10px; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>注册</h2>
+  <input type="text" id="reg_name" placeholder="用户名">
+  <input type="password" id="reg_password" placeholder="密码">
+  <button onclick="register()">注册</button>
+
+  <h2>登录</h2>
+  <input type="text" id="login_name" placeholder="用户名">
+  <input type="password" id="login_password" placeholder="密码">
+  <button onclick="login()">登录</button>
+
+  <div class="message" id="message"></div>
+</div>
+
+<script>
+  // Supabase 初始化
+  const supabaseUrl = "https://YOUR_SUPABASE_PROJECT_URL.supabase.co";
+  const supabaseKey = "YOUR_SUPABASE_ANON_KEY";
+  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+  const messageDiv = document.getElementById("message");
+
+  async function register() {
+    const name = document.getElementById("reg_name").value;
+    const password = document.getElementById("reg_password").value;
+
+    if(!name || !password) {
+      messageDiv.innerText = "用户名和密码不能为空";
+      return;
+    }
+
+    // 注册用户（插入 users 表）
+    const { data, error } = await supabase.from('users').insert([
+      { name: name }
+    ]);
+
+    if(error) {
+      messageDiv.innerText = error.message;
+      return;
+    }
+
+    // 保存密码到 auth (Supabase Auth)
+    const { user, session, error: authError } = await supabase.auth.signUp({
+      email: name + "@u9.com", // 使用用户名模拟邮箱
+      password: password
+    });
+
+    if(authError) {
+      messageDiv.innerText = authError.message;
+      return;
+    }
+
+    messageDiv.style.color = "green";
+    messageDiv.innerText = "注册成功，跳转到主页...";
+    setTimeout(()=>{ window.location.href = "home.html"; }, 1000);
+  }
+
+  async function login() {
+    const name = document.getElementById("login_name").value;
+    const password = document.getElementById("login_password").value;
+
+    if(!name || !password) {
+      messageDiv.innerText = "用户名和密码不能为空";
+      return;
+    }
+
+    // 使用 Supabase Auth 登录
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: name + "@u9.com",
+      password: password
+    });
+
+    if(error) {
+      messageDiv.innerText = error.message;
+      return;
+    }
+
+    messageDiv.style.color = "green";
+    messageDiv.innerText = "登录成功，跳转到主页...";
+    setTimeout(()=>{ window.location.href = "home.html"; }, 1000);
+  }
+</script>
+
+</body>
+</html>
