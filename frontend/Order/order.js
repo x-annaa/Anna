@@ -4,10 +4,7 @@
 window.currentUserId = localStorage.getItem("currentUserId");
 window.currentUsername = localStorage.getItem("currentUser");
 
-// 正确使用
-if (ordering) return;
-ordering = true;
-
+let ordering = false;   
 let completing = false;    // 完成订单中的并发保护
 let exchanging = false;    // Balance -> Coins 兑换中的并发保护
 
@@ -400,15 +397,11 @@ function renderRoundContainer() {
   target.parentNode.insertBefore(container, target.nextSibling);
 }
 
-
 /* ======================
-   轮次状态
+   轮次信息容器实时渲染
    ====================== */
-let roundInterval = null; // 用于倒计时更新
-let ordering = false;
-
-// 获取最新轮次状态
 async function fetchCurrentRound(userId) {
+  if (!userId) return null;
   const { data, error } = await supabaseClient
     .from("rounds")
     .select("*")
@@ -416,105 +409,70 @@ async function fetchCurrentRound(userId) {
     .order("start_time", { ascending: false })
     .limit(1)
     .maybeSingle();
-
   if (error) {
-    console.error("获取轮次失败", error);
+    console.error("轮次数据读取失败：", error);
     return null;
   }
   return data;
 }
 
-// 渲染轮次信息并控制刷单按钮状态
+let roundInterval = null;
+
 async function renderRoundProgress() {
-  if (!window.currentUserId) return;
-
   const round = await fetchCurrentRound(window.currentUserId);
-  const container = document.getElementById("roundContainer");
-  const btn = document.getElementById("autoOrderBtn");
-
   if (!round) {
-    if (container) container.style.display = "none";
-    if (btn) btn.disabled = false; // 没有轮次可下单
+    document.getElementById("roundContainer").style.display = "none";
     return;
   }
 
-  container.style.display = "block";
-
-  const currentRoundEl = document.getElementById("currentRound");
-  const orderCountEl = document.getElementById("orderCount");
-  const maxOrdersEl = document.getElementById("maxOrders");
-  const maxOrdersRepeatEl = document.getElementById("maxOrdersRepeat");
-  const roundTimeLeftEl = document.getElementById("roundTimeLeft");
-
-  currentRoundEl.textContent = round.current_round;
-  orderCountEl.textContent = round.order_count;
-  maxOrdersEl.textContent = round.max_orders;
-  maxOrdersRepeatEl.textContent = round.max_orders;
-
-  // 清理之前的倒计时
-  if (roundInterval) clearInterval(roundInterval);
+  document.getElementById("currentRound").textContent = round.current_round;
+  document.getElementById("maxOrders").textContent = round.max_orders;
+  document.getElementById("orderCount").textContent = round.order_count;
+  document.getElementById("maxOrdersRepeat").textContent = round.max_orders;
 
   function updateTime() {
     const now = new Date();
     const endTime = new Date(round.end_time);
     const secondsLeft = Math.max(0, Math.ceil((endTime.getTime() - now.getTime()) / 1000));
-    roundTimeLeftEl.textContent = secondsLeft.toString();
+    document.getElementById("roundTimeLeft").textContent = secondsLeft.toString();
 
-    // 根据轮次和下单数量控制按钮
-    if (round.order_count >= round.max_orders && secondsLeft > 0) {
-      btn.disabled = true;
-      btn.textContent = `等待冷却 ${secondsLeft}s`;
-    } else {
-      btn.disabled = false;
-      btn.textContent = "🎲 一键刷单";
+    // 如果倒计时到 0，刷新轮次信息
+    if (secondsLeft <= 0) {
+      clearInterval(roundInterval);
+      roundInterval = setTimeout(renderRoundProgress, 500); // 0.5秒后刷新
     }
   }
 
   updateTime();
+  if (roundInterval) clearInterval(roundInterval);
   roundInterval = setInterval(updateTime, 1000);
 }
 
-// 自动下单，调用你之前的 place-order Edge Function
-async function autoOrder() {
-  if (ordering) return;
-  ordering = true;
-
-  const btn = document.getElementById("autoOrderBtn");
-  btn.disabled = true;
-  btn.textContent = "下单中…";
-
-  try {
-    const res = await fetch("https://<your-project-ref>.functions.supabase.co/place-order", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${window.supabaseKey || ""}` // service role 或者用户 JWT
-      },
-      body: JSON.stringify({ user_id: window.currentUserId, product_id: 1 })
-    });
-
-    const data = await res.json();
-
-    if (res.status === 200) {
-      console.log("下单成功", data);
-    } else {
-      alert(data.error || "下单失败");
-    }
-
-    // 刷新轮次显示
-    await renderRoundProgress();
-  } catch (err) {
-    console.error(err);
-    alert("下单异常");
-  } finally {
-    ordering = false;
-  }
+/* ======================
+   页面刷新轮次
+   ====================== */
+async function refreshAll() {
+  await loadCoinsOrderPage();
+  await loadLastOrder();
+  await loadRecentOrders();
+  await renderRoundProgress(); // 加入轮次渲染
 }
 
-// 页面加载时初始化
+/* ======================
+   页面初始化
+   ====================== */
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
-  renderRoundProgress();
-  // 每隔 5 秒刷新轮次状态，防止跨浏览器不同步
-  setInterval(renderRoundProgress, 5000);
+  document.getElementById("addCoinsBtn")?.addEventListener("click", openExchangeModal);
+  document.getElementById("cancelAddCoins")?.addEventListener("click", closeExchangeModal);
+  document.getElementById("confirmAddCoins")?.addEventListener("click", confirmExchange);
+
+  document.getElementById("addCoinsModal")?.addEventListener("click", (e) => {
+    if (e.target.id === "addCoinsModal") closeExchangeModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeExchangeModal();
+  });
+
+  refreshAll();
 });
