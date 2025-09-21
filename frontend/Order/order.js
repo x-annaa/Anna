@@ -182,17 +182,26 @@ async function checkOrderCooldown() {
    本轮完成订单数显示
    ====================== */
 async function updateRoundProgress() {
-  if (!window.currentRoundId) await startNewRound();
-
   try {
-    const { data: completedOrders, error } = await supabaseClient
+    // 获取最新 active 轮次
+    const { data: activeRound } = await supabaseClient
+      .from("rounds")
+      .select("*")
+      .eq("status", "active")
+      .order("start_time", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (!activeRound) return;
+
+    const roundId = activeRound.id;
+
+    const { data: completedOrders } = await supabaseClient
       .from("orders")
       .select("id")
       .eq("user_id", window.currentUserId)
-      .eq("round_id", window.currentRoundId)
+      .eq("round_id", roundId)
       .eq("status", "completed");
-
-    if (error) throw error;
 
     const completed = completedOrders?.length || 0;
     const el = document.getElementById("roundProgress");
