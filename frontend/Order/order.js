@@ -420,26 +420,31 @@ let roundInterval = null;
 
 async function renderRoundProgress() {
   const round = await fetchCurrentRound(window.currentUserId);
+
+  const container = document.getElementById("roundContainer");
+  if (!container) return;
+
   if (!round) {
-    document.getElementById("roundContainer").style.display = "none";
+    container.style.display = "none";
     return;
   }
 
-  document.getElementById("currentRound").textContent = round.current_round;
-  document.getElementById("maxOrders").textContent = round.max_orders;
-  document.getElementById("orderCount").textContent = round.order_count;
-  document.getElementById("maxOrdersRepeat").textContent = round.max_orders;
+  container.style.display = "block";
+
+  document.getElementById("currentRound").textContent = round.current_round ?? "-";
+  document.getElementById("maxOrders").textContent = round.max_orders ?? "-";
+  document.getElementById("orderCount").textContent = round.order_count ?? "0";
+  document.getElementById("maxOrdersRepeat").textContent = round.max_orders ?? "-";
 
   function updateTime() {
     const now = new Date();
-    const endTime = new Date(round.end_time);
+    const endTime = round.end_time ? new Date(round.end_time) : now;
     const secondsLeft = Math.max(0, Math.ceil((endTime.getTime() - now.getTime()) / 1000));
     document.getElementById("roundTimeLeft").textContent = secondsLeft.toString();
 
-    // 如果倒计时到 0，刷新轮次信息
     if (secondsLeft <= 0) {
       clearInterval(roundInterval);
-      roundInterval = setTimeout(renderRoundProgress, 500); // 0.5秒后刷新
+      roundInterval = setTimeout(renderRoundProgress, 500);
     }
   }
 
