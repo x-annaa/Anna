@@ -1,1 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>U9 - HOME</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f8f9fa; text-align: center; padding: 40px; }
+    h2 { margin-bottom: 20px; }
+    .info { margin: 10px 0; }
+    button { padding: 10px 20px; margin: 10px; font-size: 16px; border: none; border-radius: 6px; cursor: pointer; }
+    #order-btn { background: #007bff; color: white; }
+    #complete-btn { background: #28a745; color: white; display:none; }
+    #logout-btn { background: #dc3545; color: white; position: absolute; right: 20px; top: 20px; }
+    .product-box { margin-top: 20px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; display: none; }
+  </style>
+</head>
+<body>
 
+  <button id="logout-btn">退出</button>
+  <h2>欢迎来到 U9 刷单平台</h2>
+  <div class="info">账号余额 (Coins)：<span id="coins">加载中...</span></div>
+
+  <button id="order-btn">订单</button>
+  <button id="complete-btn">完成</button>
+
+  <div class="product-box" id="product-box">
+    <h3>当前订单</h3>
+    <p>产品名称：<span id="product-name"></span></p>
+    <p>产品价格：<span id="product-price"></span></p>
+    <p>利润：<span id="product-profit"></span></p>
+    <div id="countdown"></div>
+  </div>
+
+<script>
+  // ===== Supabase 初始化 =====
+  const SUPABASE_URL = "https://ofaxbeydyeajdgwwqrzz.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9mYXhiZXlkeWVhamRnd3dxcnp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NzQxMTQsImV4cCI6MjA3NDA1MDExNH0.mJGdh6BBEy2Mp83H7aBEo3wIFyIsUsVfqgTErgsvFdY";
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  let currentUser = null;
+  let currentOrder = null;
+  let countdownTimer = null;
+
+  // 页面加载时获取当前用户
+  (async () => {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) {
+      window.location.href = "../index.html";
+      return;
+    }
+    currentUser = user;
+    loadBalance();
+  })();
+
+  // 获取用户余额
+  async function loadBalance() {
+    const { data, error } = await supabaseClient
+      .from('users')
+      .select('coins')
+      .eq('id', currentUser.id)
+      .single();
+    if (!error) {
+      document.getElementById("coins").innerText = data.coins;
+    }
+  }
+
+  // 点击「订单」
+  document.getElementById("order-btn").addEventListener("click", async () => {
+    // 随机获取产品
+    const { data: products, error } = await supabaseClient
+      .from('products')
+      .select('*');
+    if (error || products.length === 0) {
+      alert("没有可用的产品");
+      return;
+    }
+
+    const product = products[Math.floor(Math.random() * products.length)];
+
+    // 创建订单
+    const { data: orderData, error: orderError } = await supabaseClient
+      .from('orders')
+      .insert([{ user_id: currentUser.id, product_id: product.id }])
+      .select()
+      .single();
+
+    if (orderError) {
+      alert(orderError.message);
+      return;
+    }
+
+    currentOrder = { ...orderData, product };
+
+    // 显示产品信息
+    document.getElementById("product-name").innerText = product.name;
+    document.getElementById("product-price").innerText = product.price;
+    document.getElementById("product-profit").innerText = product.profit;
+    document.getElementById("product-box").style.display = "block";
+
+    // 扣除本金
+    await supabaseClient.rpc("deduct_coins", { uid: currentUser.id, amount: product.price });
+
+    loadBalance();
+
+    // 倒计时
+    let countdown = 5; // 这里写死5秒，你可以改成任务表的 countdown
+    document.getElementById("countdown").innerText = "倒计时：" + countdown + "秒";
+    document.getElementById("order-btn").style.display = "none";
+    document.getElementById("complete-btn").style.display = "block";
+
+    countdownTimer = setInterval(() => {
+      countdown--;
+      document.getElementById("countdown").innerText = "倒计时：" + countdown + "秒";
+      if (countdown <= 0) {
+        clearInterval(countdownTimer);
+      }
+    }, 1000);
+  });
+
+  // 点击「完成」
+  document.getElementById("complete-btn").addEventListener("click", async () => {
+    if (!currentOrder) return;
+
+    // 更新订单状态
+    await supabaseClient
+      .from('orders')
+      .update({ status: "completed", completed_at: new Date() })
+      .eq('id', currentOrder.id);
+
+    // 给用户返还本金+利润
+    await supabaseClient.rpc("add_coins", { uid: currentUser.id, amount: currentOrder.product.price + currentOrder.product.profit });
+
+    loadBalance();
+
+    alert("订单完成！获得利润：" + currentOrder.product.profit);
+
+    // 重置
+    document.getElementById("order-btn").style.display = "block";
+    document.getElementById("complete-btn").style.display = "none";
+    document.getElementById("product-box").style.display = "none";
+    currentOrder = null;
+  });
+
+  // 退出登录
+  document.getElementById("logout-btn").addEventListener("click", async () => {
+    await supabaseClient.auth.signOut();
+    window.location.href = "../index.html";
+  });
+</script>
+</body>
+</html>
