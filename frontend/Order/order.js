@@ -319,14 +319,15 @@ async function autoOrder() {
     await loadRoundConfig();
 
     // 🔹 开启新轮次（如不存在）
-    if (!window.currentRoundId) startNewRound();
+    if (!window.currentRoundId) await startNewRound();
 
-    // 🔹 检查本轮已完成订单数
-    const { data: roundOrders } = await supabaseClient
+    // 检查本轮完成订单数
+    const { data: roundOrders, error } = await supabaseClient
       .from("orders")
       .select("id,status")
       .eq("user_id", window.currentUserId)
       .eq("round_id", window.currentRoundId);
+    if (error) throw error;
 
     const completedCount = roundOrders?.filter(o => o.status === "completed").length || 0;
     if (completedCount >= window.ORDERS_PER_ROUND) {
