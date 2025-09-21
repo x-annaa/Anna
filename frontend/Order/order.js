@@ -457,17 +457,23 @@ function startMatchingCountdown(order) {
    页面刷新恢复匹配状态（双查询版）
    ====================== */
 async function restoreMatchingIfAny() {
-  const { data: order } = await supabaseClient
-    .from("orders")
-    .select("id, matching_end_time, product_id")
-    .eq("user_id", window.currentUserId)
-    .eq("status", "matching")
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .single();
+  if (!window.currentUserId) return;
 
-  if (order) {
-    // 手动查询产品信息
+  try {
+    // 查询最近匹配中的订单
+    const { data: orders, error } = await supabaseClient
+      .from("orders")
+      .select("id, matching_end_time, product_id")
+      .eq("user_id", window.currentUserId)
+      .eq("status", "matching")
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    if (error) throw error;
+    const order = orders?.[0];
+    if (!order) return;
+
+    // 查询产品信息
     const { data: prod } = await supabaseClient
       .from("products")
       .select("name")
@@ -476,10 +482,8 @@ async function restoreMatchingIfAny() {
     order.product = prod;
 
     const remainingSec = Math.ceil((new Date(order.matching_end_time).getTime() - Date.now()) / 1000);
-    if (remainingSec > 0) {
-      startMatchingCountdown(order, remainingSec);
-    } else {
-      // 超时，直接变为 pending
+    if (remainingSec > 0) startMatchingCountdown(order, remainingSec);
+    else {
       await supabaseClient
         .from("orders")
         .update({ status: "pending" })
@@ -487,6 +491,8 @@ async function restoreMatchingIfAny() {
         .eq("status", "matching");
       await loadLastOrder();
     }
+  } catch (e) {
+    console.error("恢复匹配订单失败：", e.message);
   }
 }
 
