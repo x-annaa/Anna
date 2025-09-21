@@ -445,52 +445,6 @@ async function restoreMatchingIfAny() {
   }
 }
 
-/* ======================
-   匹配完成后的订单生成
-   ====================== */
-async function finalizeMatchedOrder(product) {
-  try {
-    const { data: user } = await supabaseClient
-      .from("users")
-      .select("coins")
-      .eq("id", window.currentUserId)
-      .single();
-    let coins = Number(user?.coins || 0);
-
-    const price = Number(product.price) || 0;
-    const profitRatio = Number(product.profit) || 0;
-    const profit = +(price * profitRatio).toFixed(2);
-    const tempCoins = coins - price;
-
-    await supabaseClient
-      .from("users")
-      .update({ coins: tempCoins })
-      .eq("id", window.currentUserId);
-
-    const { data: newOrder } = await supabaseClient
-      .from("orders")
-      .insert({
-        user_id: window.currentUserId,
-        product_id: product.id,
-        total_price: price,
-        profit: profit,
-        status: "pending",
-        round_id: window.currentRoundId,
-      })
-      .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
-      .single();
-
-    renderLastOrder(newOrder, tempCoins);
-    updateCoinsUI(tempCoins);
-    await checkPendingLock();
-    await loadRecentOrders();
-    await updateRoundProgress();
-
-  } catch (e) {
-    alert(e.message || "生成订单失败");
-  }
-}
-
 // 页面加载时恢复匹配状态
 document.addEventListener("DOMContentLoaded", restoreMatchingIfAny);
 
