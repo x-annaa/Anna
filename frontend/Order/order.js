@@ -322,12 +322,12 @@ async function autoOrder() {
     if (!window.currentRoundId) await startNewRound();
 
     // 检查本轮完成订单数
-    const { data: roundOrders, error } = await supabaseClient
+    const { data: roundOrders, error: roundOrdersError } = await supabaseClient
       .from("orders")
       .select("id,status")
       .eq("user_id", window.currentUserId)
       .eq("round_id", window.currentRoundId);
-    if (error) throw error;
+    if (roundOrdersError) throw roundOrdersError;
 
     const completedCount = roundOrders?.filter(o => o.status === "completed").length || 0;
     if (completedCount >= window.ORDERS_PER_ROUND) {
@@ -341,12 +341,14 @@ async function autoOrder() {
     }
 
     // 🔹 获取用户 Coins
-    const { data: user } = await supabaseClient
+    const { data: userData, error: userError } = await supabaseClient
       .from("users")
       .select("coins")
       .eq("id", window.currentUserId)
       .single();
-    const coins = Number(user?.coins || 0);
+    if (userError) throw userError;
+
+    const coins = Number(userData?.coins || 0);
     if (coins < 50) {
       alert("你的余额不足，最少需要 50 coins");
       setOrderBtnDisabled(false);
@@ -355,12 +357,14 @@ async function autoOrder() {
     }
 
     // 🔹 检查未完成订单
-    const { data: pend } = await supabaseClient
+    const { data: pend, error: pendError } = await supabaseClient
       .from("orders")
       .select("id")
       .eq("user_id", window.currentUserId)
       .eq("status", "pending")
       .limit(1);
+    if (pendError) throw pendError;
+
     if (pend?.length) {
       alert("您有未完成订单，请先完成订单再继续下单。");
       await checkPendingLock();
@@ -370,20 +374,21 @@ async function autoOrder() {
 
     // 🔹 选择商品（规则或随机）
     let product;
-    const totalOrdersRes = await supabaseClient
+    const { count: totalOrdersCount, error: totalOrdersError } = await supabaseClient
       .from("orders")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", window.currentUserId);
-    const orderNumber = (totalOrdersRes?.count || 0) + 1;
+      .select("id", { count: "exact", head: true });
+    if (totalOrdersError) throw totalOrdersError;
+
+    const orderNumber = (totalOrdersCount || 0) + 1;
 
     const ruleProductId = await getUserRuleProduct(window.currentUserId, orderNumber);
     if (ruleProductId) {
-      const { data: pData, error } = await supabaseClient
+      const { data: pData, error: pDataError } = await supabaseClient
         .from("products")
         .select("*")
         .eq("id", ruleProductId)
         .single();
-      if (!error && pData) product = pData;
+      if (!pDataError && pData) product = pData;
     }
     if (!product) product = await getRandomProduct();
 
@@ -393,7 +398,8 @@ async function autoOrder() {
     ) + window.MATCH_MIN_SECONDS;
 
     const matchingEnd = new Date(Date.now() + delaySec * 1000).toISOString();
-    const { data: newOrder, error } = await supabaseClient
+
+    const { data: newOrder, error: newOrderError } = await supabaseClient
       .from("orders")
       .insert({
         user_id: window.currentUserId,
@@ -406,15 +412,15 @@ async function autoOrder() {
       })
       .select("id, matching_end_time, product_id")
       .single();
-    if (error) throw error;
+    if (newOrderError) throw newOrderError;
 
     // 🔹 手动查询产品信息
-    const { data: prod } = await supabaseClient
+    const { data: prod, error: prodError } = await supabaseClient
       .from("products")
       .select("name")
       .eq("id", newOrder.product_id)
       .single();
-    newOrder.product = prod;
+    if (!prodError) newOrder.product = prod;
 
     // 🔹 启动匹配倒计时
     startMatchingCountdown(newOrder, delaySec);
