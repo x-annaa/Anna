@@ -14,6 +14,7 @@
   #complete-btn { background: #28a745; color: white; display:none; }
   #logout-btn { background: #dc3545; color: white; position: absolute; right: 20px; top: 20px; }
   .product-box { margin-top: 20px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; display: none; }
+  #product-img { max-width:200px; margin:10px 0; border-radius:8px; }
 </style>
 </head>
 <body>
@@ -27,6 +28,7 @@
 
 <div class="product-box" id="product-box">
   <h3>当前订单</h3>
+  <img id="product-img" src="" alt="产品图片" />
   <p>产品名称：<span id="product-name"></span></p>
   <p>产品价格：<span id="product-price"></span></p>
   <p>利润：<span id="product-profit"></span></p>
@@ -43,7 +45,7 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 let currentUser = null;
 let currentOrder = null;
 let countdownTimer = null;
-let roundNumber = 1; // 当前轮数，可扩展任务表
+let roundNumber = 1; // 当前轮数
 
 // 页面加载
 (async () => {
@@ -114,6 +116,7 @@ document.getElementById("order-btn").addEventListener("click", async () => {
   currentOrder = { ...orderData, product };
 
   // 显示产品信息
+  document.getElementById("product-img").src = product.url;
   document.getElementById("product-name").innerText = product.name;
   document.getElementById("product-price").innerText = product.price;
   document.getElementById("product-profit").innerText = product.profit;
@@ -125,7 +128,7 @@ document.getElementById("order-btn").addEventListener("click", async () => {
   await loadBalance();
 
   // 倒计时
-  let countdown = 5; // 可改为任务表倒计时
+  let countdown = 5; // 默认5秒，可改成任务表倒计时
   document.getElementById("countdown").innerText = "倒计时：" + countdown + "秒";
   document.getElementById("order-btn").style.display = "none";
   document.getElementById("complete-btn").style.display = "block";
@@ -152,8 +155,6 @@ document.getElementById("complete-btn").addEventListener("click", async () => {
   if (deficit > 0) {
     const confirmRecharge = confirm(`余额不足 ${deficit} Coins，需要充值才能完成订单。点击确定充值。`);
     if (!confirmRecharge) return;
-
-    // 调用 RPC 或支付接口充值
     await supabaseClient.rpc("recharge_coins", { uid: currentUser.id, amount: deficit });
     alert("充值成功！");
   }
@@ -175,7 +176,7 @@ document.getElementById("complete-btn").addEventListener("click", async () => {
   document.getElementById("complete-btn").style.display = "none";
   document.getElementById("product-box").style.display = "none";
   currentOrder = null;
-  roundNumber++; // 自动轮数加 1
+  roundNumber++;
 });
 
 // 退出登录
