@@ -374,7 +374,7 @@ async function autoOrder() {
     if (error) throw error;
 
     // 🔹 启动匹配倒计时
-    startMatchingCountdown(product, delaySec);
+    startMatchingCountdown(newOrder, delaySec);
 
   } catch (e) {
     alert(e.message || "下单失败");
