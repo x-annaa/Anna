@@ -29,9 +29,9 @@
 
 <script>
   // ===== Supabase 初始化 =====
-  const supabaseUrl = "https://ofaxbeydyeajdgwwqrzz.supabase.co";
-  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9mYXhiZXlkeWVhamRnd3dxcnp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NzQxMTQsImV4cCI6MjA3NDA1MDExNH0.mJGdh6BBEy2Mp83H7aBEo3wIFyIsUsVfqgTErgsvFdY";
-  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+  const SUPABASE_URL = "https://ofaxbeydyeajdgwwqrzz.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9mYXhiZXlkeWVhamRnd3dxcnp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NzQxMTQsImV4cCI6MjA3NDA1MDExNH0.mJGdh6BBEy2Mp83H7aBEo3wIFyIsUsVfqgTErgsvFdY";
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   let isLogin = false;
 
@@ -46,10 +46,12 @@
       formTitle.innerText = "登录";
       actionBtn.innerText = "登录";
       toggleForm.innerText = "没有账号？注册";
+      document.getElementById('name').style.display = "none"; // 登录隐藏用户名输入框
     } else {
       formTitle.innerText = "注册";
       actionBtn.innerText = "注册";
       toggleForm.innerText = "已有账号？登录";
+      document.getElementById('name').style.display = "block"; // 注册显示用户名输入框
     }
     message.innerText = "";
   });
@@ -66,7 +68,7 @@
 
     if (isLogin) {
       // 登录
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
       if (error) {
         message.innerText = error.message;
       } else {
@@ -74,12 +76,12 @@
       }
     } else {
       // 注册
-      const { data, error } = await supabase.auth.signUp({ email, password });
+      const { data, error } = await supabaseClient.auth.signUp({ email, password });
       if (error) {
         message.innerText = error.message;
       } else {
         // 注册成功后在 users 表插入 name
-        await supabase.from('users').insert([{ name }]);
+        await supabaseClient.from('users').insert([{ name }]);
         window.location.href = "frontend/HOME.html";
       }
     }
