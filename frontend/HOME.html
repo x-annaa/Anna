@@ -57,14 +57,19 @@
       </div>
     </div>
 
-    <div id="roundContainer">
-      <p>当前轮次：<span id="currentRound">-</span>/<span id="maxOrders">-</span></p>
-      <p>已下单：<span id="orderCount">0</span>/<span id="maxOrdersRepeat">0</span></p>
-      <p>轮次剩余时间：<span id="roundTimeLeft">-</span> 秒</p>
-    </div>
+    <!-- 轮次 + 下单按钮统一容器 -->
+    <div id="roundOrderContainer" style="border:1px solid #ccc; padding:10px; border-radius:5px; margin:10px 0;">
+      <!-- 轮次信息 -->
+      <div id="roundContainer">
+        <p>当前轮次：<span id="currentRound">-</span>/<span id="maxOrders">5</span></p>
+        <p>已下单：<span id="orderCount">0</span>/<span id="maxOrdersRepeat">5</span></p>
+        <p>轮次剩余时间：<span id="roundTimeLeft">-</span> 秒</p>
+      </div>
 
-    <div class="order-actions">
-      <button id="autoOrderBtn">🎲 一键刷单</button>
+      <!-- 下单按钮 -->
+      <div class="order-actions" style="margin-top:10px;">
+        <button id="autoOrderBtn">🎲 一键刷单</button>
+      </div>
     </div>
 
     <div id="orderResult" class="order-result"></div>
@@ -76,6 +81,7 @@
       </ul>
     </div>
 
+    <!-- Coins 弹窗 -->
     <div id="addCoinsModal" class="modal">
       <div class="modal-content">
         <h3>兑换 Coins</h3>
