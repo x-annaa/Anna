@@ -1,102 +1,89 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>U9 - 注册/登录</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>U9 注册 / 登录</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; background:#f2f2f2; display:flex; justify-content:center; align-items:center; height:100vh; }
-    .container { background:#fff; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); width:300px; }
-    input { width:100%; padding:10px; margin:5px 0; }
-    button { width:100%; padding:10px; margin:10px 0; cursor:pointer; }
-    .message { color:red; margin-top:10px; }
+    body { font-family: Arial, sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    .container { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); width: 300px; }
+    h2 { text-align: center; margin-bottom: 20px; }
+    input { width: 100%; padding: 10px; margin: 8px 0; border-radius: 4px; border: 1px solid #ccc; }
+    button { width: 100%; padding: 10px; margin-top: 10px; border: none; background: #007bff; color: white; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #0056b3; }
+    .toggle { text-align: center; margin-top: 10px; cursor: pointer; color: #007bff; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <h2>注册</h2>
-  <input type="text" id="reg_name" placeholder="用户名">
-  <input type="password" id="reg_password" placeholder="密码">
-  <button onclick="register()">注册</button>
-
-  <h2>登录</h2>
-  <input type="text" id="login_name" placeholder="用户名">
-  <input type="password" id="login_password" placeholder="密码">
-  <button onclick="login()">登录</button>
-
-  <div class="message" id="message"></div>
+  <h2 id="form-title">注册</h2>
+  <input type="text" id="name" placeholder="用户名" />
+  <input type="email" id="email" placeholder="邮箱" />
+  <input type="password" id="password" placeholder="密码" />
+  <button id="action-btn">注册</button>
+  <div class="toggle" id="toggle-form">已有账号？登录</div>
+  <div id="message" style="color:red;text-align:center;margin-top:10px;"></div>
 </div>
 
 <script>
-  // Supabase 初始化
+  // ===== Supabase 初始化 =====
   const supabaseUrl = "https://ofaxbeydyeajdgwwqrzz.supabase.co";
   const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9mYXhiZXlkeWVhamRnd3dxcnp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NzQxMTQsImV4cCI6MjA3NDA1MDExNH0.mJGdh6BBEy2Mp83H7aBEo3wIFyIsUsVfqgTErgsvFdY";
   const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-  const messageDiv = document.getElementById("message");
+  let isLogin = false;
 
-  async function register() {
-    const name = document.getElementById("reg_name").value;
-    const password = document.getElementById("reg_password").value;
+  const formTitle = document.getElementById('form-title');
+  const actionBtn = document.getElementById('action-btn');
+  const toggleForm = document.getElementById('toggle-form');
+  const message = document.getElementById('message');
 
-    if(!name || !password) {
-      messageDiv.innerText = "用户名和密码不能为空";
+  toggleForm.addEventListener('click', () => {
+    isLogin = !isLogin;
+    if (isLogin) {
+      formTitle.innerText = "登录";
+      actionBtn.innerText = "登录";
+      toggleForm.innerText = "没有账号？注册";
+    } else {
+      formTitle.innerText = "注册";
+      actionBtn.innerText = "注册";
+      toggleForm.innerText = "已有账号？登录";
+    }
+    message.innerText = "";
+  });
+
+  actionBtn.addEventListener('click', async () => {
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+
+    if (!email || !password || (!isLogin && !name)) {
+      message.innerText = "请填写完整信息";
       return;
     }
 
-    // 注册用户（插入 users 表）
-    const { data, error } = await supabase.from('users').insert([
-      { name: name }
-    ]);
-
-    if(error) {
-      messageDiv.innerText = error.message;
-      return;
+    if (isLogin) {
+      // 登录
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        message.innerText = error.message;
+      } else {
+        window.location.href = "home.html";
+      }
+    } else {
+      // 注册
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      if (error) {
+        message.innerText = error.message;
+      } else {
+        // 注册成功后在 users 表插入 name
+        await supabase.from('users').insert([{ name }]);
+        window.location.href = "frontend/HOME.html";
+      }
     }
-
-    // 保存密码到 auth (Supabase Auth)
-    const { user, session, error: authError } = await supabase.auth.signUp({
-      email: name + "@u9.com", // 使用用户名模拟邮箱
-      password: password
-    });
-
-    if(authError) {
-      messageDiv.innerText = authError.message;
-      return;
-    }
-
-    messageDiv.style.color = "green";
-    messageDiv.innerText = "注册成功，跳转到主页...";
-    setTimeout(()=>{ window.location.href = "home.html"; }, 1000);
-  }
-
-  async function login() {
-    const name = document.getElementById("login_name").value;
-    const password = document.getElementById("login_password").value;
-
-    if(!name || !password) {
-      messageDiv.innerText = "用户名和密码不能为空";
-      return;
-    }
-
-    // 使用 Supabase Auth 登录
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: name + "@u9.com",
-      password: password
-    });
-
-    if(error) {
-      messageDiv.innerText = error.message;
-      return;
-    }
-
-    messageDiv.style.color = "green";
-    messageDiv.innerText = "登录成功，跳转到主页...";
-    setTimeout(()=>{ window.location.href = "home.html"; }, 1000);
-  }
+  });
 </script>
 
 </body>
