@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>U9 注册 / 登录</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+  <!-- 正确引入 v2 SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body { font-family: Arial, sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; }
     .container { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); width: 300px; }
@@ -28,10 +29,11 @@
 </div>
 
 <script>
-  // ===== Supabase 初始化 =====
+  // ===== Supabase 初始化 (v2 正确写法) =====
+  const { createClient } = supabase;
   const SUPABASE_URL = "https://ofaxbeydyeajdgwwqrzz.supabase.co";
   const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9mYXhiZXlkeWVhamRnd3dxcnp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NzQxMTQsImV4cCI6MjA3NDA1MDExNH0.mJGdh6BBEy2Mp83H7aBEo3wIFyIsUsVfqgTErgsvFdY";
-  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
   let isLogin = false;
 
@@ -80,7 +82,7 @@
       if (error) {
         message.innerText = error.message;
       } else {
-        // 注册成功后在 users 表插入 name
+        // 注册成功后写入 users 表
         await supabaseClient.from('users').insert([{ name }]);
         window.location.href = "frontend/HOME.html";
       }
