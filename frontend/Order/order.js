@@ -387,8 +387,8 @@ async function autoOrder() {
 /* ======================
    匹配倒计时函数（刷新保持状态）
    ====================== */
-function startMatchingCountdown(order, delaySec) {
-  const endTime = new Date(order.matching_end_time).getTime(); // ✏️ 改写
+function startMatchingCountdown(order) {
+  const endTime = new Date(order.matching_end_time).getTime();
 
   const tick = async () => {
     const remaining = Math.ceil((endTime - Date.now()) / 1000);
@@ -397,12 +397,6 @@ function startMatchingCountdown(order, delaySec) {
       requestAnimationFrame(tick);
     } else {
       setMatchingState(false);
-
-      // ❌ 删除：localStorage 清理
-      // localStorage.removeItem("matchingEndTime");
-      // localStorage.removeItem("matchingProductId");
-
-      // ✏️ 改写：更新订单为 pending
       await supabaseClient
         .from("orders")
         .update({ status: "pending" })
