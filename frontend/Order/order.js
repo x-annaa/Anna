@@ -377,3 +377,150 @@ async function confirmExchange() {
     if (confirmBtn) confirmBtn.disabled = false;
   }
 }
+
+/* ======================
+   轮次信息容器渲染
+   ====================== */
+function renderRoundContainer() {
+  if (document.getElementById("roundInfo")) return; // 已存在
+
+  const container = document.createElement("div");
+  container.id = "roundInfo";
+  container.style.cssText = "margin:10px 0; padding:10px; border:1px solid #ccc; border-radius:5px;";
+  container.innerHTML = `
+    <div>当前轮次: <span id="currentRound">-</span> / 总轮次: <span id="maxOrders">5</span></div>
+    <div>本轮完成: <span id="orderCount">0</span> / <span id="maxOrders2">5</span> 单</div>
+    <div><span id="cooldownMsg" style="color:red;"></span></div>
+  `;
+
+  const target = document.getElementById("orderResult") || document.body;
+  target.parentNode.insertBefore(container, target.nextSibling);
+}
+
+/* ======================
+   获取轮次信息并更新界面
+   ====================== */
+async function fetchRoundInfo(userId) {
+  if (!userId) return;
+
+  const { data: round, error } = await supabaseClient
+    .from("rounds")
+    .select("*")
+    .eq("user_id", userId)
+    .order("start_time", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error("获取轮次失败", error);
+    return;
+  }
+
+  if (!round) {
+    document.getElementById("currentRound").textContent = "-";
+    document.getElementById("orderCount").textContent = "0";
+    document.getElementById("cooldownMsg").textContent = "";
+    return;
+  }
+
+  const now = new Date();
+  const endTime = new Date(round.end_time);
+
+  // 更新轮次和已完成订单数
+  document.getElementById("currentRound").textContent = round.current_round;
+  document.getElementById("orderCount").textContent = round.order_count;
+  document.getElementById("maxOrders").textContent = round.max_orders;
+  document.getElementById("maxOrders2").textContent = round.max_orders;
+
+  // 判断是否冷却
+  if (now > endTime) {
+    document.getElementById("cooldownMsg").textContent = "等待下一轮开始…";
+  } else if (round.order_count >= round.max_orders) {
+    const secondsLeft = Math.ceil((endTime - now) / 1000);
+    document.getElementById("cooldownMsg").textContent = `本轮已满，请等待 ${secondsLeft} 秒`;
+  } else {
+    document.getElementById("cooldownMsg").textContent = "";
+  }
+}
+
+/* ======================
+   定时刷新轮次信息
+   ====================== */
+function startRoundAutoRefresh() {
+  renderRoundContainer();
+  setInterval(() => {
+    if (window.currentUserId) fetchRoundInfo(window.currentUserId);
+  }, 1000);
+}
+
+/* ======================
+   下单成功后刷新轮次
+   ====================== */
+async function postOrderRefresh() {
+  await fetchRoundInfo(window.currentUserId);
+  await checkPendingLock();
+  await loadLastOrder();
+  await loadRecentOrders();
+}
+
+/* ======================
+   修改 autoOrder 调用
+   ====================== */
+async function autoOrder() {
+  if (!window.currentUserId) { alert("请先登录！"); return; }
+  if (ordering) return;
+  ordering = true;
+  setOrderBtnDisabled(true, "下单中…");
+
+  try {
+    const getRandomProduct = async () => {
+      const { data: products, error } = await supabaseClient
+        .from("products")
+        .select("*")
+        .eq("enabled", true)
+        .eq("manual_only", false);
+
+      if (error || !products || products.length === 0) {
+        throw new Error("产品列表为空或读取失败！");
+      }
+
+      return products[Math.floor(Math.random() * products.length)];
+    };
+
+    const randomProduct = await getRandomProduct();
+    const { data, error } = await supabaseClient.rpc("try_create_order", {
+      p_user_id: window.currentUserId,
+      p_product_id: randomProduct.id
+    });
+
+    if (error) throw new Error(error.message);
+
+    if (!data.success) {
+      if (data.message === "冷却中") {
+        alert(`⚠️ 冷却中，还剩 ${data.remaining_seconds} 秒`);
+      } else {
+        alert("❌ " + data.message);
+      }
+      return;
+    }
+
+    alert(`✅ 下单成功，订单ID=${data.order_id} (${data.round_orders}/${data.max_orders})`);
+
+    // ✅ 下单成功后刷新轮次
+    await postOrderRefresh();
+
+  } catch (e) {
+    alert(e.message || "下单失败");
+  } finally {
+    ordering = false;
+    setOrderBtnDisabled(false);
+  }
+}
+
+/* ======================
+   页面初始化
+   ====================== */
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
+  startRoundAutoRefresh();
+});
