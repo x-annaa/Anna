@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>U9 - HOME</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+  <!-- 正确引入 Supabase v2 SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body { font-family: Arial, sans-serif; background: #f8f9fa; text-align: center; padding: 40px; }
     h2 { margin-bottom: 20px; }
@@ -37,7 +38,9 @@
   // ===== Supabase 初始化 =====
   const SUPABASE_URL = "https://ofaxbeydyeajdgwwqrzz.supabase.co";
   const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9mYXhiZXlkeWVhamRnd3dxcnp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NzQxMTQsImV4cCI6MjA3NDA1MDExNH0.mJGdh6BBEy2Mp83H7aBEo3wIFyIsUsVfqgTErgsvFdY";
-  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const { createClient } = supabase;
+  const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
   let currentUser = null;
   let currentOrder = null;
@@ -105,7 +108,7 @@
     loadBalance();
 
     // 倒计时
-    let countdown = 5; // 这里写死5秒，你可以改成任务表的 countdown
+    let countdown = 5; // 默认5秒（你之后可以改成任务表的 countdown）
     document.getElementById("countdown").innerText = "倒计时：" + countdown + "秒";
     document.getElementById("order-btn").style.display = "none";
     document.getElementById("complete-btn").style.display = "block";
