@@ -95,12 +95,41 @@ function isRoundExpired() {
   return (Date.now() - Number(window.roundStartTime)) > window.ROUND_DURATION;
 }
 
-function startNewRound() {
-  const uuid = crypto.randomUUID();
-  window.currentRoundId = uuid;
-  window.roundStartTime = Date.now();
-  localStorage.setItem("currentRoundId", uuid);
-  localStorage.setItem("roundStartTime", window.roundStartTime);
+async function startNewRound() {
+  try {
+    // 查询是否存在 active 轮次
+    const { data: activeRound, error } = await supabaseClient
+      .from("rounds")
+      .select("*")
+      .eq("status", "active")
+      .limit(1)
+      .single();
+
+    if (error && !activeRound) throw error;
+
+    let roundId, startTime;
+    if (activeRound) {
+      roundId = activeRound.id;
+      startTime = new Date(activeRound.start_time).getTime();
+    } else {
+      // 创建新的轮次
+      const { data: newRound, error: insErr } = await supabaseClient
+        .from("rounds")
+        .insert({})
+        .select("id, start_time")
+        .single();
+      if (insErr) throw insErr;
+      roundId = newRound.id;
+      startTime = new Date(newRound.start_time).getTime();
+    }
+
+    window.currentRoundId = roundId;
+    window.roundStartTime = startTime;
+    localStorage.setItem("currentRoundId", roundId);
+    localStorage.setItem("roundStartTime", startTime);
+  } catch (e) {
+    console.error("⚠️ 初始化轮次失败：", e.message);
+  }
 }
 
 /* ======================
