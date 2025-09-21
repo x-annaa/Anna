@@ -1,1 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>U9 刷单平台</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  body { font-family: Arial; background: #f0f2f5; margin: 0; padding: 0; }
+  .container { max-width: 600px; margin: 50px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+  h2 { text-align: center; }
+  button { padding: 10px 20px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; }
+  button:hover { opacity: 0.9; }
+  .order-card { border: 1px solid #ccc; padding: 15px; border-radius: 6px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+  .completed { background: #e0ffe0; }
+</style>
+</head>
+<body>
 
+<div class="container">
+  <h2>U9 刷单平台</h2>
+  <div>
+    <strong>当前 Coins: </strong><span id="user-coins">0</span>
+  </div>
+  <button id="btn-create-order" style="background:#007bff;color:white;">生成订单</button>
+  <div id="orders-list"></div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://ofaxbeydyeajdgwwqrzz.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9mYXhiZXlkeWVhamRnd3dxcnp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NzQxMTQsImV4cCI6MjA3NDA1MDExNH0.mJGdh6BBEy2Mp83H7aBEo3wIFyIsUsVfqgTErgsvFdY";
+const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let userId = localStorage.getItem("user_id");
+let countdownTimers = {};
+
+async function fetchUser() {
+  const { data, error } = await supabase.from('users').select('*').eq('id', userId).single();
+  if (error) return alert("获取用户信息失败：" + error.message);
+  document.getElementById("user-coins").innerText = data.coins;
+  return data;
+}
+
+async function fetchOrders() {
+  const { data, error } = await supabase.from('orders')
+    .select('*, products(*)')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+  if (error) return alert("获取订单失败：" + error.message);
+  renderOrders(data);
+}
+
+function renderOrders(orders) {
+  const list = document.getElementById('orders-list');
+  list.innerHTML = '';
+  orders.forEach(order => {
+    const div = document.createElement('div');
+    div.className = 'order-card ' + (order.status === 'completed' ? 'completed' : '');
+    div.innerHTML = `
+      <div>
+        <strong>${order.products.name}</strong><br>
+        价格: ${order.products.price} | 利润: ${order.products.profit}<br>
+        状态: ${order.status} 
+        <span id="countdown-${order.id}"></span>
+      </div>
+      ${order.status === 'pending' ? `<button onclick="completeOrder('${order.id}', ${order.products.price}, ${order.products.profit})" style="background:#28a745;color:white;">完成订单</button>` : ''}
+    `;
+    list.appendChild(div);
+    if (order.status === 'pending') startCountdown(order.id, 10); // 默认倒计时 10 秒
+  });
+}
+
+function startCountdown(orderId, seconds) {
+  const countdownEl = document.getElementById(`countdown-${orderId}`);
+  let remaining = seconds;
+  countdownEl.innerText = ` | 倒计时: ${remaining}s`;
+  countdownTimers[orderId] = setInterval(() => {
+    remaining--;
+    if (remaining <= 0) {
+      clearInterval(countdownTimers[orderId]);
+      countdownEl.innerText = ' | 倒计时结束';
+    } else {
+      countdownEl.innerText = ` | 倒计时: ${remaining}s`;
+    }
+  }, 1000);
+}
+
+async function createOrder() {
+  const user = await fetchUser();
+  // 1. 获取当前任务
+  const { data: task } = await supabase.from('tasks')
+    .select('*').eq('user_id', userId).order('start_time', { ascending: false }).limit(1).single();
+
+  if (!task) return alert("请先创建任务");
+  const orderIndex = task.completed_orders + 1;
+
+  // 2. 检查手动匹配
+  let { data: manual } = await supabase.from('manual_assignments')
+    .select('*').eq('user_id', userId).eq('order_index', orderIndex).maybeSingle();
+
+  let product;
+  if (manual) {
+    const { data } = await supabase.from('products').select('*').eq('id', manual.product_id).single();
+    product = data;
+  } else {
+    const { data } = await supabase.from('products').select('*');
+    product = data[Math.floor(Math.random() * data.length)];
+  }
+
+  // 3. 扣除 Coins
+  await supabase.rpc('deduct_coins', { uid: userId, amount: product.price });
+
+  // 4. 插入订单
+  await supabase.from('orders').insert([{ user_id: userId, product_id: product.id }]);
+
+  fetchUser();
+  fetchOrders();
+}
+
+async function completeOrder(orderId, price, profit) {
+  const user = await fetchUser();
+  if (user.coins < 0) {
+    const deficit = Math.abs(user.coins);
+    const recharge = prompt(`余额不足，请充值 ${deficit} Coins`);
+    if (Number(recharge) < deficit) return alert("充值不足");
+    await supabase.rpc('add_coins', { uid: userId, amount: recharge });
+  }
+
+  // 完成订单，加利润
+  await supabase.rpc('add_coins', { uid: userId, amount: profit });
+  await supabase.from('orders').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', orderId);
+
+  // 更新任务完成数
+  const { data: task } = await supabase.from('tasks')
+    .select('*').eq('user_id', userId).order('start_time', { ascending: false }).limit(1).single();
+  await supabase.from('tasks').update({ completed_orders: task.completed_orders + 1 }).eq('id', task.id);
+
+  fetchUser();
+  fetchOrders();
+}
+
+fetchUser();
+fetchOrders();
+
+document.getElementById('btn-create-order').addEventListener('click', createOrder);
+</script>
+</body>
+</html>
