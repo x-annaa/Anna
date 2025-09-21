@@ -97,15 +97,14 @@ function isRoundExpired() {
 
 async function startNewRound() {
   try {
-    // 查询是否存在 active 轮次
-    const { data: activeRound, error } = await supabaseClient
+    // 查询数据库是否有 active 轮次
+    const { data: activeRound } = await supabaseClient
       .from("rounds")
       .select("*")
       .eq("status", "active")
+      .order("start_time", { ascending: false })
       .limit(1)
       .single();
-
-    if (error && !activeRound) throw error;
 
     let roundId, startTime;
     if (activeRound) {
@@ -113,16 +112,16 @@ async function startNewRound() {
       startTime = new Date(activeRound.start_time).getTime();
     } else {
       // 创建新的轮次
-      const { data: newRound, error: insErr } = await supabaseClient
+      const { data: newRound } = await supabaseClient
         .from("rounds")
         .insert({})
         .select("id, start_time")
         .single();
-      if (insErr) throw insErr;
       roundId = newRound.id;
       startTime = new Date(newRound.start_time).getTime();
     }
 
+    // **更新 localStorage 及全局变量**
     window.currentRoundId = roundId;
     window.roundStartTime = startTime;
     localStorage.setItem("currentRoundId", roundId);
@@ -131,6 +130,7 @@ async function startNewRound() {
     console.error("⚠️ 初始化轮次失败：", e.message);
   }
 }
+
 
 /* ======================
    获取用户规则产品
