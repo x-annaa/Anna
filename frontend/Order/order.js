@@ -396,3 +396,39 @@ function renderRoundContainer() {
   const target = document.getElementById("orderResult") || document.body;
   target.parentNode.insertBefore(container, target.nextSibling);
 }
+
+/* ======================
+   轮次显示
+   ====================== */
+async function renderCurrentRound() {
+  if (!window.currentUserId) return;
+
+  try {
+    // 获取最近一轮
+    const { data: round, error } = await supabaseClient
+      .from("rounds")
+      .select("current_round")
+      .eq("user_id", window.currentUserId)
+      .order("start_time", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      console.error("获取轮次失败", error);
+      return;
+    }
+
+    const currentRoundEl = document.getElementById("currentRound");
+    if (currentRoundEl) {
+      currentRoundEl.textContent = round?.current_round?.toString() || "0";
+    }
+
+  } catch (e) {
+    console.error("轮次渲染异常", e);
+  }
+}
+
+// 页面加载时调用
+document.addEventListener("DOMContentLoaded", () => {
+  renderCurrentRound();
+});
