@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>U9</title>
 
-  <!-- CSS 部分 --> 
+  <!-- css 部分 --> 
   <link rel="stylesheet" href="Home/home.css">
   <link rel="stylesheet" href="About/about.css">
   <link rel="stylesheet" href="Order/order.css">
@@ -33,7 +33,7 @@
       </button>
     </div>
 
-    <!-- 聊天窗口 -->
+    <!-- 聊天窗口（默认隐藏） -->
     <div id="chatWindow" class="chat-window hidden">
       <div class="chat-header">
         <button id="backBtn">⬅ 返回</button>
@@ -51,9 +51,6 @@
   <div id="orderPage" class="page">
     <div class="order-header">
       <h2>📦 ORDER</h2>
-      <div id="roundProgress" style="margin-bottom: 10px; font-weight: bold;">
-        本轮完成订单：加载中...
-      </div>
       <div class="coins-box">
         💰 Coins: <span id="ordercoins">0</span>
         <button id="addCoinsBtn" title="从余额兑换Coins">+</button>
@@ -62,11 +59,6 @@
 
     <div class="order-actions">
       <button id="autoOrderBtn">🎲 一键刷单</button>
-      <p id="cooldownDisplay" style="color:red; font-weight:bold;"></p>
-    </div>
-
-    <div id="matchingGif" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:999;">
-      <img src="https://ffdrwsemmfvqlqhyjlnb.supabase.co/storage/v1/object/public/Product%20Photos/Qbox.gif" alt="正在匹配..." style="width:150px; height:150px;">
     </div>
 
     <div id="orderResult" class="order-result"></div>
@@ -78,40 +70,33 @@
       </ul>
     </div>
 
-    <!-- Balance / Coins 兑换弹窗 -->
     <div id="addCoinsModal" class="modal">
       <div class="modal-content">
-        <h3>兑换 Coins / Balance</h3>
-
-        <!-- 横排切换按钮 -->
-        <div class="exchange-toggle">
-          <button id="balanceToCoinsBtn" class="exchange-btn active" data-type="toCoins">Balance → Coins</button>
-          <button id="coinsToBalanceBtn" class="exchange-btn" data-type="toBalance">Coins → Balance</button>
-        </div>
-
+        <h3>兑换 Coins</h3>
         <p>请输入要兑换的数量：</p>
         <input type="number" id="addCoinsInput" min="1" placeholder="输入数量" />
-
         <div class="modal-actions">
-          <button id="cancelExchange">取消</button>
-          <button id="confirmExchange">确认</button>
+          <button id="cancelAddCoins">取消</button>
+          <button id="confirmAddCoins">确认</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- 关于我们页面 -->
+  <!-- 关于我们 -->
   <div id="msgPage" class="page">ℹ️ 关于我们</div>
 
   <!-- 我的页面 -->
   <div id="myPage" class="page">
     <h2>👤 我的页面</h2>
 
+    <!-- 用户信息 -->
     <div class="user-info">
       <p class="username"><strong>用户名：</strong><span id="username">加载中...</span></p>
       <p class="platform"><strong>平台账号：</strong><span id="platformAccount">加载中...</span></p>
     </div>
 
+    <!-- 余额和提现区域 -->
     <div class="balance-box">
       <p><strong>Balance：</strong><span id="balance">0.00</span></p>
       <div class="balance-actions">
@@ -134,7 +119,7 @@
     </div>
   </div>
 
-  <!-- 提现弹窗 -->
+  <!-- 提现窗口 -->
   <div id="withdrawModal" class="modal">
     <div class="modal-content">
       <h3>提现</h3>
@@ -149,7 +134,7 @@
     </div>
   </div>
 
-  <!-- 设置密码弹窗 -->
+  <!-- 设置密码窗口 -->
   <div id="setPasswordModal" class="modal">
     <div class="modal-content">
       <h3>设置提现密码</h3>
@@ -162,7 +147,7 @@
     </div>
   </div>
 
-  <!-- 更新密码弹窗 -->
+  <!-- 更新密码窗口 -->
   <div id="updatePasswordModal" class="modal">
     <div class="modal-content">
       <h3>更改提现密码</h3>
@@ -176,7 +161,7 @@
     </div>
   </div>
 
-  <!-- 确认提现密码弹窗 -->
+  <!-- 确认提现密码窗口 -->
   <div id="confirmPwdModal" class="modal">
     <div class="modal-content">
       <h3>输入提现密码</h3>
@@ -188,7 +173,7 @@
     </div>
   </div>
 
-  <!-- 充值弹窗 -->
+  <!-- 充值窗口 -->
   <div id="rechargeModal" class="modal">
     <div class="modal-content">
       <h3>充值</h3>
@@ -221,5 +206,6 @@
   <script src="Me/me.js"></script>
   <script src="Button/button.js"></script>
   <script src="Recharge/recharge.js"></script>
+  
 </body>
 </html>
