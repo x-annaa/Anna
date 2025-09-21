@@ -308,3 +308,39 @@ button:disabled {
 .exchange-btn:not(.active):hover {
   background-color: #bdbdbd;
 }
+
+/* 轮次 + 下单按钮容器 */
+.round-order-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 12px 20px;
+  margin: 15px 0;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* 左侧轮次信息 */
+.round-info p {
+  margin: 6px 0;
+  font-size: 15px;
+}
+
+/* 右侧按钮 */
+.round-order-container .order-actions button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  background-color: #1976d2;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.round-order-container .order-actions button:hover {
+  background-color: #1565c0;
+}
+
