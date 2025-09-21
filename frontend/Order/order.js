@@ -710,21 +710,23 @@ async function loadCoinsOrderPage() {
 async function loadLastOrder() {
   if (!window.currentUserId) return;
 
-  const { data: orders } = await supabaseClient
+  const { data: orders, error: ordersError } = await supabaseClient
     .from("orders")
     .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
     .eq("user_id", window.currentUserId)
     .order("created_at", { ascending: false })
     .limit(1);
+  if (ordersError) console.error("加载最近订单失败：", ordersError);
 
   let filterCol = window.currentUserUUID ? "uuid" : "id";
   let filterVal = window.currentUserUUID || window.currentUserId;
 
-  const { data: user } = await supabaseClient
+  const { data: user, error: userError } = await supabaseClient
     .from("users")
     .select("coins")
     .eq(filterCol, filterVal)
     .single();
+  if (userError) console.error("加载用户 Coins 失败：", userError);
 
   if (orders?.length) renderLastOrder(orders[0], user?.coins ?? 0);
   else document.getElementById("orderResult").innerHTML = "";
