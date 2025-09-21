@@ -369,9 +369,17 @@ async function autoOrder() {
         matching_end_time: matchingEnd,
         round_id: window.currentRoundId,
       })
-      .select("id, matching_end_time, products (name)")
+      .select("id, matching_end_time, product_id")
       .single();
     if (error) throw error;
+
+    // 🔹 手动查询产品信息
+    const { data: prod } = await supabaseClient
+      .from("products")
+      .select("name")
+      .eq("id", newOrder.product_id)
+      .single();
+    newOrder.product = prod;
 
     // 🔹 启动匹配倒计时
     startMatchingCountdown(newOrder, delaySec);
@@ -411,12 +419,12 @@ function startMatchingCountdown(order) {
 }
 
 /* ======================
-   页面刷新恢复匹配状态
+   页面刷新恢复匹配状态（双查询版）
    ====================== */
 async function restoreMatchingIfAny() {
   const { data: order } = await supabaseClient
     .from("orders")
-    .select("id, matching_end_time, products (name)")
+    .select("id, matching_end_time, product_id")
     .eq("user_id", window.currentUserId)
     .eq("status", "matching")
     .order("created_at", { ascending: false })
@@ -424,6 +432,14 @@ async function restoreMatchingIfAny() {
     .single();
 
   if (order) {
+    // 手动查询产品信息
+    const { data: prod } = await supabaseClient
+      .from("products")
+      .select("name")
+      .eq("id", order.product_id)
+      .single();
+    order.product = prod;
+
     const remainingSec = Math.ceil((new Date(order.matching_end_time).getTime() - Date.now()) / 1000);
     if (remainingSec > 0) {
       startMatchingCountdown(order, remainingSec);
@@ -438,9 +454,6 @@ async function restoreMatchingIfAny() {
     }
   }
 }
-
-// 页面加载时恢复匹配状态
-document.addEventListener("DOMContentLoaded", restoreMatchingIfAny);
 
 /* ======================
    冷却倒计时函数
