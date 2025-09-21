@@ -398,12 +398,13 @@ function renderRoundContainer() {
 }
 
 /* ======================
-   轮次显示
+   渲染当前轮次信息
    ====================== */
 async function renderCurrentRound() {
   if (!window.currentUserId) return;
 
   try {
+    // 获取用户最近一轮
     const { data: round, error } = await supabaseClient
       .from("rounds")
       .select("current_round, max_orders_per_round, orders_in_round")
@@ -417,15 +418,29 @@ async function renderCurrentRound() {
       return;
     }
 
-    document.getElementById("currentRound")!.textContent = round?.current_round?.toString() || "0";
-    document.getElementById("maxOrders")!.textContent = round?.max_orders_per_round?.toString() || "0";
-    document.getElementById("orderCount")!.textContent = round?.orders_in_round?.toString() || "0";
+    // 更新 DOM
+    const currentRoundEl = document.getElementById("currentRound");
+    const maxOrdersEl = document.getElementById("maxOrders");
+    const orderCountEl = document.getElementById("orderCount");
+
+    if (currentRoundEl) {
+      currentRoundEl.textContent = (round && round.current_round) ? round.current_round.toString() : "0";
+    }
+
+    if (maxOrdersEl) {
+      maxOrdersEl.textContent = (round && round.max_orders_per_round) ? round.max_orders_per_round.toString() : "0";
+    }
+
+    if (orderCountEl) {
+      orderCountEl.textContent = (round && round.orders_in_round) ? round.orders_in_round.toString() : "0";
+    }
 
   } catch (e) {
     console.error("轮次渲染异常", e);
   }
 }
 
+// 页面加载时调用
 document.addEventListener("DOMContentLoaded", () => {
   renderCurrentRound();
 });
