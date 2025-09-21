@@ -417,23 +417,29 @@ function startMatchingCountdown(product, delaySec) {
 /* ======================
    页面刷新恢复匹配状态
    ====================== */
-function restoreMatchingIfAny() {
-  const endTime = Number(localStorage.getItem("matchingEndTime"));
-  const productId = localStorage.getItem("matchingProductId");
+async function restoreMatchingIfAny() {
+  const { data: order } = await supabaseClient
+    .from("orders")
+    .select("id, matching_end_time, products (name)")
+    .eq("user_id", window.currentUserId)
+    .eq("status", "matching")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single();
 
-  if (endTime && productId && endTime > Date.now()) {
-    const delaySec = Math.ceil((endTime - Date.now()) / 1000);
-    // 获取产品信息再启动倒计时
-    supabaseClient.from("products").select("*").eq("id", productId).single()
-      .then(({ data, error }) => {
-        if (!error && data) startMatchingCountdown(data, delaySec);
-      });
-  } else if (endTime && productId) {
-    // 匹配已结束但可能未生成订单
-    supabaseClient.from("products").select("*").eq("id", productId).single()
-      .then(({ data, error }) => { if (!error && data) finalizeMatchedOrder(data); });
-    localStorage.removeItem("matchingEndTime");
-    localStorage.removeItem("matchingProductId");
+  if (order) {
+    const remainingSec = Math.ceil((new Date(order.matching_end_time).getTime() - Date.now()) / 1000);
+    if (remainingSec > 0) {
+      startMatchingCountdown(order, remainingSec);
+    } else {
+      // 超时，直接变为 pending
+      await supabaseClient
+        .from("orders")
+        .update({ status: "pending" })
+        .eq("id", order.id)
+        .eq("status", "matching");
+      await loadLastOrder();
+    }
   }
 }
 
