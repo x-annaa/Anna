@@ -273,9 +273,6 @@ async function checkPendingLock() {
 /* ======================
    订单
    ====================== */
-/* ======================
-   自动下单（支持刷新保持匹配倒计时）
-   ====================== */
 async function autoOrder() {
   if (!window.currentUserId) {
     alert("请先登录！");
@@ -390,24 +387,29 @@ async function autoOrder() {
 /* ======================
    匹配倒计时函数（刷新保持状态）
    ====================== */
-function startMatchingCountdown(product, delaySec) {
-  const endTime = Date.now() + delaySec * 1000;
-  const btn = document.getElementById("autoOrderBtn");
-  const gifEl = document.getElementById("matchingGif");
+function startMatchingCountdown(order, delaySec) {
+  const endTime = new Date(order.matching_end_time).getTime(); // ✏️ 改写
 
-  const tick = () => {
+  const tick = async () => {
     const remaining = Math.ceil((endTime - Date.now()) / 1000);
-
     if (remaining > 0) {
-      setMatchingState(true); // ✅ 使用统一函数显示匹配状态
+      setMatchingState(true);
       requestAnimationFrame(tick);
     } else {
-      setMatchingState(false); // 匹配完成，恢复按钮
-      localStorage.removeItem("matchingEndTime");
-      localStorage.removeItem("matchingProductId");
+      setMatchingState(false);
 
-      // 下单逻辑
-      finalizeMatchedOrder(product);
+      // ❌ 删除：localStorage 清理
+      // localStorage.removeItem("matchingEndTime");
+      // localStorage.removeItem("matchingProductId");
+
+      // ✏️ 改写：更新订单为 pending
+      await supabaseClient
+        .from("orders")
+        .update({ status: "pending" })
+        .eq("id", order.id)
+        .eq("status", "matching");
+      await loadLastOrder();
+      await checkPendingLock();
     }
   };
 
