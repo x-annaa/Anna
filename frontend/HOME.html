@@ -38,7 +38,6 @@
   // ===== Supabase 初始化 =====
   const SUPABASE_URL = "https://ofaxbeydyeajdgwwqrzz.supabase.co";
   const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9mYXhiZXlkeWVhamRnd3dxcnp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NzQxMTQsImV4cCI6MjA3NDA1MDExNH0.mJGdh6BBEy2Mp83H7aBEo3wIFyIsUsVfqgTErgsvFdY";
-
   const { createClient } = supabase;
   const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -46,14 +45,14 @@
   let currentOrder = null;
   let countdownTimer = null;
 
-  // 页面加载时获取当前用户
+  // 页面加载时获取当前用户（用 localStorage 存的 user_id）
   (async () => {
-    const { data: { user } } = await supabaseClient.auth.getUser();
-    if (!user) {
+    const userId = localStorage.getItem("user_id");
+    if (!userId) {
       window.location.href = "../index.html";
       return;
     }
-    currentUser = user;
+    currentUser = { id: userId };
     loadBalance();
   })();
 
@@ -148,7 +147,7 @@
 
   // 退出登录
   document.getElementById("logout-btn").addEventListener("click", async () => {
-    await supabaseClient.auth.signOut();
+    localStorage.removeItem("user_id"); // 清除登录状态
     window.location.href = "../index.html";
   });
 </script>
