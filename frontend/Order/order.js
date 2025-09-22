@@ -22,12 +22,15 @@ async function loadRoundConfig() {
     const { data, error } = await supabaseClient.rpc("get_round_config");
     if (error) throw error;
 
-    window.ORDERS_PER_ROUND = Number(data.orders_per_round);
-    window.ROUND_DURATION_MINUTES = Number(data.round_duration_minutes);
+    const config = data?.[0]; // ⚠️ 取数组第一个元素
+    if (!config) throw new Error("未获取到轮次配置");
+
+    window.ORDERS_PER_ROUND = Number(config.orders_per_round);
+    window.ROUND_DURATION_MINUTES = Number(config.round_duration_minutes);
     window.ROUND_DURATION = window.ROUND_DURATION_MINUTES * 60 * 1000;
 
-    window.MATCH_MIN_SECONDS = Number(data.match_min) || 5;
-    window.MATCH_MAX_SECONDS = Number(data.match_max) || 15;
+    window.MATCH_MIN_SECONDS = Number(config.match_min) || 5;
+    window.MATCH_MAX_SECONDS = Number(config.match_max) || 15;
 
     console.log("✅ 配置已加载：", {
       ORDERS_PER_ROUND: window.ORDERS_PER_ROUND,
@@ -39,6 +42,7 @@ async function loadRoundConfig() {
   } catch (e) {
     console.error("❌ 读取配置失败", e.message);
 
+    // 默认值
     window.ORDERS_PER_ROUND = 3;
     window.ROUND_DURATION_MINUTES = 5;
     window.ROUND_DURATION = 5 * 60 * 1000;
