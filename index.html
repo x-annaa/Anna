@@ -1,117 +1,93 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <title>U9 - 注册 / 登录</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="index.css" />
-
-  <!-- Supabase SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <!-- 初始化 Supabase -->
-  <script src="supabaseClient.js" defer></script>
-
-  <style>
-    body { font-family: Arial, sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; }
-    .container { background: #fff; padding: 2rem; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
-    h2 { text-align: center; margin-bottom: 1rem; }
-    input { width: 100%; padding: 0.5rem; margin: 0.5rem 0; border-radius: 5px; border: 1px solid #ccc; }
-    button { width: 100%; padding: 0.7rem; margin-top: 1rem; border: none; border-radius: 5px; background: #4caf50; color: #fff; font-size: 1rem; cursor: pointer; }
-    button:hover { background: #45a049; }
-    .toggle { text-align: center; margin-top: 1rem; cursor: pointer; color: #007bff; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>登录 / 注册</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+  .container { background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); width: 320px; }
+  h2 { text-align: center; margin-bottom: 1rem; }
+  input { width: 100%; padding: 0.5rem; margin: 0.5rem 0; border-radius: 5px; border: 1px solid #ccc; }
+  button { width: 100%; padding: 0.5rem; margin-top: 1rem; border: none; border-radius: 5px; background-color: #4CAF50; color: white; cursor: pointer; }
+  button:hover { background-color: #45a049; }
+  .toggle { text-align: center; margin-top: 1rem; color: #555; cursor: pointer; font-size: 0.9rem; }
+</style>
 </head>
 <body>
-  <div class="container">
-    <h2 id="formTitle">注册</h2>
-    <input type="text" id="username" placeholder="用户名" required />
-    <input type="password" id="password" placeholder="密码" required />
-    <button id="submitBtn">注册</button>
-    <div class="toggle" id="toggleForm">已有账号？点击登录</div>
-  </div>
 
-  <script>
-    let isLogin = false; // false: 注册, true: 登录
+<div class="container">
+  <h2 id="formTitle">登录</h2>
+  <input type="text" id="username" placeholder="用户名">
+  <input type="password" id="password" placeholder="密码">
+  <button id="submitBtn">登录</button>
+  <div class="toggle" id="toggleForm">没有账号？点这里注册</div>
+</div>
 
-    const formTitle = document.getElementById("formTitle");
-    const usernameInput = document.getElementById("username");
-    const passwordInput = document.getElementById("password");
-    const submitBtn = document.getElementById("submitBtn");
-    const toggleForm = document.getElementById("toggleForm");
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+<script src="./supabaseClient.js"></script>
+<script>
+  let isLogin = true; // 默认登录
 
-    toggleForm.addEventListener("click", () => {
-      isLogin = !isLogin;
-      formTitle.textContent = isLogin ? "登录" : "注册";
-      submitBtn.textContent = isLogin ? "登录" : "注册";
-      toggleForm.textContent = isLogin ? "没有账号？点击注册" : "已有账号？点击登录";
-    });
+  const formTitle = document.getElementById("formTitle");
+  const submitBtn = document.getElementById("submitBtn");
+  const toggleForm = document.getElementById("toggleForm");
 
-    submitBtn.addEventListener("click", async () => {
-      const username = usernameInput.value.trim();
-      const password = passwordInput.value.trim();
+  toggleForm.addEventListener("click", () => {
+    isLogin = !isLogin;
+    formTitle.textContent = isLogin ? "登录" : "注册";
+    submitBtn.textContent = isLogin ? "登录" : "注册";
+    toggleForm.textContent = isLogin ? "没有账号？点这里注册" : "已有账号？点这里登录";
+  });
 
-      if (!username || !password) {
-        alert("用户名和密码不能为空！");
-        return;
+  submitBtn.addEventListener("click", async () => {
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+    if (!username || !password) { alert("请输入用户名和密码"); return; }
+
+    try {
+      if (isLogin) {
+        // 登录
+        const { data, error } = await supabaseClient
+          .from("users")
+          .select("*")
+          .eq("username", username)
+          .eq("password", password) // 明文密码示例
+          .single();
+        if (error || !data) { alert("用户名或密码错误"); return; }
+
+        localStorage.setItem("currentUserId", data.id);
+        localStorage.setItem("currentUser", data.username);
+        localStorage.setItem("currentUserUUID", data.uuid);
+
+        window.location.href = "./frontend/HOME.html";
+      } else {
+        // 注册
+        const { data: existing } = await supabaseClient
+          .from("users")
+          .select("*")
+          .eq("username", username)
+          .single();
+        if (existing) { alert("用户名已存在"); return; }
+
+        const { data, error } = await supabaseClient
+          .from("users")
+          .insert([{ username, password, coins: 100, balance: 50 }])
+          .select()
+          .single();
+        if (error) throw error;
+
+        alert("注册成功，请登录");
+        isLogin = true;
+        formTitle.textContent = "登录";
+        submitBtn.textContent = "登录";
+        toggleForm.textContent = "没有账号？点这里注册";
       }
+    } catch (e) {
+      alert("操作失败：" + e.message);
+    }
+  });
+</script>
 
-      try {
-        if (!window.supabaseClient) throw new Error("Supabase 未初始化");
-
-        if (isLogin) {
-          // 登录
-          const { data: user, error } = await supabaseClient
-            .from("users")
-            .select("*")
-            .eq("username", username)
-            .single();
-
-          if (error || !user) throw new Error("用户名不存在");
-          
-          // 简单密码验证（建议用 hash 后存储）
-          if (user.password_hash !== password) throw new Error("密码错误");
-
-          // 保存登录状态
-          localStorage.setItem("currentUserId", user.id);
-          localStorage.setItem("currentUser", user.username);
-          localStorage.setItem("currentUserUUID", user.uuid);
-
-          alert("登录成功！");
-          window.location.href = "frontend/HOME.html";
-
-        } else {
-          // 注册
-          // 检查用户名是否存在
-          const { data: existing, error: existErr } = await supabaseClient
-            .from("users")
-            .select("id")
-            .eq("username", username)
-            .single();
-          if (existing) throw new Error("用户名已存在");
-
-          // 插入新用户
-          const { data: newUser, error } = await supabaseClient
-            .from("users")
-            .insert({
-              username: username,
-              password_hash: password
-            })
-            .select()
-            .single();
-          
-          if (error) throw error;
-
-          localStorage.setItem("currentUserId", newUser.id);
-          localStorage.setItem("currentUser", newUser.username);
-          localStorage.setItem("currentUserUUID", newUser.uuid);
-
-          alert("注册成功！");
-          window.location.href = "frontend/HOME.html";
-        }
-      } catch (e) {
-        alert(e.message || "操作失败");
-      }
-    });
-  </script>
 </body>
 </html>
