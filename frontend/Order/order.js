@@ -1,16 +1,16 @@
 /* ====================== 1.初始化用户信息 ====================== */
 window.currentUserId = localStorage.getItem("currentUserId");
 window.currentUsername = localStorage.getItem("currentUser");
-window.currentUserUUID = localStorage.getItem("currentUserUUID"); // 新增 UUID
+window.currentUserUUID = localStorage.getItem("currentUserUUID"); 
 
-let ordering = false;      // 下单中的并发保护
-let completing = false;    // 完成订单中的并发保护
-let exchanging = false;    // Balance <-> Coins 兑换中的并发保护
-let cooldownTimer = null;  // 冷却倒计时
+let ordering = false;
+let completing = false;
+let exchanging = false;
+let cooldownTimer = null;
 
 // 默认轮次配置
 window.ORDERS_PER_ROUND = 3;
-window.ROUND_DURATION = 5 * 60 * 1000; // 毫秒
+window.ROUND_DURATION = 5 * 60 * 1000;
 
 if (!window.supabaseClient) {
   console.error("❌ supabaseClient 未初始化！");
@@ -218,13 +218,7 @@ async function canExchangeThisRound() {
   }
 }
 
-
-/* ====================== 10.已删除 ====================== */
-
-
-/* ====================== 11.页面事件绑定 ✅ async 修复 ====================== */
-/* ====================== 11/21. 页面事件绑定 & 弹窗函数 ====================== */
-
+/* ====================== 10. 页面事件绑定 & 弹窗函数 ====================== */
 // 当前兑换方向，默认 Coins → Balance
 let currentExchangeDirection = "toBalance";
 
@@ -274,7 +268,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await startNewRound(); // 初始化时开启一轮
 });
 
-/* ====================== 12.检查 pending 锁定 ====================== */
+/* ====================== 11.检查 pending 锁定 ====================== */
 async function checkPendingLock() {
   if (!window.currentUserId) return;
 
@@ -292,7 +286,7 @@ async function checkPendingLock() {
   }
 }
 
-/* ====================== 13.订单 ====================== */
+/* ====================== 12.订单 ====================== */
 async function autoOrder() {
   if (!window.currentUserId) {
     alert("请先登录！");
@@ -382,9 +376,7 @@ async function autoOrder() {
   }
 }
 
-/* ====================== 14.已删除 ====================== */
-
-/* ====================== 15.页面刷新恢复匹配状态 ====================== */
+/* ====================== 13.页面刷新恢复匹配状态 ====================== */
 function restoreMatchingIfAny() {
   const endTime = Number(localStorage.getItem("matchingEndTime"));
   const productId = localStorage.getItem("matchingProductId");
@@ -405,7 +397,7 @@ function restoreMatchingIfAny() {
   }
 }
 
-/* ====================== 16.匹配完成后调用 RPC 生成订单 ====================== */
+/* ====================== 14.匹配完成后调用 RPC 生成订单 ====================== */
 function startMatchingCountdown(product, delaySec) {
   const endTime = Date.now() + delaySec * 1000;
   const btn = document.getElementById("autoOrderBtn");
@@ -493,7 +485,7 @@ async function finalizeMatchedOrder(product) {
   }
 }
 
-/* ====================== 17.开启新轮次 ====================== */
+/* ====================== 15.开启新轮次 ====================== */
 async function startNewRound() {
   if (!window.currentUserUUID) return;
 
@@ -516,7 +508,7 @@ async function startNewRound() {
 }
 
 
-/* ====================== 18.刷新兑换按钮可用状态 ====================== */
+/* ====================== 16.刷新兑换按钮可用状态 ====================== */
 async function refreshExchangeUI() {
   if (!window.currentUserUUID) return;
 
@@ -532,11 +524,7 @@ async function refreshExchangeUI() {
   }
 }
 
-
-/* ====================== 19.已删除 ====================== */
-
-
-/* ====================== 20.兑换逻辑 Coins ↔ Balance ====================== */
+/* ====================== 17.兑换逻辑 Coins ↔ Balance ====================== */
 async function confirmExchange() {
   if (exchanging) return;
   exchanging = true;
@@ -608,7 +596,7 @@ async function confirmExchange() {
   }
 }
 
-/* ====================== 22.页面刷新工具 ====================== */
+/* ====================== 18.页面刷新工具 ====================== */
 async function refreshAll() {
   await loadRoundConfig();
   await loadCoinsOrderPage();
@@ -695,7 +683,7 @@ async function loadRecentOrders() {
   }
 }
 
-/* ====================== 23.显示/隐藏匹配状态 & GIF ====================== */
+/* ====================== 19.显示/隐藏匹配状态 & GIF ====================== */
 function setMatchingState(isMatching) {
   const gifEl = document.getElementById("matchingGif");
   const btn = document.getElementById("autoOrderBtn");
@@ -707,7 +695,7 @@ function setMatchingState(isMatching) {
   }
 }
 
-/* ====================== 24.渲染最近订单 ====================== */
+/* ====================== 20.渲染最近订单 ====================== */
 function renderLastOrder(order, coinsRaw) {
   const el = document.getElementById("orderResult");
   if (!el || !order) return;
