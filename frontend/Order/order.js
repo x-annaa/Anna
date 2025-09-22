@@ -139,9 +139,8 @@ async function updateRoundProgress() {
 }
 
 /* ====================== 8.完成订单 ✅ 改用 RPC ====================== */
-/* ====================== 8.完成订单 ✅ 改用 RPC ====================== */
-async function completeOrder(order) {
-  if (completing) return;
+async function completeOrder(order, currentCoinsRaw) {
+  if (completing) return; // 并发保护
   completing = true;
 
   try {
@@ -156,22 +155,27 @@ async function completeOrder(order) {
 
     if (order.status === "completed") return;
 
-    // 调用 RPC 完成订单并更新轮次
+    // 调用 RPC 完成订单
     const { data, error } = await supabaseClient.rpc(
       "complete_order_and_update_round",
       { p_order_id: order.id, p_user_id: window.currentUserId }
     );
+
     if (error) throw error;
+    if (!data?.length) throw new Error("RPC 返回数据为空");
 
-    const result = data[0]; // result 包含 { order_id, order_status, user_coins, completed_orders }
+    const result = data[0]; 
+    // result = { order_id, order_status, user_coins, round_completed_orders }
 
-    // 更新页面显示
+    // 更新最近订单显示和用户金币
     renderLastOrder({ ...order, status: result.order_status }, result.user_coins);
     updateCoinsUI(result.user_coins);
 
-    // 刷新最近订单列表和轮次进度
+    // 更新最近订单列表
     await loadRecentOrders();
-    await updateRoundProgress();
+
+    // 更新轮次进度，传入 RPC 返回的完成订单数
+    await updateRoundProgress(result.round_completed_orders);
 
   } catch (e) {
     alert(e.message || "完成订单失败");
@@ -180,6 +184,25 @@ async function completeOrder(order) {
   }
 }
 
+/* ========= updateRoundProgress 改进，接收可选参数 ========= */
+async function updateRoundProgress(completedOrdersFromRPC) {
+  let completed = completedOrdersFromRPC;
+
+  if (completed == null) {
+    // 如果没有传入，就通过 RPC 获取当前轮次
+    const { data: round, error } = await supabaseClient.rpc(
+      "get_or_create_current_round",
+      { p_user_id: window.currentUserId }
+    );
+    if (error || !round) return;
+    completed = round.round_completed_orders || 0;
+  }
+
+  const el = document.getElementById("roundProgress");
+  if (el) {
+    el.textContent = `本轮已完成订单：${completed} / ${window.ORDERS_PER_ROUND}`;
+  }
+}
 
 /* ====================== 9.检查本轮是否可兑换 ✅ 增强容错 ====================== */
 async function canExchangeThisRound() {
