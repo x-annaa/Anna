@@ -1,13 +1,59 @@
-
 <!DOCTYPE html>
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>U9</title>
+  <title>U9 - 首页</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="home.css">
+
   <!-- Supabase SDK -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <!-- 全局 Supabase 初始化 -->
   <script src="../supabaseClient.js"></script>
 </head>
 <body>
+  <header>
+    <h1>🏠 U9 首页</h1>
+  </header>
+
+  <main>
+    <section id="userInfo">
+      <p>用户：<span id="usernameDisplay">未登录</span></p>
+      <p>刷单币：<span id="ordercoins">0</span></p>
+      <p>余额：<span id="balanceDisplay">0</span></p>
+    </section>
+
+    <section id="roundSection">
+      <p id="roundProgress">本轮已完成订单：0 / 0</p>
+      <p id="cooldownDisplay"></p>
+      <button id="autoOrderBtn">🎲 一键刷单</button>
+      <p id="matchingCountdown"></p>
+    </section>
+
+    <section id="recentOrdersSection">
+      <h2>最近订单</h2>
+      <ul id="recentOrders"></ul>
+      <p id="lastOrder"></p>
+    </section>
+
+    <section id="exchangeSection">
+      <button id="addCoinsBtn">兑换刷单币</button>
+      <div id="addCoinsModal" class="modal hidden">
+        <div class="modal-content">
+          <span id="cancelExchange" class="close">&times;</span>
+          <h3>兑换刷单币</h3>
+          <input type="number" id="exchangeAmount" placeholder="输入数量">
+          <div>
+            <button id="balanceToCoinsBtn">余额→刷单币</button>
+            <button id="coinsToBalanceBtn">刷单币→余额</button>
+          </div>
+          <button id="confirmExchange">确认兑换</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="../Order/order.js"></script>
+</body>
+</html>
