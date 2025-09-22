@@ -208,6 +208,52 @@ async function canExchangeThisRound() {
   }
 }
 
+/* ======================
+   开启新轮次
+   ====================== */
+async function startNewRound() {
+  if (!window.currentUserId) return;
+  try {
+    const { data: round, error } = await supabaseClient.rpc(
+      "get_or_create_current_round",
+      { p_user_id: window.currentUserId }
+    );
+    if (error) throw error;
+
+    window.currentRoundId = round.round_id;
+    window.roundStartTime = Date.now();
+
+    console.log("🎯 新轮次已开始", round);
+
+    await updateRoundProgress();
+    await refreshExchangeUI();
+  } catch (e) {
+    console.error("开启新轮次失败", e);
+  }
+}
+
+/* ======================
+   页面事件绑定 ✅ async 修复
+   ====================== */
+document.addEventListener("DOMContentLoaded", async () => {
+  document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
+  document.getElementById("addCoinsBtn")?.addEventListener("click", openExchangeModal);
+  document.getElementById("cancelExchange")?.addEventListener("click", closeExchangeModal);
+  document.getElementById("confirmExchange")?.addEventListener("click", confirmExchange);
+
+  document.getElementById("balanceToCoinsBtn")?.addEventListener("click", () => toggleExchangeDirection("toCoins"));
+  document.getElementById("coinsToBalanceBtn")?.addEventListener("click", () => toggleExchangeDirection("toBalance"));
+
+  document.getElementById("addCoinsModal")?.addEventListener("click", (e) => {
+    if (e.target.id === "addCoinsModal") closeExchangeModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeExchangeModal();
+  });
+
+  await refreshAll();
+  await startNewRound(); // 初始化时开启一轮
+});
 
 /* ======================
    检查 pending 锁定
