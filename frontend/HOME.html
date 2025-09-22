@@ -1,148 +1,225 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>U9 刷单平台</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-  body { font-family: Arial; background: #f0f2f5; margin: 0; padding: 0; }
-  .container { max-width: 600px; margin: 50px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-  h2 { text-align: center; }
-  button { padding: 10px 20px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; }
-  button:hover { opacity: 0.9; }
-  .order-card { border: 1px solid #ccc; padding: 15px; border-radius: 6px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-  .completed { background: #e0ffe0; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>U9</title>
+
+  <!-- CSS 部分 --> 
+  <link rel="stylesheet" href="Home/home.css">
+  <link rel="stylesheet" href="About/about.css">
+  <link rel="stylesheet" href="Order/order.css">
+  <link rel="stylesheet" href="Message/message.css">
+  <link rel="stylesheet" href="Me/me.css">
+  <link rel="stylesheet" href="Button/button.css">
+
+  <!-- Supabase SDK -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <!-- 全局 Supabase 初始化 -->
+  <script src="../supabaseClient.js"></script>
 </head>
 <body>
 
-<div class="container">
-  <h2>U9 刷单平台</h2>
-  <div>
-    <strong>当前 Coins: </strong><span id="user-coins">0</span>
-  </div>
-  <button id="btn-create-order" style="background:#007bff;color:white;">生成订单</button>
-  <div id="orders-list"></div>
-</div>
+  <!-- 首页 -->
+  <div id="homePage" class="page active">🏠 HOME</div>
 
-<script>
-const SUPABASE_URL = "https://ofaxbeydyeajdgwwqrzz.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9mYXhiZXlkeWVhamRnd3dxcnp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NzQxMTQsImV4cCI6MjA3NDA1MDExNH0.mJGdh6BBEy2Mp83H7aBEo3wIFyIsUsVfqgTErgsvFdY";
-const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_KEY);
+  <!-- 信息页面 -->
+  <div id="infoPage" class="page">
+    <div class="message-header">
+      <h2>💬 MESSAGE</h2>
+      <button id="openChatBtn">
+        ⛑︎
+        <span id="chatBtnUnreadCount" class="unread-dot hidden">0</span>
+      </button>
+    </div>
 
-let userId = localStorage.getItem("user_id");
-let countdownTimers = {};
-
-async function fetchUser() {
-  const { data, error } = await supabase.from('users').select('*').eq('id', userId).single();
-  if (error) return alert("获取用户信息失败：" + error.message);
-  document.getElementById("user-coins").innerText = data.coins;
-  return data;
-}
-
-async function fetchOrders() {
-  const { data, error } = await supabase.from('orders')
-    .select('*, products(*)')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false });
-  if (error) return alert("获取订单失败：" + error.message);
-  renderOrders(data);
-}
-
-function renderOrders(orders) {
-  const list = document.getElementById('orders-list');
-  list.innerHTML = '';
-  orders.forEach(order => {
-    const div = document.createElement('div');
-    div.className = 'order-card ' + (order.status === 'completed' ? 'completed' : '');
-    div.innerHTML = `
-      <div>
-        <strong>${order.products.name}</strong><br>
-        价格: ${order.products.price} | 利润: ${order.products.profit}<br>
-        状态: ${order.status} 
-        <span id="countdown-${order.id}"></span>
+    <!-- 聊天窗口 -->
+    <div id="chatWindow" class="chat-window hidden">
+      <div class="chat-header">
+        <button id="backBtn">⬅ 返回</button>
+        <h3>客服聊天</h3>
       </div>
-      ${order.status === 'pending' ? `<button onclick="completeOrder('${order.id}', ${order.products.price}, ${order.products.profit})" style="background:#28a745;color:white;">完成订单</button>` : ''}
-    `;
-    list.appendChild(div);
-    if (order.status === 'pending') startCountdown(order.id, 10); // 默认倒计时 10 秒
-  });
-}
+      <div id="chatMessages" class="chat-messages"></div>
+      <div class="chat-input">
+        <input type="text" id="chatInput" placeholder="输入消息..." />
+        <button id="sendBtn">发送</button>
+      </div>
+    </div>
+  </div>
+   
+  <!-- 订单页面 -->
+  <div id="orderPage" class="page">
+    <div class="order-header">
+      <h2>📦 ORDER</h2>
+      <div id="roundProgress" style="margin-bottom: 10px; font-weight: bold;">
+        本轮完成订单：加载中...
+      </div>
+      <div class="coins-box">
+        💰 Coins: <span id="ordercoins">0</span>
+        <button id="addCoinsBtn" title="从余额兑换Coins">+</button>
+      </div>
+    </div>
 
-function startCountdown(orderId, seconds) {
-  const countdownEl = document.getElementById(`countdown-${orderId}`);
-  let remaining = seconds;
-  countdownEl.innerText = ` | 倒计时: ${remaining}s`;
-  countdownTimers[orderId] = setInterval(() => {
-    remaining--;
-    if (remaining <= 0) {
-      clearInterval(countdownTimers[orderId]);
-      countdownEl.innerText = ' | 倒计时结束';
-    } else {
-      countdownEl.innerText = ` | 倒计时: ${remaining}s`;
-    }
-  }, 1000);
-}
+    <div class="order-actions">
+      <button id="autoOrderBtn">🎲 一键刷单</button>
+      <p id="cooldownDisplay" style="color:red; font-weight:bold;"></p>
+    </div>
 
-async function createOrder() {
-  const user = await fetchUser();
-  // 1. 获取当前任务
-  const { data: task } = await supabase.from('tasks')
-    .select('*').eq('user_id', userId).order('start_time', { ascending: false }).limit(1).single();
+    <div id="matchingGif" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:999;">
+      <img src="https://ffdrwsemmfvqlqhyjlnb.supabase.co/storage/v1/object/public/Product%20Photos/Qbox.gif" alt="正在匹配..." style="width:150px; height:150px;">
+    </div>
 
-  if (!task) return alert("请先创建任务");
-  const orderIndex = task.completed_orders + 1;
+    <div id="orderResult" class="order-result"></div>
 
-  // 2. 检查手动匹配
-  let { data: manual } = await supabase.from('manual_assignments')
-    .select('*').eq('user_id', userId).eq('order_index', orderIndex).maybeSingle();
+    <div class="order-history">
+      <h3>🕘 最近订单</h3>
+      <ul id="recentOrders">
+        <li>暂无订单！</li>
+      </ul>
+    </div>
 
-  let product;
-  if (manual) {
-    const { data } = await supabase.from('products').select('*').eq('id', manual.product_id).single();
-    product = data;
-  } else {
-    const { data } = await supabase.from('products').select('*');
-    product = data[Math.floor(Math.random() * data.length)];
-  }
+    <!-- Balance / Coins 兑换弹窗 -->
+    <div id="addCoinsModal" class="modal">
+      <div class="modal-content">
+        <h3>兑换 Coins / Balance</h3>
 
-  // 3. 扣除 Coins
-  await supabase.rpc('deduct_coins', { uid: userId, amount: product.price });
+        <!-- 横排切换按钮 -->
+        <div class="exchange-toggle">
+          <button id="balanceToCoinsBtn" class="exchange-btn active" data-type="toCoins">Balance → Coins</button>
+          <button id="coinsToBalanceBtn" class="exchange-btn" data-type="toBalance">Coins → Balance</button>
+        </div>
 
-  // 4. 插入订单
-  await supabase.from('orders').insert([{ user_id: userId, product_id: product.id }]);
+        <p>请输入要兑换的数量：</p>
+        <input type="number" id="addCoinsInput" min="1" placeholder="输入数量" />
 
-  fetchUser();
-  fetchOrders();
-}
+        <div class="modal-actions">
+          <button id="cancelExchange">取消</button>
+          <button id="confirmExchange">确认</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-async function completeOrder(orderId, price, profit) {
-  const user = await fetchUser();
-  if (user.coins < 0) {
-    const deficit = Math.abs(user.coins);
-    const recharge = prompt(`余额不足，请充值 ${deficit} Coins`);
-    if (Number(recharge) < deficit) return alert("充值不足");
-    await supabase.rpc('add_coins', { uid: userId, amount: recharge });
-  }
+  <!-- 关于我们页面 -->
+  <div id="msgPage" class="page">ℹ️ 关于我们</div>
 
-  // 完成订单，加利润
-  await supabase.rpc('add_coins', { uid: userId, amount: profit });
-  await supabase.from('orders').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', orderId);
+  <!-- 我的页面 -->
+  <div id="myPage" class="page">
+    <h2>👤 我的页面</h2>
 
-  // 更新任务完成数
-  const { data: task } = await supabase.from('tasks')
-    .select('*').eq('user_id', userId).order('start_time', { ascending: false }).limit(1).single();
-  await supabase.from('tasks').update({ completed_orders: task.completed_orders + 1 }).eq('id', task.id);
+    <div class="user-info">
+      <p class="username"><strong>用户名：</strong><span id="username">加载中...</span></p>
+      <p class="platform"><strong>平台账号：</strong><span id="platformAccount">加载中...</span></p>
+    </div>
 
-  fetchUser();
-  fetchOrders();
-}
+    <div class="balance-box">
+      <p><strong>Balance：</strong><span id="balance">0.00</span></p>
+      <div class="balance-actions">
+        <button id="depositBtn">充值</button>
+        <button id="withdrawBtn">提现</button>
+      </div>
+    </div>
 
-fetchUser();
-fetchOrders();
+    <div class="my-buttons">
+      <button id="logoutBtn">Logout</button>
+    </div>
+  </div>
 
-document.getElementById('btn-create-order').addEventListener('click', createOrder);
-</script>
+  <!-- Logout 确认弹窗 -->
+  <div id="logoutModal" class="modal">
+    <div class="modal-content">
+      <p>确定要退出吗？</p>
+      <button id="cancelLogout">否</button>
+      <button id="confirmLogout">确定</button>
+    </div>
+  </div>
+
+  <!-- 提现弹窗 -->
+  <div id="withdrawModal" class="modal">
+    <div class="modal-content">
+      <h3>提现</h3>
+      <p>当前余额：<span id="withdrawBalance">0.00</span></p>
+      <input type="number" id="withdrawAmount" placeholder="输入提现金额" />
+      <input type="text" id="walletAddress" placeholder="USDT-TRC20钱包地址" />
+      <button id="setPasswordBtn">添加提现密码</button>
+      <div class="modal-actions">
+        <button id="cancelWithdraw">取消</button>
+        <button id="confirmWithdraw">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 设置密码弹窗 -->
+  <div id="setPasswordModal" class="modal">
+    <div class="modal-content">
+      <h3>设置提现密码</h3>
+      <input type="text" id="withdrawPwd" maxlength="6" placeholder="输入6位数字密码" />
+      <input type="text" id="confirmWithdrawPwd" maxlength="6" placeholder="确认密码" />
+      <div class="modal-actions">
+        <button id="cancelSetPwd">取消</button>
+        <button id="saveWithdrawPwd">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 更新密码弹窗 -->
+  <div id="updatePasswordModal" class="modal">
+    <div class="modal-content">
+      <h3>更改提现密码</h3>
+      <input type="text" id="oldWithdrawPwd" maxlength="6" placeholder="输入原密码" />
+      <input type="text" id="newWithdrawPwd" maxlength="6" placeholder="输入新密码" />
+      <input type="text" id="confirmNewWithdrawPwd" maxlength="6" placeholder="确认新密码" />
+      <div class="modal-actions">
+        <button id="cancelUpdatePwd">取消</button>
+        <button id="saveUpdatePwd">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 确认提现密码弹窗 -->
+  <div id="confirmPwdModal" class="modal">
+    <div class="modal-content">
+      <h3>输入提现密码</h3>
+      <input type="text" id="inputWithdrawPwd" maxlength="6" placeholder="请输入密码" />
+      <div class="modal-actions">
+        <button id="cancelConfirmPwd">取消</button>
+        <button id="submitWithdrawFinal">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 充值弹窗 -->
+  <div id="rechargeModal" class="modal">
+    <div class="modal-content">
+      <h3>充值</h3>
+      <input type="file" id="fileInput" />
+      <button id="uploadBtn">上传</button>
+      <p id="status"></p>
+      <div class="modal-actions">
+        <button id="cancelRecharge">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部导航栏 -->
+  <div class="bottom-nav">
+    <button data-page="homePage" class="active">Home</button>
+    <button data-page="infoPage" id="messageBtn">
+      Message
+      <span id="bottomUnreadCount" class="unread-dot hidden">0</span>
+    </button>
+    <button data-page="orderPage">Order</button>
+    <button data-page="msgPage">About</button>
+    <button data-page="myPage">Me</button>
+  </div>
+
+  <!-- JS 部分 --> 
+  <script src="Home/home.js"></script>
+  <script src="Message/message.js"></script>
+  <script src="Order/order.js"></script>
+  <script src="About/about.js"></script>
+  <script src="Me/me.js"></script>
+  <script src="Button/button.js"></script>
+  <script src="Recharge/recharge.js"></script>
 </body>
 </html>
