@@ -643,6 +643,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   refreshAll();
+  await startNewRound(); // 初始化时开启一轮
 });
 
 /* ======================
