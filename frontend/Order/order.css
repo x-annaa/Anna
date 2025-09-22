@@ -31,6 +31,7 @@ h2, h3 {
   border-top: 1px solid #ddd;
   background: #fff;
   padding: 8px 0;
+  z-index: 100;
 }
 
 .bottom-nav button {
@@ -98,6 +99,11 @@ h2, h3 {
   background: #1565c0;
 }
 
+.order-actions button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
 .order-result {
   margin-top: 20px;
   padding: 15px;
@@ -137,21 +143,15 @@ h2, h3 {
   padding: 10px 12px;
   border-bottom: 1px solid #eee;
   font-size: 14px;
+  transition: background 0.2s;
 }
 
 .order-history li:last-child {
   border-bottom: none;
 }
 
-/* ========= 通用按钮 ========= */
-button {
-  font-family: inherit;
-  outline: none;
-}
-
-button:disabled {
-  background: #ccc !important;
-  cursor: not-allowed;
+.order-history li:hover {
+  background: #e3f2fd;
 }
 
 /* ========= 通用 Modal 样式 ========= */
@@ -163,7 +163,6 @@ button:disabled {
   left: 0;
   width: 100%;
   height: 100%;
-
   background-color: rgba(0,0,0,0.5);
   justify-content: center;
   align-items: center;
@@ -229,34 +228,7 @@ button:disabled {
   transition: 0.2s;
 }
 
-/* ========= AddCoins 按钮 ========= */
-#cancelAddCoins {
-  background-color: #e0e0e0;
-  color: #333;
-}
-#cancelAddCoins:hover {
-  background-color: #d5d5d5;
-}
-#confirmAddCoins {
-  background-color: #4caf50;
-  color: white;
-}
-#confirmAddCoins:hover {
-  background-color: #45a049;
-}
-
-/* ========= Balance/Coins 弹窗新增 ========= */
-#exchangeModal h3 {
-  color: #1976d2;
-}
-
-#exchangeNotice {
-  font-size: 0.85em;
-  color: #d32f2f;
-  margin-top: -8px;
-  margin-bottom: 12px;
-}
-
+/* ========= AddCoins / Exchange 弹窗 ========= */
 #cancelExchange {
   background-color: #e0e0e0;
   color: #333;
@@ -273,13 +245,6 @@ button:disabled {
   background-color: #1565c0;
 }
 
-/* ========= 弹窗渐显动画 ========= */
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-/* 横排切换按钮 */
 .exchange-toggle {
   display: flex;
   justify-content: center;
@@ -307,4 +272,10 @@ button:disabled {
 
 .exchange-btn:not(.active):hover {
   background-color: #bdbdbd;
+}
+
+/* ========= 弹窗渐显动画 ========= */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
 }
