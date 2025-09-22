@@ -127,70 +127,64 @@ async function checkOrderCooldown() {
 
 /* ====================== 7.本轮完成订单数显示 ====================== */
 async function updateRoundProgress(completedOrdersFromRPC) {
-  let completed = completedOrdersFromRPC;
+  let roundData = completedOrdersFromRPC;
 
-  if (completed == null) {
+  if (!roundData) {
     // 如果没有传入，就通过 RPC 获取当前轮次
-    const { data: round, error } = await supabaseClient.rpc(
+    const { data, error } = await supabaseClient.rpc(
       "get_or_create_current_round",
       { p_user_id: window.currentUserId }
     );
-    if (error || !round) return;
-    completed = round.round_completed_orders || 0;
-    window.roundStartTime = window.roundStartTime || Date.now(); // 确保有开始时间
+    if (error || !data) return;
+
+    roundData = data[0];
   }
 
-  const el = document.getElementById("roundProgress");
-  if (el) el.textContent = `本轮已完成订单：${completed} / ${window.ORDERS_PER_ROUND}`;
+  const completed = roundData.completed_orders || 0;
+  const orderLimit = roundData.order_limit || window.ORDERS_PER_ROUND;
+  const cooldownSec = roundData.cooldown_remaining_seconds || 0;
 
-  // 超出轮次订单数，自动开启新轮次
-  if (completed >= window.ORDERS_PER_ROUND) {
+  const el = document.getElementById("roundProgress");
+  if (el) el.textContent = `本轮已完成订单：${completed} / ${orderLimit}`;
+
+  // 超过轮次订单数，自动开启新轮次
+  if (completed >= orderLimit) {
     console.log("🎯 本轮完成订单数已达上限，开启新轮次");
     await startNewRound();
   } else {
     // 启动倒计时显示
-    startRoundCountdown();
+    startRoundCountdown(cooldownSec);
   }
 }
 
-/* ====================== 倒计时函数 ====================== */
-function startRoundCountdown() {
+// 倒计时显示
+function startRoundCountdown(cooldownSeconds) {
   if (window.roundCooldownTimer) clearInterval(window.roundCooldownTimer);
   const displayEl = document.getElementById("cooldownDisplay");
-  if (!displayEl || !window.roundStartTime) return;
+  if (!displayEl) return;
+
+  let remaining = cooldownSeconds;
 
   window.roundCooldownTimer = setInterval(() => {
-    const elapsed = Date.now() - window.roundStartTime;
-    const remaining = Math.max(0, window.ROUND_DURATION - elapsed);
-    const sec = Math.ceil(remaining / 1000);
-    displayEl.textContent = `⏱ 本轮剩余时间：${formatTime(sec)}`;
-
     if (remaining <= 0) {
       clearInterval(window.roundCooldownTimer);
       displayEl.textContent = "⏱ 本轮已结束，自动开启新轮次";
-      startNewRound(); // 自动开启新轮次
+      startNewRound();
+      return;
     }
-  }, 500);
+    displayEl.textContent = `⏱ 本轮剩余时间：${formatTime(remaining)}`;
+    remaining--;
+  }, 1000);
 }
 
 /* ====================== 8.完成订单 ✅ 改用 RPC ====================== */
 async function completeOrder(order, currentCoinsRaw) {
-  if (completing) return; // 并发保护
+  if (completing) return;
   completing = true;
 
   try {
-    console.log("🔥 completeOrder 调用开始", {
-      orderId: order.id,
-      typeOrderId: typeof order.id,
-      orderStatus: order.status,
-      typeOrderStatus: typeof order.status,
-      userId: window.currentUserId,
-      typeUserId: typeof window.currentUserId
-    });
-
     if (order.status === "completed") return;
 
-    // 调用 RPC 完成订单
     const { data, error } = await supabaseClient.rpc(
       "complete_order_and_update_round",
       { p_order_id: order.id, p_user_id: window.currentUserId }
@@ -199,8 +193,8 @@ async function completeOrder(order, currentCoinsRaw) {
     if (error) throw error;
     if (!data?.length) throw new Error("RPC 返回数据为空");
 
-    const result = data[0]; 
-    // result = { order_id, order_status, user_coins, round_completed_orders }
+    const result = data[0];
+    // result = { order_id, order_status, user_coins, completed_orders, order_limit, status, cooldown_remaining_seconds }
 
     // 更新最近订单显示和用户金币
     renderLastOrder({ ...order, status: result.order_status }, result.user_coins);
@@ -209,8 +203,8 @@ async function completeOrder(order, currentCoinsRaw) {
     // 更新最近订单列表
     await loadRecentOrders();
 
-    // 更新轮次进度，传入 RPC 返回的完成订单数
-    await updateRoundProgress(result.round_completed_orders);
+    // 更新轮次进度，传入 RPC 返回的数据
+    await updateRoundProgress(result);
 
   } catch (e) {
     alert(e.message || "完成订单失败");
@@ -481,18 +475,19 @@ document.addEventListener("DOMContentLoaded", restoreMatchingIfAny);
 async function startNewRound() {
   if (!window.currentUserId) return;
   try {
-    const { data: round, error } = await supabaseClient.rpc(
+    const { data, error } = await supabaseClient.rpc(
       "get_or_create_current_round",
       { p_user_id: window.currentUserId }
     );
-    if (error) throw error;
+    if (error || !data?.length) throw error;
 
+    const round = data[0];
     window.currentRoundId = round.round_id;
-    window.roundStartTime = Date.now();
 
     console.log("🎯 新轮次已开始", round);
 
-    await updateRoundProgress(round.round_completed_orders || 0);
+    // 更新轮次 UI 和倒计时
+    await updateRoundProgress(round);
     await refreshExchangeUI(); // 同步兑换按钮
   } catch (e) {
     console.error("开启新轮次失败", e);
