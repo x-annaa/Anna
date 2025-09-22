@@ -152,13 +152,20 @@ async function completeOrder(order, currentCoinsRaw) {
 
     if (order.status === "completed") return;
 
+    // ⚠️ 强制将字符串 ID 转为数字，避免 RPC 报 400
     const { data, error } = await supabaseClient.rpc(
       "complete_order_and_update_round",
-      { p_order_id: order.id, p_user_id: window.currentUserId }
+      { 
+        p_order_id: Number(order.id),
+        p_user_id: Number(window.currentUserId)
+      }
     );
     if (error) throw error;
-    const result = data[0];
 
+    const result = data?.[0];
+    if (!result) throw new Error("RPC 未返回数据");
+
+    // 更新界面
     renderLastOrder({ ...order, status: result.order_status }, result.coins);
     updateCoinsUI(result.coins);
     await loadRecentOrders();
