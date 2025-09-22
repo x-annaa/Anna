@@ -3,27 +3,51 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>U9 - 订单页面</title>
-  <link rel="stylesheet" href="./Order/order.css"> <!-- 如果有 CSS -->
-  <style>
-    body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
-    .page { max-width: 800px; margin: 20px auto; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    .order-header { margin-bottom: 20px; }
-    .coins-box { margin-top: 10px; }
-    .order-actions { margin: 20px 0; }
-    #autoOrderBtn { padding: 10px 20px; font-size: 16px; cursor: pointer; }
-    .order-result { margin-top: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
-    .order-history ul { padding-left: 20px; }
-    .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index: 1000; }
-    .modal-content { background:white; padding:20px; border-radius:10px; width:300px; text-align:center; }
-    .modal-actions button { margin: 10px 5px 0 5px; padding: 5px 10px; cursor: pointer; }
-    .exchange-toggle { display: flex; justify-content: space-between; margin-bottom: 10px; }
-    .exchange-btn { flex:1; padding:5px; margin:0 5px; cursor:pointer; }
-    .exchange-btn.active { background-color: #4CAF50; color:white; }
-  </style>
+  <title>U9</title>
+
+  <!-- CSS 部分 --> 
+  <link rel="stylesheet" href="Home/home.css">
+  <link rel="stylesheet" href="About/about.css">
+  <link rel="stylesheet" href="Order/order.css">
+  <link rel="stylesheet" href="Message/message.css">
+  <link rel="stylesheet" href="Me/me.css">
+  <link rel="stylesheet" href="Button/button.css">
+
+  <!-- Supabase SDK -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <!-- 全局 Supabase 初始化 -->
+  <script src="../supabaseClient.js"></script>
 </head>
 <body>
 
+  <!-- 首页 -->
+  <div id="homePage" class="page active">🏠 HOME</div>
+
+  <!-- 信息页面 -->
+  <div id="infoPage" class="page">
+    <div class="message-header">
+      <h2>💬 MESSAGE</h2>
+      <button id="openChatBtn">
+        ⛑︎
+        <span id="chatBtnUnreadCount" class="unread-dot hidden">0</span>
+      </button>
+    </div>
+
+    <!-- 聊天窗口 -->
+    <div id="chatWindow" class="chat-window hidden">
+      <div class="chat-header">
+        <button id="backBtn">⬅ 返回</button>
+        <h3>客服聊天</h3>
+      </div>
+      <div id="chatMessages" class="chat-messages"></div>
+      <div class="chat-input">
+        <input type="text" id="chatInput" placeholder="输入消息..." />
+        <button id="sendBtn">发送</button>
+      </div>
+    </div>
+  </div>
+   
+  <!-- 订单页面 -->
   <div id="orderPage" class="page">
     <div class="order-header">
       <h2>📦 ORDER</h2>
@@ -42,7 +66,7 @@
     </div>
 
     <div id="matchingGif" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:999;">
-      <img src="https://ofaxbeydyeajdgwwqrzz.supabase.co/storage/v1/object/public/Photos/Qbox.gif" alt="正在匹配..." style="width:150px; height:150px;">
+      <img src="https://ffdrwsemmfvqlqhyjlnb.supabase.co/storage/v1/object/public/Product%20Photos/Qbox.gif" alt="正在匹配..." style="width:150px; height:150px;">
     </div>
 
     <div id="orderResult" class="order-result"></div>
@@ -76,10 +100,126 @@
     </div>
   </div>
 
-  <!-- 引入 supabase 客户端 (全局) -->
-  <script src="./Order/supabaseClient.js"></script>
-  <!-- 引入订单逻辑 -->
-  <script src="./Order/order.js"></script>
+  <!-- 关于我们页面 -->
+  <div id="msgPage" class="page">ℹ️ 关于我们</div>
 
+  <!-- 我的页面 -->
+  <div id="myPage" class="page">
+    <h2>👤 我的页面</h2>
+
+    <div class="user-info">
+      <p class="username"><strong>用户名：</strong><span id="username">加载中...</span></p>
+      <p class="platform"><strong>平台账号：</strong><span id="platformAccount">加载中...</span></p>
+    </div>
+
+    <div class="balance-box">
+      <p><strong>Balance：</strong><span id="balance">0.00</span></p>
+      <div class="balance-actions">
+        <button id="depositBtn">充值</button>
+        <button id="withdrawBtn">提现</button>
+      </div>
+    </div>
+
+    <div class="my-buttons">
+      <button id="logoutBtn">Logout</button>
+    </div>
+  </div>
+
+  <!-- Logout 确认弹窗 -->
+  <div id="logoutModal" class="modal">
+    <div class="modal-content">
+      <p>确定要退出吗？</p>
+      <button id="cancelLogout">否</button>
+      <button id="confirmLogout">确定</button>
+    </div>
+  </div>
+
+  <!-- 提现弹窗 -->
+  <div id="withdrawModal" class="modal">
+    <div class="modal-content">
+      <h3>提现</h3>
+      <p>当前余额：<span id="withdrawBalance">0.00</span></p>
+      <input type="number" id="withdrawAmount" placeholder="输入提现金额" />
+      <input type="text" id="walletAddress" placeholder="USDT-TRC20钱包地址" />
+      <button id="setPasswordBtn">添加提现密码</button>
+      <div class="modal-actions">
+        <button id="cancelWithdraw">取消</button>
+        <button id="confirmWithdraw">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 设置密码弹窗 -->
+  <div id="setPasswordModal" class="modal">
+    <div class="modal-content">
+      <h3>设置提现密码</h3>
+      <input type="text" id="withdrawPwd" maxlength="6" placeholder="输入6位数字密码" />
+      <input type="text" id="confirmWithdrawPwd" maxlength="6" placeholder="确认密码" />
+      <div class="modal-actions">
+        <button id="cancelSetPwd">取消</button>
+        <button id="saveWithdrawPwd">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 更新密码弹窗 -->
+  <div id="updatePasswordModal" class="modal">
+    <div class="modal-content">
+      <h3>更改提现密码</h3>
+      <input type="text" id="oldWithdrawPwd" maxlength="6" placeholder="输入原密码" />
+      <input type="text" id="newWithdrawPwd" maxlength="6" placeholder="输入新密码" />
+      <input type="text" id="confirmNewWithdrawPwd" maxlength="6" placeholder="确认新密码" />
+      <div class="modal-actions">
+        <button id="cancelUpdatePwd">取消</button>
+        <button id="saveUpdatePwd">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 确认提现密码弹窗 -->
+  <div id="confirmPwdModal" class="modal">
+    <div class="modal-content">
+      <h3>输入提现密码</h3>
+      <input type="text" id="inputWithdrawPwd" maxlength="6" placeholder="请输入密码" />
+      <div class="modal-actions">
+        <button id="cancelConfirmPwd">取消</button>
+        <button id="submitWithdrawFinal">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 充值弹窗 -->
+  <div id="rechargeModal" class="modal">
+    <div class="modal-content">
+      <h3>充值</h3>
+      <input type="file" id="fileInput" />
+      <button id="uploadBtn">上传</button>
+      <p id="status"></p>
+      <div class="modal-actions">
+        <button id="cancelRecharge">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部导航栏 -->
+  <div class="bottom-nav">
+    <button data-page="homePage" class="active">Home</button>
+    <button data-page="infoPage" id="messageBtn">
+      Message
+      <span id="bottomUnreadCount" class="unread-dot hidden">0</span>
+    </button>
+    <button data-page="orderPage">Order</button>
+    <button data-page="msgPage">About</button>
+    <button data-page="myPage">Me</button>
+  </div>
+
+  <!-- JS 部分 --> 
+  <script src="Home/home.js"></script>
+  <script src="Message/message.js"></script>
+  <script src="Order/order.js"></script>
+  <script src="About/about.js"></script>
+  <script src="Me/me.js"></script>
+  <script src="Button/button.js"></script>
+  <script src="Recharge/recharge.js"></script>
 </body>
 </html>
