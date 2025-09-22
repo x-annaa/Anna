@@ -569,7 +569,7 @@ async function confirmExchange() {
 }
 
 /* ====================== 21.页面事件绑定 ====================== */
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
   document.getElementById("addCoinsBtn")?.addEventListener("click", openExchangeModal);
   document.getElementById("cancelExchange")?.addEventListener("click", closeExchangeModal);
@@ -585,7 +585,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.key === "Escape") closeExchangeModal();
   });
 
-  refreshAll();
+  await refreshAll();
   await startNewRound(); // 初始化时开启一轮
 });
 
