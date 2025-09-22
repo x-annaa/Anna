@@ -1,118 +1,139 @@
-// =======================
-// 密码可见切换
-// =======================
-window.togglePassword = function (id, el) {
-  const input = document.getElementById(id);
-  if (!input) return;
-  if (input.type === "password") {
-    input.type = "text";
-    el.textContent = "🙈";
-  } else {
-    input.type = "password";
-    el.textContent = "👁️";
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>注册 / 登录</title>
+<script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.33.1/dist/supabase.min.js"></script>
+<style>
+body { font-family: sans-serif; padding: 2rem; background: #f0f2f5; }
+.container { max-width: 400px; margin: auto; background: #fff; padding: 2rem; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);}
+h2 { text-align: center; }
+form { display: flex; flex-direction: column; }
+input { margin-bottom: 1rem; padding: 0.5rem; font-size: 1rem; }
+button { padding: 0.5rem; font-size: 1rem; cursor: pointer; }
+p.switch { text-align: center; cursor: pointer; color: blue; }
+#error { color: red; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h2 id="formTitle">登录</h2>
+  <div id="error"></div>
+
+  <form id="authForm">
+    <input type="text" id="username" placeholder="用户名" required>
+    <input type="password" id="password" placeholder="密码" required>
+    <button type="submit" id="submitBtn">登录</button>
+  </form>
+
+  <p class="switch" id="toggleForm">没有账号？去注册</p>
+</div>
+
+<script>
+// 初始化 Supabase
+window.supabaseClient = window.supabase.createClient(
+  "https://ofaxbeydyeajdgwwqrzz.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9mYXhiZXlkeWVhamRnd3dxcnp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NzQxMTQsImV4cCI6MjA3NDA1MDExNH0.mJGdh6BBEy2Mp83H7aBEo3wIFyIsUsVfqgTErgsvFdY"
+);
+
+let isRegister = false;
+
+const formTitle = document.getElementById("formTitle");
+const toggleForm = document.getElementById("toggleForm");
+const authForm = document.getElementById("authForm");
+const submitBtn = document.getElementById("submitBtn");
+const errorDiv = document.getElementById("error");
+
+toggleForm.addEventListener("click", () => {
+  isRegister = !isRegister;
+  formTitle.textContent = isRegister ? "注册" : "登录";
+  submitBtn.textContent = isRegister ? "注册" : "登录";
+  toggleForm.textContent = isRegister ? "已有账号？去登录" : "没有账号？去注册";
+  errorDiv.textContent = "";
+});
+
+authForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  errorDiv.textContent = "";
+
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value;
+
+  if (!username || !password) {
+    errorDiv.textContent = "用户名和密码不能为空";
+    return;
   }
-};
 
-// =======================
-// Tab 切换
-// =======================
-const loginForm = document.getElementById("loginForm");
-const registerForm = document.getElementById("registerForm");
-document.getElementById("showLogin").addEventListener("click", () => {
-  loginForm.classList.remove("hidden");
-  registerForm.classList.add("hidden");
+  try {
+    if (isRegister) {
+      // 注册：先检查用户名是否存在
+      const { data: existing, error: checkErr } = await supabaseClient
+        .from("users")
+        .select("id")
+        .eq("username", username)
+        .limit(1)
+        .single();
+
+      if (existing) {
+        errorDiv.textContent = "用户名已存在";
+        return;
+      }
+
+      // 密码哈希
+      const hash = bcrypt.hashSync(password, 10);
+
+      const { data: newUser, error: insertErr } = await supabaseClient
+        .from("users")
+        .insert({ username, password_hash: hash })
+        .select()
+        .single();
+
+      if (insertErr) throw insertErr;
+
+      // 保存到 localStorage
+      localStorage.setItem("currentUserId", newUser.id);
+      localStorage.setItem("currentUser", newUser.username);
+      localStorage.setItem("currentUserUUID", newUser.uuid);
+
+      // 跳转
+      window.location.href = "frontend/HOME.html";
+
+    } else {
+      // 登录
+      const { data: user, error: loginErr } = await supabaseClient
+        .from("users")
+        .select("*")
+        .eq("username", username)
+        .limit(1)
+        .single();
+
+      if (!user) {
+        errorDiv.textContent = "用户不存在";
+        return;
+      }
+
+      // 验证密码
+      if (!bcrypt.compareSync(password, user.password_hash)) {
+        errorDiv.textContent = "密码错误";
+        return;
+      }
+
+      // 保存到 localStorage
+      localStorage.setItem("currentUserId", user.id);
+      localStorage.setItem("currentUser", user.username);
+      localStorage.setItem("currentUserUUID", user.uuid);
+
+      // 跳转
+      window.location.href = "frontend/HOME.html";
+    }
+  } catch (err) {
+    console.error(err);
+    errorDiv.textContent = err.message || "操作失败";
+  }
 });
-document.getElementById("showRegister").addEventListener("click", () => {
-  loginForm.classList.add("hidden");
-  registerForm.classList.remove("hidden");
-});
+</script>
 
-// =======================
-// 生成随机平台账号（前两位大写字母 + 后四位数字）
-// =======================
-function generatePlatformAccount() {
-  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  const numbers = "0123456789";
-  let acc = "";
-  for (let i = 0; i < 2; i++) acc += letters[Math.floor(Math.random() * letters.length)];
-  for (let i = 0; i < 4; i++) acc += numbers[Math.floor(Math.random() * numbers.length)];
-  return acc;
-}
-
-// =======================
-// 注册逻辑
-// =======================
-document.getElementById("registerBtn").addEventListener("click", async () => {
-  const username = document.getElementById("regUsername").value.trim();
-  const password = document.getElementById("regPassword").value;
-  const confirm = document.getElementById("regConfirmPassword").value;
-  const agree = document.getElementById("agreeTerms").checked;
-
-  if (!username || !password) return alert("请输入用户名和密码");
-  if (password !== confirm) return alert("两次输入的密码不一致");
-  if (!agree) return alert("请先勾选同意条款");
-
-  // 检查用户名是否存在
-  const { data: exist } = await supabaseClient
-    .from("users")
-    .select("id")
-    .eq("username", username)
-    .maybeSingle();
-  if (exist) return alert("该用户名已存在，请换一个");
-
-  // 生成平台账号和密码哈希
-  const platformAccount = generatePlatformAccount();
-  const uuid = crypto.randomUUID();
-  const password_hash = bcrypt.hashSync(password, 10);
-
-  // 插入用户
-  const { data, error } = await supabaseClient
-    .from("users")
-    .insert({
-      username,
-      password_hash,
-      coins: 0,
-      balance: 0,
-      platform_account: platformAccount,
-      uuid
-    })
-    .select()
-    .single();
-
-  if (error) return alert("注册失败：" + error.message);
-
-  localStorage.setItem("currentUserId", data.id);
-  localStorage.setItem("currentUser", data.username);
-  localStorage.setItem("platformAccount", data.platform_account);
-  localStorage.setItem("currentUserUUID", data.uuid);
-
-  alert("注册成功！");
-  window.location.href = "frontend/HOME.html";
-});
-
-// =======================
-// 登录逻辑
-// =======================
-document.getElementById("loginBtn").addEventListener("click", async () => {
-  const username = document.getElementById("loginUsername").value.trim();
-  const password = document.getElementById("loginPassword").value;
-  if (!username || !password) return alert("请输入用户名和密码");
-
-  const { data, error } = await supabaseClient
-    .from("users")
-    .select("id, username, password_hash, platform_account, uuid")
-    .eq("username", username)
-    .maybeSingle();
-
-  if (error) return alert("登录失败: " + error.message);
-  if (!data) return alert("用户不存在");
-  if (!bcrypt.compareSync(password, data.password_hash)) return alert("密码错误");
-
-  localStorage.setItem("currentUserId", data.id);
-  localStorage.setItem("currentUser", data.username);
-  localStorage.setItem("platformAccount", data.platform_account);
-  localStorage.setItem("currentUserUUID", data.uuid);
-
-  alert("登录成功！");
-  window.location.href = "frontend/HOME.html";
-});
+</body>
+</html>
