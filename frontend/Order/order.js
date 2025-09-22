@@ -439,8 +439,8 @@ async function refreshExchangeUI() {
 
     const balanceEl = document.getElementById("balanceDisplay");
     const coinsEl = document.getElementById("ordercoins"); 
-    if (balanceEl) balanceEl.textContent = `余额：¥${Number(data.balance).toFixed(2)}`;
-    if (coinsEl) coinsEl.textContent = `刷单币：${Number(data.coins).toFixed(2)}`;
+    if (balanceEl) balanceEl.textContent = `Balance：¥${Number(data.balance).toFixed(2)}`;
+    if (coinsEl) coinsEl.textContent = `Coins：${Number(data.coins).toFixed(2)}`;
 
   } catch (e) {
     console.error("刷新兑换界面失败", e.message);
