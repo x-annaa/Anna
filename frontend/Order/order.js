@@ -139,43 +139,47 @@ async function updateRoundProgress() {
 }
 
 /* ====================== 8.完成订单 ✅ 改用 RPC ====================== */
-async function completeOrder(order, currentCoinsRaw) {
+/* ====================== 8.完成订单 ✅ 改用 RPC ====================== */
+async function completeOrder(order) {
   if (completing) return;
   completing = true;
 
   try {
     console.log("🔥 completeOrder 调用开始", {
-      orderId: order.id, typeOrderId: typeof order.id,
-      orderStatus: order.status, typeOrderStatus: typeof order.status,
-      userId: window.currentUserId, typeUserId: typeof window.currentUserId
+      orderId: order.id,
+      typeOrderId: typeof order.id,
+      orderStatus: order.status,
+      typeOrderStatus: typeof order.status,
+      userId: window.currentUserId,
+      typeUserId: typeof window.currentUserId
     });
 
     if (order.status === "completed") return;
 
-    // ⚠️ 强制将字符串 ID 转为数字，避免 RPC 报 400
+    // 调用 RPC 完成订单并更新轮次
     const { data, error } = await supabaseClient.rpc(
       "complete_order_and_update_round",
-      { 
-        p_order_id: Number(order.id),
-        p_user_id: Number(window.currentUserId)
-      }
+      { p_order_id: order.id, p_user_id: window.currentUserId }
     );
     if (error) throw error;
 
-    const result = data?.[0];
-    if (!result) throw new Error("RPC 未返回数据");
+    const result = data[0]; // result 包含 { order_id, order_status, user_coins, completed_orders }
 
-    // 更新界面
-    renderLastOrder({ ...order, status: result.order_status }, result.coins);
-    updateCoinsUI(result.coins);
+    // 更新页面显示
+    renderLastOrder({ ...order, status: result.order_status }, result.user_coins);
+    updateCoinsUI(result.user_coins);
+
+    // 刷新最近订单列表和轮次进度
     await loadRecentOrders();
     await updateRoundProgress();
+
   } catch (e) {
     alert(e.message || "完成订单失败");
   } finally {
     completing = false;
   }
 }
+
 
 /* ====================== 9.检查本轮是否可兑换 ✅ 增强容错 ====================== */
 async function canExchangeThisRound() {
