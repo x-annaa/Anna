@@ -1,1 +1,189 @@
+/* ======================
+   我的页面整体样式
+   ====================== */
+#myPage {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
 
+/* ======================
+   用户信息
+   ====================== */
+.user-info {
+  text-align: right;
+  margin-bottom: 20px;
+}
+
+.user-info p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+/* ======================
+   余额区
+   ====================== */
+.balance-box {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.balance-box p {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.balance-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 12px;
+}
+
+.balance-actions button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 10px;
+  background: #007bff;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.balance-actions button:hover {
+  background: #0056b3;
+}
+
+/* ======================
+   我的页面按钮区
+   ====================== */
+.my-buttons {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.my-buttons button {
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #f1f1f1;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.my-buttons button:hover {
+  background: #ddd;
+}
+
+/* ======================
+   通用弹窗样式
+   ====================== */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  width: 320px;
+  max-width: 90%;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.modal-content h3 {
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.modal-content p {
+  margin: 10px 0;
+}
+
+.modal-content input {
+  width: 90%;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  text-align: center;
+  letter-spacing: 2px; /* 让数字更清晰 */
+}
+
+/* ======================
+   弹窗操作按钮
+   ====================== */
+.modal-actions {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 15px;
+}
+
+.modal-actions button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.modal-actions button:first-child {
+  background: #f1f1f1;
+}
+
+.modal-actions button:first-child:hover {
+  background: #ddd;
+}
+
+.modal-actions button:last-child {
+  background: #007bff;
+  color: white;
+}
+
+.modal-actions button:last-child:hover {
+  background: #0056b3;
+}
+
+/* ======================
+   特殊按钮（提现密码）
+   ====================== */
+#setPasswordBtn {
+  margin-top: 10px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: rgb(0, 0, 255);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+#setPasswordBtn:hover {
+  background: rgba(0, 123, 255, 0.1);
+}
+
+/* ======================
+   Logout 弹窗单独调整
+   ====================== */
+#logoutModal .modal-content {
+  width: 260px;
+}
+
+#logoutModal p {
+  margin-bottom: 15px;
+  font-size: 15px;
+}
