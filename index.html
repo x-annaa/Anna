@@ -8,8 +8,9 @@
 
   <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- bcrypt.js 前端哈希 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
+  <!-- bcrypt.js -->
+  <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
+  <!-- 全局 Supabase 初始化 -->
   <script src="supabaseClient.js"></script>
 </head>
 <body>
@@ -30,7 +31,7 @@
       </div>
       <div class="field password-wrapper">
         <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" />
-        <button type="button" class="toggle-password" data-target="loginPassword" aria-label="toggle password">👁️</button>
+        <button type="button" class="toggle-password" data-target="loginPassword">👁️</button>
       </div>
       <div id="loginMsg" class="form-msg"></div>
       <button id="loginBtn" class="primary-btn">Login</button>
@@ -43,16 +44,18 @@
       </div>
       <div class="field password-wrapper">
         <input type="password" id="regPassword" placeholder="Password" autocomplete="new-password" />
-        <button type="button" class="toggle-password" data-target="regPassword" aria-label="toggle password">👁️</button>
+        <button type="button" class="toggle-password" data-target="regPassword">👁️</button>
       </div>
       <div class="field password-wrapper">
         <input type="password" id="regConfirmPassword" placeholder="Confirm Password" autocomplete="new-password" />
-        <button type="button" class="toggle-password" data-target="regConfirmPassword" aria-label="toggle password">👁️</button>
+        <button type="button" class="toggle-password" data-target="regConfirmPassword">👁️</button>
       </div>
+
       <label class="agreement">
         <input type="checkbox" id="agreeTerms" />
         <span>I agree to the terms</span>
       </label>
+
       <div id="registerMsg" class="form-msg"></div>
       <button id="registerBtn" class="primary-btn">Register</button>
     </div>
