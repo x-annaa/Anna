@@ -1,99 +1,69 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>U9 - 登录</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f5f5f5; display:flex; justify-content:center; align-items:center; height:100vh; margin:0; }
-    .login-box { background:white; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); width:300px; text-align:center; }
-    input { width:90%; padding:8px; margin:10px 0; border:1px solid #ddd; border-radius:5px; }
-    button { padding:10px 15px; margin:10px 5px; cursor:pointer; border:none; border-radius:5px; background:#4CAF50; color:white; font-weight:bold; }
-    button:hover { background:#45a049; }
-    .switch { margin-top:10px; font-size:14px; cursor:pointer; color:blue; text-decoration:underline; }
-  </style>
+  <meta charset="UTF-8" />
+  <title>U9</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="index.css" />
+
+  <!-- Supabase SDK（必须在 supabaseClient.js 之前） -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- 全局 Supabase 初始化（把 supabaseClient 挂到 window） -->
+  <script src="supabaseClient.js"></script>
 </head>
 <body>
+  <div class="container">
+    <h1 class="title">Welcome</h1>
+    <p class="desc">Please register or login below:</p>
 
-  <div class="login-box">
-    <h2 id="formTitle">登录</h2>
-    <input type="text" id="username" placeholder="用户名" />
-    <input type="password" id="password" placeholder="密码" />
-    <button id="submitBtn">登录</button>
-    <div id="switchMode" class="switch">没有账号？注册</div>
-    <p id="message" style="color:red;"></p>
+    <!-- Tab -->
+    <div class="tab-container">
+      <button id="showLogin" class="tab-btn active">Login</button>
+      <button id="showRegister" class="tab-btn">Register</button>
+    </div>
+
+    <!-- 登录 -->
+    <div id="loginForm" class="form-container">
+      <div class="field">
+        <input type="text" id="loginUsername" placeholder="Username" autocomplete="username" />
+      </div>
+
+      <div class="field password-wrapper">
+        <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" />
+        <button type="button" class="toggle-password" data-target="loginPassword" aria-label="toggle password">👁️</button>
+      </div>
+
+      <div id="loginMsg" class="form-msg"></div>
+      <button id="loginBtn" class="primary-btn">Login</button>
+    </div>
+
+    <!-- 注册 -->
+    <div id="registerForm" class="form-container hidden">
+      <div class="field">
+        <input type="text" id="regUsername" placeholder="Username" autocomplete="username" />
+      </div>
+
+      <div class="field password-wrapper">
+        <input type="password" id="regPassword" placeholder="Password" autocomplete="new-password" />
+        <button type="button" class="toggle-password" data-target="regPassword" aria-label="toggle password">👁️</button>
+      </div>
+
+      <div class="field password-wrapper">
+        <input type="password" id="regConfirmPassword" placeholder="Confirm Password" autocomplete="new-password" />
+        <button type="button" class="toggle-password" data-target="regConfirmPassword" aria-label="toggle password">👁️</button>
+      </div>
+
+      <label class="agreement">
+        <input type="checkbox" id="agreeTerms" />
+        <span>I agree to the terms</span>
+      </label>
+
+      <div id="registerMsg" class="form-msg"></div>
+      <button id="registerBtn" class="primary-btn">Register</button>
+    </div>
   </div>
 
-  <!-- Supabase 客户端 -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./frontend/Order/supabaseClient.js"></script>
-
-  <script>
-    let isLogin = true; // 当前模式：true=登录，false=注册
-    const formTitle = document.getElementById("formTitle");
-    const submitBtn = document.getElementById("submitBtn");
-    const switchMode = document.getElementById("switchMode");
-    const message = document.getElementById("message");
-
-    switchMode.addEventListener("click", () => {
-      isLogin = !isLogin;
-      formTitle.textContent = isLogin ? "登录" : "注册";
-      submitBtn.textContent = isLogin ? "登录" : "注册";
-      switchMode.textContent = isLogin ? "没有账号？注册" : "已有账号？登录";
-      message.textContent = "";
-    });
-
-    submitBtn.addEventListener("click", async () => {
-      const username = document.getElementById("username").value.trim();
-      const password = document.getElementById("password").value.trim();
-      if (!username || !password) {
-        message.textContent = "请输入用户名和密码";
-        return;
-      }
-
-      if (isLogin) {
-        // 登录：检查用户名和密码
-        const { data, error } = await supabaseClient
-          .from("users")
-          .select("*")
-          .eq("username", username)
-          .eq("password", password)   // ⚠️ 简单示例，生产不能明文存密码
-          .single();
-
-        if (error || !data) {
-          message.textContent = "用户名或密码错误";
-        } else {
-          localStorage.setItem("user_uuid", data.uuid); // 保存用户UUID
-          window.location.href = "./frontend/HOME.html";
-        }
-      } else {
-        // 注册：先检查是否存在
-        const { data: existing } = await supabaseClient
-          .from("users")
-          .select("uuid")
-          .eq("username", username)
-          .maybeSingle();
-
-        if (existing) {
-          message.textContent = "用户名已存在";
-          return;
-        }
-
-        const { data, error } = await supabaseClient
-          .from("users")
-          .insert([{ username, password }]) // 新用户
-          .select()
-          .single();
-
-        if (error) {
-          message.textContent = "注册失败：" + error.message;
-        } else {
-          localStorage.setItem("user_uuid", data.uuid);
-          window.location.href = "./frontend/HOME.html";
-        }
-      }
-    });
-  </script>
-
+  <!-- 业务逻辑 -->
+  <script src="index.js"></script>
 </body>
 </html>
