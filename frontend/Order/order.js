@@ -150,55 +150,8 @@ async function updateRoundProgress() {
   if (el) el.textContent = `本轮已完成订单：${completed} / ${window.ORDERS_PER_ROUND}`;
 }
 
-
-
-
-
-
-
 /* ======================
-   渲染最近订单
-   ====================== */
-function renderLastOrder(order, coinsRaw) {
-  const el = document.getElementById("orderResult");
-  if (!el || !order) return;
-
-  const coins = Number(coinsRaw) || 0;
-  const price = Number(order.total_price) || 0;
-  const profit = Number(order.profit) || 0; 
-  const profitRatio = Number(order.products?.profit) || 0; 
-
-  let html = `
-    <h3>✅ 最近一次订单</h3>
-    <p>商品：${order.products?.name || "未知商品"}</p>
-    <p>价格：¥${price.toFixed(2)}</p>
-    <p>利润率：${profitRatio}</p>
-    <p>收入：+¥${profit.toFixed(2)}</p>
-    <p>状态：${order.status === "completed" ? "✅ 已完成" : "⏳ 待完成"}</p>
-    <p>时间：${new Date(order.created_at).toLocaleString()}</p>
-    <p>当前金币：¥${coins.toFixed(2)}</p>
-  `;
-
-  if (order.status === "pending" && coins >= 0) {
-    html += `<button id="completeOrderBtn">完成订单</button>`;
-  }
-  if (coins < 0) {
-    html += `<p style="color:red;">⚠️ 金币为负，欠款 ¥${Math.abs(coins).toFixed(2)}</p>`;
-  }
-
-  el.innerHTML = html;
-
-  const compBtn = document.getElementById("completeOrderBtn");
-  if (compBtn) {
-    compBtn.addEventListener("click", async () => {
-      compBtn.disabled = true;
-      await completeOrder(order, coins);
-    });
-  }
-}
-
-/* ======================
-   完成订单
+   完成订单 ✅ 改用 RPC
    ====================== */
 async function completeOrder(order, currentCoinsRaw) {
   if (completing) return;
@@ -207,35 +160,54 @@ async function completeOrder(order, currentCoinsRaw) {
   try {
     if (order.status === "completed") return;
 
-    const currentCoins = Number(currentCoinsRaw) || 0;
-    const price = Number(order.total_price) || 0;
-    const profit = Number(order.profit) || 0;
-    const finalCoins = currentCoins + price + profit;
+    const { data, error } = await supabaseClient.rpc(
+      "complete_order_and_update_round",
+      { p_order_id: order.id, p_user_id: window.currentUserId }
+    );
+    if (error) throw error;
+    const result = data[0];
 
-    const { error: orderErr } = await supabaseClient
-      .from("orders")
-      .update({ status: "completed" })
-      .eq("id", order.id)
-      .eq("status", "pending");
-    if (orderErr) throw new Error(orderErr.message);
-
-    const { error: coinErr } = await supabaseClient
-      .from("users")
-      .update({ coins: finalCoins })
-      .eq("id", window.currentUserId);
-    if (coinErr) throw new Error(coinErr.message);
-
-    renderLastOrder({ ...order, status: "completed" }, finalCoins);
-    updateCoinsUI(finalCoins);
-    await checkPendingLock();
+    renderLastOrder({ ...order, status: result.status }, result.coins);
+    updateCoinsUI(result.coins);
     await loadRecentOrders();
-    await updateRoundProgress(); // 更新本轮完成数
+    await updateRoundProgress();
   } catch (e) {
     alert(e.message || "完成订单失败");
   } finally {
     completing = false;
   }
 }
+
+/* ======================
+   检查本轮是否可兑换 ✅ 增强容错
+   ====================== */
+async function canExchangeThisRound() {
+  if (!window.currentUserId) return false;
+
+  if (!window.currentRoundId) {
+    const { data: round } = await supabaseClient.rpc("get_or_create_current_round", {
+      p_user_id: window.currentUserId
+    });
+    window.currentRoundId = round?.round_id;
+  }
+  if (!window.currentRoundId) return false;
+
+  try {
+    const { data, error } = await supabaseClient
+      .from("orders")
+      .select("id")
+      .eq("user_id", window.currentUserId)
+      .eq("round_id", window.currentRoundId)
+      .eq("status", "completed");
+
+    if (error) throw error;
+    return (data?.length || 0) >= window.ORDERS_PER_ROUND;
+  } catch (e) {
+    console.error("检查本轮兑换条件失败", e);
+    return false;
+  }
+}
+
 
 /* ======================
    检查 pending 锁定
@@ -745,5 +717,52 @@ function setMatchingState(isMatching) {
   if (btn) {
     btn.disabled = isMatching;
     btn.textContent = isMatching ? "🎲 正在匹配..." : "🎲 一键刷单";
+  }
+}
+
+
+
+
+
+
+
+/* ======================
+   渲染最近订单
+   ====================== */
+function renderLastOrder(order, coinsRaw) {
+  const el = document.getElementById("orderResult");
+  if (!el || !order) return;
+
+  const coins = Number(coinsRaw) || 0;
+  const price = Number(order.total_price) || 0;
+  const profit = Number(order.profit) || 0; 
+  const profitRatio = Number(order.products?.profit) || 0; 
+
+  let html = `
+    <h3>✅ 最近一次订单</h3>
+    <p>商品：${order.products?.name || "未知商品"}</p>
+    <p>价格：¥${price.toFixed(2)}</p>
+    <p>利润率：${profitRatio}</p>
+    <p>收入：+¥${profit.toFixed(2)}</p>
+    <p>状态：${order.status === "completed" ? "✅ 已完成" : "⏳ 待完成"}</p>
+    <p>时间：${new Date(order.created_at).toLocaleString()}</p>
+    <p>当前金币：¥${coins.toFixed(2)}</p>
+  `;
+
+  if (order.status === "pending" && coins >= 0) {
+    html += `<button id="completeOrderBtn">完成订单</button>`;
+  }
+  if (coins < 0) {
+    html += `<p style="color:red;">⚠️ 金币为负，欠款 ¥${Math.abs(coins).toFixed(2)}</p>`;
+  }
+
+  el.innerHTML = html;
+
+  const compBtn = document.getElementById("completeOrderBtn");
+  if (compBtn) {
+    compBtn.addEventListener("click", async () => {
+      compBtn.disabled = true;
+      await completeOrder(order, coins);
+    });
   }
 }
