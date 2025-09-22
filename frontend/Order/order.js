@@ -90,14 +90,6 @@ function isRoundExpired() {
   return (Date.now() - Number(window.roundStartTime)) > window.ROUND_DURATION;
 }
 
-function startNewRound() {
-  const uuid = crypto.randomUUID();
-  window.currentRoundId = uuid;
-  window.roundStartTime = Date.now();
-  localStorage.setItem("currentRoundId", uuid);
-  localStorage.setItem("roundStartTime", window.roundStartTime);
-}
-
 /* ======================
    获取用户规则产品
    ====================== */
