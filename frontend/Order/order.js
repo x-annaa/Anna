@@ -455,27 +455,45 @@ async function finalizeMatchedOrder(product) {
 document.addEventListener("DOMContentLoaded", restoreMatchingIfAny);
 
 /* ======================
-   冷却倒计时函数
+   开启新轮次
    ====================== */
-function startCooldownTimer(nextAllowed, messagePrefix = "冷却中，请等待") {
-  if (!nextAllowed) return;
+async function startNewRound() {
+  if (!window.currentUserId) return;
+  try {
+    const { data: round, error } = await supabaseClient.rpc(
+      "get_or_create_current_round",
+      { p_user_id: window.currentUserId }
+    );
+    if (error) throw error;
 
-  const tick = () => {
-    const sec = Math.ceil((new Date(nextAllowed).getTime() - Date.now()) / 1000);
-    if (sec <= 0) {
-      clearInterval(cooldownTimer);
-      setOrderBtnDisabled(false, "", "");
-      startNewRound();
-      updateRoundProgress();
-      loadRecentOrders();
-    } else {
-      setOrderBtnDisabled(true, `${messagePrefix} ${formatTime(sec)}`, `冷却剩余时间：${formatTime(sec)}`);
+    window.currentRoundId = round.round_id;
+    window.roundStartTime = Date.now();
+
+    console.log("🎯 新轮次已开始", round);
+
+    await updateRoundProgress();
+    await refreshExchangeUI(); // 同步兑换按钮
+  } catch (e) {
+    console.error("开启新轮次失败", e);
+  }
+}
+
+/* ======================
+   刷新兑换按钮可用状态
+   ====================== */
+async function refreshExchangeUI() {
+  if (!window.currentUserId) return;
+
+  try {
+    const canToBalance = await canExchangeThisRound();
+    const coinsToBalanceBtn = document.getElementById("coinsToBalanceBtn");
+    if (coinsToBalanceBtn) {
+      coinsToBalanceBtn.disabled = !canToBalance;
+      coinsToBalanceBtn.title = canToBalance ? "" : `⚠️ 需要完成 ${window.ORDERS_PER_ROUND} 单才可用`;
     }
-  };
-
-  tick();
-  if (cooldownTimer) clearInterval(cooldownTimer);
-  cooldownTimer = setInterval(tick, 1000);
+  } catch (e) {
+    console.error("刷新兑换按钮状态失败", e);
+  }
 }
 
 /* ======================
