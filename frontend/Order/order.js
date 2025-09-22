@@ -192,27 +192,8 @@ async function canExchangeThisRound() {
   }
 }
 
-/* ====================== 10.开启新轮次 ====================== */
-async function startNewRound() {
-  if (!window.currentUserId) return;
-  try {
-    const { data: round, error } = await supabaseClient.rpc(
-      "get_or_create_current_round",
-      { p_user_id: window.currentUserId }
-    );
-    if (error) throw error;
+/* ====================== 10.已删除 ====================== */
 
-    window.currentRoundId = round.round_id;
-    window.roundStartTime = Date.now();
-
-    console.log("🎯 新轮次已开始", round);
-
-    await updateRoundProgress();
-    await refreshExchangeUI();
-  } catch (e) {
-    console.error("开启新轮次失败", e);
-  }
-}
 
 /* ====================== 11.页面事件绑定 ✅ async 修复 ====================== */
 document.addEventListener("DOMContentLoaded", async () => {
@@ -479,23 +460,8 @@ async function refreshExchangeUI() {
   }
 }
 
-/* ====================== 19.检查本轮 Coins → Balance 是否可用 ====================== */
-async function canExchangeThisRound() {
-  if (!window.currentUserId || !window.currentRoundId) return false;
-  try {
-    const { data: completedOrders, error } = await supabaseClient
-      .from("orders")
-      .select("id")
-      .eq("user_id", window.currentUserId)
-      .eq("round_id", window.currentRoundId)
-      .eq("status", "completed");
-    if (error) throw error;
-    return (completedOrders?.length || 0) >= window.ORDERS_PER_ROUND;
-  } catch (e) {
-    console.error("检查本轮兑换条件失败", e);
-    return false;
-  }
-}
+/* ====================== 19.已删除 ====================== */
+
 
 /* ====================== 20.兑换逻辑 Coins ↔ Balance ====================== */
 let currentExchangeDirection = "toCoins";
