@@ -80,7 +80,7 @@
           localStorage.setItem("currentUserUUID", data.uuid);
 
           // 跳转
-          window.location.href = "frontend/HOME.html";
+          window.location.href = "/frontend/HOME.html";
 
         } else {
           // 注册
@@ -110,7 +110,7 @@
           localStorage.setItem("currentUser", data.username);
           localStorage.setItem("currentUserUUID", data.uuid);
 
-          window.location.href = "frontend/HOME.html";
+          window.location.href = "/frontend/HOME.html";
         }
       } catch (err) {
         errorMsg.textContent = err.message || "操作失败";
