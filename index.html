@@ -3,119 +3,97 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>U9 登录 / 注册</title>
+  <title>U9 - 登录</title>
   <style>
-    body { font-family: Arial, sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; background:#f0f2f5; }
-    .container { background:#fff; padding:30px; border-radius:8px; box-shadow:0 0 15px rgba(0,0,0,0.1); width:300px; }
-    h2 { text-align:center; margin-bottom:20px; }
-    input { width:100%; padding:8px; margin:8px 0; border-radius:4px; border:1px solid #ccc; }
-    button { width:100%; padding:10px; border:none; border-radius:4px; background:#4caf50; color:#fff; font-weight:bold; cursor:pointer; margin-top:10px; }
+    body { font-family: Arial, sans-serif; background: #f5f5f5; display:flex; justify-content:center; align-items:center; height:100vh; margin:0; }
+    .login-box { background:white; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); width:300px; text-align:center; }
+    input { width:90%; padding:8px; margin:10px 0; border:1px solid #ddd; border-radius:5px; }
+    button { padding:10px 15px; margin:10px 5px; cursor:pointer; border:none; border-radius:5px; background:#4CAF50; color:white; font-weight:bold; }
     button:hover { background:#45a049; }
-    .switch { text-align:center; margin-top:10px; cursor:pointer; color:#007bff; }
-    .switch:hover { text-decoration:underline; }
-    .error { color:red; font-size:14px; margin-top:5px; text-align:center; }
+    .switch { margin-top:10px; font-size:14px; cursor:pointer; color:blue; text-decoration:underline; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2 id="formTitle">登录</h2>
 
+  <div class="login-box">
+    <h2 id="formTitle">登录</h2>
     <input type="text" id="username" placeholder="用户名" />
     <input type="password" id="password" placeholder="密码" />
-    <div class="error" id="errorMsg"></div>
     <button id="submitBtn">登录</button>
-
-    <div class="switch" id="toggleForm">没有账号？点击注册</div>
+    <div id="switchMode" class="switch">没有账号？注册</div>
+    <p id="message" style="color:red;"></p>
   </div>
 
-  <!-- 引入 Supabase 客户端 -->
+  <!-- Supabase 客户端 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabaseClient.js"></script>
+  <script src="./frontend/Order/supabaseClient.js"></script>
 
-  <!-- 登录/注册逻辑 -->
   <script>
-    let isLogin = true;
-
+    let isLogin = true; // 当前模式：true=登录，false=注册
     const formTitle = document.getElementById("formTitle");
     const submitBtn = document.getElementById("submitBtn");
-    const toggleForm = document.getElementById("toggleForm");
-    const errorMsg = document.getElementById("errorMsg");
+    const switchMode = document.getElementById("switchMode");
+    const message = document.getElementById("message");
 
-    toggleForm.addEventListener("click", () => {
+    switchMode.addEventListener("click", () => {
       isLogin = !isLogin;
       formTitle.textContent = isLogin ? "登录" : "注册";
       submitBtn.textContent = isLogin ? "登录" : "注册";
-      toggleForm.textContent = isLogin ? "没有账号？点击注册" : "已有账号？点击登录";
-      errorMsg.textContent = "";
+      switchMode.textContent = isLogin ? "没有账号？注册" : "已有账号？登录";
+      message.textContent = "";
     });
 
     submitBtn.addEventListener("click", async () => {
       const username = document.getElementById("username").value.trim();
       const password = document.getElementById("password").value.trim();
       if (!username || !password) {
-        errorMsg.textContent = "用户名和密码不能为空";
+        message.textContent = "请输入用户名和密码";
         return;
       }
 
-      errorMsg.textContent = "";
+      if (isLogin) {
+        // 登录：检查用户名和密码
+        const { data, error } = await supabaseClient
+          .from("users")
+          .select("*")
+          .eq("username", username)
+          .eq("password", password)   // ⚠️ 简单示例，生产不能明文存密码
+          .single();
 
-      try {
-        if (isLogin) {
-          // 登录
-          const { data, error } = await supabaseClient
-            .from("users")
-            .select("*")
-            .eq("username", username)
-            .eq("password", password) // ⚠️示例，生产建议用哈希
-            .single();
-
-          if (error || !data) {
-            errorMsg.textContent = "用户名或密码错误";
-            return;
-          }
-
-          // 存储 session
-          localStorage.setItem("currentUserId", data.id);
-          localStorage.setItem("currentUser", data.username);
-          localStorage.setItem("currentUserUUID", data.uuid);
-
-          // 跳转
-          window.location.href = "/frontend/HOME.html";
-
+        if (error || !data) {
+          message.textContent = "用户名或密码错误";
         } else {
-          // 注册
-          const { data: existing } = await supabaseClient
-            .from("users")
-            .select("id")
-            .eq("username", username)
-            .single();
-
-          if (existing) {
-            errorMsg.textContent = "用户名已存在";
-            return;
-          }
-
-          const { data, error } = await supabaseClient
-            .from("users")
-            .insert([{ username, password }])
-            .select()
-            .single();
-
-          if (error || !data) {
-            errorMsg.textContent = "注册失败，请稍后重试";
-            return;
-          }
-
-          localStorage.setItem("currentUserId", data.id);
-          localStorage.setItem("currentUser", data.username);
-          localStorage.setItem("currentUserUUID", data.uuid);
-
-          window.location.href = "/frontend/HOME.html";
+          localStorage.setItem("user_uuid", data.uuid); // 保存用户UUID
+          window.location.href = "./frontend/HOME.html";
         }
-      } catch (err) {
-        errorMsg.textContent = err.message || "操作失败";
+      } else {
+        // 注册：先检查是否存在
+        const { data: existing } = await supabaseClient
+          .from("users")
+          .select("uuid")
+          .eq("username", username)
+          .maybeSingle();
+
+        if (existing) {
+          message.textContent = "用户名已存在";
+          return;
+        }
+
+        const { data, error } = await supabaseClient
+          .from("users")
+          .insert([{ username, password }]) // 新用户
+          .select()
+          .single();
+
+        if (error) {
+          message.textContent = "注册失败：" + error.message;
+        } else {
+          localStorage.setItem("user_uuid", data.uuid);
+          window.location.href = "./frontend/HOME.html";
+        }
       }
     });
   </script>
+
 </body>
 </html>
