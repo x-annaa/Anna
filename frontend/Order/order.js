@@ -3,7 +3,6 @@ window.currentUserId = localStorage.getItem("currentUserId");
 window.currentUsername = localStorage.getItem("currentUser");
 window.currentUserUUID = localStorage.getItem("currentUserUUID"); // 新增 UUID
 
-
 let ordering = false;      // 下单中的并发保护
 let completing = false;    // 完成订单中的并发保护
 let exchanging = false;    // Balance <-> Coins 兑换中的并发保护
@@ -25,7 +24,6 @@ async function loadRoundConfig() {
     const { data, error } = await supabaseClient.rpc("get_round_config");
     if (error) throw error;
 
-    // 直接取 JSON 对象返回
     window.ORDERS_PER_ROUND = Number(data.orders_per_round);
     window.ROUND_DURATION_MINUTES = Number(data.round_duration_minutes);
     window.ROUND_DURATION = window.ROUND_DURATION_MINUTES * 60 * 1000;
@@ -43,7 +41,6 @@ async function loadRoundConfig() {
   } catch (e) {
     console.error("❌ 读取配置失败", e.message);
 
-    // 默认值
     window.ORDERS_PER_ROUND = 3;
     window.ROUND_DURATION_MINUTES = 5;
     window.ROUND_DURATION = 5 * 60 * 1000;
@@ -127,14 +124,11 @@ async function checkOrderCooldown() {
     const { data, error } = await supabaseClient
       .rpc("check_user_order_cooldown", { p_user_uuid: window.currentUserUUID });
     if (error) throw error;
-
-    // RPC 返回的就是 JSON 对象，不是数组
     return {
       allowed: data.allowed,
       next_allowed: data.next_allowed,
       cooldown_seconds: data.cooldown_seconds
     };
-
   } catch (e) {
     console.error("检查冷却失败", e);
     return { allowed: true, next_allowed: null };
@@ -145,7 +139,6 @@ async function checkOrderCooldown() {
    本轮完成订单数显示
    ====================== */
 async function updateRoundProgress() {
-  // ✅ 改成调用 RPC 获取当前轮次
   const { data: round, error } = await supabaseClient.rpc(
     "get_or_create_current_round",
     { p_user_id: window.currentUserId }
@@ -156,6 +149,12 @@ async function updateRoundProgress() {
   const el = document.getElementById("roundProgress");
   if (el) el.textContent = `本轮已完成订单：${completed} / ${window.ORDERS_PER_ROUND}`;
 }
+
+
+
+
+
+
 
 /* ======================
    渲染最近订单
