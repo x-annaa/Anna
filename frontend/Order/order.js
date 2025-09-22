@@ -145,18 +145,14 @@ async function checkOrderCooldown() {
    本轮完成订单数显示
    ====================== */
 async function updateRoundProgress() {
-  // 确保配置已加载
-  if (!window.ORDERS_PER_ROUND || !window.ROUND_DURATION_MINUTES) {
-    await loadRoundConfig();
-  }
+  // ✅ 改成调用 RPC 获取当前轮次
+  const { data: round, error } = await supabaseClient.rpc(
+    "get_or_create_current_round",
+    { p_user_id: window.currentUserId }
+  );
+  if (error) return;
 
-  const { data: orders } = await supabaseClient
-    .from("orders")
-    .select("id, status")
-    .eq("user_id", window.currentUserId)
-    .eq("round_id", window.currentRoundId);
-
-  const completed = orders?.filter(o => o.status === "completed").length || 0;
+  const completed = round.completed_orders || 0;
   const el = document.getElementById("roundProgress");
   if (el) el.textContent = `本轮已完成订单：${completed} / ${window.ORDERS_PER_ROUND}`;
 }
@@ -264,9 +260,6 @@ async function checkPendingLock() {
 
 /* ======================
    订单
-   ====================== */
-/* ======================
-   自动下单（支持刷新保持匹配倒计时）
    ====================== */
 async function autoOrder() {
   if (!window.currentUserId) {
