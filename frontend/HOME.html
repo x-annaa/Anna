@@ -19,60 +19,6 @@
   <script src="../supabaseClient.js"></script>
 </head>
 <body>
-
-  <!-- 首页 -->
-  <div id="homePage" class="page active">🏠 HOME</div>
-
-  <!-- 信息页面 -->
-  <div id="infoPage" class="page active">💬 MESSAGE</div>
-
-  <!-- 订单页面 -->
-  <div id="orderPage" class="page active">
-    <h2>📦 ORDER 测试页面</h2>
-
-    <!-- 本轮进度 -->
-    <div id="roundProgress">本轮已完成订单：0 / 0</div>
-    <!-- 刷单冷却倒计时 -->
-    <div id="cooldownDisplay"></div>
-    <!-- 匹配倒计时 -->
-    <div id="matchingCountdown"></div>
-
-    <!-- 自动刷单按钮 -->
-    <button id="autoOrderBtn">🎲 一键刷单</button>
-
-    <!-- 最近订单列表 -->
-    <h3>最近订单</h3>
-    <ul id="recentOrders"></ul>
-
-    <!-- 最新订单显示 -->
-    <div id="lastOrder">最新订单：-</div>
-
-    <!-- 兑换弹窗按钮 -->
-    <button id="addCoinsBtn">兑换刷单币</button>
-
-    <!-- 兑换弹窗 -->
-    <div id="addCoinsModal" style="display:none; position:fixed; top:20%; left:50%; transform:translateX(-50%); background:#fff; padding:20px; border:1px solid #ccc;">
-      <h3>兑换刷单币</h3>
-      <input type="number" id="exchangeAmount" placeholder="输入数量">
-      <div>
-        <button id="balanceToCoinsBtn">余额→刷单币</button>
-        <button id="coinsToBalanceBtn">刷单币→余额</button>
-      </div>
-      <button id="confirmExchange">确认兑换</button>
-      <button id="cancelExchange">取消</button>
-    </div>
-
-    <!-- 余额/刷单币显示 -->
-    <div id="balanceDisplay">余额：0</div>
-    <div id="coinsDisplay">刷单币：0</div>
-  </div>
-
-  <!-- 关于我们页面 -->
-  <div id="msgPage" class="page active">ℹ️ 关于我们</div>
-
-  <!-- 我的页面 -->
-  <div id="myPage" class="page active">👤 我的页面</div>
-
   <!-- 底部导航栏 -->
   <div class="bottom-nav">
     <button data-page="homePage" class="active">Home</button>
@@ -95,3 +41,5 @@
   <script src="Recharge/recharge.js"></script>
 </body>
 </html>
+
+现在我们在 <!-- 订单页面 -->加一下代码。来测试我们的功能
