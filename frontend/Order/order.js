@@ -223,22 +223,53 @@ async function canExchangeThisRound() {
 
 
 /* ====================== 11.页面事件绑定 ✅ async 修复 ====================== */
+/* ====================== 11/21. 页面事件绑定 & 弹窗函数 ====================== */
+
+// 当前兑换方向，默认 Coins → Balance
+let currentExchangeDirection = "toBalance";
+
+// 打开兑换弹窗
+function openExchangeModal() {
+  const modal = document.getElementById("addCoinsModal");
+  if (modal) modal.style.display = "block";
+}
+
+// 关闭兑换弹窗
+function closeExchangeModal() {
+  const modal = document.getElementById("addCoinsModal");
+  if (modal) modal.style.display = "none";
+}
+
+// 切换兑换方向
+function toggleExchangeDirection(direction) {
+  currentExchangeDirection = direction;
+}
+
+// 页面事件绑定
 document.addEventListener("DOMContentLoaded", async () => {
+  // 下单按钮
   document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
+
+  // 弹窗相关
   document.getElementById("addCoinsBtn")?.addEventListener("click", openExchangeModal);
   document.getElementById("cancelExchange")?.addEventListener("click", closeExchangeModal);
   document.getElementById("confirmExchange")?.addEventListener("click", confirmExchange);
 
+  // 兑换方向切换
   document.getElementById("balanceToCoinsBtn")?.addEventListener("click", () => toggleExchangeDirection("toCoins"));
   document.getElementById("coinsToBalanceBtn")?.addEventListener("click", () => toggleExchangeDirection("toBalance"));
 
+  // 点击弹窗遮罩关闭
   document.getElementById("addCoinsModal")?.addEventListener("click", (e) => {
     if (e.target.id === "addCoinsModal") closeExchangeModal();
   });
+
+  // ESC 键关闭弹窗
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeExchangeModal();
   });
 
+  // 刷新页面数据并初始化轮次
   await refreshAll();
   await startNewRound(); // 初始化时开启一轮
 });
@@ -576,27 +607,6 @@ async function confirmExchange() {
     exchanging = false;
   }
 }
-
-/* ====================== 21.页面事件绑定 ====================== */
-document.addEventListener("DOMContentLoaded", async () => {
-  document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
-  document.getElementById("addCoinsBtn")?.addEventListener("click", openExchangeModal);
-  document.getElementById("cancelExchange")?.addEventListener("click", closeExchangeModal);
-  document.getElementById("confirmExchange")?.addEventListener("click", confirmExchange);
-
-  document.getElementById("balanceToCoinsBtn")?.addEventListener("click", () => toggleExchangeDirection("toCoins"));
-  document.getElementById("coinsToBalanceBtn")?.addEventListener("click", () => toggleExchangeDirection("toBalance"));
-
-  document.getElementById("addCoinsModal")?.addEventListener("click", (e) => {
-    if (e.target.id === "addCoinsModal") closeExchangeModal();
-  });
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeExchangeModal();
-  });
-
-  await refreshAll();
-  await startNewRound(); // 初始化时开启一轮
-});
 
 /* ====================== 22.页面刷新工具 ====================== */
 async function refreshAll() {
