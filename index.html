@@ -28,16 +28,9 @@
     <div class="switch" id="toggleForm">没有账号？点击注册</div>
   </div>
 
-  <!-- 引入 Supabase SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
-  <!-- 初始化 supabaseClient -->
-  <script src="supabaseClient.js" defer></script>
-  <script>
-    window.supabaseClient = supabase.createClient(
-      "https://ofaxbeydyeajdgwwqrzz.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9mYXhiZXlkeWVhamRnd3dxcnp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NzQxMTQsImV4cCI6MjA3NDA1MDExNH0.mJGdh6BBEy2Mp83H7aBEo3wIFyIsUsVfqgTErgsvFdY"
-    );
-  </script>
+  <!-- 引入 Supabase 客户端 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabaseClient.js"></script>
 
   <!-- 登录/注册逻辑 -->
   <script>
@@ -73,7 +66,7 @@
             .from("users")
             .select("*")
             .eq("username", username)
-            .eq("password", password) // 简单明文示例，生产请用哈希
+            .eq("password", password) // ⚠️示例，生产建议用哈希
             .single();
 
           if (error || !data) {
@@ -81,12 +74,12 @@
             return;
           }
 
-          // 登录成功，存储 session
+          // 存储 session
           localStorage.setItem("currentUserId", data.id);
           localStorage.setItem("currentUser", data.username);
           localStorage.setItem("currentUserUUID", data.uuid);
 
-          // 跳转到 HOME
+          // 跳转
           window.location.href = "frontend/HOME.html";
 
         } else {
@@ -113,7 +106,6 @@
             return;
           }
 
-          // 注册成功自动登录
           localStorage.setItem("currentUserId", data.id);
           localStorage.setItem("currentUser", data.username);
           localStorage.setItem("currentUserUUID", data.uuid);
