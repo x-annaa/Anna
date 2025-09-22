@@ -84,11 +84,11 @@ function isRoundExpired() {
 }
 
 /* ====================== 4.获取用户规则产品 ====================== */
-async function getUserRuleProduct(userId, orderNumber) {
+async function getUserRuleProduct(userUUID, orderNumber) {
   const { data: rules, error } = await supabaseClient
     .from("user_product_rules")
     .select("product_id")
-    .eq("user_id", userId)
+    .eq("user_uuid", userUUID)
     .eq("order_number", orderNumber)
     .eq("enabled", true)
     .limit(1);
@@ -155,7 +155,7 @@ async function updateRoundProgress(roundData) {
   }
 }
 
-/* ====================== 8.完成订单 ✅ 改用 RPC ====================== */
+/* ====================== 8.完成订单 ====================== */
 async function completeOrder(order, currentCoinsRaw) {
   if (completing) return;
   completing = true;
@@ -185,7 +185,7 @@ async function completeOrder(order, currentCoinsRaw) {
   }
 }
 
-/* ====================== 9.检查本轮是否可兑换 ✅ 增强容错 ====================== */
+/* ====================== 9.检查本轮是否可兑换 ====================== */
 async function canExchangeThisRound() {
   if (!window.currentUserUUID) return false;
 
@@ -218,64 +218,45 @@ async function canExchangeThisRound() {
   }
 }
 
-/* ====================== 10. 页面事件绑定 & 弹窗函数 ====================== */
-// 当前兑换方向，默认 Coins → Balance
+/* ====================== 10.页面事件绑定 & 弹窗函数 ====================== */
 let currentExchangeDirection = "toBalance";
 
-// 打开兑换弹窗
 function openExchangeModal() {
   const modal = document.getElementById("addCoinsModal");
   if (modal) modal.style.display = "block";
 }
 
-// 关闭兑换弹窗
 function closeExchangeModal() {
   const modal = document.getElementById("addCoinsModal");
   if (modal) modal.style.display = "none";
 }
 
-// 切换兑换方向
 function toggleExchangeDirection(direction) {
   currentExchangeDirection = direction;
 }
 
-// 页面事件绑定
 document.addEventListener("DOMContentLoaded", async () => {
-  // 下单按钮
   document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
-
-  // 弹窗相关
   document.getElementById("addCoinsBtn")?.addEventListener("click", openExchangeModal);
   document.getElementById("cancelExchange")?.addEventListener("click", closeExchangeModal);
   document.getElementById("confirmExchange")?.addEventListener("click", confirmExchange);
-
-  // 兑换方向切换
   document.getElementById("balanceToCoinsBtn")?.addEventListener("click", () => toggleExchangeDirection("toCoins"));
   document.getElementById("coinsToBalanceBtn")?.addEventListener("click", () => toggleExchangeDirection("toBalance"));
+  document.getElementById("addCoinsModal")?.addEventListener("click", (e) => { if (e.target.id === "addCoinsModal") closeExchangeModal(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeExchangeModal(); });
 
-  // 点击弹窗遮罩关闭
-  document.getElementById("addCoinsModal")?.addEventListener("click", (e) => {
-    if (e.target.id === "addCoinsModal") closeExchangeModal();
-  });
-
-  // ESC 键关闭弹窗
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeExchangeModal();
-  });
-
-  // 刷新页面数据并初始化轮次
   await refreshAll();
-  await startNewRound(); // 初始化时开启一轮
+  await startNewRound();
 });
 
 /* ====================== 11.检查 pending 锁定 ====================== */
 async function checkPendingLock() {
-  if (!window.currentUserId) return;
+  if (!window.currentUserUUID) return;
 
   const { data: pend } = await supabaseClient
     .from("orders")
     .select("id")
-    .eq("user_id", window.currentUserId)
+    .eq("user_uuid", window.currentUserUUID)
     .eq("status", "pending")
     .limit(1);
 
