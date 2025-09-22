@@ -144,6 +144,12 @@ async function completeOrder(order, currentCoinsRaw) {
   completing = true;
 
   try {
+    console.log("🔥 completeOrder 调用开始", {
+      orderId: order.id, typeOrderId: typeof order.id,
+      orderStatus: order.status, typeOrderStatus: typeof order.status,
+      userId: window.currentUserId, typeUserId: typeof window.currentUserId
+    });
+
     if (order.status === "completed") return;
 
     const { data, error } = await supabaseClient.rpc(
