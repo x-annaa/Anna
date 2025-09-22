@@ -25,35 +25,33 @@ if (!window.supabaseClient) {
    ====================== */
 async function loadRoundConfig() {
   try {
-    const { data, error } = await supabaseClient
-      .from("round_config")
-      .select("orders_per_round, round_duration, match_min_seconds, match_max_seconds")
-      .limit(1)
-      .single();
-
+    const { data, error } = await supabaseClient.rpc("get_round_config");
     if (error) throw error;
-    if (data) {
-      window.ORDERS_PER_ROUND = Number(data.orders_per_round);
-      window.ROUND_DURATION_MINUTES = Number(data.round_duration);
-      window.ROUND_DURATION = window.ROUND_DURATION_MINUTES * 60 * 1000;
 
-      // 🔥 新增：匹配时间区间
-      window.MATCH_MIN_SECONDS = Number(data.match_min_seconds) || 5;
-      window.MATCH_MAX_SECONDS = Number(data.match_max_seconds) || 15;
+    // 直接取 JSON 对象返回
+    window.ORDERS_PER_ROUND = Number(data.orders_per_round);
+    window.ROUND_DURATION_MINUTES = Number(data.round_duration_minutes);
+    window.ROUND_DURATION = window.ROUND_DURATION_MINUTES * 60 * 1000;
 
-      console.log("✅ 配置已加载：", {
-        ORDERS_PER_ROUND: window.ORDERS_PER_ROUND,
-        ROUND_DURATION_MINUTES: window.ROUND_DURATION_MINUTES,
-        MATCH_MIN: window.MATCH_MIN_SECONDS,
-        MATCH_MAX: window.MATCH_MAX_SECONDS,
-      });
-    }
+    window.MATCH_MIN_SECONDS = Number(data.match_min) || 5;
+    window.MATCH_MAX_SECONDS = Number(data.match_max) || 15;
+
+    console.log("✅ 配置已加载：", {
+      ORDERS_PER_ROUND: window.ORDERS_PER_ROUND,
+      ROUND_DURATION_MINUTES: window.ROUND_DURATION_MINUTES,
+      MATCH_MIN: window.MATCH_MIN_SECONDS,
+      MATCH_MAX: window.MATCH_MAX_SECONDS,
+    });
+
   } catch (e) {
     console.error("❌ 读取配置失败", e.message);
-    if (!window.ORDERS_PER_ROUND) window.ORDERS_PER_ROUND = 3;
-    if (!window.ROUND_DURATION_MINUTES) window.ROUND_DURATION_MINUTES = 5;
-    if (!window.MATCH_MIN_SECONDS) window.MATCH_MIN_SECONDS = 5;
-    if (!window.MATCH_MAX_SECONDS) window.MATCH_MAX_SECONDS = 15;
+
+    // 默认值
+    window.ORDERS_PER_ROUND = 3;
+    window.ROUND_DURATION_MINUTES = 5;
+    window.ROUND_DURATION = 5 * 60 * 1000;
+    window.MATCH_MIN_SECONDS = 5;
+    window.MATCH_MAX_SECONDS = 15;
   }
 }
 
