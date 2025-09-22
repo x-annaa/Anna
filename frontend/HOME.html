@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>U9 - 订单页面</title>
-  <link rel="stylesheet" href="./Order/order.css"> <!-- 如果有单独css文件，可选 -->
+  <link rel="stylesheet" href="./Order/order.css"> <!-- 如果有 CSS -->
   <style>
     body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
     .page { max-width: 800px; margin: 20px auto; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
@@ -76,8 +76,8 @@
     </div>
   </div>
 
-  <!-- 引入 supabase 客户端 -->
-  <script src="../supabaseClient.js"></script>
+  <!-- 引入 supabase 客户端 (全局) -->
+  <script src="./Order/supabaseClient.js"></script>
   <!-- 引入订单逻辑 -->
   <script src="./Order/order.js"></script>
 
