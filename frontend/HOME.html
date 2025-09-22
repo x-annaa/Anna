@@ -3,57 +3,50 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>U9 - 首页</title>
+  <title>U9 首页</title>
 
   <!-- CSS -->
-  <link rel="stylesheet" href="home.css">
+  <link rel="stylesheet" href="Order/order.css">
 
   <!-- Supabase SDK -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script src="../supabaseClient.js"></script>
+  <!-- 全局 Supabase 初始化 -->
+  <script src="Order/supabaseClient.js"></script>
 </head>
 <body>
-  <header>
+  <div class="container">
     <h1>🏠 U9 首页</h1>
-  </header>
+    <p>用户：<span id="usernameDisplay">未登录</span></p>
+    <p>刷单币：<span id="ordercoins">0</span></p>
+    <p>余额：<span id="balanceDisplay">0</span></p>
+    <p id="roundProgress">本轮已完成订单：0 / 0</p>
 
-  <main>
-    <section id="userInfo">
-      <p>用户：<span id="usernameDisplay">未登录</span></p>
-      <p>刷单币：<span id="ordercoins">0</span></p>
-      <p>余额：<span id="balanceDisplay">0</span></p>
-    </section>
+    <button id="autoOrderBtn">🎲 一键刷单</button>
 
-    <section id="roundSection">
-      <p id="roundProgress">本轮已完成订单：0 / 0</p>
-      <p id="cooldownDisplay"></p>
-      <button id="autoOrderBtn">🎲 一键刷单</button>
-      <p id="matchingCountdown"></p>
-    </section>
+    <h2>最近订单</h2>
+    <ul id="recentOrders"></ul>
 
-    <section id="recentOrdersSection">
-      <h2>最近订单</h2>
-      <ul id="recentOrders"></ul>
-      <p id="lastOrder"></p>
-    </section>
+    <button id="addCoinsBtn">兑换刷单币</button>
 
-    <section id="exchangeSection">
-      <button id="addCoinsBtn">兑换刷单币</button>
-      <div id="addCoinsModal" class="modal hidden">
-        <div class="modal-content">
-          <span id="cancelExchange" class="close">&times;</span>
-          <h3>兑换刷单币</h3>
-          <input type="number" id="exchangeAmount" placeholder="输入数量">
-          <div>
-            <button id="balanceToCoinsBtn">余额→刷单币</button>
-            <button id="coinsToBalanceBtn">刷单币→余额</button>
-          </div>
-          <button id="confirmExchange">确认兑换</button>
+    <div id="addCoinsModal" class="modal hidden">
+      <div class="modal-content">
+        <span id="cancelExchange" class="close">&times;</span>
+        <h3>兑换刷单币</h3>
+        <input type="number" id="exchangeAmount" placeholder="输入数量">
+        <div class="exchange-options">
+          <button id="balanceToCoinsBtn">余额→刷单币</button>
+          <button id="coinsToBalanceBtn">刷单币→余额</button>
         </div>
+        <button id="confirmExchange">确认兑换</button>
       </div>
-    </section>
-  </main>
+    </div>
 
-  <script src="../Order/order.js"></script>
+    <p id="cooldownDisplay"></p>
+    <p id="matchingCountdown"></p>
+    <p id="lastOrder"></p>
+  </div>
+
+  <!-- JS -->
+  <script src="Order/order.js"></script>
 </body>
 </html>
