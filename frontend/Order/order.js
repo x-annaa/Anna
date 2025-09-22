@@ -280,7 +280,12 @@ async function autoOrder() {
     await loadRoundConfig();
 
     // 🔹 开启新轮次（如不存在）
-    if (!window.currentRoundId) startNewRound();
+    const { data: round, error: roundErr } = await supabaseClient.rpc(
+      "get_or_create_current_round",
+      { p_user_id: window.currentUserId }
+    );
+    if (roundErr) throw roundErr;
+    const currentRoundId = round.round_id;
 
     // 🔹 检查本轮已完成订单数
     const { data: roundOrders } = await supabaseClient
