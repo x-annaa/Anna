@@ -438,7 +438,7 @@ async function refreshExchangeUI() {
     if (error) throw error;
 
     const balanceEl = document.getElementById("balanceDisplay");
-    const coinsEl = document.getElementById("coinsDisplay");
+    const coinsEl = document.getElementById("ordercoins"); 
     if (balanceEl) balanceEl.textContent = `余额：¥${Number(data.balance).toFixed(2)}`;
     if (coinsEl) coinsEl.textContent = `刷单币：${Number(data.coins).toFixed(2)}`;
 
