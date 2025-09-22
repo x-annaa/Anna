@@ -296,21 +296,16 @@ async function autoOrder() {
     await loadRoundConfig();
 
     // 🔹 开启新轮次（如不存在）
-    const { data: round, error: roundErr } = await supabaseClient.rpc(
+    const { data: roundData, error: roundErr } = await supabaseClient.rpc(
       "get_or_create_current_round",
-      { p_user_id: window.currentUserId }
+      { p_user_id: window.currentUserId }  // UUID 已在后端处理
     );
     if (roundErr) throw roundErr;
-    const currentRoundId = round.round_id;
 
-    // 🔹 检查本轮已完成订单数
-    const { data: roundOrders } = await supabaseClient
-      .from("orders")
-      .select("id,status")
-      .eq("user_id", window.currentUserId)
-      .eq("round_id", window.currentRoundId);
+    const currentRoundId = roundData[0].round_id;
+    window.currentRoundId = currentRoundId;
 
-    // 🔹 获取用户 Coins
+    // 🔹 检查用户金币
     const { data: user } = await supabaseClient
       .from("users")
       .select("coins")
@@ -372,7 +367,7 @@ async function autoOrder() {
 
   } catch (e) {
     alert(e.message || "下单失败");
-    setMatchingState(false); // 出错也隐藏 GIF
+    setMatchingState(false);
   } finally {
     ordering = false;
   }
