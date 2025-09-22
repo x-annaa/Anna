@@ -153,7 +153,7 @@ async function completeOrder(order, currentCoinsRaw) {
     if (error) throw error;
     const result = data[0];
 
-    renderLastOrder({ ...order, status: result.status }, result.coins);
+    renderLastOrder({ ...order, status: result.order_status }, result.coins);
     updateCoinsUI(result.coins);
     await loadRecentOrders();
     await updateRoundProgress();
