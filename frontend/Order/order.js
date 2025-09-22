@@ -267,450 +267,215 @@ async function checkPendingLock() {
   }
 }
 
-/* ====================== 12.订单 ====================== */
+/* ====================== 1~11 已经定义上文 ====================== */
+
+/* ====================== 12. 自动刷单 ====================== */
 async function autoOrder() {
-  if (!window.currentUserId) {
-    alert("请先登录！");
-    return;
-  }
+  if (!window.currentUserUUID) return;
   if (ordering) return;
   ordering = true;
 
   try {
-    await loadRoundConfig();
+    const cooldown = await checkOrderCooldown();
+    if (!cooldown.allowed) {
+      setOrderBtnDisabled(true, `冷却中，剩余 ${cooldown.cooldown_seconds}s`, `${cooldown.cooldown_seconds}s`);
+      return;
+    }
 
-    // 🔹 开启新轮次（如不存在）
-    const { data: roundData, error: roundErr } = await supabaseClient.rpc(
-      "get_or_create_current_round",
-      { p_user_id: window.currentUserId }  // UUID 已在后端处理
-    );
-    if (roundErr) throw roundErr;
+    const roundData = await supabaseClient
+      .rpc("get_or_create_current_round", { p_user_uuid: window.currentUserUUID });
+    const orderLimit = roundData?.[0]?.order_limit || window.ORDERS_PER_ROUND;
 
-    const currentRoundId = roundData[0].round_id;
-    window.currentRoundId = currentRoundId;
+    // 获取手动规则优先产品
+    let productId = await getUserRuleProduct(window.currentUserUUID, orderLimit);
 
-    // 🔹 检查用户金币
-    const { data: user } = await supabaseClient
-      .from("users")
-      .select("coins")
-      .eq("id", window.currentUserId)
+    // 否则随机产品
+    if (!productId) {
+      const product = await getRandomProduct();
+      productId = product.id;
+    }
+
+    // 创建订单
+    const { data, error } = await supabaseClient
+      .from("orders")
+      .insert([{ user_uuid: window.currentUserUUID, product_id: productId, status: "pending" }])
+      .select()
       .single();
-    const coins = Number(user?.coins || 0);
-    if (coins < 50) {
-      alert("你的余额不足，最少需要 50 coins");
-      setOrderBtnDisabled(false);
-      ordering = false;
-      return;
-    }
+    if (error) throw error;
 
-    // 🔹 检查未完成订单
-    const { data: pend } = await supabaseClient
-      .from("orders")
-      .select("id")
-      .eq("user_id", window.currentUserId)
-      .eq("status", "pending")
-      .limit(1);
-    if (pend?.length) {
-      alert("您有未完成订单，请先完成订单再继续下单。");
-      await checkPendingLock();
-      ordering = false;
-      return;
-    }
-
-    // 🔹 选择商品（规则或随机）
-    let product;
-    const totalOrdersRes = await supabaseClient
-      .from("orders")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", window.currentUserId);
-    const orderNumber = (totalOrdersRes?.count || 0) + 1;
-
-    const ruleProductId = await getUserRuleProduct(window.currentUserId, orderNumber);
-    if (ruleProductId) {
-      const { data: pData, error } = await supabaseClient
-        .from("products")
-        .select("*")
-        .eq("id", ruleProductId)
-        .single();
-      if (!error && pData) product = pData;
-    }
-    if (!product) product = await getRandomProduct();
-
-    // 🔹 生成随机匹配时间
-    let delaySec = Math.floor(
-      Math.random() * (window.MATCH_MAX_SECONDS - window.MATCH_MIN_SECONDS + 1)
-    ) + window.MATCH_MIN_SECONDS;
-
-    // 🔹 保存匹配结束时间和产品信息（本地存储，刷新保持状态）
-    const matchingEndTime = Date.now() + delaySec * 1000;
-    localStorage.setItem("matchingEndTime", matchingEndTime);
-    localStorage.setItem("matchingProductId", product.id);
-
-    // 🔹 启动匹配倒计时
-    startMatchingCountdown(product, delaySec);
+    // 等待匹配完成
+    await startMatchingCountdown(data.id);
 
   } catch (e) {
-    alert(e.message || "下单失败");
-    setMatchingState(false);
+    console.error("自动刷单失败", e.message);
+    alert("自动刷单失败：" + e.message);
   } finally {
     ordering = false;
   }
 }
 
-/* ====================== 13.页面刷新恢复匹配状态 ====================== */
-function restoreMatchingIfAny() {
-  const endTime = Number(localStorage.getItem("matchingEndTime"));
-  const productId = localStorage.getItem("matchingProductId");
+/* ====================== 13. 匹配倒计时 ====================== */
+async function startMatchingCountdown(orderId) {
+  if (!orderId) return;
+  const seconds = Math.floor(Math.random() * (window.MATCH_MAX_SECONDS - window.MATCH_MIN_SECONDS + 1) + window.MATCH_MIN_SECONDS);
+  let countdown = seconds;
 
-  if (endTime && productId && endTime > Date.now()) {
-    const delaySec = Math.ceil((endTime - Date.now()) / 1000);
-    // 获取产品信息再启动倒计时
-    supabaseClient.from("products").select("*").eq("id", productId).single()
-      .then(({ data, error }) => {
-        if (!error && data) startMatchingCountdown(data, delaySec);
-      });
-  } else if (endTime && productId) {
-    // 匹配已结束但可能未生成订单
-    supabaseClient.from("products").select("*").eq("id", productId).single()
-      .then(({ data, error }) => { if (!error && data) finalizeMatchedOrder(data); });
-    localStorage.removeItem("matchingEndTime");
-    localStorage.removeItem("matchingProductId");
-  }
+  const interval = setInterval(() => {
+    const el = document.getElementById("matchingCountdown");
+    if (el) el.textContent = `订单匹配中：${countdown}s`;
+    countdown--;
+    if (countdown < 0) clearInterval(interval);
+  }, 1000);
+
+  // 倒计时结束自动完成订单
+  setTimeout(async () => {
+    clearInterval(interval);
+    const orderRes = await supabaseClient
+      .from("orders")
+      .select("*")
+      .eq("id", orderId)
+      .single();
+    if (orderRes.data) await completeOrder(orderRes.data);
+  }, seconds * 1000);
 }
 
-/* ====================== 14.匹配完成后调用 RPC 生成订单 ====================== */
-function startMatchingCountdown(product, delaySec) {
-  const endTime = Date.now() + delaySec * 1000;
-  const btn = document.getElementById("autoOrderBtn");
-  const gifEl = document.getElementById("matchingGif");
+/* ====================== 14. 完成匹配订单 ====================== */
+// 已经在 completeOrder() 中实现，这里不额外重复
 
-  const tick = () => {
-    const remaining = Math.ceil((endTime - Date.now()) / 1000);
-
-    if (remaining > 0) {
-      setMatchingState(true); // 显示匹配中
-      requestAnimationFrame(tick);
-    } else {
-      setMatchingState(false); // 匹配完成
-      localStorage.removeItem("matchingEndTime");
-      localStorage.removeItem("matchingProductId");
-
-      // 调用 RPC 生成订单并更新轮次
-      finalizeMatchedOrder(product);
-    }
-  };
-
-  tick();
-}
-
-async function finalizeMatchedOrder(product) {
-  if (!window.currentUserId) return;
-
+/* ====================== 15. 开启新轮次 ====================== */
+async function startNewRound() {
   try {
-    // 调用 RPC，服务器处理：
-    // - 扣金币
-    // - 创建订单
-    // - 更新轮次完成数
-    // - 返回当前用户金币和轮次倒计时剩余秒数
-    const { data, error } = await supabaseClient.rpc("create_matching_order", {
-      p_user_id: window.currentUserId,
-      p_product_id: product.id,
-      p_round_id: window.currentRoundId
-    });
-
+    const { data, error } = await supabaseClient
+      .rpc("get_or_create_current_round", { p_user_uuid: window.currentUserUUID });
     if (error) throw error;
-    if (!data?.length) throw new Error("RPC 返回为空");
 
-    const result = data[0];
-    // result = {
-    //   order_id,
-    //   order_status,
-    //   user_coins,
-    //   completed_orders,
-    //   order_limit,
-    //   round_cooldown_seconds,
-    //   created_at,
-    //   product_name,
-    //   product_profit,
-    //   total_price,
-    //   profit
-    // }
+    window.currentRoundId = data?.[0]?.round_id;
+    window.roundStartTime = Date.now();
 
-    // 更新 UI
-    renderLastOrder({
-      id: result.order_id,
-      total_price: result.total_price,
-      profit: result.profit,
-      status: result.order_status,
-      created_at: result.created_at,
-      products: {
-        name: result.product_name,
-        profit: result.product_profit
-      }
-    }, result.user_coins);
+    const el = document.getElementById("roundProgress");
+    if (el) el.textContent = `本轮已完成订单：0 / ${window.ORDERS_PER_ROUND}`;
 
-    updateCoinsUI(result.user_coins);
-
-    await loadRecentOrders();
-
-    // 更新轮次进度并启动倒计时
-    const roundData = {
-      completed_orders: result.completed_orders,
-      order_limit: result.order_limit,
-      cooldown_remaining_seconds: result.round_cooldown_seconds
-    };
-    await updateRoundProgress(roundData);
+    setOrderBtnDisabled(false);
+    startRoundCountdown(0);
 
   } catch (e) {
-    alert(e.message || "生成订单失败");
+    console.error("开启新轮次失败", e.message);
   }
 }
 
-/* ====================== 15.开启新轮次 ====================== */
-async function startNewRound() {
+/* ====================== 16. 本轮倒计时 ====================== */
+function startRoundCountdown(cooldownSec = 0) {
+  if (cooldownTimer) clearInterval(cooldownTimer);
+  let remaining = cooldownSec;
+
+  cooldownTimer = setInterval(() => {
+    const el = document.getElementById("cooldownDisplay");
+    if (!el) return;
+
+    if (remaining > 0) {
+      el.textContent = `冷却中：${formatTime(remaining)}`;
+      setOrderBtnDisabled(true);
+      remaining--;
+    } else {
+      el.textContent = "";
+      setOrderBtnDisabled(false);
+      clearInterval(cooldownTimer);
+    }
+  }, 1000);
+}
+
+/* ====================== 17. 加载最近订单 ====================== */
+async function loadRecentOrders(limit = 5) {
   if (!window.currentUserUUID) return;
 
   try {
-    const { data, error } = await supabaseClient.rpc("get_or_create_current_round", {
-      p_user_uuid: window.currentUserUUID
-    });
-    if (error || !data?.length) throw error;
+    const { data, error } = await supabaseClient
+      .from("orders")
+      .select("id,total_price,profit,status,created_at,product_id")
+      .eq("user_uuid", window.currentUserUUID)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    if (error) throw error;
 
-    const round = data[0];
-    window.currentRoundId = round.round_id;
+    const listEl = document.getElementById("recentOrders");
+    if (listEl) {
+      listEl.innerHTML = "";
+      data.forEach(order => {
+        const li = document.createElement("li");
+        li.textContent = `${order.id} | ¥${order.total_price.toFixed(2)} | ${order.status}`;
+        listEl.appendChild(li);
+      });
+    }
 
-    console.log("🎯 新轮次已开始", round);
-
-    await updateRoundProgress(round);
-    await refreshExchangeUI();
   } catch (e) {
-    console.error("开启新轮次失败", e);
+    console.error("加载最近订单失败", e.message);
   }
 }
 
+/* ====================== 18. 渲染最新订单 ====================== */
+function renderLastOrder(order, coins) {
+  const el = document.getElementById("lastOrder");
+  if (el && order) {
+    el.textContent = `最新订单：${order.id} | ¥${order.total_price.toFixed(2)} | ${order.status}`;
+  }
+  if (coins !== undefined) updateCoinsUI(coins);
+}
 
-/* ====================== 16.刷新兑换按钮可用状态 ====================== */
+/* ====================== 19. 刷新兑换界面 ====================== */
 async function refreshExchangeUI() {
   if (!window.currentUserUUID) return;
 
   try {
-    const canToBalance = await canExchangeThisRound();
-    const coinsToBalanceBtn = document.getElementById("coinsToBalanceBtn");
-    if (coinsToBalanceBtn) {
-      coinsToBalanceBtn.disabled = !canToBalance;
-      coinsToBalanceBtn.title = canToBalance ? "" : `⚠️ 需要完成 ${window.ORDERS_PER_ROUND} 单才可用`;
-    }
+    const { data, error } = await supabaseClient
+      .from("users")
+      .select("balance,coins")
+      .eq("uuid", window.currentUserUUID)
+      .single();
+    if (error) throw error;
+
+    const balanceEl = document.getElementById("balanceDisplay");
+    const coinsEl = document.getElementById("coinsDisplay");
+    if (balanceEl) balanceEl.textContent = `余额：¥${Number(data.balance).toFixed(2)}`;
+    if (coinsEl) coinsEl.textContent = `刷单币：${Number(data.coins).toFixed(2)}`;
+
   } catch (e) {
-    console.error("刷新兑换按钮状态失败", e);
+    console.error("刷新兑换界面失败", e.message);
   }
 }
 
-/* ====================== 17.兑换逻辑 Coins ↔ Balance ====================== */
+/* ====================== 20. 确认兑换 ====================== */
 async function confirmExchange() {
   if (exchanging) return;
   exchanging = true;
 
-  const inputEl = document.getElementById("addCoinsInput");
-  const amount = parseFloat(inputEl?.value || "0");
-  if (isNaN(amount) || amount <= 0) { 
-    alert("输入无效，请输入大于0的数值"); 
-    exchanging = false; 
-    return; 
-  }
-
-  if (!window.currentUserUUID) { 
-    alert("请先登录！"); 
-    exchanging = false; 
-    return; 
-  }
-
   try {
-    if (currentExchangeDirection === "toBalance") {
-      const canEx = await canExchangeThisRound();
-      if (!canEx) {
-        alert(`⚠️ 需要完成本轮 ${window.ORDERS_PER_ROUND}/${window.ORDERS_PER_ROUND} 订单才能使用 Coins → Balance 功能！`);
-        exchanging = false;
-        return;
-      }
-    }
+    const amountInput = document.getElementById("exchangeAmount");
+    const amount = Number(amountInput?.value || 0);
+    if (amount <= 0) { alert("请输入兑换数量"); return; }
 
-    const { data: user, error } = await supabaseClient
-      .from("users")
-      .select("coins,balance")
-      .eq("uuid", window.currentUserUUID)
-      .single();
-    if (error || !user) throw new Error("加载用户信息失败");
+    const rpcName = currentExchangeDirection === "toCoins" ? "balance_to_coins" : "coins_to_balance";
 
-    let coins = Number(user.coins) || 0;
-    let balance = Number(user.balance) || 0;
+    const { data, error } = await supabaseClient
+      .rpc(rpcName, { p_user_uuid: window.currentUserUUID, p_amount: amount });
+    if (error) throw error;
 
-    if (currentExchangeDirection === "toCoins") {
-      if (balance < amount) throw new Error(`余额不足，当前 Balance：¥${balance.toFixed(2)}`);
-      coins += amount;
-      balance -= amount;
-    } else {
-      if (coins < amount) throw new Error(`Coins 不足，当前 Coins：${coins.toFixed(2)}`);
-      coins -= amount;
-      balance += amount;
-    }
-
-    const { error: updErr } = await supabaseClient
-      .from("users")
-      .update({ coins, balance })
-      .eq("uuid", window.currentUserUUID);
-    if (updErr) throw new Error("兑换失败：" + updErr.message);
-
-    alert(`✅ 成功兑换 ${amount.toFixed(2)} ${currentExchangeDirection === "toCoins" ? "Coins" : "Balance"}`);
-    document.getElementById("ordercoins").textContent = coins.toFixed(2);
-    document.getElementById("balance").textContent = balance.toFixed(2);
-    updateCoinsUI(coins);
-
-    await checkPendingLock();
-    await loadLastOrder();
-    await loadRecentOrders();
+    alert(`兑换成功！新余额：¥${data.new_balance}, 新刷单币：${data.new_coins}`);
+    await refreshExchangeUI();
     closeExchangeModal();
 
   } catch (e) {
-    alert(e.message || "兑换失败");
+    console.error("兑换失败", e.message);
+    alert("兑换失败：" + e.message);
   } finally {
     exchanging = false;
   }
 }
 
-/* ====================== 18.页面刷新工具 ====================== */
+/* ====================== 21. 页面初始化 ====================== */
 async function refreshAll() {
   await loadRoundConfig();
-  await loadCoinsOrderPage();
-  await loadLastOrder();
-  await loadRecentOrders();
   await checkPendingLock();
   await updateRoundProgress();
-}
-
-async function loadCoinsOrderPage() {
-  if (!window.currentUserId) return;
-
-  let filterCol = window.currentUserUUID ? "uuid" : "id";
-  let filterVal = window.currentUserUUID || window.currentUserId;
-
-  const { data, error } = await supabaseClient
-    .from("users")
-    .select("coins, balance")
-    .eq(filterCol, filterVal)
-    .single();
-
-  if (!error && data) {
-    updateCoinsUI(data.coins);
-    const balEl = document.getElementById("balance");
-    if (balEl) balEl.textContent = (Number(data.balance) || 0).toFixed(2);
-    await checkPendingLock();
-  }
-}
-
-async function loadLastOrder() {
-  if (!window.currentUserId) return;
-
-  const { data: orders } = await supabaseClient
-    .from("orders")
-    .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
-    .eq("user_id", window.currentUserId)
-    .order("created_at", { ascending: false })
-    .limit(1);
-
-  let filterCol = window.currentUserUUID ? "uuid" : "id";
-  let filterVal = window.currentUserUUID || window.currentUserId;
-
-  const { data: user } = await supabaseClient
-    .from("users")
-    .select("coins")
-    .eq(filterCol, filterVal)
-    .single();
-
-  if (orders?.length) renderLastOrder(orders[0], user?.coins ?? 0);
-  else document.getElementById("orderResult").innerHTML = "";
-}
-
-async function loadRecentOrders() {
-  if (!window.currentUserId) return;
-
-  try {
-    const { data: recentOrders } = await supabaseClient
-      .from("orders")
-      .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
-      .eq("user_id", window.currentUserId)
-      .order("created_at", { ascending: false })
-      .limit(5);
-
-    const { count: totalCount } = await supabaseClient
-      .from("orders")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", window.currentUserId);
-
-    const historyTitle = document.querySelector(".order-history h3");
-    if (historyTitle) historyTitle.textContent = `🕘 最近订单 订单数：${totalCount || 0}单`;
-
-    const list = document.getElementById("recentOrders");
-    if (list) {
-      if (!recentOrders?.length) list.innerHTML = `<li>暂无订单！</li>`;
-      else list.innerHTML = recentOrders.map(o => {
-        const price = Number(o.total_price) || 0;
-        const profit = Number(o.profit) || 0;
-        const profitRatio = Number(o.products?.profit) || 0;
-        return `<li>🛒 ${o.products?.name || "未知商品"} / ¥${price.toFixed(2)} / 利润：${profitRatio} / 收入：+¥${profit.toFixed(2)} / 状态：${o.status === "completed" ? "已完成" : "待完成"} / <small>${new Date(o.created_at).toLocaleString()}</small></li>`;
-      }).join("");
-    }
-  } catch (e) {
-    console.error("加载最近订单失败：", e);
-  }
-}
-
-/* ====================== 19.显示/隐藏匹配状态 & GIF ====================== */
-function setMatchingState(isMatching) {
-  const gifEl = document.getElementById("matchingGif");
-  const btn = document.getElementById("autoOrderBtn");
-
-  if (gifEl) gifEl.style.display = isMatching ? "block" : "none";
-  if (btn) {
-    btn.disabled = isMatching;
-    btn.textContent = isMatching ? "🎲 正在匹配..." : "🎲 一键刷单";
-  }
-}
-
-/* ====================== 20.渲染最近订单 ====================== */
-function renderLastOrder(order, coinsRaw) {
-  const el = document.getElementById("orderResult");
-  if (!el || !order) return;
-
-  const coins = Number(coinsRaw) || 0;
-  const price = Number(order.total_price) || 0;
-  const profit = Number(order.profit) || 0; 
-  const profitRatio = Number(order.products?.profit) || 0; 
-
-  let html = `
-    <h3>✅ 最近一次订单</h3>
-    <p>商品：${order.products?.name || "未知商品"}</p>
-    <p>价格：¥${price.toFixed(2)}</p>
-    <p>利润率：${profitRatio}</p>
-    <p>收入：+¥${profit.toFixed(2)}</p>
-    <p>状态：${order.status === "completed" ? "✅ 已完成" : "⏳ 待完成"}</p>
-    <p>时间：${new Date(order.created_at).toLocaleString()}</p>
-    <p>当前金币：¥${coins.toFixed(2)}</p>
-  `;
-
-  if (order.status === "pending" && coins >= 0) {
-    html += `<button id="completeOrderBtn">完成订单</button>`;
-  }
-  if (coins < 0) {
-    html += `<p style="color:red;">⚠️ 金币为负，欠款 ¥${Math.abs(coins).toFixed(2)}</p>`;
-  }
-
-  el.innerHTML = html;
-
-  const compBtn = document.getElementById("completeOrderBtn");
-  if (compBtn) {
-    compBtn.addEventListener("click", async () => {
-      compBtn.disabled = true;
-      await completeOrder(order, coins);
-    });
-  }
+  await loadRecentOrders();
+  await refreshExchangeUI();
 }
