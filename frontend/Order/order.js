@@ -138,9 +138,14 @@ async function checkOrderCooldown() {
     const { data, error } = await supabaseClient
       .rpc("check_user_order_cooldown", { p_user_uuid: window.currentUserUUID });
     if (error) throw error;
-    if (!data?.length) return { allowed: true, next_allowed: null };
-    const row = data[0];
-    return { allowed: row.allowed, next_allowed: row.next_allowed };
+
+    // RPC 返回的就是 JSON 对象，不是数组
+    return {
+      allowed: data.allowed,
+      next_allowed: data.next_allowed,
+      cooldown_seconds: data.cooldown_seconds
+    };
+
   } catch (e) {
     console.error("检查冷却失败", e);
     return { allowed: true, next_allowed: null };
