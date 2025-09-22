@@ -378,30 +378,7 @@ async function autoOrder() {
   }
 }
 
-/* ====================== 14.匹配倒计时函数（刷新保持状态） ====================== */
-function startMatchingCountdown(product, delaySec) {
-  const endTime = Date.now() + delaySec * 1000;
-  const btn = document.getElementById("autoOrderBtn");
-  const gifEl = document.getElementById("matchingGif");
-
-  const tick = () => {
-    const remaining = Math.ceil((endTime - Date.now()) / 1000);
-
-    if (remaining > 0) {
-      setMatchingState(true); // ✅ 使用统一函数显示匹配状态
-      requestAnimationFrame(tick);
-    } else {
-      setMatchingState(false); // 匹配完成，恢复按钮
-      localStorage.removeItem("matchingEndTime");
-      localStorage.removeItem("matchingProductId");
-
-      // 下单逻辑
-      finalizeMatchedOrder(product);
-    }
-  };
-
-  tick();
-}
+/* ====================== 14.已删除 ====================== */
 
 /* ====================== 15.页面刷新恢复匹配状态 ====================== */
 function restoreMatchingIfAny() {
@@ -424,52 +401,93 @@ function restoreMatchingIfAny() {
   }
 }
 
-/* ====================== 16.匹配完成后的订单生成 ====================== */
+/* ====================== 16.匹配完成后调用 RPC 生成订单 ====================== */
+function startMatchingCountdown(product, delaySec) {
+  const endTime = Date.now() + delaySec * 1000;
+  const btn = document.getElementById("autoOrderBtn");
+  const gifEl = document.getElementById("matchingGif");
+
+  const tick = () => {
+    const remaining = Math.ceil((endTime - Date.now()) / 1000);
+
+    if (remaining > 0) {
+      setMatchingState(true); // 显示匹配中
+      requestAnimationFrame(tick);
+    } else {
+      setMatchingState(false); // 匹配完成
+      localStorage.removeItem("matchingEndTime");
+      localStorage.removeItem("matchingProductId");
+
+      // 调用 RPC 生成订单并更新轮次
+      finalizeMatchedOrder(product);
+    }
+  };
+
+  tick();
+}
+
 async function finalizeMatchedOrder(product) {
+  if (!window.currentUserId) return;
+
   try {
-    const { data: user } = await supabaseClient
-      .from("users")
-      .select("coins")
-      .eq("id", window.currentUserId)
-      .single();
-    let coins = Number(user?.coins || 0);
+    // 调用 RPC，服务器处理：
+    // - 扣金币
+    // - 创建订单
+    // - 更新轮次完成数
+    // - 返回当前用户金币和轮次倒计时剩余秒数
+    const { data, error } = await supabaseClient.rpc("create_matching_order", {
+      p_user_id: window.currentUserId,
+      p_product_id: product.id,
+      p_round_id: window.currentRoundId
+    });
 
-    const price = Number(product.price) || 0;
-    const profitRatio = Number(product.profit) || 0;
-    const profit = +(price * profitRatio).toFixed(2);
-    const tempCoins = coins - price;
+    if (error) throw error;
+    if (!data?.length) throw new Error("RPC 返回为空");
 
-    await supabaseClient
-      .from("users")
-      .update({ coins: tempCoins })
-      .eq("id", window.currentUserId);
+    const result = data[0];
+    // result = {
+    //   order_id,
+    //   order_status,
+    //   user_coins,
+    //   completed_orders,
+    //   order_limit,
+    //   round_cooldown_seconds,
+    //   created_at,
+    //   product_name,
+    //   product_profit,
+    //   total_price,
+    //   profit
+    // }
 
-    const { data: newOrder } = await supabaseClient
-      .from("orders")
-      .insert({
-        user_id: window.currentUserId,
-        product_id: product.id,
-        total_price: price,
-        profit: profit,
-        status: "pending",
-        round_id: window.currentRoundId,
-      })
-      .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
-      .single();
+    // 更新 UI
+    renderLastOrder({
+      id: result.order_id,
+      total_price: result.total_price,
+      profit: result.profit,
+      status: result.order_status,
+      created_at: result.created_at,
+      products: {
+        name: result.product_name,
+        profit: result.product_profit
+      }
+    }, result.user_coins);
 
-    renderLastOrder(newOrder, tempCoins);
-    updateCoinsUI(tempCoins);
-    await checkPendingLock();
+    updateCoinsUI(result.user_coins);
+
     await loadRecentOrders();
-    await updateRoundProgress();
+
+    // 更新轮次进度并启动倒计时
+    const roundData = {
+      completed_orders: result.completed_orders,
+      order_limit: result.order_limit,
+      cooldown_remaining_seconds: result.round_cooldown_seconds
+    };
+    await updateRoundProgress(roundData);
 
   } catch (e) {
     alert(e.message || "生成订单失败");
   }
 }
-
-// 页面加载时恢复匹配状态
-document.addEventListener("DOMContentLoaded", restoreMatchingIfAny);
 
 /* ====================== 17.开启新轮次 ====================== */
 async function startNewRound() {
