@@ -127,7 +127,6 @@ async function checkOrderCooldown() {
 
 /* ====================== 7.本轮完成订单数显示 ====================== */
 async function updateRoundProgress(roundData) {
-  // 如果没有传入，就通过 RPC 获取当前轮次
   if (!roundData) {
     try {
       const { data, error } = await supabaseClient.rpc("get_or_create_current_round", {
@@ -164,13 +163,10 @@ async function completeOrder(order, currentCoinsRaw) {
   try {
     if (order.status === "completed") return;
 
-    const { data, error } = await supabaseClient.rpc(
-      "complete_order_and_update_round",
-      { 
-        p_order_id: order.id,
-        p_user_uuid: window.currentUserUUID // 改用 UUID
-      }
-    );
+    const { data, error } = await supabaseClient.rpc("complete_order_and_update_round", {
+      p_order_id: order.id,
+      p_user_uuid: window.currentUserUUID
+    });
 
     if (error) throw error;
     if (!data?.length) throw new Error("RPC 返回数据为空");
@@ -179,9 +175,7 @@ async function completeOrder(order, currentCoinsRaw) {
 
     renderLastOrder({ ...order, status: result.order_status }, result.user_coins);
     updateCoinsUI(result.user_coins);
-
     await loadRecentOrders();
-
     await updateRoundProgress(result);
 
   } catch (e) {
@@ -212,7 +206,7 @@ async function canExchangeThisRound() {
     const { data, error } = await supabaseClient
       .from("orders")
       .select("id")
-      .eq("user_id", window.currentUserUUID) // UUID
+      .eq("user_uuid", window.currentUserUUID)
       .eq("round_id", window.currentRoundId)
       .eq("status", "completed");
 
@@ -223,6 +217,7 @@ async function canExchangeThisRound() {
     return false;
   }
 }
+
 
 /* ====================== 10.已删除 ====================== */
 
@@ -470,11 +465,11 @@ async function finalizeMatchedOrder(product) {
 /* ====================== 17.开启新轮次 ====================== */
 async function startNewRound() {
   if (!window.currentUserUUID) return;
+
   try {
-    const { data, error } = await supabaseClient.rpc(
-      "get_or_create_current_round",
-      { p_user_uuid: window.currentUserUUID } // UUID
-    );
+    const { data, error } = await supabaseClient.rpc("get_or_create_current_round", {
+      p_user_uuid: window.currentUserUUID
+    });
     if (error || !data?.length) throw error;
 
     const round = data[0];
@@ -488,6 +483,7 @@ async function startNewRound() {
     console.error("开启新轮次失败", e);
   }
 }
+
 
 /* ====================== 18.刷新兑换按钮可用状态 ====================== */
 async function refreshExchangeUI() {
@@ -522,8 +518,7 @@ async function confirmExchange() {
     return; 
   }
 
-  const filterVal = window.currentUserUUID;
-  if (!filterVal) { 
+  if (!window.currentUserUUID) { 
     alert("请先登录！"); 
     exchanging = false; 
     return; 
@@ -542,7 +537,7 @@ async function confirmExchange() {
     const { data: user, error } = await supabaseClient
       .from("users")
       .select("coins,balance")
-      .eq("uuid", filterVal)
+      .eq("uuid", window.currentUserUUID)
       .single();
     if (error || !user) throw new Error("加载用户信息失败");
 
@@ -562,7 +557,7 @@ async function confirmExchange() {
     const { error: updErr } = await supabaseClient
       .from("users")
       .update({ coins, balance })
-      .eq("uuid", filterVal);
+      .eq("uuid", window.currentUserUUID);
     if (updErr) throw new Error("兑换失败：" + updErr.message);
 
     alert(`✅ 成功兑换 ${amount.toFixed(2)} ${currentExchangeDirection === "toCoins" ? "Coins" : "Balance"}`);
