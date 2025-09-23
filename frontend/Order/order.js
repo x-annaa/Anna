@@ -251,103 +251,66 @@ async function checkPendingLock() {
 }
 
 /* ====================== 11.订单 ====================== */
+// ======================
+// 11. 自动下单（改：新轮次写入 user_rounds 表）
+// ======================
 async function autoOrder() {
-  if (!window.currentUserId) {
-    alert("请先登录！");
-    return;
-  }
-  if (ordering) return;
-  ordering = true;
-
   try {
-    await loadRoundConfig();
-
-    // 🔹 开启新轮次（如不存在）
-    if (!window.currentRoundId) startNewRound();
-
-    // 🔹 检查本轮已完成订单数
-    const { data: roundOrders } = await supabaseClient
-      .from("orders")
-      .select("id,status")
-      .eq("user_id", window.currentUserId)
-      .eq("round_id", window.currentRoundId);
-
-    const completedCount = roundOrders?.filter(o => o.status === "completed").length || 0;
-    if (completedCount >= window.ORDERS_PER_ROUND) {
-      const cooldown = await checkOrderCooldown();
-      if (cooldown.next_allowed) {
-        startCooldownTimer(cooldown.next_allowed, "本轮已完成全部订单，冷却中，请等待");
-      }
-      alert("本轮已完成全部订单，进入冷却…");
-      ordering = false;
+    // 🔑 先确保用户已登录
+    const { data: { user }, error: authErr } = await supabaseClient.auth.getUser();
+    if (authErr || !user) {
+      console.error("未登录或获取用户失败", authErr);
       return;
     }
 
-    // 🔹 获取用户 Coins
-    const { data: user } = await supabaseClient
+    // 查 users 表拿 bigint id
+    const { data: u, error: uErr } = await supabaseClient
       .from("users")
-      .select("coins")
-      .eq("id", window.currentUserId)
-      .single();
-    const coins = Number(user?.coins || 0);
-    if (coins < 50) {
-      alert("你的余额不足，最少需要 50 coins");
-      setOrderBtnDisabled(false);
-      ordering = false;
-      return;
-    }
-
-    // 🔹 检查未完成订单
-    const { data: pend } = await supabaseClient
-      .from("orders")
       .select("id")
-      .eq("user_id", window.currentUserId)
-      .eq("status", "pending")
-      .limit(1);
-    if (pend?.length) {
-      alert("您有未完成订单，请先完成订单再继续下单。");
-      await checkPendingLock();
-      ordering = false;
+      .eq("uuid", user.id)
+      .single();
+    if (uErr || !u) {
+      console.error("获取用户 bigint id 失败", uErr);
       return;
     }
 
-    // 🔹 选择商品（规则或随机）
-    let product;
-    const totalOrdersRes = await supabaseClient
-      .from("orders")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", window.currentUserId);
-    const orderNumber = (totalOrdersRes?.count || 0) + 1;
+    // 如果当前没有正在进行的轮次，则在数据库创建一条新轮次
+    if (!window.currentRoundId) {
+      const now = new Date();
+      const matchEnd = new Date(now.getTime() + 60 * 1000);      // 1 分钟匹配
+      const countdownEnd = new Date(now.getTime() + 5 * 60 * 1000); // 5 分钟倒计时
 
-    const ruleProductId = await getUserRuleProduct(window.currentUserId, orderNumber);
-    if (ruleProductId) {
-      const { data: pData, error } = await supabaseClient
-        .from("products")
-        .select("*")
-        .eq("id", ruleProductId)
+      const { data: round, error: rErr } = await supabaseClient
+        .from("user_rounds")
+        .insert({
+          user_id: u.id,
+          round_number: 1, // 你可以在这里按需要计算轮次编号
+          match_start: now.toISOString(),
+          match_end: matchEnd.toISOString(),
+          countdown_start: now.toISOString(),
+          countdown_end: countdownEnd.toISOString(),
+        })
+        .select("id")
         .single();
-      if (!error && pData) product = pData;
+
+      if (rErr || !round) {
+        console.error("创建新轮次失败", rErr);
+        return;
+      }
+
+      // 记录数据库返回的轮次 id
+      window.currentRoundId = round.id;
+      window.roundStartTime = Date.now();
+      localStorage.setItem("currentRoundId", round.id);
+      localStorage.setItem("roundStartTime", window.roundStartTime);
     }
-    if (!product) product = await getRandomProduct();
 
-    // 🔹 生成随机匹配时间
-    let delaySec = Math.floor(
-      Math.random() * (window.MATCH_MAX_SECONDS - window.MATCH_MIN_SECONDS + 1)
-    ) + window.MATCH_MIN_SECONDS;
-
-    // 🔹 保存匹配结束时间和产品信息（本地存储，刷新保持状态）
-    const matchingEndTime = Date.now() + delaySec * 1000;
-    localStorage.setItem("matchingEndTime", matchingEndTime);
-    localStorage.setItem("matchingProductId", product.id);
-
-    // 🔹 启动匹配倒计时
-    startMatchingCountdown(product, delaySec);
+    // ====== 这里继续你的自动下单逻辑 ======
+    // 例如调用 placeOrder()、检查余额、刷新页面等
+    await placeOrder(window.currentRoundId);
 
   } catch (e) {
-    alert(e.message || "下单失败");
-    setMatchingState(false); // 出错也隐藏 GIF
-  } finally {
-    ordering = false;
+    console.error("autoOrder 运行出错：", e);
   }
 }
 
