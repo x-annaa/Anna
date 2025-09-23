@@ -250,16 +250,12 @@ async function checkPendingLock() {
   }
 }
 
-/* ====================== 11.订单 ====================== */
-/* ======================
-   11. 自动下单（改写：使用 localStorage currentUserId，并记录 user_rounds）
-   ====================== */
+/* ====================== 11. 自动下单（改进：创建轮次后立即保存 DB id，找不到时自动兜底查询）====================== */
 async function autoOrder() {
-  // 必须有本地登录用户 id（bigint）
   const currentUserIdStr = window.currentUserId || localStorage.getItem("currentUserId");
   const currentUserId = currentUserIdStr ? Number(currentUserIdStr) : null;
   if (!currentUserId) {
-    alert("请先登录（本地用户 id 缺失）！");
+    alert("请先登录（缺少本地用户 ID）！");
     return;
   }
 
@@ -267,63 +263,51 @@ async function autoOrder() {
   ordering = true;
 
   try {
-    // 确保配置已加载
     await loadRoundConfig();
 
-    // 如果还没有轮次 id（UUID），开启新轮次并在 DB 建行记录
+    // 1️⃣ 如果还没有轮次 UUID，开启新轮次并在 DB 建行记录
     if (!window.currentRoundId) {
       startNewRound(); // 生成 UUID 并写入 localStorage
 
-      try {
-        // 查询用户已有的最大 round_number（取 max + 1）
-        const { data: lastRound, error: lastErr } = await supabaseClient
-          .from("user_rounds")
-          .select("round_number")
-          .eq("user_id", currentUserId)
-          .order("round_number", { ascending: false })
-          .limit(1)
-          .single();
+      const { data: lastRound } = await supabaseClient
+        .from("user_rounds")
+        .select("round_number")
+        .eq("user_id", currentUserId)
+        .order("round_number", { ascending: false })
+        .limit(1)
+        .single()
+        .catch(() => null);
 
-        if (lastErr && lastErr.code !== "PGRST116") {
-          // PGRST116 之类的非致命错误忽略（不同 Supabase 版本返回不同 code）
-          console.warn("读取上次轮次失败（可忽略）:", lastErr);
-        }
+      const nextRoundNumber = lastRound?.round_number ? lastRound.round_number + 1 : 1;
 
-        const nextRoundNumber = lastRound?.round_number ? (lastRound.round_number + 1) : 1;
+      const now = new Date();
+      const countdownEnd = new Date(now.getTime() + (window.ROUND_DURATION || 5 * 60 * 1000));
 
-        const now = new Date();
-        const countdownEnd = new Date(now.getTime() + (window.ROUND_DURATION || 5 * 60 * 1000));
+      const { data: inserted, error: insErr } = await supabaseClient
+        .from("user_rounds")
+        .insert([{
+          user_id: currentUserId,
+          round_number: nextRoundNumber,
+          match_start: now.toISOString(),
+          match_end: now.toISOString(),
+          countdown_start: now.toISOString(),
+          countdown_end: countdownEnd.toISOString(),
+          status: "active"
+        }])
+        .select("id, round_number")
+        .single();
 
-        // 插入 user_rounds（初始 match_start/match_end 用 now 占位，后面每次匹配再更新）
-        const { data: inserted, error: insErr } = await supabaseClient
-          .from("user_rounds")
-          .insert([{
-            user_id: currentUserId,
-            round_number: nextRoundNumber,
-            match_start: now.toISOString(),
-            match_end: now.toISOString(),
-            countdown_start: now.toISOString(),
-            countdown_end: countdownEnd.toISOString(),
-            status: "active"
-          }])
-          .select("id, round_number")
-          .single();
-
-        if (insErr) {
-          console.warn("无法写入 user_rounds（不会阻止下单）:", insErr);
-        } else if (inserted?.id) {
-          // 保存 DB row id，后续更新 match 时间使用
-          localStorage.setItem("currentUserRoundDbId", String(inserted.id));
-          // 可选：也存 round_number
-          localStorage.setItem("currentUserRoundNumber", String(inserted.round_number));
-          console.log("已创建 user_rounds 行 id=", inserted.id);
-        }
-      } catch (e) {
-        console.warn("创建 user_rounds 时异常（继续执行）:", e);
+      if (insErr) {
+        console.warn("⚠️ 无法写入 user_rounds：", insErr);
+      } else if (inserted?.id) {
+        // ⭐ 关键：立即缓存
+        localStorage.setItem("currentUserRoundDbId", String(inserted.id));
+        localStorage.setItem("currentUserRoundNumber", String(inserted.round_number));
+        console.log("✅ 新建轮次 user_rounds.id =", inserted.id);
       }
     }
 
-    // 检查本轮已完成订单数量
+    // 2️⃣ 检查本轮完成订单数量
     const { data: roundOrders } = await supabaseClient
       .from("orders")
       .select("id,status")
@@ -334,31 +318,27 @@ async function autoOrder() {
     if (completedCount >= window.ORDERS_PER_ROUND) {
       const cooldown = await checkOrderCooldown();
       if (cooldown.next_allowed) {
-        startCooldownTimer(cooldown.next_allowed, "本轮已完成全部订单，冷却中，请等待");
+        startCooldownTimer(cooldown.next_allowed, "本轮已完成全部订单，冷却中");
       }
       alert("本轮已完成全部订单，进入冷却…");
       ordering = false;
       return;
     }
 
-    // 获取用户 Coins
-    const { data: userData, error: userErr } = await supabaseClient
+    // 3️⃣ 用户余额检查
+    const { data: userData } = await supabaseClient
       .from("users")
       .select("coins")
       .eq("id", currentUserId)
       .single();
-    if (userErr || !userData) {
-      throw new Error(userErr?.message || "加载用户余额失败");
-    }
-    const coins = Number(userData.coins || 0);
+    const coins = Number(userData?.coins || 0);
     if (coins < 50) {
-      alert("你的余额不足，最少需要 50 coins");
-      setOrderBtnDisabled(false);
+      alert("余额不足，至少需要 50 coins");
       ordering = false;
       return;
     }
 
-    // 检查未完成订单（pending）
+    // 4️⃣ 检查未完成订单
     const { data: pend } = await supabaseClient
       .from("orders")
       .select("id")
@@ -366,13 +346,12 @@ async function autoOrder() {
       .eq("status", "pending")
       .limit(1);
     if (pend?.length) {
-      alert("您有未完成订单，请先完成订单再继续下单。");
-      await checkPendingLock();
+      alert("请先完成未完成订单");
       ordering = false;
       return;
     }
 
-    // 选择商品（规则或随机）
+    // 5️⃣ 选择商品
     let product = null;
     const totalOrdersRes = await supabaseClient
       .from("orders")
@@ -382,71 +361,60 @@ async function autoOrder() {
 
     const ruleProductId = await getUserRuleProduct(currentUserId, orderNumber);
     if (ruleProductId) {
-      const { data: pData, error: pErr } = await supabaseClient
+      const { data: pData } = await supabaseClient
         .from("products")
         .select("*")
         .eq("id", ruleProductId)
         .single();
-      if (!pErr && pData) product = pData;
-      else console.warn("读取规则产品失败或不存在，使用随机产品", pErr);
+      if (pData) product = pData;
     }
     if (!product) product = await getRandomProduct();
 
-    // 生成随机匹配时间（秒）
+    // 6️⃣ 随机匹配时间
     const delaySec = Math.floor(
       Math.random() * (window.MATCH_MAX_SECONDS - window.MATCH_MIN_SECONDS + 1)
     ) + window.MATCH_MIN_SECONDS;
 
-    // 在 DB 中更新本轮的 match_start / match_end（如果 possible）
-    try {
-      const matchStart = new Date();
-      const matchEnd = new Date(matchStart.getTime() + delaySec * 1000);
+    // 7️⃣ 更新 user_rounds.match_start / match_end
+    const matchStart = new Date();
+    const matchEnd = new Date(matchStart.getTime() + delaySec * 1000);
 
-      let dbId = Number(localStorage.getItem("currentUserRoundDbId") || 0);
-      if (!dbId) {
-        // 尝试通过 user_id + current round number 找到行
-        const maybeRoundNumber = Number(localStorage.getItem("currentUserRoundNumber") || 0);
-        if (maybeRoundNumber) {
-          const { data: found, error: fErr } = await supabaseClient
-            .from("user_rounds")
-            .select("id")
-            .eq("user_id", currentUserId)
-            .eq("round_number", maybeRoundNumber)
-            .limit(1)
-            .order("id", { ascending: false })
-            .single();
-          if (!fErr && found?.id) dbId = found.id;
-        }
-      }
-
-      if (dbId) {
-        const { error: updErr } = await supabaseClient
+    let dbId = Number(localStorage.getItem("currentUserRoundDbId") || 0);
+    if (!dbId) {
+      // ⭐ 兜底：按 user_id + round_number 再查一次
+      const maybeRoundNumber = Number(localStorage.getItem("currentUserRoundNumber") || 0);
+      if (maybeRoundNumber) {
+        const { data: found } = await supabaseClient
           .from("user_rounds")
-          .update({
-            match_start: matchStart.toISOString(),
-            match_end: matchEnd.toISOString()
-          })
-          .eq("id", dbId);
-        if (updErr) console.warn("更新 user_rounds.match 时间失败（非致命）:", updErr);
-      } else {
-        // 没有 DB 行时不阻塞：可选地记录一个新的行（但通常不会）
-        console.warn("未找到 currentUserRoundDbId，跳过更新 user_rounds.match");
+          .select("id")
+          .eq("user_id", currentUserId)
+          .eq("round_number", maybeRoundNumber)
+          .order("id", { ascending: false })
+          .limit(1)
+          .single()
+          .catch(() => null);
+        if (found?.id) dbId = found.id;
       }
-    } catch (e) {
-      console.warn("更新 user_rounds.match 时异常（继续）:", e);
     }
 
-    // 将匹配结束时间与产品保存到 localStorage（用于刷新保持）
-    const matchingEndTime = Date.now() + delaySec * 1000;
-    localStorage.setItem("matchingEndTime", String(matchingEndTime));
-    localStorage.setItem("matchingProductId", String(product.id));
+    if (dbId) {
+      const { error: updErr } = await supabaseClient
+        .from("user_rounds")
+        .update({ match_start: matchStart.toISOString(), match_end: matchEnd.toISOString() })
+        .eq("id", dbId);
+      if (updErr) console.warn("⚠️ 更新 match 时间失败：", updErr);
+    } else {
+      console.warn("⚠️ 仍未找到 currentUserRoundDbId，跳过 match 时间更新");
+    }
 
-    // 启动匹配倒计时（页面会在倒计时结束时 finalizeMatchedOrder）
+    // 8️⃣ 保存匹配状态并启动倒计时
+    localStorage.setItem("matchingEndTime", String(Date.now() + delaySec * 1000));
+    localStorage.setItem("matchingProductId", String(product.id));
     startMatchingCountdown(product, delaySec);
 
   } catch (e) {
     alert(e.message || "下单失败");
-    setMatchingState(false); // 出错也隐藏匹配 GIF
+    setMatchingState(false);
   } finally {
     ordering = false;
   }
@@ -477,20 +445,40 @@ function startMatchingCountdown(product, delaySec) {
   tick();
 }
 
-/* ====================== 13.页面刷新恢复匹配状态 ====================== */
+/* ====================== 13. 页面刷新恢复匹配状态（增加 DB id 兜底） ====================== */
 function restoreMatchingIfAny() {
   const endTime = Number(localStorage.getItem("matchingEndTime"));
   const productId = localStorage.getItem("matchingProductId");
 
+  // 🔑 如果页面刷新但 currentUserRoundDbId 丢失，尝试恢复
+  if (!localStorage.getItem("currentUserRoundDbId")) {
+    const maybeRoundNumber = Number(localStorage.getItem("currentUserRoundNumber") || 0);
+    const currentUserId = Number(localStorage.getItem("currentUserId") || 0);
+    if (maybeRoundNumber && currentUserId) {
+      supabaseClient
+        .from("user_rounds")
+        .select("id")
+        .eq("user_id", currentUserId)
+        .eq("round_number", maybeRoundNumber)
+        .order("id", { ascending: false })
+        .limit(1)
+        .single()
+        .then(({ data }) => {
+          if (data?.id) {
+            localStorage.setItem("currentUserRoundDbId", String(data.id));
+            console.log("✅ 刷新恢复 currentUserRoundDbId =", data.id);
+          }
+        });
+    }
+  }
+
   if (endTime && productId && endTime > Date.now()) {
     const delaySec = Math.ceil((endTime - Date.now()) / 1000);
-    // 获取产品信息再启动倒计时
     supabaseClient.from("products").select("*").eq("id", productId).single()
       .then(({ data, error }) => {
         if (!error && data) startMatchingCountdown(data, delaySec);
       });
   } else if (endTime && productId) {
-    // 匹配已结束但可能未生成订单
     supabaseClient.from("products").select("*").eq("id", productId).single()
       .then(({ data, error }) => { if (!error && data) finalizeMatchedOrder(data); });
     localStorage.removeItem("matchingEndTime");
