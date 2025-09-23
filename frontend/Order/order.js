@@ -750,25 +750,3 @@ function setMatchingState(isMatching) {
     btn.textContent = isMatching ? "🎲 正在匹配..." : "🎲 一键刷单";
   }
 }
-
-// 1. 获取登录用户 UUID
-const {
-  data: { user },
-} = await supabase.auth.getUser();
-
-// 2. 查 users 表拿 bigint id
-const { data: userRow } = await supabase
-  .from("users")
-  .select("id")
-  .eq("uuid", user.id)
-  .single();
-
-// 3. 插入新轮次
-await supabase.from("user_rounds").insert({
-  user_id: userRow.id,
-  round_number: 1,
-  match_start: new Date().toISOString(),
-  match_end: new Date(Date.now() + 60_000).toISOString(),
-  countdown_start: new Date().toISOString(),
-  countdown_end: new Date(Date.now() + 300_000).toISOString(),
-});
