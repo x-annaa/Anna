@@ -262,74 +262,104 @@ async function checkPendingLock() {
 
 /* ====================== 11.订单 ====================== */
 async function autoOrder() {
-  if (!window.currentUserId) return alert("请先登录！");
+  if (!window.currentUserId) {
+    alert("请先登录！");
+    return;
+  }
   if (ordering) return;
   ordering = true;
 
   try {
-    // 🔹 1. 从服务器获取最新轮次状态
-    const { data: status, error: statusErr } = await supabaseClient
-      .from("user_round_status")
-      .select("*")
-      .eq("user_id", Number(window.currentUserId))
-      .order("updated_at", { ascending: false })
-      .limit(1)
-      .single();
+    await loadRoundConfig();
 
-    if (statusErr) throw statusErr;
+    // 🔹 开启新轮次（如不存在）
+    if (!window.currentRoundId) startNewRound();
 
-    if (status) {
-      window.currentRoundId = status.round_id;
-      window.roundStartTime = new Date(status.round_start).getTime();
-      localStorage.setItem("currentRoundId", status.round_id);
-      localStorage.setItem("roundStartTime", window.roundStartTime);
-    } else {
-      // 🔹 如果没有轮次，创建新轮次
-      const uuid = crypto.randomUUID();
-      window.currentRoundId = uuid;
-      window.roundStartTime = Date.now();
-      localStorage.setItem("currentRoundId", uuid);
-      localStorage.setItem("roundStartTime", window.roundStartTime);
+    // 🔹 检查本轮已完成订单数
+    const { data: roundOrders } = await supabaseClient
+      .from("orders")
+      .select("id,status")
+      .eq("user_id", window.currentUserId)
+      .eq("round_id", window.currentRoundId);
 
-      // 可选：在服务器初始化 user_round_status
-      await supabaseClient
-        .from("user_round_status")
-        .insert({
-          user_id: window.currentUserId,
-          round_id: uuid,
-          round_start: new Date(window.roundStartTime).toISOString(),
-          completed_orders: 0
-        });
-    }
-
-    // 🔹 2. 检查本轮是否可下单
-    if (status && status.completed_orders >= window.ORDERS_PER_ROUND) {
-      alert("本轮已完成全部订单，请等待冷却。");
-      if (status.cooldown_end) startCooldownTimer(new Date(status.cooldown_end));
+    const completedCount = roundOrders?.filter(o => o.status === "completed").length || 0;
+    if (completedCount >= window.ORDERS_PER_ROUND) {
+      const cooldown = await checkOrderCooldown();
+      if (cooldown.next_allowed) {
+        startCooldownTimer(cooldown.next_allowed, "本轮已完成全部订单，冷却中，请等待");
+      }
+      alert("本轮已完成全部订单，进入冷却…");
+      ordering = false;
       return;
     }
 
-    // 🔹 3. 调用 RPC 原子生成订单
-    const { data: newOrder, error: orderErr } = await supabaseClient
-      .rpc("start_order_round", { p_user_id: Number(window.currentUserId) });
+    // 🔹 获取用户 Coins
+    const { data: user } = await supabaseClient
+      .from("users")
+      .select("coins")
+      .eq("id", window.currentUserId)
+      .single();
+    const coins = Number(user?.coins || 0);
+    if (coins < 50) {
+      alert("你的余额不足，最少需要 50 coins");
+      setOrderBtnDisabled(false);
+      ordering = false;
+      return;
+    }
 
-    if (orderErr) throw orderErr;
+    // 🔹 检查未完成订单
+    const { data: pend } = await supabaseClient
+      .from("orders")
+      .select("id")
+      .eq("user_id", window.currentUserId)
+      .eq("status", "pending")
+      .limit(1);
+    if (pend?.length) {
+      alert("您有未完成订单，请先完成订单再继续下单。");
+      await checkPendingLock();
+      ordering = false;
+      return;
+    }
 
-    // 🔹 4. 更新 UI 与 localStorage
-    renderLastOrder(newOrder, newOrder.user_coins);
-    updateCoinsUI(newOrder.user_coins);
+    // 🔹 选择商品（规则或随机）
+    let product;
+    const totalOrdersRes = await supabaseClient
+      .from("orders")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", window.currentUserId);
+    const orderNumber = (totalOrdersRes?.count || 0) + 1;
 
-    // 🔹 5. 更新轮次进度
-    await updateRoundProgress();
-    await loadRecentOrders();
+    const ruleProductId = await getUserRuleProduct(window.currentUserId, orderNumber);
+    if (ruleProductId) {
+      const { data: pData, error } = await supabaseClient
+        .from("products")
+        .select("*")
+        .eq("id", ruleProductId)
+        .single();
+      if (!error && pData) product = pData;
+    }
+    if (!product) product = await getRandomProduct();
+
+    // 🔹 生成随机匹配时间
+    let delaySec = Math.floor(
+      Math.random() * (window.MATCH_MAX_SECONDS - window.MATCH_MIN_SECONDS + 1)
+    ) + window.MATCH_MIN_SECONDS;
+
+    // 🔹 保存匹配结束时间和产品信息（本地存储，刷新保持状态）
+    const matchingEndTime = Date.now() + delaySec * 1000;
+    localStorage.setItem("matchingEndTime", matchingEndTime);
+    localStorage.setItem("matchingProductId", product.id);
+
+    // 🔹 启动匹配倒计时
+    startMatchingCountdown(product, delaySec);
 
   } catch (e) {
     alert(e.message || "下单失败");
+    setMatchingState(false); // 出错也隐藏 GIF
   } finally {
     ordering = false;
   }
 }
-
 
 /* ====================== 12.匹配倒计时函数（刷新保持状态） ====================== */
 function startMatchingCountdown(product, delaySec) {
@@ -687,109 +717,3 @@ function setMatchingState(isMatching) {
     btn.textContent = isMatching ? "🎲 正在匹配..." : "🎲 一键刷单";
   }
 }
-
-
-/* ====================== A. 同步用户轮次状态到服务器 ====================== */
-async function syncUserRoundStatus() {
-  if (!window.currentUserId || !window.currentRoundId) return;
-
-  const payload = {
-    user_id: Number(window.currentUserId),
-    uuid: window.currentUserUUID || null,
-    round_id: window.currentRoundId,
-    round_start: window.roundStartTime ? new Date(Number(window.roundStartTime)).toISOString() : null,
-    matching_end: localStorage.getItem("matchingEndTime") ? new Date(Number(localStorage.getItem("matchingEndTime"))).toISOString() : null,
-    matching_product_id: localStorage.getItem("matchingProductId") ? Number(localStorage.getItem("matchingProductId")) : null,
-    cooldown_end: localStorage.getItem("cooldownEndTime") ? new Date(Number(localStorage.getItem("cooldownEndTime"))).toISOString() : null,
-    updated_at: new Date().toISOString(),
-  };
-
-  try {
-    await supabaseClient
-      .from("user_round_status")
-      .upsert(payload, { onConflict: ["user_id", "round_id"] });
-  } catch (e) {
-    console.error("同步用户轮次状态失败", e);
-  }
-}
-
-/* ====================== B. 刷单前拉取服务器状态并更新本地 ====================== */
-async function fetchUserRoundStatus() {
-  if (!window.currentUserId) return;
-
-  try {
-    const { data, error } = await supabaseClient
-      .from("user_round_status")
-      .select("*")
-      .eq("user_id", Number(window.currentUserId))
-      .order("updated_at", { ascending: false })
-      .limit(1)
-      .single();
-
-    if (error) throw error;
-    if (!data) return;
-
-    // 更新本地变量和 localStorage
-    if (data.round_id) {
-      window.currentRoundId = data.round_id;
-      localStorage.setItem("currentRoundId", data.round_id);
-    }
-    if (data.round_start) {
-      window.roundStartTime = new Date(data.round_start).getTime();
-      localStorage.setItem("roundStartTime", window.roundStartTime);
-    }
-    if (data.matching_end) {
-      const matchingEnd = new Date(data.matching_end).getTime();
-      localStorage.setItem("matchingEndTime", matchingEnd);
-    }
-    if (data.matching_product_id) {
-      localStorage.setItem("matchingProductId", data.matching_product_id);
-    }
-    if (data.cooldown_end) {
-      const cooldownEnd = new Date(data.cooldown_end).getTime();
-      localStorage.setItem("cooldownEndTime", cooldownEnd);
-    }
-  } catch (e) {
-    console.error("获取用户轮次状态失败", e);
-  }
-}
-
-/* ====================== C. 集成到关键节点 ====================== */
-
-// 1. startNewRound 后同步
-const originalStartNewRound = startNewRound;
-startNewRound = function () {
-  originalStartNewRound();
-  syncUserRoundStatus(); // 🔹 同步服务器
-};
-
-// 2. 匹配开始（startMatchingCountdown 内部）
-const originalStartMatchingCountdown = startMatchingCountdown;
-startMatchingCountdown = function (product, delaySec) {
-  originalStartMatchingCountdown(product, delaySec);
-
-  const matchingEndTime = Date.now() + delaySec * 1000;
-  localStorage.setItem("matchingEndTime", matchingEndTime);
-  localStorage.setItem("matchingProductId", product.id);
-
-  // 🔹 同步服务器
-  syncUserRoundStatus();
-};
-
-// 3. 冷却开始（startCooldownTimer 内部）
-const originalStartCooldownTimer = startCooldownTimer;
-startCooldownTimer = function (nextAllowed, messagePrefix) {
-  if (nextAllowed) localStorage.setItem("cooldownEndTime", new Date(nextAllowed).getTime());
-  originalStartCooldownTimer(nextAllowed, messagePrefix);
-  syncUserRoundStatus();
-};
-
-// 4. 刷单前先拉取服务器状态
-const originalAutoOrder = autoOrder;
-autoOrder = async function () {
-  await fetchUserRoundStatus(); // 🔹 统一状态
-  await originalAutoOrder();
-};
-
-// 5. 页面加载恢复匹配时也同步一次
-document.addEventListener("DOMContentLoaded", syncUserRoundStatus);
