@@ -96,7 +96,7 @@ async function fetchPendingOrderAndRestore() {
     const { data, error } = await supabaseClient
       .from('orders')
       .select(`id, match_end_time`)
-      .eq('user_uuid', window.currentUserUUID)
+      .eq('user_id', window.currentUserId)
       .eq('status', 'pending')
       .order('created_at', { ascending: false })
       .limit(1)
@@ -183,7 +183,7 @@ async function checkPendingLock() {
     const { data: pend } = await supabaseClient
       .from('orders')
       .select('id')
-      .eq('user_uuid', window.currentUserUUID)
+      .eq('user_id', window.currentUserId)
       .eq('status', 'pending')
       .limit(1);
 
