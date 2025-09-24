@@ -1,20 +1,21 @@
 /*
-  order.server-driven.js - 精简版
+  order.server-driven.js - 完整可用版
   ✅ 后端驱动轮次 / 匹配时间 / 冷却
   ✅ 前端只负责：调用 RPC、显示倒计时、渲染 UI、Coins/Balance 兑换
 */
 
 /* ====================== 1. 初始化用户信息 ====================== */
 window.currentUserId = localStorage.getItem("currentUserId");
-window.currentUserUUID = localStorage.getItem("currentUserUUID"); // RPC 使用 uuid
-window.currentRoundId = null;   
-window.roundStartTime = null;   
-window.pendingOrderId = null;   
+window.currentUserUUID = localStorage.getItem("currentUserUUID");
+window.currentRoundId = null;
+window.roundStartTime = null;
+window.pendingOrderId = null;
+window.currentRoundCompleted = 0;
 
-let ordering = false;      
-let completing = false;    
-let exchanging = false;    
-let timers = { cooldown: null, match: null }; 
+let ordering = false;
+let completing = false;
+let exchanging = false;
+let timers = { cooldown: null, match: null };
 
 if (!window.supabaseClient) console.error("❌ supabaseClient 未初始化！");
 
@@ -44,7 +45,6 @@ function formatTime(sec) {
   return `${h}:${m}:${s}`;
 }
 
-/* ====================== 3. 通用倒计时 ====================== */
 function clearTimer(name) {
   if (timers[name]) { clearInterval(timers[name]); timers[name] = null; }
 }
@@ -62,6 +62,15 @@ function startCountdownTo(targetTimeISO, onTick, onEnd, timerName = 'general') {
   timers[timerName] = setInterval(tick, 1000);
 }
 
+/* ====================== 3. 更新本轮进度 ====================== */
+function updateRoundProgress() {
+  const el = document.getElementById('roundProgress');
+  if (!el) return;
+  const completed = Number(window.currentRoundCompleted || 0);
+  const perRound = Number(window.ORDERS_PER_ROUND || 3);
+  el.textContent = `本轮已完成订单：${completed} / ${perRound}`;
+}
+
 /* ====================== 4. 获取用户轮次/冷却状态 ====================== */
 async function fetchUserRoundStatus() {
   if (!window.currentUserUUID) return;
@@ -73,13 +82,10 @@ async function fetchUserRoundStatus() {
 
     window.currentRoundId = row.current_round_id || null;
     window.roundStartTime = row.round_start_time || null;
+    window.currentRoundCompleted = Number(row.completed_count || 0);
 
     if (typeof row.coins !== 'undefined') updateCoinsUI(row.coins);
-
-    const completed = Number(row.completed_count || 0);
-    const perRound = Number(row.orders_per_round || 3);
-    const el = document.getElementById('roundProgress');
-    if (el) el.textContent = `本轮已完成订单：${completed} / ${perRound}`;
+    updateRoundProgress();
 
     if (row.cooldown_end_time) {
       const cdEnd = new Date(row.cooldown_end_time).getTime();
@@ -111,7 +117,7 @@ async function fetchPendingOrderAndRestore() {
         const el = document.getElementById('matchTimer'); if (el) el.textContent = `匹配剩余：${formatTime(sec)}`;
       }, async () => { setMatchingState(false); await refreshAll(); }, 'match');
     } else await refreshAll();
-  } catch (e) { /* 安全忽略 */ }
+  } catch (e) { /* 忽略 */ }
 }
 
 /* ====================== 6. 后端下单 ====================== */
@@ -162,6 +168,10 @@ async function completeOrderRemote(orderId) {
       const { data, error } = await supabaseClient.rpc('rpc_complete_order', params);
       if (error) throw error;
       const res = Array.isArray(data) ? data[0] : data;
+
+      // 更新全局缓存完成数
+      window.currentRoundCompleted = (window.currentRoundCompleted || 0) + 1;
+      updateRoundProgress();
 
       await fetchUserRoundStatus();
       await loadLastOrder();
@@ -307,9 +317,16 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('cancelExchange')?.addEventListener('click', closeExchangeModal);
   document.getElementById('confirmExchange')?.addEventListener('click', confirmExchange);
 
-  refreshAll();  // 初始化页面
-});
+  document.getElementById("balanceToCoinsBtn")?.addEventListener("click", () => toggleExchangeDirection("toCoins"));
+  document.getElementById("coinsToBalanceBtn")?.addEventListener("click", () => toggleExchangeDirection("toBalance"));
 
+  document.getElementById("addCoinsModal")?.addEventListener("click", (e) => {
+    if (e.target.id === "addCoinsModal") closeExchangeModal();
+  });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeExchangeModal(); });
+
+  refreshAll();
+});
 
 
 /* ====================== 15.冷却倒计时函数 ====================== */
