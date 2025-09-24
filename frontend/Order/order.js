@@ -576,3 +576,15 @@ function setMatchingState(isMatching) {
     btn.textContent = isMatching ? "🎲 正在匹配..." : "🎲 一键刷单";
   }
 }
+
+/* ====================== 21. 更新本轮进度 ====================== */
+function updateRoundProgress() {
+  const el = document.getElementById('roundProgress');
+  if (!el) return;
+
+  // 尝试从全局缓存获取
+  const completed = Number(window.currentRoundCompleted || 0);
+  const perRound = Number(window.ORDERS_PER_ROUND || 3);
+
+  el.textContent = `本轮已完成订单：${completed} / ${perRound}`;
+}
