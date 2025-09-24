@@ -717,3 +717,33 @@ function setMatchingState(isMatching) {
     btn.textContent = isMatching ? "🎲 正在匹配..." : "🎲 一键刷单";
   }
 }
+
+async function fetchRecentOrders() {
+  if (!window.currentUserId) return;
+
+  try {
+    let query = supabaseClient
+      .from("orders")
+      .select("id, status, created_at")
+      .eq("user_id", Number(window.currentUserId))
+      .order("created_at", { ascending: false })
+      .limit(10);
+
+    if (window.currentRoundId) {
+      // 如果有 round_id，就按当前轮次过滤
+      query = query.eq("round_id", window.currentRoundId);
+    } else {
+      // 如果没有 round_id，可以选择忽略，或者查没有轮次的订单
+      // query = query.is("round_id", null);
+      console.warn("⚠️ 当前没有 round_id，查询结果可能不完整");
+    }
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+    return data;
+  } catch (e) {
+    console.error("获取最近订单失败", e);
+    return [];
+  }
+}
