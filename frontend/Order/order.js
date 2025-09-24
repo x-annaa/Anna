@@ -822,4 +822,3 @@ autoOrder = async function () {
 
 // 5. 页面加载恢复匹配时也同步一次
 document.addEventListener("DOMContentLoaded", syncUserRoundStatus);
-
