@@ -58,9 +58,12 @@ setOrderBtnDisabled(true, `金币为负（欠款 ¥${Math.abs(coins).toFixed(2)}
 }
 }
 
-
 function formatTime(sec) {
-});
+  const minutes = Math.floor(sec / 60);
+  const seconds = sec % 60;
+  return `${minutes}分${seconds}秒`;
+}
+
 
 /* ====================== 15.冷却倒计时函数 ====================== */
 function startCooldownTimer(nextAllowed, messagePrefix = "冷却中，请等待") {
