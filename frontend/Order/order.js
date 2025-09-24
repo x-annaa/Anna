@@ -479,13 +479,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 /* ====================== 19.页面刷新工具 ====================== */
 async function refreshAll() {
-  await loadRoundConfig();
+  // await loadRoundConfig();  // ← 删除这一行
   await loadCoinsOrderPage();
   await loadLastOrder();
   await loadRecentOrders();
   await checkPendingLock();
-  await updateRoundProgress();
+  await updateRoundProgress?.(); // 如果有进度条更新函数
 }
+
 
 async function loadCoinsOrderPage() {
   if (!window.currentUserId) return;
