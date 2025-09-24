@@ -718,7 +718,7 @@ function setMatchingState(isMatching) {
   }
 }
 
-async function fetchRecentOrders() {
+async function safeFetchOrders(limit = 10) {
   if (!window.currentUserId) return [];
 
   try {
@@ -727,25 +727,20 @@ async function fetchRecentOrders() {
       .select("id, status, created_at")
       .eq("user_id", Number(window.currentUserId))
       .order("created_at", { ascending: false })
-      .limit(10);
+      .limit(limit);
 
-    // ✅ 这里加判断，避免 eq.null
-    if (window.currentRoundId) {
+    // ✅ round_id 只在有值时才加
+    if (window.currentRoundId && window.currentRoundId !== "null") {
       query = query.eq("round_id", window.currentRoundId);
     } else {
-      // 如果你希望查 round_id IS NULL 的订单，就用下面这一行
-      // query = query.is("round_id", null);
-
-      // 如果你希望跳过过滤（不报错但也不查 round_id），就留空
-      console.warn("⚠️ 当前没有 round_id，跳过 round_id 过滤");
+      console.warn("⚠️ round_id 为空，跳过过滤");
     }
 
     const { data, error } = await query;
     if (error) throw error;
-
     return data || [];
   } catch (err) {
-    console.error("获取最近订单失败:", err);
+    console.error("获取订单失败:", err);
     return [];
   }
 }
