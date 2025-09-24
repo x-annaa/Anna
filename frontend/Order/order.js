@@ -717,3 +717,108 @@ function setMatchingState(isMatching) {
     btn.textContent = isMatching ? "🎲 正在匹配..." : "🎲 一键刷单";
   }
 }
+
+/* ====================== A. 同步用户轮次状态到服务器 ====================== */
+async function syncUserRoundStatus() {
+  if (!window.currentUserId || !window.currentRoundId) return;
+
+  const payload = {
+    user_id: Number(window.currentUserId),
+    uuid: window.currentUserUUID || null,
+    round_id: window.currentRoundId,
+    round_start: window.roundStartTime ? new Date(Number(window.roundStartTime)).toISOString() : null,
+    matching_end: localStorage.getItem("matchingEndTime") ? new Date(Number(localStorage.getItem("matchingEndTime"))).toISOString() : null,
+    matching_product_id: localStorage.getItem("matchingProductId") ? Number(localStorage.getItem("matchingProductId")) : null,
+    cooldown_end: localStorage.getItem("cooldownEndTime") ? new Date(Number(localStorage.getItem("cooldownEndTime"))).toISOString() : null,
+    updated_at: new Date().toISOString(),
+  };
+
+  try {
+    await supabaseClient
+      .from("user_round_status")
+      .upsert(payload, { onConflict: ["user_id", "round_id"] });
+  } catch (e) {
+    console.error("同步用户轮次状态失败", e);
+  }
+}
+
+/* ====================== B. 刷单前拉取服务器状态并更新本地 ====================== */
+async function fetchUserRoundStatus() {
+  if (!window.currentUserId) return;
+
+  try {
+    const { data, error } = await supabaseClient
+      .from("user_round_status")
+      .select("*")
+      .eq("user_id", Number(window.currentUserId))
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error) throw error;
+    if (!data) return;
+
+    // 更新本地变量和 localStorage
+    if (data.round_id) {
+      window.currentRoundId = data.round_id;
+      localStorage.setItem("currentRoundId", data.round_id);
+    }
+    if (data.round_start) {
+      window.roundStartTime = new Date(data.round_start).getTime();
+      localStorage.setItem("roundStartTime", window.roundStartTime);
+    }
+    if (data.matching_end) {
+      const matchingEnd = new Date(data.matching_end).getTime();
+      localStorage.setItem("matchingEndTime", matchingEnd);
+    }
+    if (data.matching_product_id) {
+      localStorage.setItem("matchingProductId", data.matching_product_id);
+    }
+    if (data.cooldown_end) {
+      const cooldownEnd = new Date(data.cooldown_end).getTime();
+      localStorage.setItem("cooldownEndTime", cooldownEnd);
+    }
+  } catch (e) {
+    console.error("获取用户轮次状态失败", e);
+  }
+}
+
+/* ====================== C. 集成到关键节点 ====================== */
+
+// 1. startNewRound 后同步
+const originalStartNewRound = startNewRound;
+startNewRound = function () {
+  originalStartNewRound();
+  syncUserRoundStatus(); // 🔹 同步服务器
+};
+
+// 2. 匹配开始（startMatchingCountdown 内部）
+const originalStartMatchingCountdown = startMatchingCountdown;
+startMatchingCountdown = function (product, delaySec) {
+  originalStartMatchingCountdown(product, delaySec);
+
+  const matchingEndTime = Date.now() + delaySec * 1000;
+  localStorage.setItem("matchingEndTime", matchingEndTime);
+  localStorage.setItem("matchingProductId", product.id);
+
+  // 🔹 同步服务器
+  syncUserRoundStatus();
+};
+
+// 3. 冷却开始（startCooldownTimer 内部）
+const originalStartCooldownTimer = startCooldownTimer;
+startCooldownTimer = function (nextAllowed, messagePrefix) {
+  if (nextAllowed) localStorage.setItem("cooldownEndTime", new Date(nextAllowed).getTime());
+  originalStartCooldownTimer(nextAllowed, messagePrefix);
+  syncUserRoundStatus();
+};
+
+// 4. 刷单前先拉取服务器状态
+const originalAutoOrder = autoOrder;
+autoOrder = async function () {
+  await fetchUserRoundStatus(); // 🔹 统一状态
+  await originalAutoOrder();
+};
+
+// 5. 页面加载恢复匹配时也同步一次
+document.addEventListener("DOMContentLoaded", syncUserRoundStatus);
