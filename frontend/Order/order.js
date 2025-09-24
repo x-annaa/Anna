@@ -148,3 +148,49 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('completeOrderBtn')?.addEventListener('click',()=>completeOrderRemote(window.pendingOrderId));
   fetchUserRoundStatus();
 });
+
+/* ====================== 加载最近订单 ====================== */
+async function loadRecentOrders() {
+  if (!window.currentUserUUID) return;
+  try {
+    const { data: recentOrders, error } = await supabaseClient
+      .from('orders')
+      .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
+      .eq('user_uuid', window.currentUserUUID)
+      .order('created_at', { ascending: false })
+      .limit(5);
+    if (error) throw error;
+
+    const list = document.getElementById('recentOrders');
+    if (!list) return;
+    if (!recentOrders?.length) {
+      list.innerHTML = `<li>暂无订单！</li>`;
+      return;
+    }
+
+    list.innerHTML = recentOrders.map(o => {
+      const price = Number(o.total_price)||0;
+      const profit = Number(o.profit)||0;
+      const profitRatio = Number(o.products?.profit)||0;
+      return `<li>
+        🛒 ${o.products?.name||'未知商品'} / ¥${price.toFixed(2)} / 利润率：${profitRatio} / 收入：+¥${profit.toFixed(2)} / 
+        状态：${o.status==='completed'?'✅已完成':'⏳待完成'} / <small>${new Date(o.created_at).toLocaleString()}</small>
+      </li>`;
+    }).join('');
+  } catch(e){ console.error("加载最近订单失败", e); }
+}
+
+/* ====================== 页面初始化 ====================== */
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('autoOrderBtn')?.addEventListener('click', async () => {
+    await autoOrder();
+    await loadRecentOrders();
+  });
+  document.getElementById('completeOrderBtn')?.addEventListener('click', async () => {
+    await completeOrderRemote(window.pendingOrderId);
+    await loadRecentOrders();
+  });
+
+  fetchUserRoundStatus();
+  loadRecentOrders();
+});
