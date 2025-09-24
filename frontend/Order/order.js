@@ -2,8 +2,17 @@
 window.currentUserId = localStorage.getItem("currentUserId");
 window.currentUsername = localStorage.getItem("currentUser");
 window.currentUserUUID = localStorage.getItem("currentUserUUID"); // 新增 UUID
-window.currentRoundId = localStorage.getItem("currentRoundId");   // 当前轮次
-window.roundStartTime = localStorage.getItem("roundStartTime");   // 当前轮次开始时间
+window.currentRoundId = null;           // 当前轮次
+window.roundStartTime = null;           // 当前轮次开始时间
+window.nextAllowed = null;              // 下次允许下单时间
+window.matchingEnd = null;              // 匹配结束时间
+
+window.ORDERS_PER_ROUND = 3;            // 每轮订单数
+window.cooldownTimer = null;            // 冷却倒计时
+window.matchingTimer = null;            // 匹配倒计时
+let ordering = false;                    // 下单并发保护
+
+
 
 let ordering = false;      // 下单中的并发保护
 let completing = false;    // 完成订单中的并发保护
@@ -117,18 +126,19 @@ async function checkOrderCooldown() {
 
   try {
     const { data, error } = await supabaseClient
-      .rpc("check_user_order_cooldown", { p_user_id: Number(window.currentUserId) });
+      .from("user_round_status")
+      .select("next_allowed, orders_completed")
+      .eq("user_id", window.currentUserId)
+      .single();
 
-    if (error) throw error;
+    if (error && error.code !== "PGRST116") throw error;
 
-    if (!data?.length) return { allowed: true, next_allowed: null };
+    if (!data) return { allowed: true, next_allowed: null };
 
-    const row = data[0];
+    const nextAllowed = data.next_allowed ? new Date(data.next_allowed).getTime() : null;
+    const allowed = !nextAllowed || Date.now() >= nextAllowed;
 
-    // 保持 UTC 时间格式
-    const nextAllowed = row.next_allowed ? new Date(row.next_allowed).getTime() : null;
-    return { allowed: row.allowed, next_allowed: nextAllowed };
-
+    return { allowed, next_allowed: nextAllowed };
   } catch (e) {
     console.error("检查冷却失败", e);
     return { allowed: true, next_allowed: null };
@@ -317,50 +327,58 @@ async function autoOrder() {
 }
 
 /* ====================== 12.匹配倒计时函数（刷新保持状态） ====================== */
-function startMatchingCountdown(product, delaySec) {
+/* ====================== 13.页面刷新恢复匹配状态 ====================== */
+function startMatching(product, delaySec) {
   const endTime = Date.now() + delaySec * 1000;
-  const btn = document.getElementById("autoOrderBtn");
-  const gifEl = document.getElementById("matchingGif");
+  window.matchingEnd = endTime;
 
-  const tick = () => {
-    const remaining = Math.ceil((endTime - Date.now()) / 1000);
+  // 更新数据库匹配结束时间
+  supabaseClient
+    .from("user_round_status")
+    .update({ matching_end: new Date(endTime).toISOString(), matching_product_id: product.id })
+    .eq("user_id", window.currentUserId);
 
-    if (remaining > 0) {
-      setMatchingState(true); // ✅ 使用统一函数显示匹配状态
-      requestAnimationFrame(tick);
-    } else {
-      setMatchingState(false); // 匹配完成，恢复按钮
-      localStorage.removeItem("matchingEndTime");
-      localStorage.removeItem("matchingProductId");
-
-      // 下单逻辑
+  if (window.matchingTimer) clearInterval(window.matchingTimer);
+  window.matchingTimer = setInterval(() => {
+    const remaining = Math.ceil((window.matchingEnd - Date.now()) / 1000);
+    if (remaining <= 0) {
+      clearInterval(window.matchingTimer);
       finalizeMatchedOrder(product);
+    } else {
+      setMatchingState(true, `匹配中，剩余 ${remaining}s`);
     }
-  };
-
-  tick();
+  }, 1000);
 }
 
-/* ====================== 13.页面刷新恢复匹配状态 ====================== */
-function restoreMatchingIfAny() {
-  const endTime = Number(localStorage.getItem("matchingEndTime"));
-  const productId = localStorage.getItem("matchingProductId");
+async function restoreMatchingIfAny() {
+  if (!window.currentUserId) return;
 
-  if (endTime && productId && endTime > Date.now()) {
-    const delaySec = Math.ceil((endTime - Date.now()) / 1000);
-    // 获取产品信息再启动倒计时
-    supabaseClient.from("products").select("*").eq("id", productId).single()
-      .then(({ data, error }) => {
-        if (!error && data) startMatchingCountdown(data, delaySec);
-      });
-  } else if (endTime && productId) {
-    // 匹配已结束但可能未生成订单
-    supabaseClient.from("products").select("*").eq("id", productId).single()
-      .then(({ data, error }) => { if (!error && data) finalizeMatchedOrder(data); });
-    localStorage.removeItem("matchingEndTime");
-    localStorage.removeItem("matchingProductId");
+  const { data, error } = await supabaseClient
+    .from("user_round_status")
+    .select("matching_end, matching_product_id")
+    .eq("user_id", window.currentUserId)
+    .single();
+
+  if (error || !data || !data.matching_end) return;
+
+  const remaining = Math.ceil(new Date(data.matching_end).getTime() - Date.now()) / 1000;
+  if (remaining > 0) {
+    const { data: product, error: prodErr } = await supabaseClient
+      .from("products")
+      .select("*")
+      .eq("id", data.matching_product_id)
+      .single();
+    if (!prodErr && product) startMatching(product, remaining);
+  } else if (data.matching_product_id) {
+    const { data: product, error: prodErr } = await supabaseClient
+      .from("products")
+      .select("*")
+      .eq("id", data.matching_product_id)
+      .single();
+    if (!prodErr && product) finalizeMatchedOrder(product);
   }
 }
+
 
 /* ====================== 14.匹配完成后的订单生成 ====================== */
 async function finalizeMatchedOrder(product) {
@@ -416,20 +434,21 @@ function startCooldownTimer(nextAllowed, messagePrefix = "冷却中，请等待"
   const tick = () => {
     const sec = Math.ceil((nextAllowed - Date.now()) / 1000);
     if (sec <= 0) {
-      clearInterval(cooldownTimer);
+      clearInterval(window.cooldownTimer);
       setOrderBtnDisabled(false, "", "");
-      startNewRound();
-      updateRoundProgress();
+      startNewRound();          // 新轮次
+      updateRoundProgress();    // 更新 UI
       loadRecentOrders();
     } else {
-      setOrderBtnDisabled(true, `${messagePrefix} ${formatTime(sec)}`, `冷却剩余时间：${formatTime(sec)}`);
+      setOrderBtnDisabled(true, `${messagePrefix} ${formatTime(sec)}`, `冷却剩余：${formatTime(sec)}`);
     }
   };
 
   tick();
-  if (cooldownTimer) clearInterval(cooldownTimer);
-  cooldownTimer = setInterval(tick, 1000);
+  if (window.cooldownTimer) clearInterval(window.cooldownTimer);
+  window.cooldownTimer = setInterval(tick, 1000);
 }
+
 
 /* ====================== 16.检查本轮 Coins → Balance 是否可用 ====================== */
 async function canExchangeThisRound() {
