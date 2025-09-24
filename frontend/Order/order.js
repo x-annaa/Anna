@@ -409,25 +409,33 @@ function restoreMatchingIfAny() {
 
 /* ====================== 14.匹配完成后的订单生成 ====================== */
 async function finalizeMatchedOrder(product) {
+  if (!window.currentUserId) return;
+
   try {
-    const { data: user } = await supabaseClient
+    // 获取用户当前 Coins
+    const { data: user, error: userErr } = await supabaseClient
       .from("users")
       .select("coins")
       .eq("id", window.currentUserId)
       .single();
-    let coins = Number(user?.coins || 0);
+    if (userErr || !user) throw new Error("获取用户信息失败");
+
+    let coins = Number(user.coins || 0);
 
     const price = Number(product.price) || 0;
     const profitRatio = Number(product.profit) || 0;
     const profit = +(price * profitRatio).toFixed(2);
-    const tempCoins = coins - price;
 
-    await supabaseClient
+    // 扣除价格，更新用户 Coins
+    const tempCoins = coins - price;
+    const { error: updErr } = await supabaseClient
       .from("users")
       .update({ coins: tempCoins })
       .eq("id", window.currentUserId);
+    if (updErr) throw new Error(updErr.message);
 
-    const { data: newOrder } = await supabaseClient
+    // 插入新订单
+    const { data: newOrder, error: orderErr } = await supabaseClient
       .from("orders")
       .insert({
         user_id: window.currentUserId,
@@ -435,11 +443,13 @@ async function finalizeMatchedOrder(product) {
         total_price: price,
         profit: profit,
         status: "pending",
-        round_id: window.currentRoundId,
+        round_id: window.currentRoundId || crypto.randomUUID(), // 确保 round_id 有值
       })
       .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
       .single();
+    if (orderErr || !newOrder) throw new Error("生成订单失败：" + orderErr?.message);
 
+    // 更新 UI
     renderLastOrder(newOrder, tempCoins);
     updateCoinsUI(tempCoins);
     await checkPendingLock();
@@ -447,12 +457,11 @@ async function finalizeMatchedOrder(product) {
     await updateRoundProgress();
 
   } catch (e) {
+    console.error("匹配完成生成订单失败：", e);
     alert(e.message || "生成订单失败");
   }
 }
 
-// 页面加载时恢复匹配状态
-document.addEventListener("DOMContentLoaded", restoreMatchingIfAny);
 
 /* ====================== 15.冷却倒计时函数 ====================== */
 function startCooldownTimer(nextAllowed, messagePrefix = "冷却中，请等待") {
