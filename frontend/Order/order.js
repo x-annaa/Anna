@@ -135,19 +135,29 @@ async function getRandomProduct() {
    检查冷却
    ====================== */
 async function checkOrderCooldown() {
-  if (!window.currentUserUUID) return { allowed: true, next_allowed: null };
+  // 使用 userId，而不是 UUID
+  if (!window.currentUserId) return { allowed: true, next_allowed: null };
+
   try {
+    // 调用 RPC 函数时使用 p_user_id 参数
     const { data, error } = await supabaseClient
-      .rpc("check_user_order_cooldown", { p_user_uuid: window.currentUserUUID });
+      .rpc("check_user_order_cooldown", { p_user_id: Number(window.currentUserId) });
+
     if (error) throw error;
+
+    // 没有记录时，允许下单
     if (!data?.length) return { allowed: true, next_allowed: null };
+
     const row = data[0];
     return { allowed: row.allowed, next_allowed: row.next_allowed };
+
   } catch (e) {
     console.error("检查冷却失败", e);
+    // 出错时也默认允许下单，避免阻塞
     return { allowed: true, next_allowed: null };
   }
 }
+
 
 /* ======================
    本轮完成订单数显示
