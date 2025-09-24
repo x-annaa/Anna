@@ -311,7 +311,7 @@ async function autoOrder() {
 
     // 4️⃣ 随机延迟匹配
     const delaySec = Math.floor(Math.random() * (window.MATCH_MAX_SECONDS - window.MATCH_MIN_SECONDS + 1)) + window.MATCH_MIN_SECONDS;
-    startMatchingCountdown(product, delaySec);
+    startMatching(product, delaySec);
 
   } catch (e) {
     alert(e.message || "下单失败");
