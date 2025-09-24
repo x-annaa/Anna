@@ -1,31 +1,24 @@
 /* ====================== 1.初始化用户信息 ====================== */
 window.currentUserId = localStorage.getItem("currentUserId");
 window.currentUsername = localStorage.getItem("currentUser");
-window.currentUserUUID = localStorage.getItem("currentUserUUID"); // 新增 UUID
-window.currentRoundId = null;           // 当前轮次
-window.roundStartTime = null;           // 当前轮次开始时间
-window.nextAllowed = null;              // 下次允许下单时间
-window.matchingEnd = null;              // 匹配结束时间
+window.currentUserUUID = localStorage.getItem("currentUserUUID");
+window.currentRoundId = null;
+window.roundStartTime = null;
+window.nextAllowed = null;
+window.matchingEnd = null;
 
-window.ORDERS_PER_ROUND = 3;            // 每轮订单数
-window.cooldownTimer = null;            // 冷却倒计时
-window.matchingTimer = null;            // 匹配倒计时
-let ordering = false;                    // 下单并发保护
-
-
-
-let ordering = false;      // 下单中的并发保护
-let completing = false;    // 完成订单中的并发保护
-let exchanging = false;    // Balance <-> Coins 兑换中的并发保护
-let cooldownTimer = null;  // 冷却倒计时
-
-// 默认轮次配置
 window.ORDERS_PER_ROUND = 3;
 window.ROUND_DURATION = 5 * 60 * 1000; // 毫秒
+window.MATCH_MIN_SECONDS = 5;
+window.MATCH_MAX_SECONDS = 15;
 
-if (!window.supabaseClient) {
-  console.error("❌ supabaseClient 未初始化！");
-}
+window.ordering = false;
+window.completing = false;
+window.exchanging = false;
+window.cooldownTimer = null;
+window.matchingTimer = null;
+
+if (!window.supabaseClient) console.error("❌ supabaseClient 未初始化！");
 
 /* ====================== 2.读取轮次配置 (每轮单数 & 冷却分钟) ====================== */
 async function loadRoundConfig() {
@@ -129,6 +122,8 @@ async function checkOrderCooldown() {
       .from("user_round_status")
       .select("next_allowed, orders_completed")
       .eq("user_id", window.currentUserId)
+      .order("round_start", { ascending: false })
+      .limit(1)
       .single();
 
     if (error && error.code !== "PGRST116") throw error;
@@ -327,12 +322,10 @@ async function autoOrder() {
 }
 
 /* ====================== 12.匹配倒计时函数（刷新保持状态） ====================== */
-/* ====================== 13.页面刷新恢复匹配状态 ====================== */
 function startMatching(product, delaySec) {
   const endTime = Date.now() + delaySec * 1000;
   window.matchingEnd = endTime;
 
-  // 更新数据库匹配结束时间
   supabaseClient
     .from("user_round_status")
     .update({ matching_end: new Date(endTime).toISOString(), matching_product_id: product.id })
@@ -350,6 +343,7 @@ function startMatching(product, delaySec) {
   }, 1000);
 }
 
+/* ====================== 13.页面刷新恢复匹配状态 ====================== */
 async function restoreMatchingIfAny() {
   if (!window.currentUserId) return;
 
@@ -357,11 +351,13 @@ async function restoreMatchingIfAny() {
     .from("user_round_status")
     .select("matching_end, matching_product_id")
     .eq("user_id", window.currentUserId)
+    .order("round_start", { ascending: false })
+    .limit(1)
     .single();
 
   if (error || !data || !data.matching_end) return;
 
-  const remaining = Math.ceil(new Date(data.matching_end).getTime() - Date.now()) / 1000;
+  const remaining = Math.ceil((new Date(data.matching_end).getTime() - Date.now()) / 1000);
   if (remaining > 0) {
     const { data: product, error: prodErr } = await supabaseClient
       .from("products")
@@ -379,7 +375,6 @@ async function restoreMatchingIfAny() {
   }
 }
 
-
 /* ====================== 14.匹配完成后的订单生成 ====================== */
 async function finalizeMatchedOrder(product) {
   try {
@@ -391,8 +386,7 @@ async function finalizeMatchedOrder(product) {
     let coins = Number(user?.coins || 0);
 
     const price = Number(product.price) || 0;
-    const profitRatio = Number(product.profit) || 0;
-    const profit = +(price * profitRatio).toFixed(2);
+    const profit = +(price * Number(product.profit || 0)).toFixed(2);
     const tempCoins = coins - price;
 
     await supabaseClient
@@ -418,13 +412,11 @@ async function finalizeMatchedOrder(product) {
     await checkPendingLock();
     await loadRecentOrders();
     await updateRoundProgress();
-
   } catch (e) {
     alert(e.message || "生成订单失败");
   }
 }
 
-// 页面加载时恢复匹配状态
 document.addEventListener("DOMContentLoaded", restoreMatchingIfAny);
 
 /* ====================== 15.冷却倒计时函数 ====================== */
@@ -435,9 +427,9 @@ function startCooldownTimer(nextAllowed, messagePrefix = "冷却中，请等待"
     const sec = Math.ceil((nextAllowed - Date.now()) / 1000);
     if (sec <= 0) {
       clearInterval(window.cooldownTimer);
-      setOrderBtnDisabled(false, "", "");
-      startNewRound();          // 新轮次
-      updateRoundProgress();    // 更新 UI
+      setOrderBtnDisabled(false);
+      startNewRound();
+      updateRoundProgress();
       loadRecentOrders();
     } else {
       setOrderBtnDisabled(true, `${messagePrefix} ${formatTime(sec)}`, `冷却剩余：${formatTime(sec)}`);
@@ -448,8 +440,6 @@ function startCooldownTimer(nextAllowed, messagePrefix = "冷却中，请等待"
   if (window.cooldownTimer) clearInterval(window.cooldownTimer);
   window.cooldownTimer = setInterval(tick, 1000);
 }
-
-
 /* ====================== 16.检查本轮 Coins → Balance 是否可用 ====================== */
 async function canExchangeThisRound() {
   if (!window.currentUserId || !window.currentRoundId) return false;
