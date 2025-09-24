@@ -1,63 +1,69 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>刷单测试页面</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 40px; }
-    input { margin: 5px 0; padding: 5px; width: 200px; }
-    button { padding: 5px 10px; margin-top: 10px; }
-    .container { margin-bottom: 30px; }
-    table { border-collapse: collapse; width: 80%; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-  </style>
+  <meta charset="UTF-8" />
+  <title>U9</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="index.css" />
+
+  <!-- Supabase SDK（必须在 supabaseClient.js 之前） -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- 全局 Supabase 初始化（把 supabaseClient 挂到 window） -->
+  <script src="supabaseClient.js"></script>
 </head>
 <body>
+  <div class="container">
+    <h1 class="title">Welcome</h1>
+    <p class="desc">Please register or login below:</p>
 
-  <div class="container" id="registerBox">
-    <h2>注册</h2>
-    <input type="text" id="regUsername" placeholder="用户名"><br>
-    <input type="password" id="regPassword" placeholder="密码"><br>
-    <button id="btnRegister">注册</button>
-    <p id="regMessage"></p>
+    <!-- Tab -->
+    <div class="tab-container">
+      <button id="showLogin" class="tab-btn active">Login</button>
+      <button id="showRegister" class="tab-btn">Register</button>
+    </div>
+
+    <!-- 登录 -->
+    <div id="loginForm" class="form-container">
+      <div class="field">
+        <input type="text" id="loginUsername" placeholder="Username" autocomplete="username" />
+      </div>
+
+      <div class="field password-wrapper">
+        <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" />
+        <button type="button" class="toggle-password" data-target="loginPassword" aria-label="toggle password">👁️</button>
+      </div>
+
+      <div id="loginMsg" class="form-msg"></div>
+      <button id="loginBtn" class="primary-btn">Login</button>
+    </div>
+
+    <!-- 注册 -->
+    <div id="registerForm" class="form-container hidden">
+      <div class="field">
+        <input type="text" id="regUsername" placeholder="Username" autocomplete="username" />
+      </div>
+
+      <div class="field password-wrapper">
+        <input type="password" id="regPassword" placeholder="Password" autocomplete="new-password" />
+        <button type="button" class="toggle-password" data-target="regPassword" aria-label="toggle password">👁️</button>
+      </div>
+
+      <div class="field password-wrapper">
+        <input type="password" id="regConfirmPassword" placeholder="Confirm Password" autocomplete="new-password" />
+        <button type="button" class="toggle-password" data-target="regConfirmPassword" aria-label="toggle password">👁️</button>
+      </div>
+
+      <label class="agreement">
+        <input type="checkbox" id="agreeTerms" />
+        <span>I agree to the terms</span>
+      </label>
+
+      <div id="registerMsg" class="form-msg"></div>
+      <button id="registerBtn" class="primary-btn">Register</button>
+    </div>
   </div>
 
-  <div class="container" id="loginBox">
-    <h2>登录</h2>
-    <input type="text" id="loginUsername" placeholder="用户名"><br>
-    <input type="password" id="loginPassword" placeholder="密码"><br>
-    <button id="btnLogin">登录</button>
-    <p id="loginMessage"></p>
-  </div>
-
-  <div class="container" id="userPanel" style="display:none;">
-    <h2>用户信息</h2>
-    <p id="userInfo"></p>
-    <button id="btnCreateOrder">创建订单</button>
-    <p id="orderMessage"></p>
-
-    <h3>订单记录</h3>
-    <table id="ordersTable">
-      <thead>
-        <tr>
-          <th>订单ID</th>
-          <th>商品ID</th>
-          <th>商品名称</th>
-          <th>价格</th>
-          <th>利润</th>
-          <th>轮次</th>
-          <th>匹配开始</th>
-          <th>匹配结束</th>
-          <th>冷却</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
-  <!-- Supabase SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabaseClient.js"></script>
+  <!-- 业务逻辑 -->
   <script src="index.js"></script>
 </body>
 </html>
