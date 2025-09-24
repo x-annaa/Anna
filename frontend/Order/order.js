@@ -605,3 +605,63 @@ function updateRoundProgress() {
 
   el.textContent = `本轮已完成订单：${completed} / ${perRound}`;
 }
+
+/* ====================== 22. 实时冷却倒计时整合 ====================== */
+function startRealtimeCooldown(endTimeISO, messagePrefix = '冷却中，请等待') {
+  // 清理旧计时器
+  clearTimer('cooldown');
+  if (!endTimeISO) {
+    setOrderBtnDisabled(false);
+    return;
+  }
+
+  const endTs = new Date(endTimeISO).getTime();
+  if (isNaN(endTs) || endTs <= Date.now()) {
+    setOrderBtnDisabled(false);
+    return;
+  }
+
+  // 每秒刷新
+  function tick() {
+    const remainingSec = Math.ceil((endTs - Date.now()) / 1000);
+    if (remainingSec <= 0) {
+      clearTimer('cooldown');
+      setOrderBtnDisabled(false);
+      // 冷却结束后刷新状态
+      fetchUserRoundStatus();
+      return;
+    }
+    const formatted = formatTime(remainingSec);
+    setOrderBtnDisabled(true, `${messagePrefix} ${formatted}`, `冷却剩余时间：${formatted}`);
+  }
+
+  tick();
+  timers.cooldown = setInterval(tick, 1000);
+}
+
+// 修改 fetchUserRoundStatus 内的冷却逻辑调用
+async function fetchUserRoundStatus() {
+  if (!window.currentUserUUID) return;
+  try {
+    const { data, error } = await supabaseClient.rpc('rpc_user_round_status', { p_user_uuid: window.currentUserUUID });
+    if (error) throw error;
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row) return;
+
+    window.currentRoundId = row.current_round_id || null;
+    window.roundStartTime = row.round_start_time || null;
+    window.currentRoundCompleted = Number(row.completed_count || 0);
+
+    if (typeof row.coins !== 'undefined') updateCoinsUI(row.coins);
+    updateRoundProgress();
+
+    if (row.cooldown_end_time) {
+      startRealtimeCooldown(row.cooldown_end_time, '冷却中，请等待');
+    } else {
+      clearTimer('cooldown');
+      setOrderBtnDisabled(false);
+    }
+  } catch (e) {
+    console.error('fetchUserRoundStatus 失败', e);
+  }
+}
