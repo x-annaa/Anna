@@ -719,7 +719,7 @@ function setMatchingState(isMatching) {
 }
 
 async function fetchRecentOrders() {
-  if (!window.currentUserId) return;
+  if (!window.currentUserId) return [];
 
   try {
     let query = supabaseClient
@@ -729,21 +729,24 @@ async function fetchRecentOrders() {
       .order("created_at", { ascending: false })
       .limit(10);
 
+    // ✅ 这里加判断，避免 eq.null
     if (window.currentRoundId) {
-      // 如果有 round_id，就按当前轮次过滤
       query = query.eq("round_id", window.currentRoundId);
     } else {
-      // 如果没有 round_id，可以选择忽略，或者查没有轮次的订单
+      // 如果你希望查 round_id IS NULL 的订单，就用下面这一行
       // query = query.is("round_id", null);
-      console.warn("⚠️ 当前没有 round_id，查询结果可能不完整");
+
+      // 如果你希望跳过过滤（不报错但也不查 round_id），就留空
+      console.warn("⚠️ 当前没有 round_id，跳过 round_id 过滤");
     }
 
     const { data, error } = await query;
-
     if (error) throw error;
-    return data;
-  } catch (e) {
-    console.error("获取最近订单失败", e);
+
+    return data || [];
+  } catch (err) {
+    console.error("获取最近订单失败:", err);
     return [];
   }
 }
+
