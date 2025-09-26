@@ -48,6 +48,15 @@ function generatePlatformAccount() {
 }
 
 // =======================
+// 生成 UUID
+// =======================
+function generateUUID() {
+  return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+  );
+}
+
+// =======================
 // 注册逻辑
 // =======================
 document.getElementById("registerBtn").addEventListener("click", async () => {
@@ -81,8 +90,8 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  // 生成平台账号
   const platformAccount = generatePlatformAccount();
+  const uuid = generateUUID(); // 自动生成 UUID
 
   // 插入新用户
   const { data, error } = await supabaseClient
@@ -92,7 +101,9 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
       password, // ⚠️ 明文存储不安全，建议 hash
       coins: 0,
       balance: 0,
-      platform_account: platformAccount
+      platform_account: platformAccount,
+      uuid,
+      session_token: null
     })
     .select()
     .single();
@@ -106,13 +117,14 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   localStorage.setItem("currentUserId", data.id);
   localStorage.setItem("currentUser", data.username);
   localStorage.setItem("platformAccount", data.platform_account);
+  localStorage.setItem("currentUserUUID", data.uuid);
 
   alert("注册成功！");
   window.location.href = "frontend/HOME.html";
 });
 
 // =======================
-// 登录逻辑
+// 登录逻辑 (带 session_token)
 // =======================
 document.getElementById("loginBtn").addEventListener("click", async () => {
   const username = document.getElementById("loginUsername").value.trim();
@@ -125,7 +137,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
 
   const { data, error } = await supabaseClient
     .from("users")
-    .select("id, username, password, platform_account")
+    .select("id, username, password, platform_account, uuid")
     .eq("username", username)
     .maybeSingle();
 
@@ -142,10 +154,26 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     return;
   }
 
+  // === 生成新的 session_token ===
+  const sessionToken = generateUUID();
+
+  // 更新数据库中的 session_token
+  const { error: updateErr } = await supabaseClient
+    .from("users")
+    .update({ session_token: sessionToken })
+    .eq("id", data.id);
+
+  if (updateErr) {
+    alert("更新 session 失败: " + updateErr.message);
+    return;
+  }
+
   // 保存到 localStorage
   localStorage.setItem("currentUserId", data.id);
   localStorage.setItem("currentUser", data.username);
   localStorage.setItem("platformAccount", data.platform_account);
+  localStorage.setItem("currentUserUUID", data.uuid);
+  localStorage.setItem("sessionToken", sessionToken);
 
   alert("登录成功！");
   window.location.href = "frontend/HOME.html";
