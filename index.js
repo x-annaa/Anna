@@ -92,6 +92,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
 
   const platformAccount = generatePlatformAccount();
   const uuid = generateUUID(); // 自动生成 UUID
+  const sessionToken = generateUUID(); // 新增 session_token
 
   // 插入新用户
   const { data, error } = await supabaseClient
@@ -103,7 +104,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
       balance: 0,
       platform_account: platformAccount,
       uuid,
-      session_token: null
+      session_token: sessionToken // 保存 token
     })
     .select()
     .single();
@@ -118,10 +119,12 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   localStorage.setItem("currentUser", data.username);
   localStorage.setItem("platformAccount", data.platform_account);
   localStorage.setItem("currentUserUUID", data.uuid);
+  localStorage.setItem("sessionToken", sessionToken); // 保存 token
 
   alert("注册成功！");
   window.location.href = "frontend/HOME.html";
 });
+
 
 // =======================
 // 登录逻辑 (带 session_token)
