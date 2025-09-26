@@ -1,21 +1,17 @@
 // =======================
-// 密码可见切换（修复版）
+// 密码可见切换
 // =======================
-document.querySelectorAll(".toggle-password").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const targetId = btn.getAttribute("data-target");
-    const input = document.getElementById(targetId);
-    if (!input) return;
-
-    if (input.type === "password") {
-      input.type = "text";
-      btn.textContent = "🙈";
-    } else {
-      input.type = "password";
-      btn.textContent = "👁️";
-    }
-  });
-});
+window.togglePassword = function (id, el) {
+  const input = document.getElementById(id);
+  if (!input) return;
+  if (input.type === "password") {
+    input.type = "text";
+    el.textContent = "🙈";
+  } else {
+    input.type = "password";
+    el.textContent = "👁️";
+  }
+};
 
 // =======================
 // 登录 / 注册 Tab 切换
@@ -46,10 +42,8 @@ function generatePlatformAccount() {
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const numbers = "0123456789";
   let acc = "";
-  for (let i = 0; i < 2; i++)
-    acc += letters[Math.floor(Math.random() * letters.length)];
-  for (let i = 0; i < 4; i++)
-    acc += numbers[Math.floor(Math.random() * numbers.length)];
+  for (let i = 0; i < 2; i++) acc += letters[Math.floor(Math.random() * letters.length)];
+  for (let i = 0; i < 4; i++) acc += numbers[Math.floor(Math.random() * numbers.length)];
   return acc;
 }
 
@@ -97,7 +91,8 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   }
 
   const platformAccount = generatePlatformAccount();
-  const uuid = generateUUID();
+  const uuid = generateUUID(); // 自动生成 UUID
+  const sessionToken = generateUUID(); // 新注册的用户直接分配 session
 
   // 插入新用户
   const { data, error } = await supabaseClient
@@ -109,7 +104,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
       balance: 0,
       platform_account: platformAccount,
       uuid,
-      session_token: null
+      session_token: sessionToken
     })
     .select()
     .single();
@@ -119,12 +114,19 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  alert("注册成功！请登录");
-  showLoginBtn.click();
+  // 保存到 localStorage
+  localStorage.setItem("currentUserId", data.id);
+  localStorage.setItem("currentUser", data.username);
+  localStorage.setItem("platformAccount", data.platform_account);
+  localStorage.setItem("currentUserUUID", data.uuid);
+  localStorage.setItem("sessionToken", data.session_token);
+
+  alert("注册成功！");
+  window.location.href = "frontend/HOME.html";
 });
 
 // =======================
-// 登录逻辑（带 session_token）
+// 登录逻辑
 // =======================
 document.getElementById("loginBtn").addEventListener("click", async () => {
   const username = document.getElementById("loginUsername").value.trim();
@@ -154,15 +156,15 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     return;
   }
 
-  // 生成新的 session_token
-  const sessionToken = generateUUID();
-  const { error: updateError } = await supabaseClient
+  // 生成新的 session_token 并更新到数据库
+  const newSession = generateUUID();
+  const { error: updateErr } = await supabaseClient
     .from("users")
-    .update({ session_token: sessionToken })
+    .update({ session_token: newSession })
     .eq("id", data.id);
 
-  if (updateError) {
-    alert("更新登录状态失败: " + updateError.message);
+  if (updateErr) {
+    alert("登录失败: " + updateErr.message);
     return;
   }
 
@@ -171,7 +173,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   localStorage.setItem("currentUser", data.username);
   localStorage.setItem("platformAccount", data.platform_account);
   localStorage.setItem("currentUserUUID", data.uuid);
-  localStorage.setItem("sessionToken", sessionToken);
+  localStorage.setItem("sessionToken", newSession);
 
   alert("登录成功！");
   window.location.href = "frontend/HOME.html";
