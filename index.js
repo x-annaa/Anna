@@ -1,7 +1,7 @@
 // =======================
 // 密码可见切换（修复版）
 // =======================
-document.querySelectorAll(".toggle-password").forEach(btn => {
+document.querySelectorAll(".toggle-password").forEach((btn) => {
   btn.addEventListener("click", () => {
     const targetId = btn.getAttribute("data-target");
     const input = document.getElementById(targetId);
@@ -46,8 +46,10 @@ function generatePlatformAccount() {
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const numbers = "0123456789";
   let acc = "";
-  for (let i = 0; i < 2; i++) acc += letters[Math.floor(Math.random() * letters.length)];
-  for (let i = 0; i < 4; i++) acc += numbers[Math.floor(Math.random() * numbers.length)];
+  for (let i = 0; i < 2; i++)
+    acc += letters[Math.floor(Math.random() * letters.length)];
+  for (let i = 0; i < 4; i++)
+    acc += numbers[Math.floor(Math.random() * numbers.length)];
   return acc;
 }
 
@@ -97,6 +99,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   const platformAccount = generatePlatformAccount();
   const uuid = generateUUID();
 
+  // 插入新用户
   const { data, error } = await supabaseClient
     .from("users")
     .insert({
@@ -116,12 +119,12 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  alert("注册成功，请登录！");
-  showLoginBtn.click(); // 自动切换到登录
+  alert("注册成功！请登录");
+  showLoginBtn.click();
 });
 
 // =======================
-// 登录逻辑 + 单点登录
+// 登录逻辑（带 session_token）
 // =======================
 document.getElementById("loginBtn").addEventListener("click", async () => {
   const username = document.getElementById("loginUsername").value.trim();
@@ -153,10 +156,15 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
 
   // 生成新的 session_token
   const sessionToken = generateUUID();
-  await supabaseClient
+  const { error: updateError } = await supabaseClient
     .from("users")
     .update({ session_token: sessionToken })
     .eq("id", data.id);
+
+  if (updateError) {
+    alert("更新登录状态失败: " + updateError.message);
+    return;
+  }
 
   // 保存到 localStorage
   localStorage.setItem("currentUserId", data.id);
