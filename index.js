@@ -1,17 +1,21 @@
 // =======================
-// 密码可见切换
+// 密码可见切换（修复版）
 // =======================
-window.togglePassword = function (id, el) {
-  const input = document.getElementById(id);
-  if (!input) return;
-  if (input.type === "password") {
-    input.type = "text";
-    el.textContent = "🙈";
-  } else {
-    input.type = "password";
-    el.textContent = "👁️";
-  }
-};
+document.querySelectorAll(".toggle-password").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const targetId = btn.getAttribute("data-target");
+    const input = document.getElementById(targetId);
+    if (!input) return;
+
+    if (input.type === "password") {
+      input.type = "text";
+      btn.textContent = "🙈";
+    } else {
+      input.type = "password";
+      btn.textContent = "👁️";
+    }
+  });
+});
 
 // =======================
 // 登录 / 注册 Tab 切换
@@ -91,9 +95,8 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   }
 
   const platformAccount = generatePlatformAccount();
-  const uuid = generateUUID(); // 自动生成 UUID
+  const uuid = generateUUID();
 
-  // 插入新用户
   const { data, error } = await supabaseClient
     .from("users")
     .insert({
@@ -102,7 +105,8 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
       coins: 0,
       balance: 0,
       platform_account: platformAccount,
-      uuid
+      uuid,
+      session_token: null
     })
     .select()
     .single();
@@ -112,18 +116,12 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  // 保存到 localStorage
-  localStorage.setItem("currentUserId", data.id);
-  localStorage.setItem("currentUser", data.username);
-  localStorage.setItem("platformAccount", data.platform_account);
-  localStorage.setItem("currentUserUUID", data.uuid); // 保存 UUID
-
-  alert("注册成功！");
-  window.location.href = "frontend/HOME.html";
+  alert("注册成功，请登录！");
+  showLoginBtn.click(); // 自动切换到登录
 });
 
 // =======================
-// 登录逻辑
+// 登录逻辑 + 单点登录
 // =======================
 document.getElementById("loginBtn").addEventListener("click", async () => {
   const username = document.getElementById("loginUsername").value.trim();
@@ -153,11 +151,19 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     return;
   }
 
+  // 生成新的 session_token
+  const sessionToken = generateUUID();
+  await supabaseClient
+    .from("users")
+    .update({ session_token: sessionToken })
+    .eq("id", data.id);
+
   // 保存到 localStorage
   localStorage.setItem("currentUserId", data.id);
   localStorage.setItem("currentUser", data.username);
   localStorage.setItem("platformAccount", data.platform_account);
-  localStorage.setItem("currentUserUUID", data.uuid); // 保存 UUID
+  localStorage.setItem("currentUserUUID", data.uuid);
+  localStorage.setItem("sessionToken", sessionToken);
 
   alert("登录成功！");
   window.location.href = "frontend/HOME.html";
