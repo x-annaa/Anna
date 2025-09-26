@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>HOME</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="../index.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="home.css" />
 
   <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -12,10 +12,10 @@
 </head>
 <body>
   <div class="container">
-    <h1>欢迎, <span id="username"></span></h1>
-    <p>平台账号: <span id="platformAccount"></span></p>
-    <p>UUID: <span id="userUUID"></span></p>
-    <button id="logoutBtn" class="primary-btn">退出登录</button>
+    <h1>Welcome, <span id="username"></span> 🎉</h1>
+    <p>平台账号：<span id="platformAccount"></span></p>
+    <p>UUID：<span id="uuid"></span></p>
+    <button id="logoutBtn">退出登录</button>
   </div>
 
   <script>
@@ -50,10 +50,10 @@
         return;
       }
 
-      // 渲染页面
+      // 显示用户信息
       document.getElementById("username").textContent = username;
       document.getElementById("platformAccount").textContent = platformAccount;
-      document.getElementById("userUUID").textContent = uuid;
+      document.getElementById("uuid").textContent = uuid;
     }
 
     function logout() {
@@ -63,7 +63,6 @@
 
     document.getElementById("logoutBtn").addEventListener("click", logout);
 
-    // 页面加载时执行
     checkSession();
   </script>
 </body>
