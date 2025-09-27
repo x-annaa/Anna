@@ -158,7 +158,14 @@ async function updateRoundProgress() {
     .from("orders")
     .select("id, status")
     .eq("user_id", window.currentUserId)
-    .eq("round_id", window.currentRoundId);
+
+  if (window.currentRoundId) {
+    query = query.eq("round_id", window.currentRoundId);
+  } else {
+    query = query.is("round_id", null);
+  }
+
+  const { data: orders } = await query;
 
   const completed = orders?.filter(o => o.status === "completed").length || 0;
   const el = document.getElementById("roundProgress");
