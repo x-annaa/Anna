@@ -193,16 +193,25 @@ function renderLastOrder(order, coinsRaw) {
   const price = Number(order.total_price) || 0;
   const profit = Number(order.profit) || 0; 
   const profitRatio = Number(order.products?.profit) || 0; 
+  const productUrl = order.products?.url || ""; // 新增 url
 
+  // 左右布局
   let html = `
-    <h3>✅ 最近一次订单</h3>
-    <p>商品：${order.products?.name || "未知商品"}</p>
-    <p>价格：¥${price.toFixed(2)}</p>
-    <p>利润率：${profitRatio}</p>
-    <p>收入：+¥${profit.toFixed(2)}</p>
-    <p>状态：${order.status === "completed" ? "✅ 已完成" : "⏳ 待完成"}</p>
-    <p>时间：${new Date(order.created_at).toLocaleString()}</p>
-    <p>当前金币：¥${coins.toFixed(2)}</p>
+    <div style="display:flex; align-items:flex-start; gap:16px;">
+      <div style="flex-shrink:0;">
+        ${productUrl ? `<img src="${productUrl}" alt="${order.products?.name || ''}" style="width:120px; height:120px; object-fit:cover; border-radius:8px;">` : ''}
+      </div>
+      <div>
+        <h3>✅ 最近一次订单</h3>
+        <p>商品：${order.products?.name || "未知商品"}</p>
+        <p>价格：¥${price.toFixed(2)}</p>
+        <p>利润率：${profitRatio}</p>
+        <p>收入：+¥${profit.toFixed(2)}</p>
+        <p>状态：${order.status === "completed" ? "✅ 已完成" : "⏳ 待完成"}</p>
+        <p>时间：${new Date(order.created_at).toLocaleString()}</p>
+        <p>当前金币：¥${coins.toFixed(2)}</p>
+      </div>
+    </div>
   `;
 
   if (order.status === "pending" && coins >= 0) {
