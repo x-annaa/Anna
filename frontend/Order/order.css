@@ -6,6 +6,48 @@ body {
   color: #333;
 }
 
+h2, h3 {
+  margin: 10px 0;
+  font-weight: 600;
+}
+
+.page {
+  display: none;
+  padding: 20px;
+}
+
+.page.active {
+  display: block;
+}
+
+/* ========= 底部导航 ========= */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  border-top: 1px solid #ddd;
+  background: #fff;
+  padding: 8px 0;
+}
+
+.bottom-nav button {
+  flex: 1;
+  border: none;
+  background: none;
+  padding: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.bottom-nav button.active {
+  color: #1976d2;
+  font-weight: bold;
+}
+
 /* ========= 订单中心 ========= */
 .order-header {
   display: flex;
@@ -66,49 +108,6 @@ body {
   font-size: 15px;
   color: #555;
 }
-
-h2, h3 {
-  margin: 10px 0;
-  font-weight: 600;
-}
-
-.page {
-  display: none;
-  padding: 20px;
-}
-
-.page.active {
-  display: block;
-}
-
-/* ========= 底部导航 ========= */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  display: flex;
-  justify-content: space-around;
-  border-top: 1px solid #ddd;
-  background: #fff;
-  padding: 8px 0;
-}
-
-.bottom-nav button {
-  flex: 1;
-  border: none;
-  background: none;
-  padding: 8px;
-  font-size: 15px;
-  cursor: pointer;
-  transition: color 0.3s;
-}
-
-.bottom-nav button.active {
-  color: #1976d2;
-  font-weight: bold;
-}
-
 
 /* ========= 最近订单历史 ========= */
 .order-history {
@@ -278,4 +277,34 @@ button:disabled {
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.9); }
   to { opacity: 1; transform: scale(1); }
+}
+
+/* 横排切换按钮 */
+.exchange-toggle {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #1976d2;
+}
+
+.exchange-btn {
+  flex: 1;
+  padding: 10px 0;
+  border: none;
+  background-color: #e0e0e0;
+  color: #555;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.exchange-btn.active {
+  background-color: #1976d2;
+  color: #fff;
+}
+
+.exchange-btn:not(.active):hover {
+  background-color: #bdbdbd;
 }
