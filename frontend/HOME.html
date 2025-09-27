@@ -63,10 +63,14 @@
     <div class="order-actions">
       <button id="autoOrderBtn">🎲 一键刷单</button>
       <p id="cooldownDisplay" style="color:red; font-weight:bold;"></p>
-    </div>
-
-    <div id="matchingGif" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:999;">
-      <img src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/Qbox.gif" alt="正在匹配..." style="width:150px; height:150px;">
+      
+      <!-- 匹配动图 -->
+      <img
+        id="matchingGif"
+        src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/Qbox.gif" 
+        alt="正在匹配..."
+        style="width:150px; height:150px; display:none; margin-top:10px;"
+      >
     </div>
 
     <div id="orderResult" class="order-result"></div>
