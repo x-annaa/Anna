@@ -78,8 +78,14 @@ h2, h3 {
 }
 
 .order-actions {
-  text-align: center;
+  display: flex;                /* 横向布局 */
+  justify-content: space-between; /* 左右分散 */
+  align-items: center;          /* 垂直居中 */
+  background: #4caf50;          /* 绿色背景 */
+  padding: 15px;
+  border-radius: 12px;
   margin: 20px 0;
+  color: white;                 /* 内部文字也变白 */
 }
 
 .order-actions button {
@@ -92,6 +98,11 @@ h2, h3 {
   cursor: pointer;
   transition: 0.3s;
   margin: 0 6px;
+}
+
+.order-actions img {
+  width: 150px;
+  height: 150px;
 }
 
 .order-actions button:hover {
