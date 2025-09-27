@@ -51,9 +51,9 @@ h2, h3 {
 /* ========= 订单中心 ========= */
 .order-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: end;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 0px;
 }
 
 .coins-box {
