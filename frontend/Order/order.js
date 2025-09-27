@@ -162,7 +162,7 @@ async function updateRoundProgress() {
 
   const completed = orders?.filter(o => o.status === "completed").length || 0;
   const el = document.getElementById("roundProgress");
-  if (el) el.textContent = `${completed} / ${window.ORDERS_PER_ROUND}`;
+  if (el) el.textContent = `Round：${completed} / ${window.ORDERS_PER_ROUND}`;
 }
 
 /* ====================== 8.渲染最近订单 ====================== */
