@@ -93,21 +93,51 @@ h2, h3 {
   justify-content: space-between;
   align-items: center;
 
-  /* 🔹玻璃质感背景 */
-  background: linear-gradient(135deg, rgba(0, 123, 255, 0.25), rgba(0, 255, 255, 0.15));
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  /* 🌈 动态渐变背景 (流动感) */
+  background: linear-gradient(135deg, rgba(0, 183, 255, 0.3), rgba(0, 255, 200, 0.25), rgba(100, 100, 255, 0.2));
+  background-size: 400% 400%;
+  animation: gradientFlow 8s ease infinite;
 
-  /* 🔹立体边框和阴影 */
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  /* 玻璃毛玻璃 */
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 
-  padding: 15px;
-  border-radius: 16px;
+  /* 边框 + 发光 */
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 20px rgba(0, 200, 255, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.2);
+
+  padding: 20px;
+  border-radius: 20px;
   margin: 20px 0;
-  color: white;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
 }
 
+/* 🌟 内部动态光效 (扫光) */
+.order-actions::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+  animation: shine 6s linear infinite;
+}
+
+/* 渐变流动动画 */
+@keyframes gradientFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* 光点扫动动画 */
+@keyframes shine {
+  0% { transform: translateX(-30%) translateY(-30%) rotate(0deg); }
+  100% { transform: translateX(30%) translateY(30%) rotate(360deg); }
+}
 
 .order-actions button {
   padding: 10px 20px;
