@@ -86,16 +86,28 @@ h2, h3 {
   background: #388e3c;
 }
 
+
+/* 按钮容器 */
 .order-actions {
-  display: flex;                /* 横向布局 */
-  justify-content: space-between; /* 左右分散 */
-  align-items: center;          /* 垂直居中 */
-  background: #4caf50;          /* 绿色背景 */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  /* 🔹玻璃质感背景 */
+  background: linear-gradient(135deg, rgba(0, 123, 255, 0.25), rgba(0, 255, 255, 0.15));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  /* 🔹立体边框和阴影 */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+
   padding: 15px;
-  border-radius: 12px;
+  border-radius: 16px;
   margin: 20px 0;
-  color: white;                 /* 内部文字也变白 */
+  color: white;
 }
+
 
 .order-actions button {
   padding: 10px 20px;
