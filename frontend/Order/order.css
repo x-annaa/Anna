@@ -65,18 +65,22 @@ h2, h3 {
 /* ========= 按钮容器 ========= */
 .order-actions {
   display: flex;
-  flex-direction: column; /* 整体竖排 */
-  align-items: center;    /* 居中 */
+  justify-content: space-between;
+  align-items: center;
   background: linear-gradient(135deg, #f9f9f9, #efefef);
   padding: 20px;
   border-radius: 16px;
-  margin: 20px 0;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-  font-family: "Helvetica Neue", "Arial", sans-serif;
-  animation: fadeInUp 0.8s ease, floaty 6s ease-in-out infinite;
   position: relative;
-  overflow: hidden;
 }
+
+/* 左侧按钮+进度堆叠 */
+.action-left {
+  display: flex;
+  flex-direction: column;  /* 上下排列 */
+  align-items: flex-start; /* 靠左 */
+}
+
 
 /* ✨ 光效扫过 */
 .order-actions::before {
