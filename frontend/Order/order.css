@@ -309,9 +309,8 @@ button:disabled {
   background-color: #bdbdbd;
 }
 
-roundProgress {
+.roundProgress {
   margin-bottom: 2px;
   ont-weight: bold;
   color: #3100f4;
 }
-
