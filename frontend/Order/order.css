@@ -93,54 +93,122 @@ h2, h3 {
   justify-content: space-between;
   align-items: center;
 
-  /* ☕ 咖啡拿铁渐变背景 */
-  background: linear-gradient(135deg, #6f4e37, #c19a6b);
+  /* 🖤 高级灰白背景 + 微渐变 */
+  background: linear-gradient(135deg, #f9f9f9, #efefef);
   padding: 20px;
   border-radius: 16px;
   margin: 20px 0;
 
-  /* 木质柔和阴影 */
-  box-shadow: 0 6px 12px rgba(80, 50, 20, 0.4);
+  /* 柔和投影，像橱窗展示 */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 
-  color: #f5f2e7;  /* 奶油色文字 */
-  font-family: "Georgia", "Times New Roman", serif;
+  color: #333;
+  font-family: "Helvetica Neue", "Arial", sans-serif;
+
+  /* 🎞️ 动画：淡入 + 微浮动 */
+  animation: fadeInUp 0.8s ease, floaty 6s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
 }
 
-/* 🍪 咖啡风按钮 */
+/* ✨ 高级光效扫过 */
+.order-actions::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.4) 20%,
+    rgba(255, 255, 255, 0) 60%
+  );
+  transform: rotate(25deg);
+  animation: shine 8s infinite;
+}
+
+/* 👔 按钮 – 高级感 + 微交互 */
 .order-actions button {
-  padding: 12px 24px;
+  padding: 12px 28px;
   border: none;
-  border-radius: 25px;
-  background: linear-gradient(145deg, #8b5e3c, #d2b48c); /* 深咖 → 拿铁 */
-  color: #fffaf0;
-  font-size: 16px;
-  font-weight: bold;
+  border-radius: 30px;
+  background: linear-gradient(145deg, #111, #444);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   margin: 0 6px;
 
-  box-shadow: 0 4px 6px rgba(70, 40, 20, 0.4);
+  letter-spacing: 1px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+
+  /* 初始状态：轻微浮动 */
+  animation: buttonFloat 4s ease-in-out infinite;
 }
 
-/* 🍫 按钮悬停：更亮，像打上光 */
 .order-actions button:hover {
-  background: linear-gradient(145deg, #a67b5b, #deb887);
-  transform: scale(1.05);
+  background: linear-gradient(145deg, #222, #666);
+  transform: scale(1.07);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
 }
 
-/* ☕ 按下：微缩，像咖啡豆 */
 .order-actions button:active {
   transform: scale(0.95);
-  box-shadow: 0 2px 4px rgba(60, 30, 10, 0.3);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
-/* 🥛 动图加圆角奶油框 */
+/* 📸 商品展示图风格 + 动画 */
 .order-actions img {
   width: 150px;
   height: 150px;
-  border-radius: 16px;
-  border: 3px solid #fff8dc; /* 奶油白 */
-  box-shadow: 0 4px 10px rgba(80, 50, 20, 0.4);
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  object-fit: cover;
+
+  /* 图片轻微缩放呼吸感 */
+  animation: imgBreath 5s ease-in-out infinite;
+}
+
+/* ================= 动画关键帧 ================= */
+
+/* 整体面板入场 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 整体微浮动 */
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* 光效扫过 */
+@keyframes shine {
+  0% { transform: translateX(-100%) rotate(25deg); }
+  100% { transform: translateX(100%) rotate(25deg); }
+}
+
+/* 按钮轻微浮动 */
+@keyframes buttonFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* 图片呼吸感缩放 */
+@keyframes imgBreath {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
 }
 
 /* -- */
