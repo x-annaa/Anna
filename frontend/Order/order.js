@@ -682,7 +682,7 @@ async function loadLastOrder() {
 
   const { data: orders } = await supabaseClient
     .from("orders")
-    .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
+    .select(`id, total_price, profit, status, created_at, products ( name, profit, url )`)
     .eq("user_id", window.currentUserId)
     .order("created_at", { ascending: false })
     .limit(1);
