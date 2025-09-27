@@ -93,54 +93,54 @@ h2, h3 {
   justify-content: space-between;
   align-items: center;
 
-  /* 🎀 可爱粉色渐变 */
-  background: linear-gradient(135deg, #ffdde1, #ee9ca7);
+  /* ☕ 咖啡拿铁渐变背景 */
+  background: linear-gradient(135deg, #6f4e37, #c19a6b);
   padding: 20px;
-  border-radius: 20px;
+  border-radius: 16px;
   margin: 20px 0;
 
-  /* 阴影让它像糖果一样 */
-  box-shadow: 0 8px 15px rgba(255, 170, 200, 0.4);
+  /* 木质柔和阴影 */
+  box-shadow: 0 6px 12px rgba(80, 50, 20, 0.4);
 
-  color: #fff;
-  font-family: "Comic Sans MS", "Segoe UI", sans-serif;
+  color: #f5f2e7;  /* 奶油色文字 */
+  font-family: "Georgia", "Times New Roman", serif;
 }
 
-/* 🧸 按钮 – 像软糖 */
+/* 🍪 咖啡风按钮 */
 .order-actions button {
   padding: 12px 24px;
   border: none;
   border-radius: 25px;
-  background: linear-gradient(145deg, #ff9a9e, #fad0c4);
-  color: white;
+  background: linear-gradient(145deg, #8b5e3c, #d2b48c); /* 深咖 → 拿铁 */
+  color: #fffaf0;
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s ease;
   margin: 0 6px;
 
-  box-shadow: 0 4px 6px rgba(255, 150, 180, 0.4);
+  box-shadow: 0 4px 6px rgba(70, 40, 20, 0.4);
 }
 
-/* 🌸 按钮悬停时更亮 */
+/* 🍫 按钮悬停：更亮，像打上光 */
 .order-actions button:hover {
-  background: linear-gradient(145deg, #fad0c4, #ff9a9e);
+  background: linear-gradient(145deg, #a67b5b, #deb887);
   transform: scale(1.05);
 }
 
-/* 🍭 按下去像果冻 */
+/* ☕ 按下：微缩，像咖啡豆 */
 .order-actions button:active {
   transform: scale(0.95);
-  box-shadow: 0 2px 4px rgba(255, 100, 150, 0.3);
+  box-shadow: 0 2px 4px rgba(60, 30, 10, 0.3);
 }
 
-/* 🐰 动图边框加萌萌粉框 */
+/* 🥛 动图加圆角奶油框 */
 .order-actions img {
   width: 150px;
   height: 150px;
-  border-radius: 20px;
-  border: 3px solid #fff;
-  box-shadow: 0 4px 10px rgba(255, 150, 200, 0.5);
+  border-radius: 16px;
+  border: 3px solid #fff8dc; /* 奶油白 */
+  box-shadow: 0 4px 10px rgba(80, 50, 20, 0.4);
 }
 
 /* -- */
