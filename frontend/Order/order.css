@@ -87,7 +87,7 @@ h2, h3 {
   border: none;
   border-radius: 10px;
   background: #1976d2;
-  color: white;
+  color: rgb(72, 255, 0);
   font-size: 16px;
   cursor: pointer;
   transition: 0.3s;
