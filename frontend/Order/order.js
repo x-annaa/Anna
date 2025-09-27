@@ -193,15 +193,13 @@ function renderLastOrder(order, coinsRaw) {
   const price = Number(order.total_price) || 0;
   const profit = Number(order.profit) || 0; 
   const profitRatio = Number(order.products?.profit) || 0; 
-  const productUrl = order.products?.url || ""; // 新增 url
+  const productUrl = order.products?.url || "";
 
-  // 左右布局
+  // 构建 HTML，左边图片，右边文字
   let html = `
-    <div style="display:flex; align-items:flex-start; gap:16px;">
-      <div style="flex-shrink:0;">
-        ${productUrl ? `<img src="${productUrl}" alt="${order.products?.name || ''}" style="width:120px; height:120px; object-fit:cover; border-radius:8px;">` : ''}
-      </div>
-      <div>
+    <div style="display:flex; align-items:center; gap:20px;">
+      ${productUrl ? `<img src="${productUrl}" alt="${order.products?.name || ''}">` : ''}
+      <div class="order-info">
         <h3>✅ 最近一次订单</h3>
         <p>商品：${order.products?.name || "未知商品"}</p>
         <p>价格：¥${price.toFixed(2)}</p>
@@ -210,19 +208,15 @@ function renderLastOrder(order, coinsRaw) {
         <p>状态：${order.status === "completed" ? "✅ 已完成" : "⏳ 待完成"}</p>
         <p>时间：${new Date(order.created_at).toLocaleString()}</p>
         <p>当前金币：¥${coins.toFixed(2)}</p>
+        ${order.status === "pending" && coins >= 0 ? '<button id="completeOrderBtn">完成订单</button>' : ''}
+        ${coins < 0 ? `<p style="color:red;">⚠️ 金币为负，欠款 ¥${Math.abs(coins).toFixed(2)}</p>` : ''}
       </div>
     </div>
   `;
 
-  if (order.status === "pending" && coins >= 0) {
-    html += `<button id="completeOrderBtn">完成订单</button>`;
-  }
-  if (coins < 0) {
-    html += `<p style="color:red;">⚠️ 金币为负，欠款 ¥${Math.abs(coins).toFixed(2)}</p>`;
-  }
-
   el.innerHTML = html;
 
+  // 给“完成订单”按钮绑定事件
   const compBtn = document.getElementById("completeOrderBtn");
   if (compBtn) {
     compBtn.addEventListener("click", async () => {
