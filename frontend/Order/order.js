@@ -121,31 +121,33 @@ async function getRandomProduct() {
   return products[Math.floor(Math.random() * products.length)];
 }
 
-/* ====================== 6.检查冷却 ====================== */
-async function checkOrderCooldown() {
-  // 使用 userId，而不是 UUID
-  if (!window.currentUserId) return { allowed: true, next_allowed: null };
-
-  try {
-    // 调用 RPC 函数时使用 p_user_id 参数
-    const { data, error } = await supabaseClient
-      .rpc("check_user_order_cooldown", { p_user_id: Number(window.currentUserId) });
-
-    if (error) throw error;
-
-    // 没有记录时，允许下单
-    if (!data?.length) return { allowed: true, next_allowed: null };
-
-    const row = data[0];
-    return { allowed: row.allowed, next_allowed: row.next_allowed };
-
-  } catch (e) {
-    console.error("检查冷却失败", e);
-    // 出错时也默认允许下单，避免阻塞
-    return { allowed: true, next_allowed: null };
+/* ====================== 6+.UUID 兼容方法 ====================== */
+function generateUUID() {
+  if (crypto.randomUUID) {
+    return crypto.randomUUID(); // ✅ 新浏览器支持
+  } else {
+    // ✅ 旧浏览器 fallback：UUID v4 简单实现
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      const r = Math.random() * 16 | 0;
+      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
   }
 }
 
+/* ====================== 6.检查冷却 ====================== */
+function isRoundExpired() {
+  if (!window.roundStartTime) return true;
+  return (Date.now() - Number(window.roundStartTime)) > window.ROUND_DURATION;
+}
+
+function startNewRound() {
+  const uuid = generateUUID(); // ✅ 使用兼容 UUID
+  window.currentRoundId = uuid;
+  window.roundStartTime = Date.now();
+  localStorage.setItem("currentRoundId", uuid);
+  localStorage.setItem("roundStartTime", window.roundStartTime);
+}
 
 /* ====================== 7.本轮完成订单数显示 ====================== */
 async function updateRoundProgress() {
