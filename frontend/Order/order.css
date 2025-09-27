@@ -77,108 +77,36 @@ h2, h3 {
   background: #388e3c;
 }
 
-/* ========= 订单操作区域 ========= */
 .order-actions {
-  display: flex;
-  flex-direction: column;  /* 上下布局 */
-  align-items: center;
-  background: linear-gradient(135deg, #f9f9f9, #efefef);
-  padding: 20px;
-  border-radius: 16px;
+  text-align: center;
   margin: 20px 0;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-  position: relative;
-  overflow: hidden;
-  font-family: "Helvetica Neue", "Arial", sans-serif;
-  animation: fadeInUp 0.8s ease, floaty 6s ease-in-out infinite;
 }
 
-/* 光效扫过 */
-.order-actions::before {
-  content: "";
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    120deg,
-    rgba(255, 255, 255, 0.1) 0%,
-    rgba(255, 255, 255, 0.4) 20%,
-    rgba(255, 255, 255, 0) 60%
-  );
-  transform: rotate(25deg);
-  animation: shine 8s infinite;
-}
-
-/* roundProgress 在最上方 */
-#roundProgress {
-  margin-bottom: 12px;
-  font-weight: bold;
-  font-size: 16px;
-  color: #1976d2;
-  text-align: center;
-}
-
-/* 横排：左动图，右按钮 */
-.action-row {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-/* 匹配动图在左 */
-.action-row img {
-  width: 150px;
-  height: 150px;
-  border-radius: 10px;
-  border: 1px solid #ddd;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-  object-fit: cover;
-  animation: imgBreath 5s ease-in-out infinite;
-  display: block;
-}
-
-/* 按钮在右 */
 .order-actions button {
-  padding: 12px 28px;
+  padding: 10px 20px;
   border: none;
-  border-radius: 30px;
-  background: linear-gradient(145deg, #111, #444);
-  color: #fff;
-  font-size: 15px;
-  font-weight: 600;
+  border-radius: 10px;
+  background: #1976d2;
+  color: white;
+  font-size: 16px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  letter-spacing: 1px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-  animation: buttonFloat 4s ease-in-out infinite;
+  transition: 0.3s;
+  margin: 0 6px;
 }
 
-.order-actions button:hover:not(:disabled) {
-  background: linear-gradient(145deg, #222, #666);
-  transform: scale(1.07);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+.order-actions button:hover {
+  background: #1565c0;
 }
 
-.order-actions button:active:not(:disabled) {
-  transform: scale(0.95);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-}
-
-/* 冷却显示 */
-#cooldownDisplay {
-  margin-top: 10px;
-  color: red;
-  font-weight: bold;
+.order-result {
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #fafafa;
   text-align: center;
-}
-
-/* 按钮不可用状态 */
-.order-actions button:disabled {
-  background: #ccc !important;
-  cursor: not-allowed;
-  opacity: 0.7;
+  font-size: 15px;
+  color: #555;
 }
 
 /* ========= 最近订单历史 ========= */
@@ -215,12 +143,18 @@ h2, h3 {
   border-bottom: none;
 }
 
-/* ========= 通用按钮 & Modal ========= */
+/* ========= 通用按钮 ========= */
 button {
   font-family: inherit;
   outline: none;
 }
 
+button:disabled {
+  background: #ccc !important;
+  cursor: not-allowed;
+}
+
+/* ========= 通用 Modal 样式 ========= */
 .modal {
   display: none;
   position: fixed;
@@ -229,6 +163,7 @@ button {
   left: 0;
   width: 100%;
   height: 100%;
+
   background-color: rgba(0,0,0,0.5);
   justify-content: center;
   align-items: center;
@@ -243,6 +178,19 @@ button {
   max-width: 90%;
   box-shadow: 0 6px 18px rgba(0,0,0,0.25);
   animation: fadeIn 0.25s ease;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 1.3em;
+  color: #333;
+}
+
+.modal-content p {
+  margin-bottom: 10px;
+  color: #555;
+  font-size: 0.95em;
 }
 
 .modal-content input,
@@ -264,28 +212,69 @@ button {
   box-shadow: 0 0 5px rgba(25,118,210,0.3);
 }
 
-/* ========= 动画关键帧 ========= */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
 }
 
-@keyframes floaty {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+.modal-actions button {
+  flex: 1;
+  padding: 10px 0;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 500;
+  transition: 0.2s;
 }
 
-@keyframes shine {
-  0% { transform: translateX(-100%) rotate(25deg); }
-  100% { transform: translateX(100%) rotate(25deg); }
+/* ========= AddCoins 按钮 ========= */
+#cancelAddCoins {
+  background-color: #e0e0e0;
+  color: #333;
+}
+#cancelAddCoins:hover {
+  background-color: #d5d5d5;
+}
+#confirmAddCoins {
+  background-color: #4caf50;
+  color: white;
+}
+#confirmAddCoins:hover {
+  background-color: #45a049;
 }
 
-@keyframes buttonFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
+/* ========= Balance/Coins 弹窗新增 ========= */
+#exchangeModal h3 {
+  color: #1976d2;
 }
 
-@keyframes imgBreath {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+#exchangeNotice {
+  font-size: 0.85em;
+  color: #d32f2f;
+  margin-top: -8px;
+  margin-bottom: 12px;
+}
+
+#cancelExchange {
+  background-color: #e0e0e0;
+  color: #333;
+}
+#cancelExchange:hover {
+  background-color: #bdbdbd;
+}
+
+#confirmExchange {
+  background-color: #1976d2;
+  color: #fff;
+}
+#confirmExchange:hover {
+  background-color: #1565c0;
+}
+
+/* ========= 弹窗渐显动画 ========= */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
 }
