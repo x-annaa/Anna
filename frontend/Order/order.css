@@ -33,19 +33,28 @@ h2, h3 {
   padding: 8px 0;
 }
 
-.bottom-nav button {
-  flex: 1;
+.order-actions button {
+  padding: 10px 20px;
   border: none;
-  background: none;
-  padding: 8px;
-  font-size: 15px;
+  border-radius: 10px;
+  background: linear-gradient(to bottom, #42a5f5, #1976d2); /* 渐变制造立体感 */
+  color: white;
+  font-size: 16px;
   cursor: pointer;
-  transition: color 0.3s;
+  transition: all 0.2s ease;
+  margin: 0 6px;
+
+  /* 3D 阴影效果 */
+  box-shadow: 0 4px 0 #0d47a1, 0 6px 10px rgba(0, 0, 0, 0.3);
 }
 
-.bottom-nav button.active {
-  color: #1976d2;
-  font-weight: bold;
+.order-actions button:hover {
+  background: linear-gradient(to bottom, #64b5f6, #1e88e5);
+}
+
+.order-actions button:active {
+  transform: translateY(3px); /* 按下去的感觉 */
+  box-shadow: 0 2px 0 #0d47a1, 0 3px 6px rgba(0, 0, 0, 0.2);
 }
 
 /* ========= 订单中心 ========= */
