@@ -465,7 +465,7 @@ async function finalizeMatchedOrder(product) {
         status: "pending",
         round_id: window.currentRoundId,
       })
-      .select(`id, total_price, profit, status, created_at, products ( name, profit )`)
+      .select(`id, total_price, profit, status, created_at, products ( name, profit, url )`) 
       .single();
 
     renderLastOrder(newOrder, tempCoins);
