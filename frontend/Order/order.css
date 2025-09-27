@@ -308,3 +308,10 @@ button:disabled {
 .exchange-btn:not(.active):hover {
   background-color: #bdbdbd;
 }
+
+roundProgress {
+  margin-bottom: 2px;
+  ont-weight: bold;
+  color: #3100f4;
+}
+
