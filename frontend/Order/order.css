@@ -6,48 +6,6 @@ body {
   color: #333;
 }
 
-h2, h3 {
-  margin: 10px 0;
-  font-weight: 600;
-}
-
-.page {
-  display: none;
-  padding: 20px;
-}
-
-.page.active {
-  display: block;
-}
-
-/* ========= 底部导航 ========= */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  display: flex;
-  justify-content: space-around;
-  border-top: 1px solid #ddd;
-  background: #fff;
-  padding: 8px 0;
-}
-
-.bottom-nav button {
-  flex: 1;
-  border: none;
-  background: none;
-  padding: 8px;
-  font-size: 15px;
-  cursor: pointer;
-  transition: color 0.3s;
-}
-
-.bottom-nav button.active {
-  color: #1976d2;
-  font-weight: bold;
-}
-
 /* ========= 订单中心 ========= */
 .order-header {
   display: flex;
@@ -108,6 +66,49 @@ h2, h3 {
   font-size: 15px;
   color: #555;
 }
+
+h2, h3 {
+  margin: 10px 0;
+  font-weight: 600;
+}
+
+.page {
+  display: none;
+  padding: 20px;
+}
+
+.page.active {
+  display: block;
+}
+
+/* ========= 底部导航 ========= */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  border-top: 1px solid #ddd;
+  background: #fff;
+  padding: 8px 0;
+}
+
+.bottom-nav button {
+  flex: 1;
+  border: none;
+  background: none;
+  padding: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.bottom-nav button.active {
+  color: #1976d2;
+  font-weight: bold;
+}
+
 
 /* ========= 最近订单历史 ========= */
 .order-history {
