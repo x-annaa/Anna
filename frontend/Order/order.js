@@ -305,11 +305,11 @@ async function autoOrder() {
       .eq("round_id", window.currentRoundId);
 
     const completedCount = roundOrders?.filter(o => o.status === "completed").length || 0;
+
     if (completedCount >= window.ORDERS_PER_ROUND) {
-      // 直接用 roundStartTime + ROUND_DURATION 计算下一次可下单时间
+      // 直接使用 roundStartTime + ROUND_DURATION 计算下一次可下单时间
       const nextAllowed = Number(window.roundStartTime) + window.ROUND_DURATION;
-        startCooldownTimer(nextAllowed, "本轮已完成全部订单，冷却中，请等待");
-      }
+      startCooldownTimer(nextAllowed, "本轮已完成全部订单，冷却中，请等待");
       alert("本轮已完成全部订单，进入冷却…");
       ordering = false;
       return;
