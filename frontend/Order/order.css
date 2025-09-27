@@ -104,10 +104,46 @@ h2, h3 {
   border: 1px solid #ddd;
   border-radius: 10px;
   background: #fafafa;
-  text-align: center;
+
+  display: flex;           /* 左右布局 */
+  align-items: center;     /* 图片垂直居中 */
+  gap: 20px;               /* 左右间距 */
   font-size: 15px;
   color: #555;
 }
+
+.order-result img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;          /* 防止图片缩小 */
+}
+
+.order-result .order-info {
+  line-height: 1.4;       /* 紧凑行距 */
+}
+
+.order-result .order-info p {
+  margin: 4px 0;          /* 每行文字间距 */
+}
+
+.order-result .order-info button {
+  margin-top: 8px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: none;
+  background-color: #1976d2;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.order-result .order-info button:hover {
+  background-color: #1565c0;
+}
+
 
 /* ========= 最近订单历史 ========= */
 .order-history {
