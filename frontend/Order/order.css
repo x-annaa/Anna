@@ -62,10 +62,10 @@ h2, h3 {
 }
 
 .coins-box button {
-  margin-left: 5px;
+  margin-left: 0px;
   padding: 2px 8px;
   border: none;
-  border-radius: 50%;
+  border-radius: 20%;
   background: #1b76d3;
   color: #fff;
   font-size: 18px;
