@@ -154,23 +154,33 @@ async function updateRoundProgress() {
     await loadRoundConfig();
   }
 
-  const { data: orders } = await supabaseClient
-    .from("orders")
-    .select("id, status")
-    .eq("user_id", window.currentUserId)
+  try {
+    // 构造查询
+    let query = supabaseClient
+      .from("orders")
+      .select("id, status")
+      .eq("user_id", window.currentUserId);
 
-  if (window.currentRoundId) {
-    query = query.eq("round_id", window.currentRoundId);
-  } else {
-    query = query.is("round_id", null);
+    if (window.currentRoundId) {
+      // 有 roundId → 正常匹配
+      query = query.eq("round_id", window.currentRoundId);
+    } else {
+      // 没有 roundId → 查 round_id IS NULL
+      query = query.is("round_id", null);
+    }
+
+    const { data: orders, error } = await query;
+
+    if (error) throw error;
+
+    const completed = orders?.filter(o => o.status === "completed").length || 0;
+    const el = document.getElementById("roundProgress");
+    if (el) el.textContent = `Round：${completed} / ${window.ORDERS_PER_ROUND}`;
+  } catch (e) {
+    console.error("❌ 更新本轮进度失败：", e.message);
   }
-
-  const { data: orders } = await query;
-
-  const completed = orders?.filter(o => o.status === "completed").length || 0;
-  const el = document.getElementById("roundProgress");
-  if (el) el.textContent = `Round：${completed} / ${window.ORDERS_PER_ROUND}`;
 }
+
 
 /* ====================== 8.渲染最近订单 ====================== */
 function renderLastOrder(order, coinsRaw) {
