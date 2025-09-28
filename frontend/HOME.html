@@ -54,24 +54,19 @@
       </div>
     </div>
 
-    <div class="order-actions">
-      <!-- 放在按钮上面 -->
-      <div id="roundProgress" style="margin-bottom: 10px; font-weight: bold;"></div>
-
-      <button id="autoOrderBtn">🎲 一键刷单</button>
-
-      <p id="cooldownDisplay" style="color:red; font-weight:bold;"></p>
-      
-      <!-- 匹配动图 -->
+    <div class="order-status">
+      <div id="roundProgress" class="round-progress"></div>
+      <p id="cooldownDisplay"></p>
       <img
         id="matchingGif"
         src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/Qbox.gif" 
         alt="正在匹配..."
-        style="width:150px; height:150px; display:none; margin-top:10px;"
       >
     </div>
 
-    <div id="orderResult" class="order-result"></div>
+    <div class="order-actions">
+      <button id="autoOrderBtn">🎲 一键刷单</button>
+    </div>
 
     <div class="order-history">
       <h3>🕘 最近订单</h3>
