@@ -80,16 +80,17 @@
   background-color: #bdbdbd;
 }
 
-/* 广告网格 2x2 */
+/* 广告网格 横向4个 */
 .category-ad-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;              /* 横向排列 */
+  justify-content: space-between; /* 四个等距分布 */
   gap: 10px;
+  margin-top: 10px;
 }
 
 .ad-item {
-  width: 100%;
-  aspect-ratio: 1; /* 方形 */
+  width: 23%;                  /* 四个横向等分 */
+  aspect-ratio: 1;             /* 方形 */
   background-color: #f0f0f0;
   border-radius: 12px;
   overflow: hidden;
