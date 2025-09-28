@@ -91,7 +91,7 @@ function animateMarquee() {
   const wrapperWidth = wrapper.offsetWidth;
   const textWidth = marqueeText.offsetWidth;
   let pos = -textWidth; // 初始位置：完全在左边外面
-  const speed = 2; // 每帧移动像素
+  const speed = 8; // 每帧移动像素
 
   function step() {
     pos += speed; // 文字向右移动
