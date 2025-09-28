@@ -64,7 +64,7 @@
 .category-btn {
   padding: 3px 15px;
   border: 1px solid #3b3a3a;
-  border-radius: 8px;
+  border-radius: 5px;
   background-color: #e0e0e0;
   color: #333;
   cursor: pointer;
@@ -92,7 +92,7 @@
   width: 23%;                  /* 四个横向等分 */
   aspect-ratio: 1;             /* 方形 */
   background-color: #f0f0f0;
-  border-radius: 12px;
+  border-radius: 5px;
   overflow: hidden;
   display: flex;
   align-items: center;
