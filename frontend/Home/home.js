@@ -54,9 +54,9 @@ window.logout = async function () {
 // 广告轮播
 // =======================
 const adUrls = [
-  "https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/ad1.png",
-  "https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/ad2.png",
-  "https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/ad3.png"
+  "https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/w1.jpg",
+  "https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/w2.png",
+  "https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/w3.jpg"
 ];
 
 let currentAdIndex = 0;
