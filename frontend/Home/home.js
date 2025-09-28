@@ -107,3 +107,73 @@ function animateMarquee() {
 
 // 等 DOM 加载完再启动动画
 window.addEventListener("load", animateMarquee);
+
+
+// ===== 分类广告切换 =====
+const categoryBtns = document.querySelectorAll(".category-btn");
+const adItems = document.querySelectorAll(".ad-item");
+
+// 示例广告 URL 数据
+const adsData = {
+  phone: [
+    "https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Home%20Photos/p1.avif",
+    "https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Home%20Photos/p1.jpg",
+    "https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Home%20Photos/p2.webp",
+    "https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Home%20Photos/c1.avif"
+  ],
+  clothes: [
+    "https://via.placeholder.com/200x200?text=衣服1",
+    "https://via.placeholder.com/200x200?text=衣服2",
+    "https://via.placeholder.com/200x200?text=衣服3",
+    "https://via.placeholder.com/200x200?text=衣服4"
+  ],
+  car: [
+    "https://via.placeholder.com/200x200?text=汽车1",
+    "https://via.placeholder.com/200x200?text=汽车2",
+    "https://via.placeholder.com/200x200?text=汽车3",
+    "https://via.placeholder.com/200x200?text=汽车4"
+  ],
+  cosmetics: [
+    "https://via.placeholder.com/200x200?text=化妆品1",
+    "https://via.placeholder.com/200x200?text=化妆品2",
+    "https://via.placeholder.com/200x200?text=化妆品3",
+    "https://via.placeholder.com/200x200?text=化妆品4"
+  ],
+  diamond: [
+    "https://via.placeholder.com/200x200?text=钻石1",
+    "https://via.placeholder.com/200x200?text=钻石2",
+    "https://via.placeholder.com/200x200?text=钻石3",
+    "https://via.placeholder.com/200x200?text=钻石4"
+  ]
+};
+
+// 初始显示 phone 分类
+updateAds("phone");
+
+// 点击按钮切换
+categoryBtns.forEach(btn => {
+  btn.addEventListener("click", () => {
+    // 更新按钮样式
+    categoryBtns.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    // 切换广告
+    const category = btn.dataset.category;
+    updateAds(category);
+  });
+});
+
+function updateAds(category) {
+  // 遍历所有 ad-item
+  let idx = 0;
+  adItems.forEach(item => {
+    if (item.dataset.category === category) {
+      item.classList.remove("hidden");
+      item.innerHTML = `<img src="${adsData[category][idx]}" alt="${category}">`;
+      idx++;
+    } else {
+      item.classList.add("hidden");
+      item.innerHTML = "";
+    }
+  });
+}
