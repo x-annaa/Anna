@@ -195,19 +195,16 @@ function renderLastOrder(order, coinsRaw) {
   const profitRatio = Number(order.products?.profit) || 0; 
   const productUrl = order.products?.url || "";
 
-  // 构建 HTML，左边图片，右边文字
+  // 构建 HTML（去掉标题、时间、当前金币）
   let html = `
     <div style="display:flex; align-items:center; gap:20px;">
       ${productUrl ? `<img src="${productUrl}" alt="${order.products?.name || ''}">` : ''}
       <div class="order-info">
-        <h3>✅ 最近一次订单</h3>
         <p>商品：${order.products?.name || "未知商品"}</p>
         <p>价格：¥${price.toFixed(2)}</p>
         <p>利润率：${profitRatio}</p>
         <p>收入：+¥${profit.toFixed(2)}</p>
         <p>状态：${order.status === "completed" ? "✅ 已完成" : "⏳ 待完成"}</p>
-        <p>时间：${new Date(order.created_at).toLocaleString()}</p>
-        <p>当前金币：¥${coins.toFixed(2)}</p>
         ${order.status === "pending" && coins >= 0 ? '<button id="completeOrderBtn">完成订单</button>' : ''}
         ${coins < 0 ? `<p style="color:red;">⚠️ 金币为负，欠款 ¥${Math.abs(coins).toFixed(2)}</p>` : ''}
       </div>
@@ -225,6 +222,7 @@ function renderLastOrder(order, coinsRaw) {
     });
   }
 }
+
 
 /* ====================== 9.完成订单 ====================== */
 async function completeOrder(order, currentCoinsRaw) {
