@@ -7,7 +7,7 @@
 
 .ad-container img {
   width: 100%;            /* 占屏幕 90% */
-  max-width: 400px;      /* 限制最大宽度 */
+  max-width: 100%;      /* 限制最大宽度 */
   height: auto;
   border-radius: 2px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.15);
