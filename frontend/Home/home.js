@@ -79,7 +79,7 @@ showAd(currentAdIndex);
 setInterval(() => {
   currentAdIndex = (currentAdIndex + 1) % adUrls.length;
   showAd(currentAdIndex);
-}, 5000);
+}, 15000);
 
 // =======================
 // 跑马灯动画
