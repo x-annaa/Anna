@@ -49,3 +49,62 @@
   font-weight: 500;
   color: #7b0101;
 }
+
+/* ===== 分类广告选择 ===== */
+.ad-category-container {
+  margin-top: 20px;
+}
+
+.category-buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 12px;
+}
+
+.category-btn {
+  padding: 8px 14px;
+  border: 1px solid #1976d2;
+  border-radius: 8px;
+  background-color: #e0e0e0;
+  color: #333;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.category-btn.active {
+  background-color: #1976d2;
+  color: #fff;
+}
+
+.category-btn:not(.active):hover {
+  background-color: #bdbdbd;
+}
+
+/* 广告网格 2x2 */
+.category-ad-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.ad-item {
+  width: 100%;
+  aspect-ratio: 1; /* 方形 */
+  background-color: #f0f0f0;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.ad-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hidden {
+  display: none;
+}
