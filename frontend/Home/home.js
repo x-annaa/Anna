@@ -80,3 +80,30 @@ setInterval(() => {
   currentAdIndex = (currentAdIndex + 1) % adUrls.length;
   showAd(currentAdIndex);
 }, 5000);
+
+// =======================
+// 跑马灯动画
+// =======================
+const marqueeText = document.querySelector(".marquee-text");
+
+function animateMarquee() {
+  const wrapper = document.querySelector(".marquee-wrapper");
+  const wrapperWidth = wrapper.offsetWidth;
+  const textWidth = marqueeText.offsetWidth;
+  let pos = -textWidth; // 初始位置：完全在左边外面
+  const speed = 2; // 每帧移动像素
+
+  function step() {
+    pos += speed; // 文字向右移动
+    if (pos > wrapperWidth) {
+      pos = -textWidth; // 移动到左侧重新开始
+    }
+    marqueeText.style.transform = `translateX(${pos}px)`;
+    requestAnimationFrame(step);
+  }
+
+  requestAnimationFrame(step);
+}
+
+// 等 DOM 加载完再启动动画
+window.addEventListener("load", animateMarquee);
