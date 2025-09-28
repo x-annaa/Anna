@@ -49,3 +49,35 @@ window.logout = async function () {
   localStorage.clear();
   window.location.href = "../index.html";
 };
+
+
+// =======================
+// 广告轮播
+// =======================
+const adUrls = [
+  "https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/w1.jpg",
+  "https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/w2.png",
+  "https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/w3.jpg"
+];
+
+let currentAdIndex = 0;
+const adImage = document.getElementById("adImage");
+
+function showAd(index) {
+  if (adImage) {
+    adImage.style.opacity = 0; // 先淡出
+    setTimeout(() => {
+      adImage.src = adUrls[index];
+      adImage.style.opacity = 1; // 再淡入
+    }, 300);
+  }
+}
+
+// 初始化显示第一张
+showAd(currentAdIndex);
+
+// 每 5 秒切换
+setInterval(() => {
+  currentAdIndex = (currentAdIndex + 1) % adUrls.length;
+  showAd(currentAdIndex);
+}, 5000);
