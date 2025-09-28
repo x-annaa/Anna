@@ -103,11 +103,6 @@ h2, h3 {
   background: #1565c0;
 }
 
-
-.order-actions button:hover {
-  background: #1565c0;
-}
-
 .order-result {
   margin-top: 20px;
   padding: 15px;
@@ -153,7 +148,6 @@ h2, h3 {
 .order-result .order-info button:hover {
   background-color: #1565c0;
 }
-
 
 /* ========= 最近订单历史 ========= */
 .order-history {
@@ -353,4 +347,33 @@ button:disabled {
 
 .exchange-btn:not(.active):hover {
   background-color: #bdbdbd;
+}
+
+/* ========= 订单状态（Round / 倒计时 / GIF） ========= */
+.order-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0 12px 0;   /* 上下间距 */
+  gap: 6px;                /* 元素之间的紧凑间距 */
+}
+
+.round-progress {
+  font-weight: bold;
+  font-size: 15px;
+  color: #1976d2;
+}
+
+#cooldownDisplay {
+  color: #d32f2f;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+#matchingGif {
+  width: 110px;
+  height: 110px;
+  margin-top: 4px;       /* 和文字距离很小 */
+  display: none;
 }
