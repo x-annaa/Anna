@@ -13,7 +13,7 @@ h2, h3 {
 
 .page {
   display: none;
-  padding: 0px;
+  padding: 20px;
 }
 
 .page.active {
