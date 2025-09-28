@@ -18,11 +18,11 @@
 .marquee-container {
   display: flex;
   align-items: center;
-  margin: 15px auto;
+  margin: 0px auto;
   max-width: 95%;
-  height: 40px;
-  background: #fff8e1;
-  border-radius: 10px;
+  height: 25px;
+  background: #ffffff;
+  border-radius: 4px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
   overflow: hidden;
   padding: 0 10px;
