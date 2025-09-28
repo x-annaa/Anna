@@ -52,17 +52,17 @@
 
 /* ===== 分类广告选择 ===== */
 .ad-category-container {
-  margin-top: 20px;
+  margin-top: 5px;
 }
 
 .category-buttons {
   display: flex;
   justify-content: space-around;
-  margin-bottom: 12px;
+  margin-bottom: 0px;
 }
 
 .category-btn {
-  padding: 8px 14px;
+  padding: 3px 15px;
   border: 1px solid #1976d2;
   border-radius: 8px;
   background-color: #e0e0e0;
