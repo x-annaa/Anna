@@ -78,12 +78,18 @@ h2, h3 {
 }
 
 .order-actions {
-  text-align: center;
+  display: flex;
+  flex-direction: column;   /* 垂直方向排列 */
+  align-items: center;      /* 居中对齐 */
+  justify-content: center;  /* 在容器内部垂直居中 */
   margin: 20px 0;
+  gap: 12px;                /* 每个按钮之间的间距 */
 }
 
 .order-actions button {
-  padding: 10px 20px;
+  width: 80%;               /* 按钮宽度固定占比（自适应屏幕） */
+  max-width: 260px;         /* 限制最大宽度 */
+  padding: 12px 0;
   border: none;
   border-radius: 10px;
   background: #1976d2;
@@ -91,8 +97,12 @@ h2, h3 {
   font-size: 16px;
   cursor: pointer;
   transition: 0.3s;
-  margin: 0 6px;
 }
+
+.order-actions button:hover {
+  background: #1565c0;
+}
+
 
 .order-actions button:hover {
   background: #1565c0;
