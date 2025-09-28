@@ -13,3 +13,39 @@
   box-shadow: 0 4px 10px rgba(0,0,0,0.15);
   transition: opacity 0.5s ease;
 }
+
+/* ========= 广告跑马灯 ========= */
+.marquee-container {
+  display: flex;
+  align-items: center;
+  margin: 15px auto;
+  max-width: 95%;
+  height: 40px;
+  background: #fff8e1;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  overflow: hidden;
+  padding: 0 10px;
+}
+
+.marquee-icon {
+  flex-shrink: 0;       /* 图标固定不动 */
+  font-size: 22px;
+  margin-right: 8px;
+}
+
+.marquee-wrapper {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  height: 100%;
+}
+
+.marquee-text {
+  position: absolute;
+  white-space: nowrap;
+  transform: translateX(100%); /* 初始在右侧外 */
+  font-size: 18px;
+  font-weight: 500;
+  color: #d84315;
+}
