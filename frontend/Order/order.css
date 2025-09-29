@@ -3,11 +3,18 @@ body {
   margin: 0;
   font-family: "Segoe UI", Arial, sans-serif;
   background: 
+    /* 大气泡 */
     radial-gradient(circle at 20% 30%, rgba(255,255,255,0.6) 0px, transparent 40px),
     radial-gradient(circle at 70% 20%, rgba(255,255,255,0.5) 0px, transparent 50px),
     radial-gradient(circle at 40% 70%, rgba(255,255,255,0.4) 0px, transparent 60px),
     radial-gradient(circle at 80% 60%, rgba(255,255,255,0.3) 0px, transparent 40px),
-    linear-gradient(135deg, #a8e6ff, #d0f0ff, #f5f7fa);  /* 渐变天蓝背景 */
+    /* 小气泡 */
+    radial-gradient(circle at 15% 80%, rgba(255,255,255,0.25) 0px, transparent 20px),
+    radial-gradient(circle at 60% 85%, rgba(255,255,255,0.2) 0px, transparent 15px),
+    radial-gradient(circle at 90% 40%, rgba(255,255,255,0.3) 0px, transparent 18px),
+    radial-gradient(circle at 35% 15%, rgba(255,255,255,0.25) 0px, transparent 12px),
+    /* 背景渐变 */
+    linear-gradient(135deg, #a8e6ff, #d0f0ff, #f5f7fa);
   background-repeat: no-repeat;
   background-size: cover;
   min-height: 100vh;
@@ -27,7 +34,6 @@ h2, h3 {
 .page.active {
   display: block;
 }
-
 
 
 /* ========= 底部导航 ========= */
