@@ -6,8 +6,8 @@
 }
 
 .ad-container img {
-  width: 100%;            /* 占屏幕 90% */
-  max-width: 100%;      /* 限制最大宽度 */
+  width: 100%;
+  max-width: 100%;
   height: auto;
   border-radius: 2px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.15);
@@ -18,7 +18,7 @@
 .marquee-container {
   display: flex;
   align-items: center;
-  margin: 0px auto;
+  margin: 0 auto;
   max-width: 100%;
   height: 25px;
   background: #ffffff;
@@ -29,7 +29,7 @@
 }
 
 .marquee-icon {
-  flex-shrink: 0;       /* 图标固定不动 */
+  flex-shrink: 0;       
   font-size: 18px;
   margin-right: 8px;
 }
@@ -44,31 +44,38 @@
 .marquee-text {
   position: absolute;
   white-space: nowrap;
-  transform: translateX(100%); /* 初始在右侧外 */
+  transform: translateX(100%);
   font-size: 18px;
   font-weight: 500;
   color: #7b0101;
 }
 
-/* ===== 分类广告选择 ===== */
+/* ========= 分类广告选择 ========= */
 .ad-category-container {
   margin-top: 10px;
+  width: 100%;
 }
 
 .category-buttons {
   display: flex;
-  justify-content: space-around;
-  margin-bottom: 0px;
+  width: 100%;
 }
 
 .category-btn {
-  padding: 3px 15px;
+  flex: 1;                       /* 平均分布，撑满整行 */
+  margin: 0;                     /* 去掉空隙 */
   border: 1px solid #3b3a3a;
-  border-radius: 5px;
+  border-radius: 0;               /* 去掉圆角，避免中间有缝 */
   background-color: #e0e0e0;
   color: #333;
   cursor: pointer;
+  padding: 8px 0;
+  font-size: 14px;
   transition: 0.2s;
+}
+
+.category-btn + .category-btn {
+  border-left: none;              /* 避免双边框 */
 }
 
 .category-btn.active {
@@ -80,17 +87,18 @@
   background-color: #bdbdbd;
 }
 
-/* 广告网格 横向4个 */
+/* ========= 横向 4 个广告 ========= */
 .category-ad-grid {
-  display: flex;              /* 横向排列 */
-  justify-content: space-between; /* 四个等距分布 */
-  gap: 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
   margin-top: 10px;
 }
 
 .ad-item {
-  width: 23%;                  /* 四个横向等分 */
-  aspect-ratio: 1;             /* 方形 */
+  flex: 1;
+  max-width: 24%;                /* 横排 4 个 */
+  aspect-ratio: 1;               
   background-color: #f0f0f0;
   border-radius: 5px;
   overflow: hidden;
