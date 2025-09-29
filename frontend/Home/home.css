@@ -79,8 +79,8 @@
 }
 
 .category-btn.active {
-  background-color: #424242;
-  color: #fff;
+  background-color: #00a0fd;
+  color: #ffffff;
 }
 
 .category-btn:not(.active):hover {
