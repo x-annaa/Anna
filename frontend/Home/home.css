@@ -50,7 +50,7 @@
   position: absolute;
   white-space: nowrap;
   transform: translateX(100%);    /* 初始在右侧外 */
-  font-size: 18px;                /* 字体大小自由改动都能居中 */
+  font-size: 12px;                /* 字体大小自由改动都能居中 */
   font-weight: 500;
   line-height: 1;                 /* 避免文字上下不齐 */
   color: #7b0101;
