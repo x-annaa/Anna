@@ -70,6 +70,7 @@
 .category-btn {
   flex: 1;                       /* 平均分布，撑满整行 */
   margin: 0;                     /* 去掉空隙 */
+  margin-top: 10px;
   border: 1px solid #ffffff;
   border-radius: 0;               /* 去掉圆角，避免中间有缝 */
   background-color: #ecebeb;
