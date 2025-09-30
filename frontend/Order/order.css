@@ -403,3 +403,17 @@ button:disabled {
   padding: 5px 10px;
   font-size: 16px;
 }
+
+.order-roundandcoldown {
+  margin-top: 10px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #fafafa;
+
+  display: flex;           /* 左右布局 */
+  align-items: center;     /* 图片垂直居中 */
+  gap: 20px;               /* 左右间距 */
+  font-size: 15px;
+  color: #555;
+}
