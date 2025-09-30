@@ -340,3 +340,39 @@ button:disabled {
 .exchange-btn:not(.active):hover {
   background-color: #bdbdbd;
 }
+
+/* ========= 容器变成左右布局 ========= */
+.order-actions {
+  display: flex;
+  align-items: center; /* 垂直居中 */
+  gap: 20px;           /* 左右间距 */
+}
+
+.left-side {
+  display: flex;
+  flex-direction: column; /* 图片上下排列 */
+  align-items: center;
+  gap: 10px;
+}
+
+.right-side {
+  display: flex;
+  flex-direction: column; /* 右侧内容上下排列 */
+  align-items: flex-start; /* 左对齐 */
+  gap: 10px;
+}
+
+/* 控制图片大小 */
+.fixed-img, .matching-gif {
+  width: 150px;
+  height: 150px;
+}
+
+#roundProgress {
+  font-weight: bold;
+}
+
+#cooldownDisplay {
+  color: red;
+  font-weight: bold;
+}
