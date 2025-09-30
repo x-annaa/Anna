@@ -344,16 +344,26 @@ button:disabled {
 /* ========= 容器变成左右布局 ========= */
 .order-actions {
   display: flex;
-  align-items: center;
-  gap: 20px;
+  justify-content: space-between; /* 左右两边分开 */
+  align-items: center;            /* 左右垂直居中 */
+  width: 100%;
+  height: 200px;                  /* 根据需要调整整体高度 */
+  padding: 0 20px;                /* 左右内边距 */
+  box-sizing: border-box;
+  position: relative;
 }
 
+/* 左侧容器 */
 .left-side {
   width: 150px;
   height: 150px;
-  position: relative; /* 为 GIF 的绝对定位提供参考 */
+  position: relative;             /* 为绝对定位提供参考 */
+  display: flex;
+  justify-content: center;        /* 水平居中内容 */
+  align-items: center;            /* 垂直居中内容 */
 }
 
+/* 固定图片和 GIF 同位置 */
 .fixed-img, .matching-gif {
   width: 150px;
   height: 150px;
@@ -366,13 +376,19 @@ button:disabled {
   display: none; /* 默认隐藏 GIF */
 }
 
+/* 右侧容器 */
 .right-side {
+  width: 150px;
+  height: 150px;
+  position: relative;             /* 可以控制右侧内容移动 */
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  justify-content: center;        /* 垂直居中 */
+  align-items: center;            /* 水平居中 */
   gap: 10px;
 }
 
+/* 右侧文本样式 */
 #roundProgress {
   font-weight: bold;
 }
@@ -380,4 +396,10 @@ button:disabled {
 #cooldownDisplay {
   color: red;
   font-weight: bold;
+}
+
+/* 可选：按钮样式 */
+#autoOrderBtn {
+  padding: 5px 10px;
+  font-size: 16px;
 }
