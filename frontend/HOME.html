@@ -22,7 +22,6 @@
 
   <!-- 首页 -->
   <div id="homePage" class="page active">
-    
     <!-- 广告轮播容器 -->
     <div class="ad-container">
       <img id="adImage" src="" alt="广告" />
@@ -36,11 +35,8 @@
       </div>
     </div>
 
-
-
     <!-- 分类广告选择 -->
     <div class="ad-category-container">
-
       <!-- 广告网格 2x2 -->
       <div class="category-ad-grid">
         <div class="ad-item" data-category="phone"></div>
@@ -69,7 +65,7 @@
         <div class="ad-item" data-category="diamond"></div>
       </div>
 
-            <!-- 分类按钮 -->
+      <!-- 分类按钮 -->
       <div class="category-buttons">
         <button class="category-btn active" data-category="phone">Phones</button>
         <button class="category-btn" data-category="clothes">Clothing</button>
@@ -79,7 +75,7 @@
       </div>
     </div>
 
-            <!-- 🏆 排行榜 -->
+    <!-- 🏆 排行榜 -->
     <div class="rank-section">
       <h3>🏆 Ranking list</h3>
       <ul class="rank-list">
@@ -131,16 +127,15 @@
           id="orderUrlImg" 
           src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Home%20Photos/c1.avif" 
           alt="订单图"
-         />
-
-      <!-- 匹配动图 -->
-         <img
-           id="matchingGif"
-           src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/Qbox.gif" 
-           alt="正在匹配..."
-           style="width:150px; height:150px; display:none; margin-top:10px;"
-         >
-        </div>
+        />
+        <!-- 匹配动图 -->
+        <img
+          id="matchingGif"
+          src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/Qbox.gif" 
+          alt="正在匹配..."
+          style="display:none;"
+        >
+      </div>
 
       <!-- 右侧：按钮 + 进度条 -->
       <div class="order-right">
@@ -203,7 +198,7 @@
     </div>
   </div>
 
-  <!-- Logout 确认弹窗 -->
+  <!-- 各种弹窗（提现/充值/密码） -->
   <div id="logoutModal" class="modal">
     <div class="modal-content">
       <p>确定要退出吗？</p>
@@ -212,7 +207,6 @@
     </div>
   </div>
 
-  <!-- 提现弹窗 -->
   <div id="withdrawModal" class="modal">
     <div class="modal-content">
       <h3>提现</h3>
@@ -227,7 +221,6 @@
     </div>
   </div>
 
-  <!-- 设置密码弹窗 -->
   <div id="setPasswordModal" class="modal">
     <div class="modal-content">
       <h3>设置提现密码</h3>
@@ -240,7 +233,6 @@
     </div>
   </div>
 
-  <!-- 更新密码弹窗 -->
   <div id="updatePasswordModal" class="modal">
     <div class="modal-content">
       <h3>更改提现密码</h3>
@@ -254,7 +246,6 @@
     </div>
   </div>
 
-  <!-- 确认提现密码弹窗 -->
   <div id="confirmPwdModal" class="modal">
     <div class="modal-content">
       <h3>输入提现密码</h3>
@@ -266,7 +257,6 @@
     </div>
   </div>
 
-  <!-- 充值弹窗 -->
   <div id="rechargeModal" class="modal">
     <div class="modal-content">
       <h3>充值</h3>
