@@ -410,7 +410,7 @@ button:disabled {
   justify-content: space-between; /* 左右分开 */
   align-items: center;           /* 垂直居中 */
   width: 100%;
-  padding: 10px 15px;            /* 内边距 */
+  padding: 0px 15px;            /* 内边距 */
   margin-bottom: 10px;
   font-family: Arial, sans-serif;
   border: 1px solid #ddd;        /* 边框 */
@@ -421,8 +421,8 @@ button:disabled {
 
 #roundProgress {
   font-weight: bold;
-  font-size: 18px; /* 左边字体大小 */
-  color: #333;
+  font-size: 13px; /* 左边字体大小 */
+  color: #8c8282;
 }
 
 #cooldownDisplay {
