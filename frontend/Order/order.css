@@ -395,6 +395,7 @@ button:disabled {
 
 #cooldownDisplay {
   color: red;
+  margin: 0px;
   font-weight: bold;
 }
 
