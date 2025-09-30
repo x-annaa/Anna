@@ -737,3 +737,20 @@ function setMatchingState(isMatching) {
     btn.textContent = isMatching ? "🎲 正在匹配..." : "🎲 一键刷单";
   }
 }
+
+const orderUrlImg = document.getElementById("orderUrlImg");
+const matchingGif = document.getElementById("matchingGif");
+const autoOrderBtn = document.getElementById("autoOrderBtn");
+
+autoOrderBtn.addEventListener("click", () => {
+  // 点击后隐藏 url 图，显示匹配动图
+  orderUrlImg.style.display = "none";
+  matchingGif.style.display = "block";
+
+  // TODO: 这里接上你的下单逻辑
+  setTimeout(() => {
+    // 模拟完成订单后，恢复显示 url 图
+    matchingGif.style.display = "none";
+    orderUrlImg.style.display = "block";
+  }, 5000); // 5秒后恢复
+});
