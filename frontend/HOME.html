@@ -126,28 +126,29 @@
     <div class="order-actions">
       <!-- 左侧：图片 / 匹配动图 -->
       <div class="order-left">
-        <img id="orderUrlImg" src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Home%20Photos/c1.avif" />
-        <img id="matchingGif" src="matching.gif" alt="匹配中" style="display: none;" />
-      </div>
+        <!-- 默认图 -->
+        <img 
+          id="orderUrlImg" 
+          src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Home%20Photos/c1.avif" 
+          alt="订单图"
+         />
+
+      <!-- 匹配动图 -->
+         <img
+           id="matchingGif"
+           src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/Qbox.gif" 
+           alt="正在匹配..."
+           style="width:150px; height:150px; display:none; margin-top:10px;"
+         >
+        </div>
 
       <!-- 右侧：按钮 + 进度条 -->
       <div class="order-right">
         <button id="autoOrderBtn">一键刷单</button>
         <div id="roundProgress"></div>
       </div>
-    </div> 
-    
-      <!-- 匹配动图 -->
-      <img
-        id="matchingGif"
-        src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/Qbox.gif" 
-        alt="正在匹配..."
-        style="width:150px; height:150px; display:none; margin-top:10px;"
-      >
     </div>
-
-    <div id="orderResult" class="order-result"></div>
-
+    
     <div class="order-history">
       <h3>🕘 最近订单</h3>
       <ul id="recentOrders">
