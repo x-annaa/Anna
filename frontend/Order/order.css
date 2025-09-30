@@ -410,8 +410,13 @@ button:disabled {
   justify-content: space-between; /* 左右分开 */
   align-items: center;           /* 垂直居中 */
   width: 100%;
-  font-family: Arial, sans-serif; /* 可选字体 */
+  padding: 10px 15px;            /* 内边距 */
   margin-bottom: 10px;
+  font-family: Arial, sans-serif;
+  border: 1px solid #ddd;        /* 边框 */
+  border-radius: 10px;           /* 圆角 */
+  background-color: #fafafa;     /* 背景色 */
+  box-sizing: border-box;
 }
 
 #roundProgress {
