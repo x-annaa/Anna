@@ -344,28 +344,33 @@ button:disabled {
 /* ========= 容器变成左右布局 ========= */
 .order-actions {
   display: flex;
-  align-items: center; /* 垂直居中 */
-  gap: 20px;           /* 左右间距 */
+  align-items: center;
+  gap: 20px;
 }
 
 .left-side {
-  display: flex;
-  flex-direction: column; /* 图片上下排列 */
-  align-items: center;
-  gap: 10px;
+  width: 150px;
+  height: 150px;
+  position: relative; /* 为 GIF 的绝对定位提供参考 */
+}
+
+.fixed-img, .matching-gif {
+  width: 150px;
+  height: 150px;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.matching-gif {
+  display: none; /* 默认隐藏 GIF */
 }
 
 .right-side {
   display: flex;
-  flex-direction: column; /* 右侧内容上下排列 */
-  align-items: flex-start; /* 左对齐 */
+  flex-direction: column;
+  align-items: flex-start;
   gap: 10px;
-}
-
-/* 控制图片大小 */
-.fixed-img, .matching-gif {
-  width: 150px;
-  height: 150px;
 }
 
 #roundProgress {
