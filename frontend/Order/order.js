@@ -59,7 +59,7 @@ function setOrderBtnDisabled(disabled, reason = "", cooldownText = "") {
   if (btn) {
     btn.disabled = disabled;
     btn.title = reason || "";
-    btn.textContent = disabled ? `🎲 一键刷单（不可用）` : "🎲 一键刷单";
+    btn.textContent = disabled ? `Order` : "Order";
   }
   const cdEl = document.getElementById("cooldownDisplay");
   if (cdEl) cdEl.textContent = cooldownText;
