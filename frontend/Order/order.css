@@ -30,11 +30,9 @@ h2, h3 {
   display: none;
   padding: 20px;
 }
-
 .page.active {
   display: block;
 }
-
 
 /* ========= 底部导航 ========= */
 .bottom-nav {
@@ -48,7 +46,6 @@ h2, h3 {
   background: #fff;
   padding: 8px 0;
 }
-
 .bottom-nav button {
   flex: 1;
   border: none;
@@ -58,7 +55,6 @@ h2, h3 {
   cursor: pointer;
   transition: color 0.3s;
 }
-
 .bottom-nav button.active {
   color: #1976d2;
   font-weight: bold;
@@ -71,12 +67,10 @@ h2, h3 {
   align-items: center;
   margin-bottom: 0px;
 }
-
 .coins-box {
   font-weight: bold;
   color: #0c6f23;
 }
-
 .coins-box button {
   margin-left: 5px;
   padding: 0px 6px;
@@ -88,21 +82,20 @@ h2, h3 {
   cursor: pointer;
   transition: 0.3s;
 }
-
 .coins-box button:hover {
   background: #388e3c;
 }
 
-/* ========= 按钮和GIF ========= */
+/* ========= 优化后的订单操作区 ========= */
 .order-actions {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  margin-top: 15px;
-  width: 100%;
+  align-items: center;
+  margin: 20px 0;
+  gap: 20px;
 }
-
-.order-left, .order-right {
+.order-left,
+.order-right {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -110,43 +103,67 @@ h2, h3 {
   justify-content: center;
 }
 
+/* 左侧图 */
 .order-left img {
   max-width: 100%;
   height: auto;
   border-radius: 10px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
 }
 
+/* 右侧按钮 */
+.order-right button {
+  width: 80%;
+  max-width: 240px;
+  padding: 12px 0;
+  border: none;
+  border-radius: 10px;
+  background: #1976d2;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+  margin-bottom: 12px;
+}
+.order-right button:hover {
+  background: #1565c0;
+}
 
+/* roundProgress 占位 */
+#roundProgress {
+  width: 100%;
+  max-width: 240px;
+  text-align: center;
+  font-size: 14px;
+  color: #1976d2;
+}
+
+/* ========= 匹配结果 ========= */
 .order-result {
   margin-top: 20px;
   padding: 15px;
   border: 1px solid #ddd;
   border-radius: 10px;
   background: #fafafa;
-
-  display: flex;           /* 左右布局 */
-  align-items: center;     /* 图片垂直居中 */
-  gap: 20px;               /* 左右间距 */
+  display: flex;
+  align-items: center;
+  gap: 20px;
   font-size: 15px;
   color: #555;
 }
-
 .order-result img {
   width: 120px;
   height: 120px;
   object-fit: cover;
   border-radius: 8px;
-  flex-shrink: 0;          /* 防止图片缩小 */
+  flex-shrink: 0;
 }
-
 .order-result .order-info {
-  line-height: 1.4;       /* 紧凑行距 */
+  line-height: 1.4;
 }
-
 .order-result .order-info p {
-  margin: 4px 0;          /* 每行文字间距 */
+  margin: 4px 0;
 }
-
 .order-result .order-info button {
   margin-top: 8px;
   padding: 6px 12px;
@@ -158,42 +175,35 @@ h2, h3 {
   font-size: 14px;
   transition: 0.2s;
 }
-
 .order-result .order-info button:hover {
   background-color: #1565c0;
 }
-
 
 /* ========= 最近订单历史 ========= */
 .order-history {
   margin-top: 25px;
 }
-
 .order-history h3 {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-
 .order-count {
   font-size: 14px;
   font-weight: 500;
   color: #1976d2;
   margin-left: 10px;
 }
-
 .order-history ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
-
 .order-history li {
   padding: 10px 12px;
   border-bottom: 1px solid #eee;
   font-size: 14px;
 }
-
 .order-history li:last-child {
   border-bottom: none;
 }
@@ -203,7 +213,6 @@ button {
   font-family: inherit;
   outline: none;
 }
-
 button:disabled {
   background: #ccc !important;
   cursor: not-allowed;
@@ -218,12 +227,10 @@ button:disabled {
   left: 0;
   width: 100%;
   height: 100%;
-
   background-color: rgba(0,0,0,0.5);
   justify-content: center;
   align-items: center;
 }
-
 .modal-content {
   background: #fff;
   padding: 25px 30px;
@@ -234,20 +241,17 @@ button:disabled {
   box-shadow: 0 6px 18px rgba(0,0,0,0.25);
   animation: fadeIn 0.25s ease;
 }
-
 .modal-content h3 {
   margin-top: 0;
   margin-bottom: 12px;
   font-size: 1.3em;
   color: #333;
 }
-
 .modal-content p {
   margin-bottom: 10px;
   color: #555;
   font-size: 0.95em;
 }
-
 .modal-content input,
 .modal-content select {
   width: 85%;
@@ -259,20 +263,17 @@ button:disabled {
   text-align: center;
   transition: border-color 0.2s;
 }
-
 .modal-content input:focus,
 .modal-content select:focus {
   border-color: #1976d2;
   outline: none;
   box-shadow: 0 0 5px rgba(25,118,210,0.3);
 }
-
 .modal-actions {
   display: flex;
   justify-content: space-between;
   gap: 12px;
 }
-
 .modal-actions button {
   flex: 1;
   padding: 10px 0;
@@ -304,14 +305,12 @@ button:disabled {
 #exchangeModal h3 {
   color: #1976d2;
 }
-
 #exchangeNotice {
   font-size: 0.85em;
   color: #d32f2f;
   margin-top: -8px;
   margin-bottom: 12px;
 }
-
 #cancelExchange {
   background-color: #e0e0e0;
   color: #333;
@@ -319,7 +318,6 @@ button:disabled {
 #cancelExchange:hover {
   background-color: #bdbdbd;
 }
-
 #confirmExchange {
   background-color: #1976d2;
   color: #fff;
@@ -334,7 +332,7 @@ button:disabled {
   to { opacity: 1; transform: scale(1); }
 }
 
-/* 横排切换按钮 */
+/* ========= 横排切换按钮 ========= */
 .exchange-toggle {
   display: flex;
   justify-content: center;
@@ -343,7 +341,6 @@ button:disabled {
   overflow: hidden;
   border: 1px solid #1976d2;
 }
-
 .exchange-btn {
   flex: 1;
   padding: 10px 0;
@@ -354,12 +351,10 @@ button:disabled {
   cursor: pointer;
   transition: 0.2s;
 }
-
 .exchange-btn.active {
   background-color: #1976d2;
   color: #fff;
 }
-
 .exchange-btn:not(.active):hover {
   background-color: #bdbdbd;
 }
