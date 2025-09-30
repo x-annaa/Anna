@@ -737,23 +737,3 @@ function setMatchingState(isMatching) {
     btn.textContent = isMatching ? "🎲 正在匹配..." : "🎲 一键刷单";
   }
 }
-
-const orderUrlImg = document.getElementById("orderUrlImg");
-const matchingGif = document.getElementById("matchingGif");
-const autoOrderBtn = document.getElementById("autoOrderBtn");
-
-const orderUrlImg = document.getElementById("orderUrlImg");
-const matchingGif = document.getElementById("matchingGif");
-const autoOrderBtn = document.getElementById("autoOrderBtn");
-
-autoOrderBtn.addEventListener("click", () => {
-  // 切换显示
-  orderUrlImg.style.display = "none";
-  matchingGif.style.display = "block";
-
-  // TODO: 接上订单逻辑
-  setTimeout(() => {
-    matchingGif.style.display = "none";
-    orderUrlImg.style.display = "block";
-  }, 5000);
-});
