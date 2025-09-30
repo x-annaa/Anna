@@ -404,16 +404,24 @@ button:disabled {
   font-size: 16px;
 }
 
+/* 轮次-倒计时 */
 .order-roundandcoldown {
-  margin-top: 10px;
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  background: #fafafa;
+  display: flex;
+  justify-content: space-between; /* 左右分开 */
+  align-items: center;           /* 垂直居中 */
+  width: 100%;
+  font-family: Arial, sans-serif; /* 可选字体 */
+  margin-bottom: 10px;
+}
 
-  display: flex;           /* 左右布局 */
-  align-items: center;     /* 图片垂直居中 */
-  gap: 20px;               /* 左右间距 */
-  font-size: 15px;
-  color: #555;
+#roundProgress {
+  font-weight: bold;
+  font-size: 18px; /* 左边字体大小 */
+  color: #333;
+}
+
+#cooldownDisplay {
+  font-weight: bold;
+  font-size: 16px; /* 右边字体大小 */
+  color: red;
 }
