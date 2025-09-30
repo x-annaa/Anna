@@ -124,13 +124,19 @@
     </div>
 
     <div class="order-actions">
-      <!-- 放在按钮上面 -->
-      <div id="roundProgress" style="margin-bottom: 10px; font-weight: bold;"></div>
+      <!-- 左侧：图片 / 匹配动图 -->
+      <div class="order-left">
+        <img id="orderUrlImg" src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Home%20Photos/c1.avif" />
+        <img id="matchingGif" src="matching.gif" alt="匹配中" style="display: none;" />
+      </div>
 
-      <button id="autoOrderBtn">🎲 一键刷单</button>
-
-      <p id="cooldownDisplay" style="color:red; font-weight:bold;"></p>
-      
+      <!-- 右侧：按钮 + 进度条 -->
+      <div class="order-right">
+        <button id="autoOrderBtn">一键刷单</button>
+        <div id="roundProgress"></div>
+      </div>
+    </div> 
+    
       <!-- 匹配动图 -->
       <img
         id="matchingGif"
