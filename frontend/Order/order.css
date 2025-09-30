@@ -411,7 +411,7 @@ button:disabled {
   justify-content: space-between; /* 左右分开 */
   align-items: center;           /* 垂直居中 */
   width: 100%;
-  padding: 0px 15px;            /* 内边距 */
+  padding: 3px 15px;            /* 内边距 */
   margin-bottom: 10px;
   font-family: Arial, sans-serif;
   border: 1px solid #ddd;        /* 边框 */
