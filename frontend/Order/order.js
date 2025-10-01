@@ -739,7 +739,7 @@ function setMatchingState(isMatching) {
 
   if (btn) {
     btn.disabled = isMatching;
-    btn.textContent = isMatching ? "wait" : "Order";
+    btn.textContent = isMatching ? "ordering" : "Order";
   }
 }
 
