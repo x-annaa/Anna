@@ -739,7 +739,7 @@ function setMatchingState(isMatching) {
 
   if (btn) {
     btn.disabled = isMatching;
-    btn.textContent = isMatching ? "🎲 正在匹配..." : "🎲 一键刷单";
+    btn.textContent = isMatching ? "matching..." : "Order";
   }
 }
 
