@@ -151,6 +151,8 @@ h2, h3 {
   background: #fafafa;
   justify-content: space-between;
   align-items: center;
+  padding: 5px 12px;
+  font-size: 15px;
 }
 
 .order-count {
