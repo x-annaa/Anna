@@ -471,7 +471,7 @@ button:disabled {
 /* 禁用状态 */
 #autoOrderBtn:disabled {
   background: #f0e68c;
-  color: #aaa;
+  color: #ffffff
   box-shadow: none;
   cursor: not-allowed;
 }
