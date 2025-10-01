@@ -434,32 +434,54 @@ button:disabled {
 
 /* 按钮 */
 #autoOrderBtn {
-  padding: 10px 20px;
-  font-size: 16px;
+  padding: 12px 24px;
+  font-size: 18px;
   font-weight: bold;
   color: #fff;
-  background: linear-gradient(135deg, #4CAF50, #45a049); /* 渐变绿色 */
+  background: linear-gradient(145deg, #ff9a9e, #fad0c4); /* 粉色渐变 */
   border: none;
-  border-radius: 8px;
+  border-radius: 50px; /* 圆圆的，像糖果 */
   cursor: pointer;
-  transition: all 0.3s ease; /* 平滑过渡 */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 12px rgba(255, 182, 193, 0.4); /* 粉色阴影 */
+  letter-spacing: 1px;
+  position: relative;
+  overflow: hidden;
 }
 
+/* 悬停：颜色更亮，微微放大 */
 #autoOrderBtn:hover {
-  background: linear-gradient(135deg, #45a049, #3e8e41); /* 悬停变深 */
-  transform: translateY(-2px); /* 悬停微微抬起 */
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(145deg, #ffb6c1, #ffe0e6);
+  transform: scale(1.05) rotate(-1deg);
+  box-shadow: 0 8px 18px rgba(255, 182, 193, 0.6);
 }
 
+/* 点击：缩小一下 */
 #autoOrderBtn:active {
-  transform: scale(0.95); /* 点击缩小 */
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+  transform: scale(0.95);
+  box-shadow: 0 3px 6px rgba(255, 182, 193, 0.4);
 }
 
+/* 禁用状态 */
 #autoOrderBtn:disabled {
-  background: #aaa;       /* 禁用灰色 */
-  cursor: not-allowed;
-  transform: none;
+  background: #f3f3f3;
+  color: #aaa;
   box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* 可爱的小闪光动画 */
+#autoOrderBtn::after {
+  content: "✨";
+  position: absolute;
+  top: -5px;
+  right: 10px;
+  animation: sparkle 1.5s infinite;
+  font-size: 14px;
+}
+
+@keyframes sparkle {
+  0% { opacity: 0; transform: translateY(0) rotate(0deg); }
+  50% { opacity: 1; transform: translateY(-5px) rotate(20deg); }
+  100% { opacity: 0; transform: translateY(0) rotate(0deg); }
 }
