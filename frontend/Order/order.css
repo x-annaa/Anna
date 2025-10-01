@@ -448,8 +448,8 @@ button:disabled {
   letter-spacing: 1px;
   position: relative;
   overflow: hidden;
-  top: 0;
-  left: 0;
+  top: 40;
+  left: 30;
   right: 0;
   bottom: 0;
 }
