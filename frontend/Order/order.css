@@ -147,7 +147,6 @@ h2, h3 {
 }
 
 .order-history h3 {
-  margin: 10px;
   display: flex;
   background: #fafafa;
   justify-content: space-between;
