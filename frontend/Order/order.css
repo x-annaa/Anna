@@ -438,7 +438,7 @@ button:disabled {
   font-size: 18px;
   font-weight: bold;
   color: #fff;
-  background: linear-gradient(145deg, #ff9a9e, #fad0c4); /* 粉色渐变 */
+  background: linear-gradient(145deg, #5b71fb, #ff2121);  /* 粉色渐变 */
   border: none;
   border-radius: 50px; /* 圆圆的，像糖果 */
   cursor: pointer;
