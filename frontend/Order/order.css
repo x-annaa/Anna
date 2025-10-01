@@ -168,6 +168,7 @@ h2, h3 {
 
 .order-history li {
   padding: 10px 12px;
+  background: #fafafa; 
   border-bottom: 1px solid #eee;
   font-size: 8px;
 }
