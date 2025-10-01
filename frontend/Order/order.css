@@ -431,3 +431,35 @@ button:disabled {
   font-size: 13px; /* 右边字体大小 */
   color: red;
 }
+
+/* 按钮 */
+#autoOrderBtn {
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #fff;
+  background: linear-gradient(135deg, #4CAF50, #45a049); /* 渐变绿色 */
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease; /* 平滑过渡 */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#autoOrderBtn:hover {
+  background: linear-gradient(135deg, #45a049, #3e8e41); /* 悬停变深 */
+  transform: translateY(-2px); /* 悬停微微抬起 */
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+#autoOrderBtn:active {
+  transform: scale(0.95); /* 点击缩小 */
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+#autoOrderBtn:disabled {
+  background: #aaa;       /* 禁用灰色 */
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
