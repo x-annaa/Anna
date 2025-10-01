@@ -446,12 +446,12 @@ button:disabled {
   box-shadow: 0 6px 12px rgba(255, 193, 7, 0.6), 
               inset 0 -3px 6px rgba(255, 140, 0, 0.6); /* 内外发光 */
   letter-spacing: 1px;
-  position: relative;
+  position: relative;  /* 相对自身偏移 */
   overflow: hidden;
-  top: 40;
-  left: 30;
-  right: 0;
-  bottom: 0;
+
+  top: 40px;   /* 必须写单位 */
+  left: 30px;  /* 必须写单位 */
+  /* right / bottom 通常不用和 top/left 同时写 */
 }
 
 /* 悬停：亮闪闪，轻微跳动 */
