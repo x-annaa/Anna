@@ -182,7 +182,7 @@ button {
 }
 
 button:disabled {
-  background: #ccc !important;
+  background: #535252bf !important;
   cursor: not-allowed;
 }
 
