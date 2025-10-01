@@ -458,8 +458,6 @@ button:disabled {
 #autoOrderBtn:hover {
   background: linear-gradient(145deg, #FFE55C, #FFD700, #FFC107);
   transform: scale(1.07) rotate(-1deg);
-  box-shadow: 0 10px 20px rgba(255, 193, 7, 0.7),
-              inset 0 -3px 8px rgba(255, 165, 0, 0.7);
 }
 
 /* 点击：像果冻一样缩小 */
