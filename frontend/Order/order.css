@@ -434,54 +434,57 @@ button:disabled {
 
 /* 按钮 */
 #autoOrderBtn {
-  padding: 12px 24px;
+  padding: 14px 28px;
   font-size: 18px;
   font-weight: bold;
-  color: #fff;
-  background: linear-gradient(145deg, #5b71fb, #ff2121);  /* 粉色渐变 */
+  color: #fff8dc; /* 淡奶油字色 */
+  background: linear-gradient(145deg, #FFD700, #FFC107, #FFB300); /* 金黄色渐变 */
   border: none;
-  border-radius: 50px; /* 圆圆的，像糖果 */
+  border-radius: 50px; /* 圆润，像糖果 */
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 6px 12px rgba(255, 182, 193, 0.4); /* 粉色阴影 */
+  box-shadow: 0 6px 12px rgba(255, 193, 7, 0.6), 
+              inset 0 -3px 6px rgba(255, 140, 0, 0.6); /* 内外发光 */
   letter-spacing: 1px;
   position: relative;
   overflow: hidden;
 }
 
-/* 悬停：颜色更亮，微微放大 */
+/* 悬停：亮闪闪，轻微跳动 */
 #autoOrderBtn:hover {
-  background: linear-gradient(145deg, #ffb6c1, #ffe0e6);
-  transform: scale(1.05) rotate(-1deg);
-  box-shadow: 0 8px 18px rgba(255, 182, 193, 0.6);
+  background: linear-gradient(145deg, #FFE55C, #FFD700, #FFC107);
+  transform: scale(1.07) rotate(-1deg);
+  box-shadow: 0 10px 20px rgba(255, 193, 7, 0.7),
+              inset 0 -3px 8px rgba(255, 165, 0, 0.7);
 }
 
-/* 点击：缩小一下 */
+/* 点击：像果冻一样缩小 */
 #autoOrderBtn:active {
-  transform: scale(0.95);
-  box-shadow: 0 3px 6px rgba(255, 182, 193, 0.4);
+  transform: scale(0.93);
+  box-shadow: 0 3px 8px rgba(255, 193, 7, 0.6) inset;
 }
 
 /* 禁用状态 */
 #autoOrderBtn:disabled {
-  background: #f3f3f3;
+  background: #f0e68c;
   color: #aaa;
   box-shadow: none;
   cursor: not-allowed;
 }
 
-/* 可爱的小闪光动画 */
+/* 角落可爱闪光特效 */
 #autoOrderBtn::after {
   content: "✨";
   position: absolute;
-  top: -5px;
-  right: 10px;
+  top: -6px;
+  right: 12px;
   animation: sparkle 1.5s infinite;
-  font-size: 14px;
+  font-size: 16px;
+  color: #fffacd;
 }
 
 @keyframes sparkle {
-  0% { opacity: 0; transform: translateY(0) rotate(0deg); }
-  50% { opacity: 1; transform: translateY(-5px) rotate(20deg); }
-  100% { opacity: 0; transform: translateY(0) rotate(0deg); }
+  0% { opacity: 0; transform: scale(0.8) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1.3) rotate(25deg); }
+  100% { opacity: 0; transform: scale(0.8) rotate(0deg); }
 }
