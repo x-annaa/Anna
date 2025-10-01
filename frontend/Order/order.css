@@ -148,6 +148,7 @@ h2, h3 {
 
 .order-history h3 {
   display: flex;
+  background: #fafafa;
   justify-content: space-between;
   align-items: center;
 }
