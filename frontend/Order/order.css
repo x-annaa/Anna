@@ -448,6 +448,10 @@ button:disabled {
   letter-spacing: 1px;
   position: relative;
   overflow: hidden;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 /* 悬停：亮闪闪，轻微跳动 */
