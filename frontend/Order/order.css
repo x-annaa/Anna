@@ -479,8 +479,8 @@ button:disabled {
   position: relative;  /* 相对自身偏移 */
   overflow: hidden;
 
-  top: 57px;   /* 必须写单位 */
-  left: 18px;  /* 必须写单位 */
+  top: 0px;   /* 必须写单位 */
+  left: 0px;  /* 必须写单位 */
   /* right / bottom 通常不用和 top/left 同时写 */
 }
 
