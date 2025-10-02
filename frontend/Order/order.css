@@ -405,56 +405,84 @@ button:disabled {
   font-size: 16px;
 }
 
-/* 外层容器：横向三栏 */
+/* --- 三栏外层：横向且等高 --- */
 .order-container {
   display: flex;
   width: 100%;
-  gap: 8px; /* 三块之间留点间距 */
+  gap: 8px;               /* 可保留间距 */
   box-sizing: border-box;
+  align-items: stretch;   /* 让三个子项等高（按钮会跟左边块高度一致） */
+  margin: 0;
+  padding: 0;
 }
 
-/* 左边大块（80% 比例） */
+/* --- 左边主块（按 8:1:1 比例分配） --- */
 .order-roundandcoldown {
-  flex: 8; /* 8 份 */
+  flex: 8;                       /* 8 份宽度 */
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 6px 12px;
+  align-items: center;           /* 内容垂直居中 */
+  padding: 12px 16px;            /* 增大点内边距，看起来更舒服 */
+  min-height: 56px;              /* 目标高度（可调） */
+  box-sizing: border-box;
   border: 1px solid #ddd;
   border-radius: 10px;
   background-color: #fafafa;
-  box-sizing: border-box;
+  margin: 0;
 }
 
-/* 中间（10% 比例） */
-.history-wrap {
-  flex: 1; /* 1 份 */
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* 确保内部文本元素没有默认外边距（例如 p 标签） */
+.order-roundandcoldown > * {
+  margin: 0;
 }
 
-/* 右边（10% 比例） */
+/* --- 中间 / 右边各 1 份 --- */
+.history-wrap,
 .rules-wrap {
-  flex: 1; /* 1 份 */
+  flex: 1;                       /* 1 份宽度 */
   display: flex;
-  align-items: center;
+  align-items: center;           /* 垂直居中 */
   justify-content: center;
+  box-sizing: border-box;
+  margin: 0;
+  min-width: 64px;               /* 防止太窄（可调） */
 }
 
-/* 按钮样式 */
+/* --- 按钮：填满父容器高度，视觉与左块对齐 --- */
 .history-wrap button,
 .rules-wrap button {
   width: 100%;
-  padding: 6px;
-  font-size: 13px;
-  cursor: pointer;
+  height: 100%;                  /* 与父容器等高（父容器由 .order-roundandcoldown 的 min-height 决定） */
+  padding: 0 14px;               /* 水平内边距，垂直用 height 控制 */
+  font-size: 14px;
+  line-height: 1;
   border: 1px solid #ccc;
-  border-radius: 6px;
+  border-radius: 8px;
   background: white;
+  cursor: pointer;
   box-sizing: border-box;
+  margin: 0;                      /* 清除默认 margin */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
 }
 
+/* 小屏幕可改为堆叠（可选） */
+@media (max-width: 640px) {
+  .order-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .order-roundandcoldown,
+  .history-wrap,
+  .rules-wrap {
+    min-width: 0;
+    width: 100%;
+  }
+  .history-wrap button,
+  .rules-wrap button { height: auto; padding: 10px 14px; }
+}
 
 #cooldownDisplay {
   font-weight: bold;
