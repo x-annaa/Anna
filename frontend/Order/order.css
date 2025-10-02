@@ -406,42 +406,34 @@ button:disabled {
 }
 
 /* --- 三栏外层：横向且等高 --- */
-.order-container {
-  display: flex;
+.main-container {
   width: 100%;
+  display: flex;       /* 横向排列 */
+  gap: 10px;           /* 容器之间间距，可根据需要调整 */
 }
 
-.order-roundandcoldown {
+.order-roundandcooldown {
   width: 80%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 6px 12px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  background-color: #fafafa;
+  background-color: #f0f0f0; /* 浅灰色，方便调试 */
+  padding: 10px;
   box-sizing: border-box;
 }
 
-.history-wrap {
+.history-wrap, .rules-wrap {
   width: 10%;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+  background-color: #d0d0d0; /* 浅灰色，方便调试 */
+  padding: 10px;
+  box-sizing: border-box;
 }
 
-.rules-wrap {
-  width: 10%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.history-wrap button,
-.rules-wrap button {
+/* 可选：按钮撑满容器 */
+.history-wrap button, .rules-wrap button {
   width: 100%;
-  box-sizing: border-box;
 }
+
 
 #cooldownDisplay {
   font-weight: bold;
