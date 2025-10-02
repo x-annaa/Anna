@@ -750,3 +750,50 @@ document.getElementById("autoOrderBtn").addEventListener("click", function() {
   // 模拟匹配完成 5 秒后恢复
   setTimeout(() => setMatchingState(false), 5000);
 });
+
+// 打开窗口
+document.getElementById("viewHistoryBtn").addEventListener("click", async () => {
+  const modal = document.getElementById("historyModal");
+  modal.style.display = "flex";
+
+  // 读取数据库订单
+  const { data: orders, error } = await supabaseClient
+    .from("orders")
+    .select(`id, total_price, profit, status, created_at, products ( name, url )`)
+    .eq("user_id", window.currentUserId)
+    .order("created_at", { ascending: false });
+
+  const list = document.getElementById("historyOrders");
+
+  if (error) {
+    list.innerHTML = `<li>❌ 加载失败：${error.message}</li>`;
+    return;
+  }
+
+  if (!orders?.length) {
+    list.innerHTML = `<li>暂无订单！</li>`;
+    return;
+  }
+
+  list.innerHTML = orders.map(o => `
+    <li style="margin-bottom:10px;">
+      <p>🛒 ${o.products?.name || "未知商品"}</p>
+      <p>价格：¥${(o.total_price||0).toFixed(2)} / 收入：+¥${(o.profit||0).toFixed(2)}</p>
+      <p>状态：${o.status === "completed" ? "✅ 已完成" : "⏳ 待完成"}</p>
+      <p>时间：${new Date(o.created_at).toLocaleString()}</p>
+      ${o.products?.url ? `<a href="${o.products.url}" target="_blank">🔗 产品链接</a>` : ""}
+    </li>
+  `).join("");
+});
+
+// 关闭窗口
+document.getElementById("closeHistoryModal").addEventListener("click", () => {
+  document.getElementById("historyModal").style.display = "none";
+});
+
+// 点击空白处关闭
+document.getElementById("historyModal").addEventListener("click", (e) => {
+  if (e.target.id === "historyModal") {
+    document.getElementById("historyModal").style.display = "none";
+  }
+});
