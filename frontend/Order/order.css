@@ -345,14 +345,15 @@ button:disabled {
   background-color: #bdbdbd;
 }
 
-/* ========= 容器变成左右布局 ========= */
+/* ========= 容器变成上下布局 ========= */
 .order-actions {
     display: flex;
+    flex-direction: column;   /* ⬅ 改成上下布局 */
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    height: 200px;
-    padding: 0 20px;
+    height: 400px;            /* 高度要加大点，不然挤在一起 */
+    padding: 20px;
     box-sizing: border-box;
     position: relative;
 
@@ -362,10 +363,10 @@ button:disabled {
     margin-bottom: 20px;
 
     background: #000; /* 宇宙黑底 */
-    overflow: hidden; /* 避免星星溢出 */
+    overflow: hidden;
 }
 
-/* 星空小星星闪烁 */
+/* 星空小星星闪烁保持不变 */
 .order-actions::before {
     content: "";
     position: absolute;
@@ -381,20 +382,20 @@ button:disabled {
     to { opacity: 0.7; }
 }
 
-/* 内部内容保持在最上层 */
+/* 内部内容保持最上层 */
 .order-actions > * {
     position: relative;
     z-index: 1;
 }
 
-/* 左侧容器 */
+/* 上方容器 */
 .left-side {
   width: 150px;
   height: 150px;
-  position: relative;             /* 为绝对定位提供参考 */
+  position: relative;
   display: flex;
-  justify-content: center;        /* 水平居中内容 */
-  align-items: center;            /* 垂直居中内容 */
+  justify-content: center;
+  align-items: center;
 }
 
 /* 固定图片和 GIF 同位置 */
@@ -402,23 +403,23 @@ button:disabled {
   width: 150px;
   height: 150px;
   position: absolute;
-  top: 0px;
-  left: 10px;
+  top: 0;
+  left: 0;
 }
 
 .matching-gif {
-  display: none; /* 默认隐藏 GIF */
+  display: none;
 }
 
-/* 右侧容器 */
+/* 下方容器 */
 .right-side {
   width: 150px;
   height: 150px;
-  position: relative;             /* 可以控制右侧内容移动 */
+  position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: center;        /* 垂直居中 */
-  align-items: center;            /* 水平居中 */
+  justify-content: center;
+  align-items: center;
   gap: 10px;
 }
 
