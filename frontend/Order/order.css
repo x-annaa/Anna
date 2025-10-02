@@ -354,7 +354,7 @@ button:disabled {
     gap: 20px;                /* 上下间距（你可以调小/调大） */
     
     width: 100%;
-    height: 300px;            /* 容器高度调小一些，避免太空 */
+    height: 200px;            /* 容器高度调小一些，避免太空 */
     padding: 20px;
     box-sizing: border-box;
     position: relative;
