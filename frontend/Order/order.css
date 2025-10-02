@@ -528,16 +528,20 @@ button:disabled {
 }
 
 /* 关闭按钮固定右上角 */
-.modal-content .close {
-  position: absolute;
-  top: 10px;
-  right: 15px;
-  font-size: 24px;
-  font-weight: bold;
-  cursor: pointer;
-  color: #333;
-  z-index: 1001; /* 保证在内容上方 */
+.modal-content {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 20px 20px 10px 20px; /* 底部留滚动空间 */
+  max-width: 700px;
+  width: 90%;
+  max-height: 80%;
+  overflow-y: auto;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  position: relative;
+  font-size: 14px;       /* 字体稍小 */
+  line-height: 1.8;      /* 每条订单高一些 */
 }
+
 
 /* 订单列表美化 */
 #allOrdersList {
