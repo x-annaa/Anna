@@ -713,7 +713,7 @@ async function loadRecentOrders() {
 
     const list = document.getElementById("recentOrders");
     if (list) {
-      if (!recentOrders?.length) list.innerHTML = `<li>暂无订单！</li>`;
+      if (!recentOrders?.length) list.innerHTML = `<li>There are currently no orders！</li>`;
       else list.innerHTML = recentOrders.map(o => {
         const price = Number(o.total_price) || 0;
         const profit = Number(o.profit) || 0;
