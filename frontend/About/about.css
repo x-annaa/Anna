@@ -1,1 +1,56 @@
+/* 整体页面样式 */
+#msgPage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 40px 20px;
+  min-height: 80vh;
+  background: linear-gradient(135deg, #fceabb, #f8b500);
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  color: #333;
+  animation: fadeIn 1s ease-in-out;
+}
 
+/* 标题 */
+#msgPage h1 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  color: #ff6b81;
+  text-shadow: 2px 2px #fff;
+}
+
+/* 内容区块 */
+#msgPage .content-block {
+  background: #fff0f5;
+  padding: 20px 25px;
+  border-radius: 20px;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+  transition: transform 0.3s ease;
+}
+
+#msgPage .content-block:hover {
+  transform: translateY(-5px);
+}
+
+/* 小装饰元素 */
+#msgPage .emoji {
+  font-size: 1.5rem;
+  margin-right: 8px;
+}
+
+/* 分隔线 */
+#msgPage hr {
+  border: none;
+  border-top: 2px dashed #ff9f80;
+  margin: 20px 0;
+}
+
+/* 动画 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
