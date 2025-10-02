@@ -360,6 +360,9 @@ button:disabled {
     backdrop-filter: blur(10px);
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.3);
+
+    margin-top: 20px;   /* 上边距 */
+    margin-bottom: 20px; /* 下边距 */
 }
 
 /* 左侧容器 */
