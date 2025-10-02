@@ -371,8 +371,8 @@ button:disabled {
 
 /* 图片和 GIF 居中叠放 */
 .fixed-img, .matching-gif {
-    width: 160px;
-    height: 160px;
+    width: 140px;
+    height: 140px;
     position: absolute;
     top: 50%;  /* 容器内垂直居中 */
     left: 50%; /* 容器内水平居中 */
