@@ -359,7 +359,7 @@ button:disabled {
 
     background: #000;         /* 黑色背景 */
     border-radius: 12px;
-    margin: 20px 0;
+    margin: 11px 0;
 }
 
 /* ========= 上方图片 ========= */
@@ -390,7 +390,7 @@ button:disabled {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: 10px;  /* 图片和按钮间距 */
+    margin-top: 0px;  /* 图片和按钮间距 */
 }
 
 #cooldownDisplay {
