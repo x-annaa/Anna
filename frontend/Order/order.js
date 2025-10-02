@@ -766,40 +766,22 @@ async function showAllOrders() {
   const listEl = document.getElementById("allOrdersList");
   if (!listEl) return;
 
-  if (!orders?.length) listEl.innerHTML = "<li>暂无订单</li>";
-  else {
-    listEl.innerHTML = orders.map(o => {
+  // 添加标题显示订单总数
+  listEl.innerHTML = `<li style="font-weight:bold; padding-bottom:10px;">订单数：${orders?.length || 0}单</li>`;
+
+  if (orders?.length) {
+    listEl.innerHTML += orders.map(o => {
       const price = Number(o.total_price) || 0;
       const profit = Number(o.profit) || 0;
       const productName = o.products?.name || "未知商品";
-      const img = o.products?.url ? `<img src="${o.products.url}" alt="${productName}" style="width:50px; height:50px;">` : "";
-      return `<li style="display:flex; align-items:center; gap:10px;">${img} ${productName} / ¥${price.toFixed(2)} / 收入：+¥${profit.toFixed(2)} / 状态：${o.status}</li>`;
+      const img = o.products?.url ? `<img src="${o.products.url}" alt="${productName}" style="width:40px; height:40px;">` : "";
+      return `<li style="display:flex; align-items:center; gap:10px;">
+                ${img} ${productName} / ¥${price.toFixed(2)} / 收入：+¥${profit.toFixed(2)} / 状态：${o.status}
+              </li>`;
     }).join("");
+  } else {
+    listEl.innerHTML += "<li>暂无订单</li>";
   }
 
   document.getElementById("allOrdersModal").style.display = "flex";
 }
-
-// 查看规则窗口
-function showRules() {
-  document.getElementById("rulesModal").style.display = "flex";
-}
-
-// 事件绑定
-document.getElementById("viewAllOrdersBtn")?.addEventListener("click", showAllOrders);
-document.getElementById("closeAllOrders")?.addEventListener("click", () => {
-  document.getElementById("allOrdersModal").style.display = "none";
-});
-
-document.getElementById("viewRulesBtn")?.addEventListener("click", showRules);
-document.getElementById("closeRules")?.addEventListener("click", () => {
-  document.getElementById("rulesModal").style.display = "none";
-});
-
-// 点击模态框背景关闭
-document.getElementById("allOrdersModal")?.addEventListener("click", (e) => {
-  if (e.target.id === "allOrdersModal") e.target.style.display = "none";
-});
-document.getElementById("rulesModal")?.addEventListener("click", (e) => {
-  if (e.target.id === "rulesModal") e.target.style.display = "none";
-});
