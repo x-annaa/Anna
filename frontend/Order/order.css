@@ -405,38 +405,44 @@ button:disabled {
   font-size: 16px;
 }
 
-.order-row {
-  display: flex;      /* 横向排列 */
-  width: 100%;        /* 占满一行 */
+/* 外层容器：横向三栏 */
+.order-container {
+  display: flex;
+  width: 100%;
+  gap: 8px; /* 三块之间留点间距 */
   box-sizing: border-box;
 }
 
+/* 左边大块 80% */
 .order-roundandcoldown {
-  width: 80%;         /* 左边大块 */
+  flex: 0 0 80%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 5px 12px;
+  padding: 6px 12px;
   border: 1px solid #ddd;
   border-radius: 10px;
   background-color: #fafafa;
   box-sizing: border-box;
 }
 
+/* 中间 10% */
 .history-wrap {
-  width: 10%;         /* 中间 */
+  flex: 0 0 10%;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 }
 
+/* 右边 10% */
 .rules-wrap {
-  width: 10%;         /* 右边 */
+  flex: 0 0 10%;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 }
 
+/* 按钮样式 */
 .history-wrap button,
 .rules-wrap button {
   width: 100%;
@@ -447,12 +453,6 @@ button:disabled {
   border-radius: 6px;
   background: white;
   box-sizing: border-box;
-}
-
-#roundProgress {
-  font-weight: bold;
-  font-size: 13px;
-  color: #8fbbec;
 }
 
 #cooldownDisplay {
