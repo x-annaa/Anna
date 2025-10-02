@@ -154,14 +154,14 @@
     <div id="orderResult" class="order-result"></div>
 
     <!-- 打开按钮 -->
-    <button id="viewHistoryBtn">📜 查看订单历史</button>
+    <button id="openHistoryBtn" class="golden-btn">📜 查看订单历史</button>
 
     <!-- 历史订单窗口 -->
-    <div id="historyModal" class="modal">
+    <div id="orderHistoryModal" class="modal">
       <div class="modal-content">
-        <span id="closeHistoryModal" class="close">&times;</span>
-        <h3>🕘 订单历史</h3>
-        <ul id="historyOrders"></ul>
+        <button id="closeHistoryBtn" class="close-btn">❌</button>
+        <h2>用户订单历史</h2>
+        <div id="orderHistoryList"></div>
       </div>
     </div>
 
