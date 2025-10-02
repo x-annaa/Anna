@@ -533,7 +533,7 @@ button:disabled {
 }
 
 /* 返回按钮 */
-#backBtn1 {
+#backBtn {
   margin-bottom: 15px;
   padding: 5px 10px;
   cursor: pointer;
