@@ -405,60 +405,66 @@ button:disabled {
   font-size: 16px;
 }
 
-/* 轮次-倒计时 */
-/* 容器外壳：三栏布局 */
+/* 外层容器 */
 .order-row {
   display: flex;
-  align-items: center;
   width: 100%;
-  gap: 12px;                /* 列间距，可调 */
   box-sizing: border-box;
-  padding: 6px;
 }
 
-/* 主区占 80% */
+/* 左边容器 80% */
 .order-roundandcoldown {
-  flex: 0 0 80%;            /* 不缩放，不增长，基础宽度 80% */
+  width: 80%;
   display: flex;
-  justify-content: space-between; /* 内部 roundProgress 在左，cooldown 在右 */
+  justify-content: space-between;
   align-items: center;
   padding: 5px 12px;
-  font-family: Arial, sans-serif;
   border: 1px solid #ddd;
   border-radius: 10px;
   background-color: #fafafa;
   box-sizing: border-box;
 }
 
-/* History & Rules 各占 10% */
-.history-wrap,
-.rules-wrap {
-  flex: 0 0 10%;            /* 不缩放，不增长，基础宽度 10% */
-  box-sizing: border-box;
-  min-width: 64px;          /* 防止太窄，可按需调整 */
+/* 中间 10% */
+.history-wrap {
+  width: 10%;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
 }
 
-/* 按钮填满各自容器（可选） */
+/* 右边 10% */
+.rules-wrap {
+  width: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 按钮样式 */
 .history-wrap button,
 .rules-wrap button {
   width: 100%;
-  padding: 8px;
-  font-size: 14px;
+  padding: 6px;
+  font-size: 13px;
   cursor: pointer;
-  box-sizing: border-box;
-  border-radius: 6px;
   border: 1px solid #ccc;
+  border-radius: 6px;
   background: white;
+  box-sizing: border-box;
 }
 
-/* roundProgress / cooldownDisplay 的样式 */
+/* roundProgress / cooldown 样式 */
 #roundProgress {
   font-weight: bold;
   font-size: 13px;
   color: #8fbbec;
+}
+
+#cooldownDisplay {
+  font-weight: bold;
+  font-size: 13px;
+  color: red;
 }
 
 #cooldownDisplay {
