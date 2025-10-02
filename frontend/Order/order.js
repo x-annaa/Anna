@@ -709,7 +709,7 @@ async function loadRecentOrders() {
       .eq("user_id", window.currentUserId);
 
     const historyTitle = document.querySelector(".order-history h3");
-    if (historyTitle) historyTitle.textContent = `🕘 最近订单 订单数：${totalCount || 0}单`;
+    if (historyTitle) historyTitle.textContent = `Total：${totalCount || 0}`;
 
     const list = document.getElementById("recentOrders");
     if (list) {
