@@ -351,7 +351,7 @@ button:disabled {
     flex-direction: column;   /* 上下布局 */
     justify-content: center;  /* 垂直居中 */
     align-items: center;      /* 水平居中 */
-    
+    margin-top: 20px;
     width: 100%;
     height: 145px;            /* 容器高度固定，不太高 */
     padding: 10px;
