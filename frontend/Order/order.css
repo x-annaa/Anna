@@ -406,13 +406,23 @@ button:disabled {
 }
 
 /* 轮次-倒计时 */
-.order-roundandcoldown {
+/* 容器外壳：三栏布局 */
+.order-row {
   display: flex;
-  justify-content: space-between; 
   align-items: center;
   width: 100%;
+  gap: 12px;                /* 列间距，可调 */
+  box-sizing: border-box;
+  padding: 6px;
+}
+
+/* 主区占 80% */
+.order-roundandcoldown {
+  flex: 0 0 80%;            /* 不缩放，不增长，基础宽度 80% */
+  display: flex;
+  justify-content: space-between; /* 内部 roundProgress 在左，cooldown 在右 */
+  align-items: center;
   padding: 5px 12px;
-  margin-bottom: 10px;
   font-family: Arial, sans-serif;
   border: 1px solid #ddd;
   border-radius: 10px;
@@ -420,30 +430,61 @@ button:disabled {
   box-sizing: border-box;
 }
 
-/* 左边容器 80% */
-.progress-container {
+/* History & Rules 各占 10% */
+.history-wrap,
+.rules-wrap {
+  flex: 0 0 10%;            /* 不缩放，不增长，基础宽度 10% */
+  box-sizing: border-box;
+  min-width: 64px;          /* 防止太窄，可按需调整 */
   display: flex;
-  justify-content: space-between; /* roundProgress 在左，cooldown 在右 */
   align-items: center;
-  width: 80%;
+  justify-content: center;
 }
 
-/* 两个按钮各 10% */
-#viewAllOrdersBtn,
-#viewRulesBtn {
-  width: 10%;
-  min-width: 60px; /* 防止太窄，可以根据需要调整 */
-  padding: 5px;
-  font-size: 13px;
+/* 按钮填满各自容器（可选） */
+.history-wrap button,
+.rules-wrap button {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
   cursor: pointer;
+  box-sizing: border-box;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: white;
 }
 
-/* 原有样式 */
+/* roundProgress / cooldownDisplay 的样式 */
 #roundProgress {
   font-weight: bold;
   font-size: 13px;
   color: #8fbbec;
 }
+
+#cooldownDisplay {
+  font-weight: bold;
+  font-size: 13px;
+  color: red;
+}
+
+/* 响应式：屏幕窄时堆叠 */
+@media (max-width: 640px) {
+  .order-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .order-roundandcoldown,
+  .history-wrap,
+  .rules-wrap {
+    flex: 1 0 auto;
+    width: 100%;
+  }
+  .history-wrap,
+  .rules-wrap {
+    justify-content: flex-end; /* 或者 center，根据需要 */
+  }
+}
+
 
 #cooldownDisplay {
   font-weight: bold;
