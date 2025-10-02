@@ -755,21 +755,19 @@ document.getElementById("autoOrderBtn").addEventListener("click", function() {
 document.addEventListener("DOMContentLoaded", () => {
   const rulesBtn = document.getElementById('Rules');
   const popup = document.getElementById('rulesPopup');
-  const backBtn = document.getElementById('backBtn');
 
-  if (!rulesBtn || !popup || !backBtn) return;
+  if (!rulesBtn || !popup) return;
 
+  // 显示弹窗
   rulesBtn.addEventListener('click', () => {
-    popup.style.display = 'flex'; // 显示弹窗
+    popup.style.display = 'flex';
   });
 
-  backBtn.addEventListener('click', () => {
-    popup.style.display = 'none'; // 关闭弹窗
-  });
-
-  // 点击弹窗背景关闭
+  // 委托点击事件
   popup.addEventListener('click', (e) => {
-    if (e.target === popup) popup.style.display = 'none';
+    if (e.target.id === 'backBtn' || e.target === popup) {
+      popup.style.display = 'none'; // 点击 backBtn 或背景关闭弹窗
+    }
   });
 
   // 按 Esc 键关闭弹窗
