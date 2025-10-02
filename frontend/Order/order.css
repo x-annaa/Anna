@@ -413,9 +413,9 @@ button:disabled {
   box-sizing: border-box;
 }
 
-/* 左边大块 80% */
+/* 左边大块（80% 比例） */
 .order-roundandcoldown {
-  flex: 0 0 80%;
+  flex: 8; /* 8 份 */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -426,17 +426,17 @@ button:disabled {
   box-sizing: border-box;
 }
 
-/* 中间 10% */
+/* 中间（10% 比例） */
 .history-wrap {
-  flex: 0 0 10%;
+  flex: 1; /* 1 份 */
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* 右边 10% */
+/* 右边（10% 比例） */
 .rules-wrap {
-  flex: 0 0 10%;
+  flex: 1; /* 1 份 */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -454,6 +454,7 @@ button:disabled {
   background: white;
   box-sizing: border-box;
 }
+
 
 #cooldownDisplay {
   font-weight: bold;
