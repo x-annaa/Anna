@@ -347,15 +347,26 @@ button:disabled {
 
 /* ========= 容器变成左右布局 ========= */
 .order-actions {
-  display: flex;
-  justify-content: space-between; /* 左右两边分开 */
-  align-items: center;            /* 左右垂直居中 */
-  width: 100%;
-  height: 200px;                  /* 根据需要调整整体高度 */
-  padding: 0 20px;                /* 左右内边距 */
-  box-sizing: border-box;
-  position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 200px;
+    padding: 0 20px;
+    box-sizing: border-box;
+    position: relative;
+
+    background: linear-gradient(270deg, #ff6ec4, #7873f5, #4ade80);
+    background-size: 600% 600%;
+    animation: gradientBG 10s ease infinite;
 }
+
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
 
 /* 左侧容器 */
 .left-side {
