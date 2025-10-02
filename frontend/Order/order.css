@@ -67,14 +67,21 @@ h2, h3 {
 /* ========= 订单中心 ========= */
 .order-header {
   display: flex;
-  justify-content: end;
+  justify-content: space-between; /* 左右两端对齐 */
   align-items: center;
   margin-bottom: 0px;
+}
+
+.left-buttons {
+  display: flex;
+  gap: 5px; /* H 和 i 按钮之间间距 */
 }
 
 .coins-box {
   font-weight: bold;
   color: #33bb0a;
+  display: flex;
+  align-items: center;
 }
 
 .coins-box button {
