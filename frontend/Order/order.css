@@ -150,20 +150,21 @@ h2, h3 {
 #History {
   color: #fff;
   background-color: #57a1e9;
-  border: 1px solid #5fa4f2;
+  border: 1px solid #78818a;
 }
 
 #Rules {
-  color: #fff;
-  background-color: #57a1e9;
-  border: 1px solid #5fa4f2;
-  margin-left: -150px;
+  color: #e52323;
+  background-color: #e9ed5e;
+  border: 1px solid #9d9d9d;
   width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 22px;
+  cursor: pointer;
+  margin-left: 5px; /* 按钮之间留一点空隙 */
 }
-
-圆形
-
-
 
 /* ========= 最近订单历史 ========= */
 .order-history {
