@@ -446,8 +446,8 @@ button:disabled {
 
 /* 按钮 */
 #autoOrderBtn {
-  padding: 14px 28px;
-  font-size: 18px;
+  padding: 10px 23px;
+  font-size: 15px;
   font-weight: bold;
   color: #fff8dc; /* 淡奶油字色 */
   background: linear-gradient(145deg, #FFD700, #FFC107, #FFB300); /* 金黄色渐变 */
@@ -459,7 +459,7 @@ button:disabled {
   position: relative;  /* 相对自身偏移 */
   overflow: hidden;
 
-  top: 40px;   /* 必须写单位 */
+  top: 57px;   /* 必须写单位 */
   left: 18px;  /* 必须写单位 */
   /* right / bottom 通常不用和 top/left 同时写 */
 }
