@@ -752,7 +752,7 @@ document.getElementById("autoOrderBtn").addEventListener("click", function() {
 });
 
 /* 规则弹窗 */
-(() => {
+document.addEventListener("DOMContentLoaded", () => {
   const rulesBtn = document.getElementById('Rules');
   const popup = document.getElementById('rulesPopup');
   const backBtn = document.getElementById('backBtn');
@@ -776,4 +776,4 @@ document.getElementById("autoOrderBtn").addEventListener("click", function() {
   document.addEventListener('keydown', (e) => {
     if (e.key === "Escape") popup.style.display = 'none';
   });
-})();
+});
