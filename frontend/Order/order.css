@@ -160,12 +160,14 @@ h2, h3 {
 }
 
 .order-history h3 {
-  display: flex;
-  background: #fafafa;
-  justify-content: space-between;
-  align-items: center;
-  padding: 5px 12px;
-  font-size: 15px;
+    display: flex;
+    justify-content: center; /* 水平居中 */
+    align-items: center;     /* 垂直居中 */
+    text-align: center;      /* 确保文字在行内也居中 */
+    background: #fafafa;
+    padding: 5px 12px;
+    font-size: 13px;
+    margin: 0;               /* 去掉默认的 h3 上下间距，避免看起来不居中 */
 }
 
 .order-count {
