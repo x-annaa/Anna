@@ -351,51 +351,50 @@ button:disabled {
     flex-direction: column;   /* 上下布局 */
     justify-content: center;  /* 垂直居中 */
     align-items: center;      /* 水平居中 */
-    gap: 5%;                  /* 上下间距用百分比 */
+    height: 100vh;            /* 占满整个视口高度 */
+    gap: 20px;                /* 上下容器间距 */
 
-    width: 100%;
-    height: 50%;              /* 总高度用百分比，根据父容器调整 */
-    padding: 2%;
-    box-sizing: border-box;
-
-    background: #000;         /* 黑色背景 */
+    background: #000;
     border-radius: 12px;
-    margin: 2% 0;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 /* ========= 上方容器 ========= */
 .left-side {
-  width: 30%;                 /* 宽度百分比 */
-  height: 40%;                /* 高度百分比 */
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    flex: 2;                  /* 占总高度比例 2/5 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    width: 50%;               /* 可以根据需求调整宽度 */
 }
 
 /* 图片和 GIF 居中叠放 */
 .fixed-img, .matching-gif {
-  width: 100%;                /* 占满父容器宽度 */
-  height: auto;               /* 高度自适应保持比例 */
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+    width: 100%;
+    height: auto;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 .matching-gif {
-  display: none;
+    display: none;
 }
 
 /* ========= 下方容器 ========= */
 .right-side {
-  width: 30%;                 /* 宽度百分比 */
-  height: 40%;                /* 高度百分比 */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;    /* 垂直居中 */
-  align-items: center;        /* 水平居中 */
-  gap: 5%;
+    flex: 3;                  /* 占总高度比例 3/5 */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    width: 50%;               /* 可根据需求调整宽度 */
 }
+
 
 #cooldownDisplay {
   color: red;
