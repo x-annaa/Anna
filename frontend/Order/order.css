@@ -356,13 +356,35 @@ button:disabled {
     box-sizing: border-box;
     position: relative;
 
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.3);
+    margin-top: 20px;
+    margin-bottom: 20px;
 
-    margin-top: 20px;   /* 上边距 */
-    margin-bottom: 20px; /* 下边距 */
+    background: #000; /* 宇宙黑底 */
+    overflow: hidden; /* 避免星星溢出 */
+}
+
+/* 星空小星星闪烁 */
+.order-actions::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: transparent url("https://www.transparenttextures.com/patterns/stardust.png") repeat;
+    opacity: 0.5;
+    animation: twinkle 8s infinite alternate;
+    z-index: 0;
+}
+
+@keyframes twinkle {
+    from { opacity: 0.3; }
+    to { opacity: 0.7; }
+}
+
+/* 内部内容保持在最上层 */
+.order-actions > * {
+    position: relative;
+    z-index: 1;
 }
 
 /* 左侧容器 */
