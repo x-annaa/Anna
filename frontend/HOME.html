@@ -135,57 +135,29 @@
           id="matchingGif"
           src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/Qbox.gif" 
           alt="Ordering..."
-          style="width:150px; height:150px; display:none; margin-top:0px;"
+          style="width:150px; height:150px; display:none; margin-top:10px;"
         >
       </div>
-    </div>
 
-    
-    <div class="right-side">
+      <!-- 右侧内容 -->
+      <div class="right-side">
         <button id="autoOrderBtn">Order</button>
+      </div>
     </div>
 
-    <!-- 小容器 -->
-    <div class="main-container">
-      <!-- 左边 80% -->
-      <div class="order-roundandcooldown">
-        <div id="roundProgress"></div>
-        <p id="cooldownDisplay"></p>
-      </div>
-
-      <div class="history-wrap">
-        <button id="viewAllOrdersBtn">History</button>
-      </div>
-
-      <div class="rules-wrap">
-        <button id="viewRulesBtn">Rules</button>
-      </div>
+    <div class="order-roundandcoldown">
+      <div id="roundProgress"></div>
+      <p id="cooldownDisplay"></p>
     </div>
   
     <!-- 最近订单 -->
     <div id="orderResult" class="order-result"></div>
 
-    <!-- 全部订单模态框 -->
-    <div id="allOrdersModal" class="modal" style="display:none;">
-      <div class="modal-content">
-        <span id="closeAllOrders" class="close">&times;</span>
-        <h3>所有订单历史</h3>
-        <ul id="allOrdersList"></ul>
-      </div>
-    </div>
-
-    <!-- 规则阅读模态框 -->
-    <div id="rulesModal" class="modal" style="display:none;">
-      <div class="modal-content">
-        <span id="closeRules" class="close">&times;</span>
-        <h3>规则说明</h3>
-        <div id="rulesContent">
-          <p>1. 每轮最多下单 X 次</p>
-          <p>2. Coins 不足无法下单</p>
-          <p>3. 本轮完成订单数达到后进入冷却</p>
-          <p>4. …</p>
-        </div>
-      </div>
+    <div class="order-history">
+      <h3>🕘 最近订单</h3>
+      <ul id="recentOrders">
+        <li>暂无订单！</li>
+      </ul>
     </div>
 
     <!-- Balance / Coins 兑换弹窗 -->
