@@ -751,37 +751,67 @@ document.getElementById("autoOrderBtn").addEventListener("click", function() {
   setTimeout(() => setMatchingState(false), 5000);
 });
 
-// 查看所有订单历史
-async function showAllOrders() {
-  if (!window.currentUserId) return;
+/* ====================== 21.查看所有订单历史 ====================== */
+document.addEventListener("DOMContentLoaded", () => {
 
-  const { data: orders, error } = await supabaseClient
-    .from("orders")
-    .select(`id, total_price, profit, status, created_at, products ( name, profit, url )`)
-    .eq("user_id", window.currentUserId)
-    .order("created_at", { ascending: false });
+  // ---------------- 查看所有订单历史 ----------------
+  async function showAllOrders() {
+    if (!window.currentUserId) return;
 
-  if (error) { alert("加载订单历史失败"); return; }
+    const { data: orders, error } = await supabaseClient
+      .from("orders")
+      .select(`id, total_price, profit, status, created_at, products ( name, profit, url )`)
+      .eq("user_id", window.currentUserId)
+      .order("created_at", { ascending: false });
 
-  const listEl = document.getElementById("allOrdersList");
-  if (!listEl) return;
+    if (error) { alert("加载订单历史失败"); return; }
 
-  // 添加标题显示订单总数
-  listEl.innerHTML = `<li style="font-weight:bold; padding-bottom:10px;">订单数：${orders?.length || 0}单</li>`;
+    const listEl = document.getElementById("allOrdersList");
+    if (!listEl) return;
 
-  if (orders?.length) {
-    listEl.innerHTML += orders.map(o => {
-      const price = Number(o.total_price) || 0;
-      const profit = Number(o.profit) || 0;
-      const productName = o.products?.name || "未知商品";
-      const img = o.products?.url ? `<img src="${o.products.url}" alt="${productName}" style="width:40px; height:40px;">` : "";
-      return `<li style="display:flex; align-items:center; gap:10px;">
-                ${img} ${productName} / ¥${price.toFixed(2)} / 收入：+¥${profit.toFixed(2)} / 状态：${o.status}
-              </li>`;
-    }).join("");
-  } else {
-    listEl.innerHTML += "<li>暂无订单</li>";
+    // 显示订单总数
+    listEl.innerHTML = `<li style="font-weight:bold; padding-bottom:10px;">订单数：${orders?.length || 0}单</li>`;
+
+    if (orders?.length) {
+      listEl.innerHTML += orders.map(o => {
+        const price = Number(o.total_price) || 0;
+        const profit = Number(o.profit) || 0;
+        const productName = o.products?.name || "未知商品";
+        const img = o.products?.url ? `<img src="${o.products.url}" alt="${productName}">` : "";
+        return `<li>${img} ${productName} / ¥${price.toFixed(2)} / 收入：+¥${profit.toFixed(2)} / 状态：${o.status}</li>`;
+      }).join("");
+    } else {
+      listEl.innerHTML += "<li>暂无订单</li>";
+    }
+
+    document.getElementById("allOrdersModal").style.display = "flex";
   }
 
-  document.getElementById("allOrdersModal").style.display = "flex";
-}
+  // ---------------- 事件绑定 ----------------
+  document.getElementById("viewAllOrdersBtn")?.addEventListener("click", showAllOrders);
+  document.getElementById("closeAllOrders")?.addEventListener("click", () => {
+    document.getElementById("allOrdersModal").style.display = "none";
+  });
+  document.getElementById("allOrdersModal")?.addEventListener("click", (e) => {
+    if (e.target.id === "allOrdersModal") e.target.style.display = "none";
+  });
+
+  document.getElementById("viewRulesBtn")?.addEventListener("click", () => {
+    document.getElementById("rulesModal").style.display = "flex";
+  });
+  document.getElementById("closeRules")?.addEventListener("click", () => {
+    document.getElementById("rulesModal").style.display = "none";
+  });
+  document.getElementById("rulesModal")?.addEventListener("click", (e) => {
+    if (e.target.id === "rulesModal") e.target.style.display = "none";
+  });
+
+  // ESC 键关闭模态框
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      document.getElementById("allOrdersModal").style.display = "none";
+      document.getElementById("rulesModal").style.display = "none";
+    }
+  });
+
+});
