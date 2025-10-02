@@ -2,7 +2,34 @@ document.addEventListener("DOMContentLoaded", () => {
   const page = document.getElementById("msgPage");
   if (!page) return;
 
-  page.innerHTML = `
+  // 添加漂浮图像
+  const floatImgs = [
+    '/assets/cat.png',
+    '/assets/star.png',
+    '/assets/rabbit.png'
+  ];
+  floatImgs.forEach((src, i) => {
+    const img = document.createElement('img');
+    img.src = src;
+    img.className = 'float-img';
+    img.style.top = `${50 + i*80}px`;
+    img.style.left = `${20 + i*150}px`;
+    img.style.animationDelay = `${i*1.2}s`;
+    page.appendChild(img);
+  });
+
+  // 添加随机星星
+  for(let i=0;i<30;i++){
+    const star = document.createElement('div');
+    star.className = 'star';
+    star.style.top = `${Math.random()*100}%`;
+    star.style.left = `${Math.random()*100}%`;
+    star.style.width = star.style.height = `${3+Math.random()*4}px`;
+    page.appendChild(star);
+  }
+
+  // 填充内容
+  page.innerHTML += `
     <h1>ℹ️ 关于我们</h1>
     
     <div class="content-block">
