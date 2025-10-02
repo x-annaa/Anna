@@ -405,16 +405,14 @@ button:disabled {
   font-size: 16px;
 }
 
-/* 外层容器 */
 .order-row {
-  display: flex;
-  width: 100%;
+  display: flex;      /* 横向排列 */
+  width: 100%;        /* 占满一行 */
   box-sizing: border-box;
 }
 
-/* 左边容器 80% */
 .order-roundandcoldown {
-  width: 80%;
+  width: 80%;         /* 左边大块 */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -425,23 +423,20 @@ button:disabled {
   box-sizing: border-box;
 }
 
-/* 中间 10% */
 .history-wrap {
-  width: 10%;
+  width: 10%;         /* 中间 */
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* 右边 10% */
 .rules-wrap {
-  width: 10%;
+  width: 10%;         /* 右边 */
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* 按钮样式 */
 .history-wrap button,
 .rules-wrap button {
   width: 100%;
@@ -454,11 +449,16 @@ button:disabled {
   box-sizing: border-box;
 }
 
-/* roundProgress / cooldown 样式 */
 #roundProgress {
   font-weight: bold;
   font-size: 13px;
   color: #8fbbec;
+}
+
+#cooldownDisplay {
+  font-weight: bold;
+  font-size: 13px;
+  color: red;
 }
 
 #cooldownDisplay {
