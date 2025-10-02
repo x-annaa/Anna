@@ -356,9 +356,7 @@ button:disabled {
     height: 145px;            /* 容器高度固定，不太高 */
     padding: 10px;
     box-sizing: border-box;
-
     border-radius: 12px;
-    margin: 11px 0;
 }
 
 /* ========= 上方图片/GIF ========= */
@@ -368,10 +366,7 @@ button:disabled {
     position: relative;
     display: flex;
     justify-content: center;
-    align-items: center;
-
-    /* 上下偏移量，可调节 */
-    margin-bottom: 10px;   /* 图片和按钮之间的距离 */
+    align-items: center;  
 }
 
 /* 图片和 GIF 居中叠放 */
@@ -449,7 +444,7 @@ button:disabled {
   cursor: pointer;
   transition: background 0.3s ease;
   letter-spacing: 1px;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
 
 /* 悬停略微加亮 */
