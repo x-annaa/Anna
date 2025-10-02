@@ -432,59 +432,26 @@ button:disabled {
   color: red;
 }
 
-/* 按钮 */
+/* 金黄色按钮 */
 #autoOrderBtn {
   padding: 10px 23px;
   font-size: 15px;
   font-weight: bold;
-  color: #fff8dc; /* 淡奶油字色 */
+  color: #fff8dc; /* 文字淡奶油色 */
   background: linear-gradient(145deg, #FFD700, #FFC107, #FFB300); /* 金黄色渐变 */
   border: none;
-  border-radius: 50px; /* 圆润，像糖果 */
+  border-radius: 50px; /* 圆润 */
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background 0.3s ease;
   letter-spacing: 1px;
-  position: relative;  /* 相对自身偏移 */
-  overflow: hidden;
-
-  top: 0px;   /* 必须写单位 */
-  left: 0px;  /* 必须写单位 */
-  /* right / bottom 通常不用和 top/left 同时写 */
 }
 
-/* 悬停：亮闪闪，轻微跳动 */
+/* 悬停略微加亮 */
 #autoOrderBtn:hover {
   background: linear-gradient(145deg, #FFE55C, #FFD700, #FFC107);
-  transform: scale(1.07) rotate(-1deg);
 }
 
-/* 点击：像果冻一样缩小 */
+/* 点击缩小效果 */
 #autoOrderBtn:active {
-  transform: scale(0.93);
-  box-shadow: 0 3px 8px rgba(255, 193, 7, 0.6) inset;
-}
-
-/* 禁用状态 */
-#autoOrderBtn:disabled {
-  background: #f0e68c;
-  color: #ffffff
-  box-shadow: none;
-  cursor: not-allowed;
-}
-
-/* 角落可爱闪光特效 */
-#autoOrderBtn::after {
-  content: "✨";
-  position: absolute;
-  top: -6px;
-  right: 12px;
-  animation: sparkle 1.5s infinite;
-  font-size: 16px;
-  color: #fffacd;
-}
-
-@keyframes sparkle {
-  0% { opacity: 0; transform: scale(0.8) rotate(0deg); }
-  50% { opacity: 1; transform: scale(1.3) rotate(25deg); }
-  100% { opacity: 0; transform: scale(0.8) rotate(0deg); }
+  transform: scale(0.95);
 }
