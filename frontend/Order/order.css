@@ -345,36 +345,37 @@ button:disabled {
   background-color: #bdbdbd;
 }
 
-/* ========= 主容器 ========= */
+/* ========= 容器 ========= */
 .order-actions {
     display: flex;
     flex-direction: column;   /* 上下布局 */
     justify-content: center;  /* 垂直居中 */
     align-items: center;      /* 水平居中 */
-    height: 100vh;            /* 占满整个视口高度 */
-    gap: 20px;                /* 上下容器间距 */
-
-    background: #000;
-    border-radius: 12px;
-    margin: 0;
-    padding: 20px;
+    
+    width: 100%;
+    height: 200px;            /* 容器高度固定，不太高 */
+    padding: 10px;
     box-sizing: border-box;
+
+    background: #000;         /* 黑色背景 */
+    border-radius: 12px;
+    margin: 20px 0;
 }
 
-/* ========= 上方容器 ========= */
+/* ========= 上方图片 ========= */
 .left-side {
-    flex: 2;                  /* 占总高度比例 2/5 */
+    width: 150px;
+    height: 150px;
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-    position: relative;
-    width: 50%;               /* 可以根据需求调整宽度 */
 }
 
 /* 图片和 GIF 居中叠放 */
 .fixed-img, .matching-gif {
-    width: 100%;
-    height: auto;
+    width: 150px;
+    height: 150px;
     position: absolute;
     top: 50%;
     left: 50%;
@@ -384,17 +385,13 @@ button:disabled {
     display: none;
 }
 
-/* ========= 下方容器 ========= */
+/* ========= 下方按钮 ========= */
 .right-side {
-    flex: 3;                  /* 占总高度比例 3/5 */
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 10px;
-    width: 50%;               /* 可根据需求调整宽度 */
+    margin-top: 10px;  /* 图片和按钮间距 */
 }
-
 
 #cooldownDisplay {
   color: red;
