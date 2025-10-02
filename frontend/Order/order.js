@@ -752,14 +752,28 @@ document.getElementById("autoOrderBtn").addEventListener("click", function() {
 });
 
 /* 规则弹窗 */
-const rulesBtn = document.getElementById('Rules');
-const popup = document.getElementById('rulesPopup');
+(() => {
+  const rulesBtn = document.getElementById('Rules');
+  const popup = document.getElementById('rulesPopup');
+  const backBtn = document.getElementById('backBtn');
 
-rulesBtn.addEventListener('click', () => {
-  popup.style.display = 'flex'; // 显示弹窗
-});
+  if (!rulesBtn || !popup || !backBtn) return;
 
-document.getElementById('backBtn').addEventListener('click', () => {
-  popup.style.display = 'none'; // 关闭弹窗
-});
+  rulesBtn.addEventListener('click', () => {
+    popup.style.display = 'flex'; // 显示弹窗
+  });
 
+  backBtn.addEventListener('click', () => {
+    popup.style.display = 'none'; // 关闭弹窗
+  });
+
+  // 点击弹窗背景关闭
+  popup.addEventListener('click', (e) => {
+    if (e.target === popup) popup.style.display = 'none';
+  });
+
+  // 按 Esc 键关闭弹窗
+  document.addEventListener('keydown', (e) => {
+    if (e.key === "Escape") popup.style.display = 'none';
+  });
+})();
