@@ -754,7 +754,7 @@ document.getElementById("autoOrderBtn").addEventListener("click", function() {
 /* 规则弹窗 */
 const rulesBtn = document.getElementById('Rules');
 const popup = document.getElementById('rulesPopup');
-const backBtn = document.getElementById('backBtn');
+const backBtn = document.getElementById('backBtn1');
 
 rulesBtn.addEventListener('click', () => {
   popup.style.display = 'flex'; // 显示弹窗
