@@ -471,51 +471,52 @@ button:disabled {
   background: #e6b800;
 }
 
-/* 弹窗背景 */
-.modal {
-  display: none;
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  justify-content: center;
-  align-items: center;
-}
-
-/* 弹窗内容 */
+/* 弹窗内容：居中+整齐 */
 .modal-content {
   background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  width: 80%;
-  max-height: 80%;
+  padding: 20px 25px;
+  border-radius: 12px;
+  width: 600px;              /* 固定宽度，避免太宽 */
+  max-height: 80vh;          /* 超过窗口高度时滚动 */
   overflow-y: auto;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
   position: relative;
-}
-
-/* 关闭按钮 */
-.close-btn {
-  position: absolute;
-  right: 15px;
-  top: 15px;
-  border: none;
-  background: transparent;
-  font-size: 18px;
-  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;                 /* 让内部元素有间距 */
 }
 
 /* 订单项 */
 .order-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;   /* 图片和文字顶齐 */
   gap: 15px;
+  padding: 12px 0;
   border-bottom: 1px solid #eee;
-  padding: 10px 0;
 }
 
 .order-item img {
-  width: 80px;
-  height: 80px;
+  width: 90px;
+  height: 90px;
   object-fit: cover;
   border-radius: 8px;
+  flex-shrink: 0;            /* 防止图片被挤压 */
+}
+
+.order-item div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;                  /* 每行文字间隔 */
+}
+
+.order-item p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.order-item p b {
+  font-size: 15px;
+  color: #333;
 }
