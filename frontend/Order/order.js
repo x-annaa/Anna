@@ -751,49 +751,59 @@ document.getElementById("autoOrderBtn").addEventListener("click", function() {
   setTimeout(() => setMatchingState(false), 5000);
 });
 
-// 打开窗口
-document.getElementById("viewHistoryBtn").addEventListener("click", async () => {
-  const modal = document.getElementById("historyModal");
-  modal.style.display = "flex";
+// 打开/关闭按钮
+document.getElementById("openHistoryBtn").addEventListener("click", async () => {
+  document.getElementById("orderHistoryModal").style.display = "flex";
+  await loadAllOrders();
+});
 
-  // 读取数据库订单
-  const { data: orders, error } = await supabaseClient
-    .from("orders")
-    .select(`id, total_price, profit, status, created_at, products ( name, url )`)
-    .eq("user_id", window.currentUserId)
-    .order("created_at", { ascending: false });
+document.getElementById("closeHistoryBtn").addEventListener("click", () => {
+  document.getElementById("orderHistoryModal").style.display = "none";
+});
 
-  const list = document.getElementById("historyOrders");
-
-  if (error) {
-    list.innerHTML = `<li>❌ 加载失败：${error.message}</li>`;
+// 加载订单历史
+async function loadAllOrders() {
+  if (!window.currentUserId) {
+    alert("请先登录！");
     return;
   }
 
-  if (!orders?.length) {
-    list.innerHTML = `<li>暂无订单！</li>`;
-    return;
+  try {
+    const { data: orders, error } = await supabaseClient
+      .from("orders")
+      .select(`id, total_price, profit, status, created_at, products ( name, url, profit )`)
+      .eq("user_id", window.currentUserId)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    const container = document.getElementById("orderHistoryList");
+    if (!orders?.length) {
+      container.innerHTML = "<p>暂无订单</p>";
+      return;
+    }
+
+    container.innerHTML = orders.map(o => {
+      const price = Number(o.total_price) || 0;
+      const profit = Number(o.profit) || 0;
+      const profitRatio = Number(o.products?.profit) || 0;
+      const imgUrl = o.products?.url || "";
+
+      return `
+        <div class="order-item">
+          ${imgUrl ? `<img src="${imgUrl}" alt="产品">` : ""}
+          <div>
+            <p><b>${o.products?.name || "未知商品"}</b></p>
+            <p>价格：¥${price.toFixed(2)} | 利润率：${profitRatio} | 收入：+¥${profit.toFixed(2)}</p>
+            <p>状态：${o.status === "completed" ? "✅ 已完成" : "⏳ 待完成"}</p>
+            <p><small>${new Date(o.created_at).toLocaleString()}</small></p>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+  } catch (e) {
+    console.error("加载订单历史失败：", e);
+    alert("加载订单历史失败");
   }
-
-  list.innerHTML = orders.map(o => `
-    <li style="margin-bottom:10px;">
-      <p>🛒 ${o.products?.name || "未知商品"}</p>
-      <p>价格：¥${(o.total_price||0).toFixed(2)} / 收入：+¥${(o.profit||0).toFixed(2)}</p>
-      <p>状态：${o.status === "completed" ? "✅ 已完成" : "⏳ 待完成"}</p>
-      <p>时间：${new Date(o.created_at).toLocaleString()}</p>
-      ${o.products?.url ? `<a href="${o.products.url}" target="_blank">🔗 产品链接</a>` : ""}
-    </li>
-  `).join("");
-});
-
-// 关闭窗口
-document.getElementById("closeHistoryModal").addEventListener("click", () => {
-  document.getElementById("historyModal").style.display = "none";
-});
-
-// 点击空白处关闭
-document.getElementById("historyModal").addEventListener("click", (e) => {
-  if (e.target.id === "historyModal") {
-    document.getElementById("historyModal").style.display = "none";
-  }
-});
+}
