@@ -750,3 +750,16 @@ document.getElementById("autoOrderBtn").addEventListener("click", function() {
   // 模拟匹配完成 5 秒后恢复
   setTimeout(() => setMatchingState(false), 5000);
 });
+
+/* 规则弹窗 */
+const rulesBtn = document.getElementById('Rules');
+const popup = document.getElementById('rulesPopup');
+const backBtn = document.getElementById('backBtn');
+
+rulesBtn.addEventListener('click', () => {
+  popup.style.display = 'flex'; // 显示弹窗
+});
+
+backBtn.addEventListener('click', () => {
+  popup.style.display = 'none'; // 关闭弹窗
+});
