@@ -156,11 +156,16 @@ h2, h3 {
 #Rules {
   color: #fff;
   background-color: #7eb2e6;
-  border: 1x solid #1976d2; /* 框框颜色 */
+  border: 1px solid #1565c0; /* 框框颜色 */
   margin-left: -150px;
   width: 22px;
-  text-align: center; 
+  height: 22px;          /* 高度和宽度相同，才能成圆形 */
+  border-radius: 50%;    /* 圆形 */
+  text-align: center;    /* 文字居中 */
+  line-height: 22px;     /* 文字垂直居中 */
+  cursor: pointer;
 }
+
 
 
 /* ========= 最近订单历史 ========= */
