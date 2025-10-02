@@ -150,14 +150,16 @@ h2, h3 {
 #History {
   color: #fff;
   background-color: #1976d2;
-  border: 2px solid #1565c0; /* 框框颜色 */
+  border: 1px solid #1565c0; /* 框框颜色 */
 }
 
 #Rules {
   color: #fff;
-  background-color: #f57c00;
-  border: 2px solid #e65100; /* 框框颜色 */
+  background-color: #1976d2;
+  border: 1x solid #1565c0; /* 框框颜色 */
   margin-left: -150px;
+  width: 10px;
+  text-align: center; 
 }
 
 
