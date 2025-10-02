@@ -471,13 +471,13 @@ button:disabled {
   background: #e6b800;
 }
 
-/* 父容器水平居中 */
+/* 按钮父容器水平居中 */
 #extraButtons {
-  display: flex;            /* 横向排列 */
-  justify-content: center;  /* 水平居中 */
-  align-items: center;      /* 垂直居中 */
-  gap: 15px;                /* 按钮之间间距 */
-  margin-bottom: 20px;      /* 容器下方间距 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
 }
 
 /* 按钮样式 */
@@ -486,16 +486,69 @@ button:disabled {
   font-size: 16px;
   border: none;
   border-radius: 8px;
-  background-color: #4CAF50; /* 绿色按钮，可自定义 */
+  background-color: #4CAF50;
   color: white;
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
 #extraButtons button:hover {
-  background-color: #45a049; /* 悬停颜色 */
+  background-color: #45a049;
 }
 
 #extraButtons button:active {
-  transform: scale(0.98);   /* 点击缩小效果 */
+  transform: scale(0.98);
+}
+
+/* 模态框全屏半透明背景 */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5); /* 半透明黑色背景 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* 模态框内容容器 */
+.modal-content {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 20px;
+  max-width: 700px;       /* 最大宽度 */
+  width: 90%;             /* 自适应屏幕 */
+  max-height: 80%;        /* 最大高度，避免撑满屏幕 */
+  overflow-y: auto;       /* 内容过多滚动 */
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  position: relative;
+}
+
+/* 关闭按钮 */
+.modal-content .close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #333;
+}
+
+/* 列表美化 */
+#allOrdersList li {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#allOrdersList img {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 5px;
 }
