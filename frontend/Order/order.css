@@ -353,7 +353,7 @@ button:disabled {
     align-items: center;      /* 水平居中 */
     
     width: 100%;
-    height: 185px;            /* 容器高度固定，不太高 */
+    height: 145px;            /* 容器高度固定，不太高 */
     padding: 10px;
     box-sizing: border-box;
 
@@ -449,6 +449,7 @@ button:disabled {
   cursor: pointer;
   transition: background 0.3s ease;
   letter-spacing: 1px;
+  margin-bottom: 10px;
 }
 
 /* 悬停略微加亮 */
