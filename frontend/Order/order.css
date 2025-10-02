@@ -362,7 +362,7 @@ button:disabled {
     margin: 11px 0;
 }
 
-/* ========= 上方图片 ========= */
+/* ========= 上方图片/GIF ========= */
 .left-side {
     width: 150px;
     height: 150px;
@@ -370,6 +370,9 @@ button:disabled {
     display: flex;
     justify-content: center;
     align-items: center;
+
+    /* 上下偏移量，可调节 */
+    margin-bottom: 10px;   /* 图片和按钮之间的距离 */
 }
 
 /* 图片和 GIF 居中叠放 */
@@ -377,8 +380,8 @@ button:disabled {
     width: 130px;
     height: 130px;
     position: absolute;
-    top: 50%;
-    left: 50%;
+    top: 50%;  /* 容器内垂直居中 */
+    left: 50%; /* 容器内水平居中 */
     transform: translate(-50%, -50%);
 }
 .matching-gif {
@@ -390,8 +393,11 @@ button:disabled {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: 0px;  /* 图片和按钮间距 */
+
+    /* 如果想调整按钮上下位置，可以用 margin-top */
+    margin-top: 0px;  
 }
+
 
 #cooldownDisplay {
   color: red;
