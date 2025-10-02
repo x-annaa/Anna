@@ -407,36 +407,28 @@ button:disabled {
 
 /* --- 三栏外层：横向且等高 --- */
 .main-container {
-  width: 100%;
-  display: flex;       /* 横向排列 */
-  gap: 10px;           /* 容器之间间距，可根据需要调整 */
+  width: 100%;          /* 固定占满整个父容器宽度 */
+  display: flex;        /* 横向排列 */
 }
 
 .order-roundandcooldown {
-  width: 80%;
-  background-color: #f0f0f0; /* 浅灰色，方便调试 */
-  padding: 10px;
+  width: 80%;           /* 占大容器80% */
+  background-color: #f0f0f0;
   box-sizing: border-box;
+  padding: 10px;
 }
 
-.history-wrap {
-  width: 10%;
+.history-wrap, .rules-wrap {
+  width: 10%;           /* 各占大容器10% */
+  background-color: #d0d0d0;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.rules-wrap {
-  width: 10%;
-}
-
-/* 可选：按钮撑满容器 */
 .history-wrap button, .rules-wrap button {
-  width: 100%;
-}
-
-
-#cooldownDisplay {
-  font-weight: bold;
-  font-size: 13px;
-  color: red;
+  width: 100%;          /* 按钮填满各自容器 */
 }
 
 #cooldownDisplay {
