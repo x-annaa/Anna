@@ -152,7 +152,37 @@
   
     <!-- 最近订单 -->
     <div id="orderResult" class="order-result"></div>
+    
+    <!-- 历史-规则 -->
+    <div id="extraButtons" style="display:flex; gap:10px; margin-bottom:20px;">
+      <button id="viewAllOrdersBtn">📜</button>
+      <button id="viewRulesBtn">📖</button>
+    </div>
 
+    <!-- 全部订单模态框 -->
+    <div id="allOrdersModal" class="modal" style="display:none;">
+      <div class="modal-content">
+        <span id="closeAllOrders" class="close">&times;</span>
+        <h3>所有订单历史</h3>
+        <ul id="allOrdersList"></ul>
+      </div>
+    </div>
+
+    <!-- 规则阅读模态框 -->
+    <div id="rulesModal" class="modal" style="display:none;">
+      <div class="modal-content">
+        <span id="closeRules" class="close">&times;</span>
+        <h3>规则说明</h3>
+        <div id="rulesContent">
+          <p>1. 每轮最多下单 X 次</p>
+          <p>2. Coins 不足无法下单</p>
+          <p>3. 本轮完成订单数达到后进入冷却</p>
+          <p>4. …</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 五个订单 -->
     <div class="order-history">
       <h3>🕘 最近订单</h3>
       <ul id="recentOrders">
