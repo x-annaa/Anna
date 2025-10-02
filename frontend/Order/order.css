@@ -417,10 +417,8 @@ button:disabled {
   height: 150px;
   position: relative;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 10px;
 }
 
 /* 右侧文本样式 */
