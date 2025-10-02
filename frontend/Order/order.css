@@ -345,56 +345,56 @@ button:disabled {
   background-color: #bdbdbd;
 }
 
-/* ========= 黑色背景，上下剧中 ========= */
+/* ========= 主容器 ========= */
 .order-actions {
     display: flex;
     flex-direction: column;   /* 上下布局 */
     justify-content: center;  /* 垂直居中 */
     align-items: center;      /* 水平居中 */
-    gap: 20px;                /* 上下容器之间的间距 */
-    
+    gap: 5%;                  /* 上下间距用百分比 */
+
     width: 100%;
-    height: 300px;            /* 容器高度 */
-    padding: 20px;
+    height: 50%;              /* 总高度用百分比，根据父容器调整 */
+    padding: 2%;
     box-sizing: border-box;
-    position: relative;
 
     background: #000;         /* 黑色背景 */
     border-radius: 12px;
-    margin: 20px 0;
-    overflow: hidden;
+    margin: 2% 0;
 }
 
-/* 上方容器 */
+/* ========= 上方容器 ========= */
 .left-side {
-  width: 150px;
-  height: 150px;
+  width: 30%;                 /* 宽度百分比 */
+  height: 40%;                /* 高度百分比 */
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* 固定图片和 GIF（叠在一起） */
+/* 图片和 GIF 居中叠放 */
 .fixed-img, .matching-gif {
-  width: 150px;
-  height: 150px;
+  width: 100%;                /* 占满父容器宽度 */
+  height: auto;               /* 高度自适应保持比例 */
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 .matching-gif {
   display: none;
 }
 
-/* 下方容器 */
+/* ========= 下方容器 ========= */
 .right-side {
-  width: 150px;
-  height: 150px;
+  width: 30%;                 /* 宽度百分比 */
+  height: 40%;                /* 高度百分比 */
   display: flex;
   flex-direction: column;
-  justify-content: center;   /* 垂直居中 */
-  align-items: center;       /* 水平居中 */
-  gap: 10px;
+  justify-content: center;    /* 垂直居中 */
+  align-items: center;        /* 水平居中 */
+  gap: 5%;
 }
 
 #cooldownDisplay {
