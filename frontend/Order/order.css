@@ -147,6 +147,8 @@ h2, h3 {
   background-color: #1565c0;
 }
 
+#Rules { margin-left: 0; }
+
 
 /* ========= 最近订单历史 ========= */
 .order-history {
