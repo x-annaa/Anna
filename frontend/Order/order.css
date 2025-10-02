@@ -150,13 +150,16 @@ h2, h3 {
 #History {
   color: #fff;
   background-color: #1976d2;
+  border: 2px solid #1565c0; /* 框框颜色 */
 }
 
 #Rules {
   color: #fff;
   background-color: #f57c00;
-  margin-left: -150;
+  border: 2px solid #e65100; /* 框框颜色 */
+  margin-left: -150px;
 }
+
 
 /* ========= 最近订单历史 ========= */
 .order-history {
