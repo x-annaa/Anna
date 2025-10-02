@@ -408,29 +408,49 @@ button:disabled {
 /* 轮次-倒计时 */
 .order-roundandcoldown {
   display: flex;
-  justify-content: space-between; /* 左右分开 */
-  align-items: center;           /* 垂直居中 */
+  justify-content: space-between; 
+  align-items: center;
   width: 100%;
-  padding: 5px 12px;            /* 内边距 */
+  padding: 5px 12px;
   margin-bottom: 10px;
   font-family: Arial, sans-serif;
-  border: 1px solid #ddd;        /* 边框 */
-  border-radius: 10px;           /* 圆角 */
-  background-color: #fafafa;     /* 背景色 */
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background-color: #fafafa;
   box-sizing: border-box;
 }
 
+/* 左边容器 80% */
+.progress-container {
+  display: flex;
+  justify-content: space-between; /* roundProgress 在左，cooldown 在右 */
+  align-items: center;
+  width: 80%;
+}
+
+/* 两个按钮各 10% */
+#viewAllOrdersBtn,
+#viewRulesBtn {
+  width: 10%;
+  min-width: 60px; /* 防止太窄，可以根据需要调整 */
+  padding: 5px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* 原有样式 */
 #roundProgress {
   font-weight: bold;
-  font-size: 13px; /* 左边字体大小 */
+  font-size: 13px;
   color: #8fbbec;
 }
 
 #cooldownDisplay {
   font-weight: bold;
-  font-size: 13px; /* 右边字体大小 */
+  font-size: 13px;
   color: red;
 }
+
 
 /* 金黄色按钮 */
 #autoOrderBtn {
