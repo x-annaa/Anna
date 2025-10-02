@@ -147,8 +147,16 @@ h2, h3 {
   background-color: #1565c0;
 }
 
-#Rules { margin-left: -150; }
+#History {
+  color: #fff;
+  background-color: #1976d2;
+}
 
+#Rules {
+  color: #fff;
+  background-color: #f57c00;
+  margin-left: -150;
+}
 
 /* ========= 最近订单历史 ========= */
 .order-history {
