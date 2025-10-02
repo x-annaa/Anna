@@ -419,14 +419,12 @@ button:disabled {
   box-sizing: border-box;
 }
 
-.history-wrap, .rules-wrap {
+.history-wrap {
   width: 10%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #d0d0d0; /* 浅灰色，方便调试 */
-  padding: 10px;
-  box-sizing: border-box;
+}
+
+.rules-wrap {
+  width: 10%;
 }
 
 /* 可选：按钮撑满容器 */
