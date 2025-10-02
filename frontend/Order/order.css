@@ -507,7 +507,7 @@ button:disabled {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0,0,0,0.5); /* 半透明黑色背景 */
+  background-color: rgba(0,0,0,0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -518,16 +518,16 @@ button:disabled {
 .modal-content {
   background-color: #fff;
   border-radius: 10px;
-  padding: 20px;
-  max-width: 700px;       /* 最大宽度 */
-  width: 90%;             /* 自适应屏幕 */
-  max-height: 80%;        /* 最大高度，避免撑满屏幕 */
-  overflow-y: auto;       /* 内容过多滚动 */
+  padding: 20px 20px 10px 20px; /* 底部留空间滚动条 */
+  max-width: 700px;
+  width: 90%;
+  max-height: 80%;
+  overflow-y: auto;
   box-shadow: 0 4px 15px rgba(0,0,0,0.3);
   position: relative;
 }
 
-/* 关闭按钮 */
+/* 关闭按钮固定右上角 */
 .modal-content .close {
   position: absolute;
   top: 10px;
@@ -536,19 +536,32 @@ button:disabled {
   font-weight: bold;
   cursor: pointer;
   color: #333;
+  z-index: 1001; /* 保证在内容上方 */
 }
 
-/* 列表美化 */
+/* 订单列表美化 */
+#allOrdersList {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
 #allOrdersList li {
-  margin-bottom: 10px;
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 5px 0;
+  font-size: 14px;  /* 字体小一点 */
+  border-bottom: 1px solid #eee;
+}
+
+#allOrdersList li:last-child {
+  border-bottom: none;
 }
 
 #allOrdersList img {
-  width: 50px;
-  height: 50px;
+  width: 40px;       /* 图片小一点 */
+  height: 40px;
   object-fit: cover;
   border-radius: 5px;
 }
