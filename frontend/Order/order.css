@@ -171,11 +171,13 @@ h2, h3 {
 }
 
 .order-history li {
-  padding: 10px 12px;
-  background: #fafafa; 
-  border-bottom: 1px solid #eee;
-  font-size: 8px;
+    padding: 10px 12px;
+    background: #fafafa;
+    border-bottom: 1px solid #eee;
+    font-size: 10px;
+    text-align: center;   /* 文字居中 */
 }
+
 
 .order-history li:last-child {
   border-bottom: none;
