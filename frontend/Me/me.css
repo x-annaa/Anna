@@ -37,12 +37,12 @@
   text-align: left;   /* 左对齐 */
 }
 
-/* ======================
-   余额区
-   ====================== */
 .balance-box {
-  text-align: center;
+  display: flex;
+  flex-direction: column;  /* 让内容上下排 */
+  align-items: center;     /* 水平居中 */
   margin: 20px 0;
+  text-align: center;      /* 保证文字居中 */
 }
 
 .balance-box p {
@@ -57,21 +57,6 @@
   justify-content: center;
   gap: 15px;
   margin-top: 12px;
-}
-
-.balance-actions button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 10px;
-  background: #007bff;
-  color: white;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background 0.3s;
-}
-
-.balance-actions button:hover {
-  background: #0056b3;
 }
 
 /* ======================
