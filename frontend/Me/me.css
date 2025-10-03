@@ -9,21 +9,15 @@
   align-items: center;   /* 整体居中 */
 }
 
-/* 所有主要容器统一宽度 */
-.user-info,
-.balance-box,
-.my-buttons {
-  width: 80%;
-  max-width: 400px;      /* 限制最大宽度，手机/PC都好看 */
-  margin: 0 auto;
-}
-
 /* ======================
    用户信息
    ====================== */
 .user-info {
   display: flex;
-  align-items: center;   /* 头像和文字垂直居中 */
+  align-items: center;
+  width: 80%;
+  max-width: 400px;
+  margin: 0 auto;
   padding: 10px;
   background: #fafafa;
   border-radius: 8px;
@@ -33,56 +27,57 @@
 .user-info .avatar {
   width: 60px;
   height: 60px;
-  border-radius: 50%;   /* 圆形头像 */
-  object-fit: cover;    /* 保持比例 */
-  margin-right: 15px;   /* 头像和文字间隔 */
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 15px;
   border: 2px solid #ddd;
 }
 
 .user-info .info-text {
   display: flex;
-  flex-direction: column;  /* 文字上下排列 */
+  flex-direction: column;
 }
 
 .user-info p {
   margin: 4px 0;
   font-size: 14px;
-  text-align: left;   /* 左对齐 */
+  text-align: left;
 }
 
 /* ======================
    余额区
    ====================== */
 .balance-box {
+  width: 80%;
+  max-width: 400px;
   margin: 20px auto;
   display: flex;
-  flex-direction: column;  /* 上下排 */
-  align-items: center;     /* 内容水平居中 */
-  text-align: center;      /* 文字居中 */
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
   padding: 20px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #f0f8ff, #dbeafe); /* 渐变背景 */
+  background: linear-gradient(135deg, #f0f8ff, #dbeafe);
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 .balance-box p {
-  width: 100%;            /* 跟容器保持一致 */
+  width: 100%;       /* 跟父容器宽度一致 */
   font-size: 16px;
   font-weight: bold;
-  color: #333;  
+  color: #333;
   margin: 0 0 12px 0;
 }
 
 .balance-actions {
-  width: 100%;
+  width: 100%;       /* 容器宽度 */
   display: flex;
   justify-content: center;
   gap: 15px;
-  margin-top: 12px;
 }
 
 .balance-actions button {
-  flex: 1;  /* 按钮自适应分布 */
+  width: 100%;       /* 按钮宽度 = 父容器宽度 */
   padding: 10px 18px;
   border: none;
   border-radius: 10px;
@@ -104,15 +99,16 @@
    我的页面按钮区
    ====================== */
 .my-buttons {
-  margin-top: 30px;
+  width: 80%;
+  max-width: 400px;
+  margin: 30px auto 0 auto;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  align-items: center;
 }
 
 .my-buttons button {
-  width: 100%;  /* 统一和容器宽度一致 */
+  width: 100%;       /* 按钮宽度 = 父容器宽度 */
   padding: 10px;
   border: none;
   border-radius: 8px;
@@ -126,7 +122,7 @@
 }
 
 /* ======================
-   通用弹窗样式
+   弹窗及其它样式保持不变
    ====================== */
 .modal {
   display: none;
@@ -171,9 +167,7 @@
   letter-spacing: 2px;
 }
 
-/* ======================
-   弹窗操作按钮
-   ====================== */
+/* 弹窗按钮 */
 .modal-actions {
   display: flex;
   justify-content: space-around;
@@ -206,9 +200,7 @@
   background: #0056b3;
 }
 
-/* ======================
-   特殊按钮（提现密码）
-   ====================== */
+/* 特殊按钮 */
 #setPasswordBtn {
   margin-top: 10px;
   padding: 6px 12px;
@@ -224,9 +216,7 @@
   background: rgba(0, 123, 255, 0.1);
 }
 
-/* ======================
-   Logout 弹窗单独调整
-   ====================== */
+/* Logout 弹窗 */
 #logoutModal .modal-content {
   width: 260px;
 }
