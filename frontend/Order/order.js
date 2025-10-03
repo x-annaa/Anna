@@ -709,11 +709,11 @@ async function loadRecentOrders() {
       .eq("user_id", window.currentUserId);
 
     const historyTitle = document.querySelector(".order-history h3");
-    if (historyTitle) historyTitle.textContent = `Total：${totalCount || 0}`;
+    if (historyTitle) historyTitle.textContent = `🕘 最近订单 订单数：${totalCount || 0}单`;
 
     const list = document.getElementById("recentOrders");
     if (list) {
-      if (!recentOrders?.length) list.innerHTML = `<li>There are currently no orders！</li>`;
+      if (!recentOrders?.length) list.innerHTML = `<li>暂无订单！</li>`;
       else list.innerHTML = recentOrders.map(o => {
         const price = Number(o.total_price) || 0;
         const profit = Number(o.profit) || 0;
@@ -749,29 +749,4 @@ document.getElementById("autoOrderBtn").addEventListener("click", function() {
 
   // 模拟匹配完成 5 秒后恢复
   setTimeout(() => setMatchingState(false), 5000);
-});
-
-/* 规则弹窗 */
-document.addEventListener("DOMContentLoaded", () => {
-  const rulesBtn = document.getElementById('Rules');
-  const popup = document.getElementById('rulesPopup');
-
-  if (!rulesBtn || !popup) return;
-
-  // 显示弹窗
-  rulesBtn.addEventListener('click', () => {
-    popup.style.display = 'flex';
-  });
-
-  // 委托点击事件
-  popup.addEventListener('click', (e) => {
-    if (e.target.id === 'backBtn' || e.target === popup) {
-      popup.style.display = 'none'; // 点击 backBtn 或背景关闭弹窗
-    }
-  });
-
-  // 按 Esc 键关闭弹窗
-  document.addEventListener('keydown', (e) => {
-    if (e.key === "Escape") popup.style.display = 'none';
-  });
 });
