@@ -42,10 +42,10 @@
    ====================== */
 .balance-box {
   width: 80%;
+  margin: 20px auto;       /* 整个盒子居中 */
   display: flex;
   flex-direction: column;  /* 上下排 */
-  align-items: center;     /* 水平居中 */
-  margin: 20px 0;
+  align-items: center;     /* 内容水平居中 */
   text-align: center;      /* 文字居中 */
   padding: 20px;
   border-radius: 12px;
@@ -55,6 +55,7 @@
 
 .balance-box p {
   width: 80%;
+  margin: 0 auto;  /* 居中 */
   font-size: 16px;
   font-weight: bold;
   color: #333;  /* 深色文字 */
@@ -62,10 +63,10 @@
 
 .balance-actions {
   width: 80%;
+  margin: 12px auto 0; /* 居中 */
   display: flex;
   justify-content: center;
   gap: 15px;
-  margin-top: 12px;
 }
 
 .balance-actions button {
@@ -86,7 +87,6 @@
   transform: translateY(-2px); /* 鼠标悬停轻微上浮 */
 }
 
-
 /* ======================
    我的页面按钮区
    ====================== */
@@ -95,10 +95,12 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  align-items: center; /* 按钮整体居中 */
 }
 
 .my-buttons button {
   width: 80%;
+  margin: 0 auto;  /* 居中 */
   padding: 10px;
   border: none;
   border-radius: 8px;
