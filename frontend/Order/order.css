@@ -149,12 +149,12 @@ h2, h3 {
 }
 
 .order-history h3 {
-  display: flex;
-  background: #fafafa;
-  justify-content: space-between;
-  align-items: center;
-  padding: 5px 12px;
-  font-size: 15px;
+    display: flex;
+    justify-content: center;  /* 横向居中 */
+    align-items: center;      /* 垂直居中 */
+    background: #fafafa;
+    padding: 5px 12px;
+    font-size: 15px;
 }
 
 .order-count {
