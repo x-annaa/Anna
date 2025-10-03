@@ -41,6 +41,7 @@
    余额区
    ====================== */
 .balance-box {
+  width: 80%;
   display: flex;
   flex-direction: column;  /* 上下排 */
   align-items: center;     /* 水平居中 */
