@@ -4,6 +4,18 @@
 #myPage {
   padding: 20px;
   font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;   /* 整体居中 */
+}
+
+/* 所有主要容器统一宽度 */
+.user-info,
+.balance-box,
+.my-buttons {
+  width: 80%;
+  max-width: 400px;      /* 限制最大宽度，手机/PC都好看 */
+  margin: 0 auto;
 }
 
 /* ======================
@@ -15,6 +27,7 @@
   padding: 10px;
   background: #fafafa;
   border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
 .user-info .avatar {
@@ -28,7 +41,7 @@
 
 .user-info .info-text {
   display: flex;
-  flex-direction: column;  /* 让文字上下排列 */
+  flex-direction: column;  /* 文字上下排列 */
 }
 
 .user-info p {
@@ -41,8 +54,7 @@
    余额区
    ====================== */
 .balance-box {
-  width: 80%;
-  margin: 20px auto;       /* 整个盒子居中 */
+  margin: 20px auto;
   display: flex;
   flex-direction: column;  /* 上下排 */
   align-items: center;     /* 内容水平居中 */
@@ -50,30 +62,31 @@
   padding: 20px;
   border-radius: 12px;
   background: linear-gradient(135deg, #f0f8ff, #dbeafe); /* 渐变背景 */
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* 阴影更立体 */
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 .balance-box p {
-  width: 80%;
-  margin: 0 auto;  /* 居中 */
+  width: 100%;            /* 跟容器保持一致 */
   font-size: 16px;
   font-weight: bold;
-  color: #333;  /* 深色文字 */
+  color: #333;  
+  margin: 0 0 12px 0;
 }
 
 .balance-actions {
-  width: 80%;
-  margin: 12px auto 0; /* 居中 */
+  width: 100%;
   display: flex;
   justify-content: center;
   gap: 15px;
+  margin-top: 12px;
 }
 
 .balance-actions button {
+  flex: 1;  /* 按钮自适应分布 */
   padding: 10px 18px;
   border: none;
   border-radius: 10px;
-  background: linear-gradient(135deg, #007bff, #0056b3); /* 按钮渐变色 */
+  background: linear-gradient(135deg, #007bff, #0056b3);
   color: white;
   cursor: pointer;
   font-size: 14px;
@@ -83,8 +96,8 @@
 }
 
 .balance-actions button:hover {
-  background: linear-gradient(135deg, #0056b3, #003f7f); /* hover 更深 */
-  transform: translateY(-2px); /* 鼠标悬停轻微上浮 */
+  background: linear-gradient(135deg, #0056b3, #003f7f);
+  transform: translateY(-2px);
 }
 
 /* ======================
@@ -95,12 +108,11 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  align-items: center; /* 按钮整体居中 */
+  align-items: center;
 }
 
 .my-buttons button {
-  width: 80%;
-  margin: 0 auto;  /* 居中 */
+  width: 100%;  /* 统一和容器宽度一致 */
   padding: 10px;
   border: none;
   border-radius: 8px;
@@ -156,7 +168,7 @@
   border: 1px solid #ccc;
   font-size: 16px;
   text-align: center;
-  letter-spacing: 2px; /* 让数字更清晰 */
+  letter-spacing: 2px;
 }
 
 /* ======================
