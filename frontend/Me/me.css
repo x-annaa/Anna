@@ -10,9 +10,33 @@
    用户信息
    ====================== */
 .user-info {
-  text-align: right;
-  margin-bottom: 20px;
+  display: flex;
+  align-items: center;   /* 头像和文字垂直居中 */
+  padding: 10px;
+  background: #fafafa;
+  border-radius: 8px;
 }
+
+.user-info .avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;   /* 圆形头像 */
+  object-fit: cover;    /* 保持比例 */
+  margin-right: 15px;   /* 头像和文字间隔 */
+  border: 2px solid #ddd;
+}
+
+.user-info .info-text {
+  display: flex;
+  flex-direction: column;  /* 让文字上下排列 */
+}
+
+.user-info p {
+  margin: 4px 0;
+  font-size: 14px;
+  text-align: left;   /* 左对齐 */
+}
+
 
 .user-info p {
   margin: 5px 0;
