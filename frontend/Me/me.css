@@ -57,8 +57,12 @@
 .balance-box p {
   font-size: 16px;
   font-weight: bold;
-  margin: 5px;
+  margin: 8px;
+  background: #666;      /* 灰色背景 */
+  border-radius: 8px;    /* 圆角 */
+  color: #fff;           /* 白色文字 */
 }
+
 
 .balance-actions {
   display: flex;
