@@ -43,6 +43,12 @@
 .balance-box {
   text-align: center;
   margin: 20px 0;
+  padding: 16px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #ffdf5e, #ff8c00);
+  box-shadow: 0 6px 15px rgba(255,140,0,0.4);
+  color: #fff;
+  font-weight: bold;
 }
 
 .balance-box p {
