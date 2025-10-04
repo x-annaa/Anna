@@ -55,17 +55,10 @@
 }
 
 .balance-box p {
-  font-size: 16px;
-  font-weight: bold;
-  margin: 8px;
-  padding: 10px 15px;              /* 内边距让内容更舒服 */
-  background-color: #666;          /* 灰色背景 */
-  color: #fff;                     /* 白色文字 */
-  border-radius: 8px;              /* 圆角 */
-  display: inline-block;           /* 让它根据内容自适应宽度 */
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15); /* 小阴影更立体 */
+    font-size: 16px;
+    font-weight: bold;
+    margin: 8px;
 }
-
 
 .balance-actions {
   display: flex;
