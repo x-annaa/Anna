@@ -216,12 +216,12 @@
 }
 
 .modal-actions button:last-child {
-  background: #95c5f8;
+  background: #0079f9;
   color: white;
 }
 
 .modal-actions button:last-child:hover {
-  background: #99c2f4;
+  background: #0a78ff;
 }
 
 /* ======================
@@ -233,7 +233,7 @@
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: rgb(0, 0, 255);
+  color: rgb(99, 197, 249);
   font-size: 13px;
   cursor: pointer;
 }
