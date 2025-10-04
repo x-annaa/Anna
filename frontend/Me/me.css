@@ -28,34 +28,22 @@
 
 .user-info .info-text {
   display: flex;
-  flex-direction: column;  /* 让文字上下排列 */
+  flex-direction: column;  /* 文字上下排列 */
 }
-
-.user-info p {
-  margin: 4px 0;
-  font-size: 14px;
-  text-align: left;   /* 左对齐 */
-}
-
 
 .user-info p {
   margin: 5px 0;
   font-size: 14px;
+  text-align: left;   /* 左对齐 */
 }
 
 /* ======================
    余额区
    ====================== */
 .balance-box {
-  text-align: center;
-  margin: 20px 0;
-  background: #fafafa;
-  border-radius: 8px;
-  padding: 10px;
-}
-
-.balance-box {
     position: relative;
+    text-align: center;
+    margin: 20px 0;
     padding: 20px;
     border-radius: 16px;
     background: linear-gradient(135deg, #4b6cb7, #182848);
@@ -90,12 +78,12 @@
     z-index: 1;
 }
 
-/* 1 */
+/* 余额操作按钮 */
 .balance-actions {
   display: flex;
   justify-content: center;
   gap: 15px;
-  margin: 10px;
+  margin: 10px 0;
 }
 
 .balance-actions button {
@@ -134,6 +122,25 @@
 
 .my-buttons button:hover {
   background: #ddd;
+}
+
+/* 示例：提现与充值按钮单独颜色 */
+.my-buttons button.withdraw {
+  background: linear-gradient(135deg, #FF6B6B, #FF3D3D);
+  color: white;
+}
+
+.my-buttons button.withdraw:hover {
+  background: linear-gradient(135deg, #FF3D3D, #FF6B6B);
+}
+
+.my-buttons button.deposit {
+  background: linear-gradient(135deg, #6BCB77, #2D9C6B);
+  color: white;
+}
+
+.my-buttons button.deposit:hover {
+  background: linear-gradient(135deg, #2D9C6B, #6BCB77);
 }
 
 /* ======================
@@ -179,7 +186,7 @@
   border: 1px solid #ccc;
   font-size: 16px;
   text-align: center;
-  letter-spacing: 2px; /* 让数字更清晰 */
+  letter-spacing: 2px; /* 数字更清晰 */
 }
 
 /* ======================
@@ -214,7 +221,7 @@
 }
 
 .modal-actions button:last-child:hover {
-  background: #77b3f4;
+  background: #5a9ae6;
 }
 
 /* ======================
