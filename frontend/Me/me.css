@@ -44,8 +44,8 @@
     position: relative;
     text-align: center;
     margin: 20px 0;
-    padding: 10px;
-    border-radius: 16px;
+    padding: 20px;
+    border-radius: 10px;
     background: linear-gradient(135deg, #4b6cb7, #182848);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
     overflow: hidden;
