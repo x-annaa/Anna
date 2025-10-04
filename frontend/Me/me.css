@@ -54,54 +54,35 @@
   padding: 10px;
 }
 
-.balance-box {
-  position: relative;
-  text-align: center;
-  margin: 20px 0;
-  color: white;
-  border-radius: 12px;
-  padding: 30px;
-  background: radial-gradient(circle at 20% 30%, #2b65ec, transparent 40%),
-              radial-gradient(circle at 80% 70%, #ff6b6b, transparent 40%),
-              radial-gradient(circle at 50% 50%, #6a0dad, #0b0c2a);
-  background-blend-mode: screen;
-  box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
-  overflow: hidden;
-}
-
-/* 加入球体星球效果 */
-.balance-box::before {
-  content: "";
-  position: absolute;
-  top: 40%;
-  left: 10%;
-  width: 120px;
-  height: 120px;
-  background: radial-gradient(circle at 30% 30%, #ff884d, #c93c00 70%, #421c00 100%);
-  border-radius: 50%;
-  box-shadow: 0 0 40px rgba(255, 136, 77, 0.4);
-  filter: blur(1px);
-}
-
-.balance-box::after {
-  content: "";
-  position: absolute;
-  bottom: 20%;
-  right: 10%;
-  width: 140px;
-  height: 140px;
-  background: radial-gradient(circle at 25% 25%, #2eb8ff, #004d80 70%, #001933 100%);
-  border-radius: 50%;
-  box-shadow: 0 0 50px rgba(46, 184, 255, 0.4);
-  filter: blur(2px);
-}
-
 .balance-box p {
-  font-size: 16px;
-  font-weight: bold;
-  margin: 8px;
-  position: relative;
-  z-index: 2; /* 确保文字在球体上方 */
+    font-size: 16px;
+    font-weight: bold;
+    margin: 8px;
+    color: white;
+    padding: 16px 20px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #4b6cb7, #182848);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+    letter-spacing: 0.5px;
+}
+
+/* 模拟银行卡上那种微妙的光泽 */
+.balance-box p::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -75%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(120deg, rgba(255,255,255,0.3), rgba(255,255,255,0));
+    transform: skewX(-25deg);
+    transition: 0.8s;
+}
+
+.balance-box p:hover::before {
+    left: 125%;
 }
 
 /* 1 */
