@@ -49,6 +49,8 @@
 .balance-box {
   text-align: center;
   margin: 20px 0;
+  background: #fafafa;
+  border-radius: 8px;
 }
 
 .balance-box p {
