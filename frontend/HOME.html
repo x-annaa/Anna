@@ -197,7 +197,22 @@
     </div>
 
     <div class="my-buttons">
+      <button id="changeLoginPwdBtn">AAA1</button>
       <button id="logoutBtn">Logout</button>
+    </div>
+
+    <!-- 修改登录密码弹窗 -->
+    <div id="changeLoginPwdModal" class="modal">
+      <div class="modal-content">
+        <h3>修改登录密码</h3>
+        <input type="password" id="currentLoginPwd" placeholder="输入当前登录密码" />
+        <input type="password" id="newLoginPwd" placeholder="输入新密码" />
+        <input type="password" id="confirmLoginPwd" placeholder="确认新密码" />
+        <div class="modal-actions">
+          <button id="cancelChangeLoginPwd">取消</button>
+          <button id="saveChangeLoginPwd">保存</button>
+        </div>
+      </div>
     </div>
   </div>
 
