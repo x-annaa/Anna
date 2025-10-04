@@ -58,31 +58,27 @@
     font-size: 16px;
     font-weight: bold;
     margin: 8px;
-    color: white;
+    color: #ffffff;
     padding: 16px 20px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #4b6cb7, #182848);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    border-radius: 16px;
+    background: linear-gradient(135deg, #56CCF2, #2F80ED); /* 蓝天渐变 */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     position: relative;
     overflow: hidden;
     letter-spacing: 0.5px;
 }
 
-/* 模拟银行卡上那种微妙的光泽 */
+/* 微光效果，让卡片更有质感 */
 .balance-box p::before {
     content: "";
     position: absolute;
-    top: 0;
-    left: -75%;
-    width: 50%;
-    height: 100%;
-    background: linear-gradient(120deg, rgba(255,255,255,0.3), rgba(255,255,255,0));
-    transform: skewX(-25deg);
-    transition: 0.8s;
-}
-
-.balance-box p:hover::before {
-    left: 125%;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.25), transparent 70%);
+    transform: rotate(-20deg);
+    pointer-events: none;
 }
 
 /* 1 */
