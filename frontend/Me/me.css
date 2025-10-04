@@ -54,31 +54,40 @@
   padding: 10px;
 }
 
-.balance-box p {
-    font-size: 16px;
-    font-weight: bold;
-    margin: 8px;
-    color: #ffffff;
-    padding: 16px 20px;
-    border-radius: 16px;
-    background: linear-gradient(135deg, #56CCF2, #2F80ED); /* 蓝天渐变 */
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+.balance-box {
     position: relative;
+    padding: 20px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #4b6cb7, #182848);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
     overflow: hidden;
-    letter-spacing: 0.5px;
+    color: white;
 }
 
-/* 微光效果，让卡片更有质感 */
-.balance-box p::before {
+/* 微光效果覆盖整个盒子 */
+.balance-box::before {
     content: "";
     position: absolute;
     top: -50%;
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.25), transparent 70%);
-    transform: rotate(-20deg);
-    pointer-events: none;
+    background: linear-gradient(120deg, rgba(255,255,255,0.3), rgba(255,255,255,0));
+    transform: skewX(-25deg);
+    transition: 0.8s;
+}
+
+.balance-box:hover::before {
+    left: 125%;
+}
+
+/* 文字样式 */
+.balance-box p {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0;
+    position: relative; /* 保证文字在微光上层 */
+    z-index: 1;
 }
 
 /* 1 */
