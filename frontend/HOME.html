@@ -22,7 +22,6 @@
 
   <!-- 首页 -->
   <div id="homePage" class="page active">
-    
     <!-- 广告轮播容器 -->
     <div class="ad-container">
       <img id="adImage" src="" alt="广告" />
@@ -35,32 +34,32 @@
         <span class="marquee-text">欢迎来到我的平台，恭喜发出🎉！</span>
       </div>
     </div>
-    
+
     <!-- 分类广告选择 -->
     <div class="ad-category-container">
-
-      <!-- 广告网格 2x2 -->
+      <!-- 广告网格 -->
       <div class="category-ad-grid">
+        <!-- 手机类 -->
         <div class="ad-item" data-category="phone"></div>
         <div class="ad-item" data-category="phone"></div>
         <div class="ad-item" data-category="phone"></div>
         <div class="ad-item" data-category="phone"></div>
-
+        <!-- 服饰类 -->
         <div class="ad-item" data-category="clothes"></div>
         <div class="ad-item" data-category="clothes"></div>
         <div class="ad-item" data-category="clothes"></div>
         <div class="ad-item" data-category="clothes"></div>
-
+        <!-- 汽车类 -->
         <div class="ad-item" data-category="car"></div>
         <div class="ad-item" data-category="car"></div>
         <div class="ad-item" data-category="car"></div>
         <div class="ad-item" data-category="car"></div>
-
+        <!-- 化妆品类 -->
         <div class="ad-item" data-category="cosmetics"></div>
         <div class="ad-item" data-category="cosmetics"></div>
         <div class="ad-item" data-category="cosmetics"></div>
         <div class="ad-item" data-category="cosmetics"></div>
-
+        <!-- 钻石类 -->
         <div class="ad-item" data-category="diamond"></div>
         <div class="ad-item" data-category="diamond"></div>
         <div class="ad-item" data-category="diamond"></div>
@@ -111,7 +110,7 @@
       </div>
     </div>
   </div>
-   
+
   <!-- 订单页面 -->
   <div id="orderPage" class="page">
     <div class="order-header">
@@ -126,14 +125,13 @@
       <div class="left-side">
         <img
           id="fixedImg"
-          src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Home%20Photos/331.png" 
+          src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Home%20Photos/331.png"
           alt="固定图片"
           class="fixed-img"
         >
-        
         <img
           id="matchingGif"
-          src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/Qbox.gif" 
+          src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/Qbox.gif"
           alt="Ordering..."
           style="width:150px; height:150px; display:none; margin-top:10px;"
         >
@@ -149,8 +147,7 @@
       <div id="roundProgress"></div>
       <p id="cooldownDisplay"></p>
     </div>
-  
-    <!-- 最近订单 -->
+
     <div id="orderResult" class="order-result"></div>
 
     <div class="order-history">
@@ -164,16 +161,12 @@
     <div id="addCoinsModal" class="modal">
       <div class="modal-content">
         <h3>Exchange</h3>
-
-        <!-- 横排切换按钮 -->
         <div class="exchange-toggle">
           <button id="balanceToCoinsBtn" class="exchange-btn active" data-type="toCoins">Balance → Coins</button>
           <button id="coinsToBalanceBtn" class="exchange-btn" data-type="toBalance">Coins → Balance</button>
         </div>
-
         <p>请输入要兑换的数量：</p>
         <input type="number" id="addCoinsInput" min="1" placeholder="输入数量" />
-
         <div class="modal-actions">
           <button id="cancelExchange">取消</button>
           <button id="confirmExchange">确认</button>
@@ -182,36 +175,47 @@
     </div>
   </div>
 
-  <!-- 关于我们页面 -->
+  <!-- 关于我们 -->
   <div id="msgPage" class="page">ℹ️ 关于我们</div>
 
   <!-- 我的页面 -->
   <div id="myPage" class="page">
     <div class="user-info">
-
       <img class="avatar" src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/123.jpg" alt="头像">
-
       <div class="info-text">
         <p class="username"><strong>用户名：</strong><span id="username">加载中...</span></p>
         <p class="platform"><strong>平台账号：</strong><span id="platformAccount">加载中...</span></p>
       </div>
     </div>
-  </div>
 
-   <div class="balance-box">
-    <p><strong>Balance：</strong><span id="balance">0.00</span></p>
-    <div class="balance-actions">
-      <button id="depositBtn">充值</button>
-      <button id="withdrawBtn">提现</button>
+    <div class="balance-box">
+      <p><strong>Balance：</strong><span id="balance">0.00</span></p>
+      <div class="balance-actions">
+        <button id="depositBtn">充值</button>
+        <button id="withdrawBtn">提现</button>
+      </div>
     </div>
-  </div>
 
     <div class="my-buttons">
       <button id="logoutBtn">Logout</button>
     </div>
   </div>
 
-  <!-- Logout 确认弹窗 -->
+  <!-- 底部导航栏 -->
+  <div class="bottom-nav">
+    <button data-page="homePage" class="active">Home</button>
+    <button data-page="infoPage" id="messageBtn">
+      Message
+      <span id="bottomUnreadCount" class="unread-dot hidden">0</span>
+    </button>
+    <button data-page="orderPage">Order</button>
+    <button data-page="msgPage">About</button>
+    <button data-page="myPage">Me</button>
+  </div>
+
+  <!-- =============== 弹窗区域 =============== -->
+
+  <!-- Logout -->
   <div id="logoutModal" class="modal">
     <div class="modal-content">
       <p>确定要退出吗？</p>
@@ -220,7 +224,7 @@
     </div>
   </div>
 
-  <!-- 提现弹窗 -->
+  <!-- 提现 -->
   <div id="withdrawModal" class="modal">
     <div class="modal-content">
       <h3>提现</h3>
@@ -235,12 +239,12 @@
     </div>
   </div>
 
-  <!-- 设置密码弹窗 -->
+  <!-- 设置提现密码 -->
   <div id="setPasswordModal" class="modal">
     <div class="modal-content">
       <h3>设置提现密码</h3>
-      <input type="text" id="withdrawPwd" maxlength="6" placeholder="输入6位数字密码" />
-      <input type="text" id="confirmWithdrawPwd" maxlength="6" placeholder="确认密码" />
+      <input type="password" id="withdrawPwd" maxlength="6" inputmode="numeric" placeholder="输入6位数字密码" />
+      <input type="password" id="confirmWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="确认密码" />
       <div class="modal-actions">
         <button id="cancelSetPwd">取消</button>
         <button id="saveWithdrawPwd">保存</button>
@@ -248,13 +252,13 @@
     </div>
   </div>
 
-  <!-- 更新密码弹窗 -->
+  <!-- 更新提现密码 -->
   <div id="updatePasswordModal" class="modal">
     <div class="modal-content">
       <h3>更改提现密码</h3>
-      <input type="text" id="oldWithdrawPwd" maxlength="6" placeholder="输入原密码" />
-      <input type="text" id="newWithdrawPwd" maxlength="6" placeholder="输入新密码" />
-      <input type="text" id="confirmNewWithdrawPwd" maxlength="6" placeholder="确认新密码" />
+      <input type="password" id="oldWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="输入原密码" />
+      <input type="password" id="newWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="输入新密码" />
+      <input type="password" id="confirmNewWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="确认新密码" />
       <div class="modal-actions">
         <button id="cancelUpdatePwd">取消</button>
         <button id="saveUpdatePwd">保存</button>
@@ -262,11 +266,11 @@
     </div>
   </div>
 
-  <!-- 确认提现密码弹窗 -->
+  <!-- 确认提现密码 -->
   <div id="confirmPwdModal" class="modal">
     <div class="modal-content">
       <h3>输入提现密码</h3>
-      <input type="text" id="inputWithdrawPwd" maxlength="6" placeholder="请输入密码" />
+      <input type="password" id="inputWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="请输入密码" />
       <div class="modal-actions">
         <button id="cancelConfirmPwd">取消</button>
         <button id="submitWithdrawFinal">提交</button>
@@ -274,7 +278,7 @@
     </div>
   </div>
 
-  <!-- 充值弹窗 -->
+  <!-- 充值 -->
   <div id="rechargeModal" class="modal">
     <div class="modal-content">
       <h3>充值</h3>
@@ -285,18 +289,6 @@
         <button id="cancelRecharge">取消</button>
       </div>
     </div>
-  </div>
-
-  <!-- 底部导航栏 -->
-  <div class="bottom-nav">
-    <button data-page="homePage" class="active">Home</button>
-    <button data-page="infoPage" id="messageBtn">
-      Message
-      <span id="bottomUnreadCount" class="unread-dot hidden">0</span>
-    </button>
-    <button data-page="orderPage">Order</button>
-    <button data-page="msgPage">About</button>
-    <button data-page="myPage">Me</button>
   </div>
 
   <!-- JS 部分 --> 
