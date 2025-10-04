@@ -259,3 +259,61 @@ async function loadUserInfo(username) {
     console.error("加载用户信息异常：", e);
   }
 }
+
+// ====== 修改登录密码 ======
+const changeLoginPwdBtn = document.getElementById("changeLoginPwdBtn");
+const changeLoginPwdModal = document.getElementById("changeLoginPwdModal");
+
+changeLoginPwdBtn.addEventListener("click", () => {
+  changeLoginPwdModal.style.display = "flex";
+});
+
+// 取消按钮
+document.getElementById("cancelChangeLoginPwd").addEventListener("click", () => {
+  changeLoginPwdModal.style.display = "none";
+});
+
+// 保存按钮
+document.getElementById("saveChangeLoginPwd").addEventListener("click", async () => {
+  const currentPwd = document.getElementById("currentLoginPwd").value;
+  const newPwd = document.getElementById("newLoginPwd").value;
+  const confirmPwd = document.getElementById("confirmLoginPwd").value;
+
+  // 校验
+  if (!currentPwd || !newPwd || !confirmPwd) {
+    alert("请输入完整信息");
+    return;
+  }
+
+  if (currentPwd !== localStorage.getItem("currentUserPassword")) { // 假设你本地存了登录密码
+    alert("当前登录密码错误");
+    return;
+  }
+
+  if (newPwd.length < 6) {
+    alert("新密码长度必须 ≥ 6");
+    return;
+  }
+
+  if (newPwd !== confirmPwd) {
+    alert("两次输入的新密码不一致");
+    return;
+  }
+
+  // 保存到 Supabase
+  const { error } = await supabaseClient
+    .from("users")
+    .update({ login_password: newPwd })
+    .eq("id", currentUser.id);
+
+  if (error) {
+    alert("修改失败：" + error.message);
+    return;
+  }
+
+  // 更新本地缓存
+  localStorage.setItem("currentUserPassword", newPwd);
+  alert("登录密码修改成功！");
+  changeLoginPwdModal.style.display = "none";
+});
+
