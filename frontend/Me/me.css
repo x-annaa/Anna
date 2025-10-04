@@ -116,25 +116,37 @@
 /* ======================
    我的页面按钮区
    ====================== */
-.my-buttons {
-  margin-top: 30px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
 .my-buttons button {
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-  background: #f1f1f1;
-  cursor: pointer;
-  transition: background 0.3s;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.3s;
+    color: white;
 }
 
-.my-buttons button:hover {
-  background: #ddd;
+/* 提现按钮 - 红色风格 */
+.my-buttons button.withdraw {
+    background: linear-gradient(135deg, #FF6B6B, #FF3D3D);
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
 }
+
+.my-buttons button.withdraw:hover {
+    background: linear-gradient(135deg, #FF3D3D, #FF6B6B);
+}
+
+/* 充值按钮 - 绿色风格 */
+.my-buttons button.deposit {
+    background: linear-gradient(135deg, #6BCB77, #2D9C6B);
+    box-shadow: 0 4px 12px rgba(107, 203, 119, 0.4);
+}
+
+.my-buttons button.deposit:hover {
+    background: linear-gradient(135deg, #2D9C6B, #6BCB77);
+}
+
 
 /* ======================
    通用弹窗样式
