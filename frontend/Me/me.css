@@ -10,31 +10,13 @@
    用户信息
    ====================== */
 .user-info {
-  display: flex;
-  align-items: center;   /* 头像和文字垂直居中 */
-  padding: 10px;
-  background: #fafafa;
-  border-radius: 8px;
-}
-
-.user-info .avatar {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;   /* 圆形头像 */
-  object-fit: cover;    /* 保持比例 */
-  margin-right: 15px;   /* 头像和文字间隔 */
-  border: 2px solid #ddd;
-}
-
-.user-info .info-text {
-  display: flex;
-  flex-direction: column;  /* 让文字上下排列 */
+  text-align: right;
+  margin-bottom: 20px;
 }
 
 .user-info p {
-  margin: 4px 0;
+  margin: 5px 0;
   font-size: 14px;
-  text-align: left;   /* 左对齐 */
 }
 
 /* ======================
@@ -43,27 +25,7 @@
 .balance-box {
   text-align: center;
   margin: 20px 0;
-  padding: 16px;
-  border-radius: 14px;
-  position: relative;
-  background: #0e0e0e;
-  color: #fff;
-  overflow: hidden;
 }
-.balance-box::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 14px;
-  padding: 2px;
-  background: linear-gradient(90deg, #7b2ff7, #f107a3);
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-}
-
 
 .balance-box p {
   font-size: 16px;
