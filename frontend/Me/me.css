@@ -216,12 +216,12 @@
 }
 
 .modal-actions button:last-child {
-  background: #77b3f4;
+  background: #95c5f8;
   color: white;
 }
 
 .modal-actions button:last-child:hover {
-  background: #5a9ae6;
+  background: #99c2f4;
 }
 
 /* ======================
