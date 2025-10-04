@@ -44,13 +44,26 @@
   text-align: center;
   margin: 20px 0;
   padding: 16px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(0,0,0,0.2));
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 14px;
+  position: relative;
+  background: #0e0e0e;
   color: #fff;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  overflow: hidden;
 }
+.balance-box::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  padding: 2px;
+  background: linear-gradient(90deg, #7b2ff7, #f107a3);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
 
 .balance-box p {
   font-size: 16px;
