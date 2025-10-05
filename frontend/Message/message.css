@@ -200,7 +200,7 @@
 .telegram-info {
   display: flex;
   flex-direction: column;   /* 垂直排列 */
-  justify-content: center;  /* 垂直居中 */
+  justify-content: flex-end; 
   align-items: flex-start;  /* 左对齐文字和按钮 */
   gap: 4px;
   flex: 1;                  /* 占满剩余空间 */
