@@ -59,7 +59,7 @@ function setOrderBtnDisabled(disabled, reason = "", cooldownText = "") {
   if (btn) {
     btn.disabled = disabled;
     btn.title = reason || "";
-    btn.textContent = disabled ? `🎲 一键刷单（不可用）` : "🎲 一键刷单";
+    btn.textContent = disabled ? `Order` : "Order";
   }
   const cdEl = document.getElementById("cooldownDisplay");
   if (cdEl) cdEl.textContent = cooldownText;
@@ -729,11 +729,24 @@ async function loadRecentOrders() {
 /* ====================== 20.显示/隐藏匹配状态 & GIF ====================== */
 function setMatchingState(isMatching) {
   const gifEl = document.getElementById("matchingGif");
+  const fixedImg = document.getElementById("fixedImg");
   const btn = document.getElementById("autoOrderBtn");
 
-  if (gifEl) gifEl.style.display = isMatching ? "block" : "none";
+  if (gifEl && fixedImg) {
+    gifEl.style.display = isMatching ? "block" : "none";
+    fixedImg.style.display = isMatching ? "none" : "block";
+  }
+
   if (btn) {
     btn.disabled = isMatching;
-    btn.textContent = isMatching ? "🎲 正在匹配..." : "🎲 一键刷单";
+    btn.textContent = isMatching ? "Ordering" : "Order";
   }
 }
+
+/* 自动按钮点击示例 */
+document.getElementById("autoOrderBtn").addEventListener("click", function() {
+  setMatchingState(true);
+
+  // 模拟匹配完成 5 秒后恢复
+  setTimeout(() => setMatchingState(false), 5000);
+});
