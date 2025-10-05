@@ -422,7 +422,7 @@ button:disabled {
   padding: 5px 12px;            /* 内边距 */
   margin-bottom: 10px;
   font-family: Arial, sans-serif;
-  border: 1px solid #ddd;        /* 边框 */
+  border: 1px solid #a9c2e0;       /* 边框 */
   border-radius: 10px;           /* 圆角 */
   background-color: #ecf1ff00;     /* 背景色 */
   box-sizing: border-box;
