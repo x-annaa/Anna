@@ -6,8 +6,8 @@ const sendBtn = document.getElementById("sendBtn");
 const chatInput = document.getElementById("chatInput");
 const chatMessages = document.getElementById("chatMessages");
 
-const bottomUnreadEl = document.getElementById("bottomUnreadCount"); // 底部导航红点
-const chatBtnUnreadEl = document.getElementById("chatBtnUnreadCount"); // 信息页红点
+const bottomUnreadEl = document.getElementById("bottomUnreadCount");
+const chatBtnUnreadEl = document.querySelector("#openChatBtn .unread-dot");
 
 let chatSubscription = null;
 
@@ -21,14 +21,13 @@ function getCurrentUserId() {
 openChatBtn?.addEventListener("click", async () => {
   const userId = getCurrentUserId();
   if (!userId) return alert("请先登录！");
-
   chatWindow.style.display = "flex";
   chatMessages.innerHTML = "";
   await loadMessages();
   listenForMessages();
-
   await markMessagesAsRead();
   updateUnreadCount();
+  setTimeout(() => chatInput.focus(), 200); // 弹窗打开后自动聚焦
 });
 
 // 返回按钮
@@ -38,6 +37,12 @@ backBtn?.addEventListener("click", () => {
     supabaseClient.removeChannel(chatSubscription);
     chatSubscription = null;
   }
+});
+
+// 自动调整 textarea 高度
+chatInput.addEventListener("input", () => {
+  chatInput.style.height = "auto";
+  chatInput.style.height = chatInput.scrollHeight + "px";
 });
 
 // 发送消息
@@ -59,6 +64,7 @@ sendBtn?.addEventListener("click", async () => {
 
   appendMessage("我", content);
   chatInput.value = "";
+  chatInput.style.height = "auto";
 });
 
 // 显示消息
@@ -116,8 +122,7 @@ async function updateUnreadCount() {
   const show = unread > 0;
   const text = unread > 99 ? "99+" : unread;
 
-  // 三处红点同步更新
-  [bottomUnreadEl, chatBtnUnreadEl, document.querySelector("#openChatBtn .unread-dot")].forEach(el => {
+  [bottomUnreadEl, chatBtnUnreadEl].forEach(el => {
     if (!el) return;
     el.textContent = text;
     el.style.display = show ? "inline-block" : "none";
