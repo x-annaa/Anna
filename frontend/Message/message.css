@@ -1,7 +1,7 @@
 /* =====================
    全局变量（便于修改主题色）
    ===================== */
-:root{
+:root {
   --primary-blue: #4e9cff;
   --primary-blue-dark: #3d8ce6;
   --telegram-grad-a: #2aabee;
@@ -26,10 +26,10 @@
   background-color: var(--card-bg);
   border: 1px solid #ddd;
   border-radius: 12px;
-  display: none;               /* 由 JS 控制显示/隐藏 */
+  display: none; /* JS 控制显示 */
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
   z-index: 1000;
   font-family: "Helvetica", Arial, sans-serif;
 }
@@ -47,10 +47,9 @@
   padding: 14px 12px;
   font-weight: 700;
   font-size: 15px;
-  border-bottom: 1px solid rgba(255,255,255,0.12);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-/* 兼容旧的 button 选择器（如果 header 里有 button） */
 .chat-header button {
   background: transparent;
   border: none;
@@ -61,29 +60,28 @@
 }
 
 /* =====================
-   消息列表（倒序显示，滚动在上方）
+   消息列表
    ===================== */
 #chatMessages {
   flex: 1 1 auto;
   padding: 10px;
   display: flex;
-  flex-direction: column-reverse; /* 最新消息靠下，滚到底部显示最新 */
+  flex-direction: column-reverse;
   overflow-y: auto;
   gap: 8px;
   background-color: #f0f0f0;
 }
 
-/* 优化滚动行为（可自定义） */
 #chatMessages::-webkit-scrollbar {
   width: 6px;
 }
 #chatMessages::-webkit-scrollbar-thumb {
-  background: rgba(0,0,0,0.18);
+  background: rgba(0, 0, 0, 0.18);
   border-radius: 3px;
 }
 
 /* =====================
-   单条消息样式
+   单条消息
    ===================== */
 .message-item {
   max-width: 70%;
@@ -92,10 +90,8 @@
   word-wrap: break-word;
   font-size: 14px;
   line-height: 1.4;
-  display: inline-block;
 }
 
-/* 我发送的消息（靠右） */
 .message-item.me {
   background-color: var(--primary-blue);
   color: #fff;
@@ -103,7 +99,6 @@
   border-bottom-right-radius: 4px;
 }
 
-/* 对方/客服消息（靠左） */
 .message-item.bot {
   background-color: var(--muted);
   color: var(--text-dark);
@@ -115,7 +110,6 @@
    输入区域
    ===================== */
 .chat-input {
-  flex: 0 0 auto;
   display: flex;
   gap: 8px;
   padding: 8px;
@@ -145,66 +139,111 @@
   transition: background 0.2s, transform 0.06s;
 }
 
-.chat-input button:hover { background-color: var(--primary-blue-dark); }
-.chat-input button:active { transform: scale(0.98); }
+.chat-input button:hover {
+  background-color: var(--primary-blue-dark);
+}
+.chat-input button:active {
+  transform: scale(0.98);
+}
 
 /* =====================
-   客服入口（右上角小模块）—— 支持两种写法：
-   - 你已更新 HTML 为 <div class="support-box"> -> 直接生效
-   - 仍使用 <button id="openChatBtn"> -> 我也把它样式化为卡片
+   客服 & Telegram 卡片
    ===================== */
 
-/* 公共样式 */
+/* 统一尺寸风格（Telegram 和 客服按钮等长） */
+.telegram-box,
 .support-box,
 #openChatBtn {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 8px;
-  background: linear-gradient(135deg, var(--support-grad-a), var(--support-grad-b));
-  color: #fff;
-  padding: 6px 10px;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(255,123,0,0.18);
-  cursor: pointer;
+  justify-content: space-between;
+  width: calc(100% - 20px);
+  max-width: 340px;
+  margin: 14px auto;
+  border-radius: 12px;
+  padding: 8px 14px;
+  box-sizing: border-box;
   font-weight: 600;
   font-size: 13px;
-  position: relative;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+/* Telegram 卡片 */
+.telegram-box {
+  background: linear-gradient(135deg, var(--telegram-grad-a), var(--telegram-grad-b));
+  box-shadow: 0 2px 8px rgba(34, 158, 217, 0.18);
+}
+
+.telegram-box:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(34, 158, 217, 0.24);
+}
+
+.telegram-box img {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  object-fit: cover;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.telegram-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.telegram-info p {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: 0.2px;
+  color: #fff;
+}
+
+#copyTelegramBtn {
+  padding: 4px 10px;
   border: none;
-  text-decoration: none;
-  height: auto;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.18);
+  color: white;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.18s, transform 0.06s;
 }
 
-/* 位置（如果仍想放右上角） */
+#copyTelegramBtn:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+#copyTelegramBtn:active {
+  transform: scale(0.97);
+}
+
+/* 客服卡片 */
 #openChatBtn {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  z-index: 1001;
+  background: linear-gradient(135deg, var(--support-grad-a), var(--support-grad-b));
+  box-shadow: 0 2px 8px rgba(255, 123, 0, 0.18);
 }
 
-/* hover/active */
-.support-box:hover,
 #openChatBtn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255,123,0,0.26);
-}
-.support-box:active,
-#openChatBtn:active {
-  transform: translateY(0);
+  box-shadow: 0 6px 14px rgba(255, 123, 0, 0.26);
 }
 
-/* 支持图标尺寸（只影响 support-box 内的 img） */
-.support-box img,
 #openChatBtn img {
   width: 20px;
   height: 20px;
-  object-fit: cover;
   border-radius: 5px;
+  object-fit: cover;
 }
 
-/* unread 红点（支持-box 内部） */
-.support-box .unread-dot,
-#openChatBtn .unread-dot {
+/* unread 红点 */
+.unread-dot {
   position: absolute;
   top: -6px;
   right: -6px;
@@ -216,107 +255,21 @@
   line-height: 1;
   pointer-events: none;
 }
-
-/* 如果 openChatBtn 以前是 button，重置默认样式（防止圆形样式残留） */
-#openChatBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, var(--support-grad-a), var(--support-grad-b));
-  color: white;
+.hidden {
+  display: none;
 }
 
 /* =====================
-   红点通用类（备用）
-   ===================== */
-.unread-dot {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  display: inline-block;
-  background-color: red;
-  color: white;
-  border-radius: 50%;
-  font-size: 12px;
-  padding: 2px 6px;
-  line-height: 1;
-  pointer-events: none;
-}
-.hidden { display: none; }
-
-/* =====================
-   Telegram 联系容器（小巧卡片）
-   ===================== */
-.telegram-box {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  background: linear-gradient(135deg, var(--telegram-grad-a), var(--telegram-grad-b));
-  padding: 8px 12px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(34,158,217,0.18);
-  color: white;
-  margin: 14px 10px;
-  transition: transform 0.15s ease, box-shadow 0.2s ease;
-}
-
-/* hover */
-.telegram-box:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(34,158,217,0.24);
-}
-
-/* 仅影响 telegram-box 内的图片（不会改全局 img） */
-.telegram-box img {
-  width: 20px;        /* ← 关键：缩小到 20px（你可以改为 16px / 1em） */
-  height: 20px;
-  border-radius: 4px;
-  object-fit: cover;
-  margin-right: 8px;
-  flex-shrink: 0;
-}
-
-/* telegram 信息区（账号文本 + 按钮） */
-.telegram-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-  justify-content: flex-end;
-}
-
-/* 账号文本 */
-.telegram-info p {
-  font-size: 13px;
-  font-weight: 600;
-  margin: 0;
-  letter-spacing: 0.2px;
-  color: #fff;
-}
-
-/* 复制按钮 */
-#copyTelegramBtn {
-  padding: 4px 10px;
-  border: none;
-  border-radius: 6px;
-  background: rgba(255,255,255,0.18);
-  color: white;
-  cursor: pointer;
-  font-size: 12px;
-  transition: background 0.18s, transform 0.06s;
-}
-
-#copyTelegramBtn:hover { background: rgba(255,255,255,0.28); }
-#copyTelegramBtn:active { transform: scale(0.97); }
-
-/* =====================
-   小屏适配（可选）
+   小屏适配
    ===================== */
 @media (max-width: 420px) {
-  #chatWindow { width: 320px; height: 460px; }
-  .telegram-box { margin: 12px 8px; padding: 8px 10px; }
-  .support-box, #openChatBtn { padding: 6px 8px; font-size: 13px; }
+  #chatWindow {
+    width: 320px;
+    height: 460px;
+  }
+  .telegram-box,
+  #openChatBtn {
+    width: calc(100% - 16px);
+    padding: 8px 10px;
+  }
 }
