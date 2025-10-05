@@ -20,6 +20,7 @@ function getCurrentUserId() {
 chatInput.addEventListener("input", () => {
   chatInput.style.height = "auto";
   chatInput.style.height = chatInput.scrollHeight + "px";
+  scrollToBottom();
 });
 
 // 打开聊天窗口
@@ -32,6 +33,7 @@ openChatBtn?.addEventListener("click", async () => {
   listenForMessages();
   await markMessagesAsRead();
   updateUnreadCount();
+  scrollToBottom();
 });
 
 // 返回按钮
@@ -56,6 +58,7 @@ sendBtn?.addEventListener("click", async () => {
   appendMessage("我", content);
   chatInput.value = "";
   chatInput.style.height = "auto";
+  scrollToBottom();
 });
 
 // 显示消息
@@ -64,6 +67,11 @@ function appendMessage(sender, text) {
   msg.classList.add("message-item", sender === "我" ? "me" : "bot");
   msg.textContent = text;
   chatMessages.prepend(msg);
+  scrollToBottom();
+}
+
+// 滚动到底部
+function scrollToBottom() {
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
