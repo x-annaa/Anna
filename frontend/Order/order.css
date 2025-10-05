@@ -529,4 +529,5 @@ button:disabled {
   font-weight: bold;
   color: #333;
   transition: all 0.3s ease;
+  border: 1px solid #a9c2e0;
 }
