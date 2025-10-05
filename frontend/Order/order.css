@@ -355,7 +355,7 @@ button:disabled {
   justify-content: space-between; /* 左右两边分开 */
   align-items: center;            /* 左右垂直居中 */
   width: 100%;
-  height: 200px;                  /* 根据需要调整整体高度 */
+  height: 150px;                  /* 根据需要调整整体高度 */
   padding: 0 20px;                /* 左右内边距 */
   box-sizing: border-box;
   position: relative;
@@ -455,8 +455,8 @@ button:disabled {
   position: relative;  /* 相对自身偏移 */
   overflow: hidden;
 
-  top: 40px;   /* 必须写单位 */
-  left: 18px;  /* 必须写单位 */
+  top: 35px;   /* 必须写单位 */
+  left: 13px;  /* 必须写单位 */
   /* right / bottom 通常不用和 top/left 同时写 */
 }
 
