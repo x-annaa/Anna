@@ -1,22 +1,28 @@
-/* 底部导航 */
+/* =====================
+   底部导航栏样式
+   ===================== */
 .bottom-nav {
   position: fixed;
   bottom: 0;
-  left: 0;
-  right: 0;
-  height: 60px;
+  width: 100%;
   display: flex;
+  justify-content: space-around;
   background: #fff;
   border-top: 1px solid #ddd;
+  z-index: 500;
 }
 .bottom-nav button {
   flex: 1;
+  padding: 10px 0;
   border: none;
   background: none;
   font-size: 14px;
-  color: #666;
+  position: relative;
+  color: #333;
 }
-.bottom-nav button.active { 
-  color: #007bff; 
-  font-weight: bold; 
+.bottom-nav button.active {
+  color: var(--primary-blue);
+  font-weight: bold;
 }
+
+/* 你前面那份CSS原样保留，这里直接合并 */
