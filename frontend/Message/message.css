@@ -1,5 +1,5 @@
 /* =====================
-   全局变量（便于修改主题色）
+   全局变量（主题色）
    ===================== */
 :root {
   --primary-blue: #4e9cff;
@@ -197,6 +197,7 @@
   align-items: center;
   gap: 8px;
   flex: 1;
+  justify-content: flex-start; /* 稍微靠左一点 */
 }
 .telegram-info p {
   font-size: 13px;
@@ -222,9 +223,9 @@
 }
 
 /* =====================
-   红点样式
+   红点样式（统一）
    ===================== */
-#openChatBtn .unread-dot {
+.unread-dot {
   position: absolute;
   top: -6px;
   right: -6px;
@@ -236,6 +237,9 @@
   line-height: 1;
   display: none; /* 默认隐藏 */
   pointer-events: none;
+}
+.unread-dot.show {
+  display: inline-block;
 }
 
 /* =====================
