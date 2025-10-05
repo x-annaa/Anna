@@ -21,8 +21,8 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 100%;      /* 改成占满页面宽度 */
-  max-width: 360px; /* 保持最大宽度 */
+  width: 100%;
+  max-width: 360px;
   height: 500px;
   background-color: var(--card-bg);
   border: 1px solid #ddd;
@@ -39,7 +39,6 @@
    聊天顶部
    ===================== */
 .chat-header {
-  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -50,7 +49,6 @@
   font-size: 15px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
-
 .chat-header button {
   background: transparent;
   border: none;
@@ -72,7 +70,6 @@
   gap: 8px;
   background-color: #f0f0f0;
 }
-
 #chatMessages::-webkit-scrollbar {
   width: 6px;
 }
@@ -92,14 +89,12 @@
   font-size: 14px;
   line-height: 1.4;
 }
-
 .message-item.me {
   background-color: var(--primary-blue);
   color: #fff;
   align-self: flex-end;
   border-bottom-right-radius: 4px;
 }
-
 .message-item.bot {
   background-color: var(--muted);
   color: var(--text-dark);
@@ -118,7 +113,6 @@
   background-color: #fafafa;
   align-items: center;
 }
-
 .chat-input input {
   flex: 1;
   padding: 8px 12px;
@@ -128,7 +122,6 @@
   font-size: 14px;
   background: white;
 }
-
 .chat-input button {
   padding: 8px 12px;
   border-radius: 20px;
@@ -139,7 +132,6 @@
   font-weight: 700;
   transition: background 0.2s, transform 0.06s;
 }
-
 .chat-input button:hover {
   background-color: var(--primary-blue-dark);
 }
@@ -200,7 +192,7 @@
 /* 文字和按钮横向排列在图片右边 */
 .telegram-info {
   display: flex;
-  flex-direction: row;      /* 横向排列 */
+  flex-direction: row;      /* 横向排列文字和按钮 */
   align-items: center;      /* 垂直居中 */
   gap: 8px;                 /* 元素间距 */
   flex: 1;                  /* 占满剩余空间 */
@@ -210,12 +202,11 @@
   font-size: 13px;
   font-weight: 600;
   margin: 0;
-  color: #fff;              /* 白色文字 */
+  color: #fff;
 }
 
-/* 复制按钮靠右 */
+/* 复制按钮靠近文字 */
 #copyTelegramBtn {
-  margin-left: 8px; /* 调整按钮与文字的间距 */
   padding: 4px 10px;
   border: none;
   border-radius: 6px;
@@ -225,14 +216,19 @@
   font-size: 12px;
   transition: background 0.18s, transform 0.06s;
 }
-
+#copyTelegramBtn:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+#copyTelegramBtn:active {
+  transform: scale(0.97);
+}
 
 /* =====================
    小屏适配
    ===================== */
 @media (max-width: 420px) {
   #chatWindow {
-    width: 100%;   /* 占满屏幕宽度 */
+    width: 100%;  
     max-width: 320px;
     height: 460px;
   }
