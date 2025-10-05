@@ -7,7 +7,7 @@ const chatInput = document.getElementById("chatInput");
 const chatMessages = document.getElementById("chatMessages");
 
 const bottomUnreadEl = document.getElementById("bottomUnreadCount"); // 底部导航红点
-const chatBtnUnreadEl = document.getElementById("chatBtnUnreadCount"); // message页按钮红点
+const chatBtnUnreadEl = document.getElementById("chatBtnUnreadCount"); // 信息页红点
 
 let chatSubscription = null;
 
@@ -88,7 +88,7 @@ async function loadMessages() {
   );
 }
 
-// 标记消息为已读
+// 标记为已读
 async function markMessagesAsRead() {
   const userId = getCurrentUserId();
   if (!userId) return;
@@ -116,12 +116,12 @@ async function updateUnreadCount() {
   const show = unread > 0;
   const text = unread > 99 ? "99+" : unread;
 
-  [bottomUnreadEl, chatBtnUnreadEl, document.querySelector("#openChatBtn .unread-dot")]
-    .forEach(el => {
-      if (!el) return;
-      el.textContent = text;
-      el.style.display = show ? "inline-block" : "none";
-    });
+  // 三处红点同步更新
+  [bottomUnreadEl, chatBtnUnreadEl, document.querySelector("#openChatBtn .unread-dot")].forEach(el => {
+    if (!el) return;
+    el.textContent = text;
+    el.style.display = show ? "inline-block" : "none";
+  });
 }
 
 // 监听实时消息
@@ -154,7 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
   listenForMessages();
 });
 
-// 复制 Telegram 账号
+// Telegram 一键复制
 document.getElementById("copyTelegramBtn")?.addEventListener("click", () => {
   const text = document.getElementById("telegramAccount")?.textContent || "";
   if (!text) return;
