@@ -224,3 +224,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // 全局监听消息，无论聊天窗口是否打开
   listenForMessages();
 });
+
+document.getElementById("copyTelegramBtn").addEventListener("click", () => {
+  const text = document.getElementById("telegramAccount").textContent;
+  navigator.clipboard.writeText(text)
+    .then(() => alert("已复制 Telegram 账号：" + text))
+    .catch(() => alert("复制失败，请手动复制"));
+});
