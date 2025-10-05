@@ -443,7 +443,7 @@ button:disabled {
 /* 按钮 */
 #autoOrderBtn {
   padding: 14px 28px;
-  font-size: 10px;
+  font-size: 13px;
   font-weight: bold;
   color: #fff8dc; /* 淡奶油字色 */
   background: linear-gradient(145deg, #00defb, #0ec3c6, #4174fc); /* 金黄色渐变 */
@@ -503,5 +503,5 @@ button:disabled {
   height: 25%;
   object-fit: cover;         /* 保持比例裁切填满 */
   border-radius: 3px;
-  margin-top: 10px;
+  margin-top: 13px;
 }
