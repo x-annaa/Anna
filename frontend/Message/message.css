@@ -215,23 +215,17 @@
 
 /* 复制按钮靠右 */
 #copyTelegramBtn {
-  margin-left: 8px;
-  margin-left: auto;
+  margin-left: 8px; /* 调整按钮与文字的间距 */
   padding: 4px 10px;
   border: none;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.18); /* 半透明白 */
+  background: rgba(255, 255, 255, 0.18);
   color: white;
   cursor: pointer;
   font-size: 12px;
   transition: background 0.18s, transform 0.06s;
 }
-#copyTelegramBtn:hover {
-  background: rgba(255, 255, 255, 0.28);
-}
-#copyTelegramBtn:active {
-  transform: scale(0.97);
-}
+
 
 /* =====================
    小屏适配
