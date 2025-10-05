@@ -18,14 +18,15 @@
    ===================== */
 #chatWindow {
   position: fixed;
-  bottom: 0; /* 固定底部 */
-  left: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 100%;
   max-width: 360px;
-  height: 50%;
+  height: 500px;
   background-color: var(--card-bg);
   border: 1px solid #ddd;
-  border-radius: 12px 12px 0 0;
+  border-radius: 12px;
   display: none;
   flex-direction: column;
   overflow: hidden;
@@ -272,7 +273,7 @@
   #chatWindow {
     width: 100%;
     max-width: 320px;
-    height: 50%;
+    height: 500px;
   }
   .telegram-box,
   #openChatBtn {
