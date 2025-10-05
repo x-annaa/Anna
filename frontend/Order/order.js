@@ -59,7 +59,7 @@ function setOrderBtnDisabled(disabled, reason = "", cooldownText = "") {
   if (btn) {
     btn.disabled = disabled;
     btn.title = reason || "";
-    btn.textContent = disabled ? `Order` : "Order";
+    btn.textContent = disabled ? `🎲 一键刷单（不可用）` : "🎲 一键刷单";
   }
   const cdEl = document.getElementById("cooldownDisplay");
   if (cdEl) cdEl.textContent = cooldownText;
@@ -708,6 +708,9 @@ async function loadRecentOrders() {
       .select("id", { count: "exact", head: true })
       .eq("user_id", window.currentUserId);
 
+    const historyTitle = document.querySelector(".order-history h3");
+    if (historyTitle) historyTitle.textContent = `🕘 最近订单 订单数：${totalCount || 0}单`;
+
     const list = document.getElementById("recentOrders");
     if (list) {
       if (!recentOrders?.length) list.innerHTML = `<li>暂无订单！</li>`;
@@ -726,24 +729,11 @@ async function loadRecentOrders() {
 /* ====================== 20.显示/隐藏匹配状态 & GIF ====================== */
 function setMatchingState(isMatching) {
   const gifEl = document.getElementById("matchingGif");
-  const fixedImg = document.getElementById("fixedImg");
   const btn = document.getElementById("autoOrderBtn");
 
-  if (gifEl && fixedImg) {
-    gifEl.style.display = isMatching ? "block" : "none";
-    fixedImg.style.display = isMatching ? "none" : "block";
-  }
-
+  if (gifEl) gifEl.style.display = isMatching ? "block" : "none";
   if (btn) {
     btn.disabled = isMatching;
-    btn.textContent = isMatching ? "Ordering" : "Order";
+    btn.textContent = isMatching ? "🎲 正在匹配..." : "🎲 一键刷单";
   }
 }
-
-/* 自动按钮点击示例 */
-document.getElementById("autoOrderBtn").addEventListener("click", function() {
-  setMatchingState(true);
-
-  // 模拟匹配完成 5 秒后恢复
-  setTimeout(() => setMatchingState(false), 5000);
-});
