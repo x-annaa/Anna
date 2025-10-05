@@ -750,3 +750,51 @@ document.getElementById("autoOrderBtn").addEventListener("click", function() {
   // 模拟匹配完成 5 秒后恢复
   setTimeout(() => setMatchingState(false), 5000);
 });
+
+// 获取元素
+const historyModal = document.getElementById("historyModal");
+const rulesModal = document.getElementById("rulesModal");
+
+document.querySelector(".left-box").addEventListener("click", async () => {
+  // 清空列表
+  const listEl = document.getElementById("orderHistoryList");
+  listEl.innerHTML = "<li>加载中...</li>";
+
+  // 异步获取订单数据（示例用 fetch/supabase）
+  if (window.supabaseClient && window.currentUserId) {
+    const { data: orders, error } = await supabaseClient
+      .from("orders")
+      .select(`id, total_price, profit, status, products(name, url)`)
+      .eq("user_id", window.currentUserId)
+      .order("created_at", { ascending: false });
+
+    if (!error && orders?.length) {
+      listEl.innerHTML = orders.map(o => {
+        const img = o.products?.url ? `<img src="${o.products.url}" alt="${o.products.name}" width="50" style="margin-right:5px;">` : "";
+        return `<li>${img}${o.products?.name || '未知商品'} / ¥${Number(o.total_price).toFixed(2)} / 收入 +¥${Number(o.profit).toFixed(2)} / 状态: ${o.status}</li>`;
+      }).join("");
+    } else {
+      listEl.innerHTML = "<li>暂无订单！</li>";
+    }
+  }
+
+  historyModal.style.display = "block";
+});
+
+document.querySelector(".right-box").addEventListener("click", () => {
+  rulesModal.style.display = "block";
+});
+
+// 点击关闭按钮
+document.querySelectorAll(".close").forEach(span => {
+  span.addEventListener("click", () => {
+    historyModal.style.display = "none";
+    rulesModal.style.display = "none";
+  });
+});
+
+// 点击弹窗外区域关闭
+window.addEventListener("click", (e) => {
+  if (e.target === historyModal) historyModal.style.display = "none";
+  if (e.target === rulesModal) rulesModal.style.display = "none";
+});
