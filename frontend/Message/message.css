@@ -237,19 +237,29 @@
   line-height: 1;
   display: none;
   pointer-events: none;
+  animation: pulse 1.2s infinite;
 }
 .unread-dot.show {
   display: inline-block;
 }
 
-/* Message按钮红点 */
+/* 红点动画 */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+}
+
+/* =====================
+   Message按钮红点
+   ===================== */
 .bottom-nav button {
-  position: relative;
+  position: relative; /* 绝对定位参照 */
+  z-index: 1;
 }
 #bottomUnreadCount {
   position: absolute;
-  top: 6px;
-  right: 12px;
+  top: 8px;
+  right: 16px;
   transform: translateY(-50%);
   background: red;
   color: #fff;
@@ -259,7 +269,8 @@
   line-height: 1;
   display: none;
   pointer-events: none;
-  z-index: 5;
+  z-index: 9999; /* 高于底部导航，确保覆盖 */
+  animation: pulse 1.2s infinite;
 }
 
 /* =====================
