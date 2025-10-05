@@ -446,7 +446,7 @@ button:disabled {
   font-size: 13px;
   font-weight: bold;
   color: #fff8dc; /* 淡奶油字色 */
-  background: linear-gradient(145deg, #00defb, #0ec3c6, #4174fc); /* 金黄色渐变 */
+  background: linear-gradient(145deg, #00defb, #0ec3c6, #12c8e9); /* 金黄色渐变 */
   border: none;
   border-radius: 12px; /* 圆润，像糖果 */
   cursor: pointer;
