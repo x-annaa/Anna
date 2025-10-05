@@ -147,24 +147,23 @@
 }
 
 /* =====================
-   客服 & Telegram 卡片
+   客服 & Telegram 卡片（全宽居中）
    ===================== */
 
-/* 统一尺寸风格（Telegram 和 客服按钮等长） */
+/* 基础样式 */
 .telegram-box,
-.support-box,
 #openChatBtn {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: calc(100% - 20px);
-  max-width: 340px;
-  margin: 14px auto;
+  justify-content: center; /* 水平居中 */
+  width: 100%; /* 占满屏幕宽度 */
+  padding: 12px;
+  margin: 10px 0;
   border-radius: 12px;
-  padding: 8px 14px;
   box-sizing: border-box;
+  gap: 12px;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 14px;
   color: white;
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.2s ease;
@@ -174,36 +173,22 @@
 .telegram-box {
   background: linear-gradient(135deg, var(--telegram-grad-a), var(--telegram-grad-b));
   box-shadow: 0 2px 8px rgba(34, 158, 217, 0.18);
-}
-
-.telegram-box:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(34, 158, 217, 0.24);
+  flex-direction: row;
 }
 
 .telegram-box img {
   width: 50px;
   height: 50px;
-  border-radius: 4px;
+  border-radius: 6px;
   object-fit: cover;
-  margin-right: 8px;
-  flex-shrink: 0;
 }
 
 .telegram-info {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-  justify-content: flex-end;
-}
-
-.telegram-info p {
-  font-size: 13px;
-  font-weight: 600;
-  margin: 0;
-  letter-spacing: 0.2px;
-  color: #fff;
+  flex-direction: column; /* 账号和按钮上下排列 */
+  align-items: center; /* 垂直居中 */
+  justify-content: center;
+  gap: 6px;
 }
 
 #copyTelegramBtn {
@@ -224,22 +209,28 @@
   transform: scale(0.97);
 }
 
+.telegram-box:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(34, 158, 217, 0.24);
+}
+
 /* 客服卡片 */
 #openChatBtn {
   background: linear-gradient(135deg, var(--support-grad-a), var(--support-grad-b));
   box-shadow: 0 2px 8px rgba(255, 123, 0, 0.18);
-}
-
-#openChatBtn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(255, 123, 0, 0.26);
+  flex-direction: row;
 }
 
 #openChatBtn img {
   width: 50px;
   height: 50px;
-  border-radius: 5px;
+  border-radius: 6px;
   object-fit: cover;
+}
+
+#openChatBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(255, 123, 0, 0.26);
 }
 
 /* unread 红点 */
@@ -269,7 +260,6 @@
   }
   .telegram-box,
   #openChatBtn {
-    width: calc(100% - 16px);
-    padding: 8px 10px;
+    padding: 10px;
   }
 }
