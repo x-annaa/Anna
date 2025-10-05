@@ -613,7 +613,15 @@ button:disabled {
 }
 
 .white-container {
-  width: 90%;           
-  height: 10%;         
+  width: 90%;            /* 宽度 */
+  height: 150px;         /* 固定高度，可按需调整 */
+  min-height: 100px;     /* 最小高度，可选 */
+  margin: 10px auto;     /* 居中显示 */
+  padding: 10px;         /* 内边距 */
   background-color: #ffffff;
+  border-radius: 5px;    /* 圆角 */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1); /* 阴影 */
+  color: #333;           /* 字体颜色 */
+  font-size: 14px;       /* 字体大小 */
+  overflow: auto;        /* 内容超出时显示滚动条 */
 }
