@@ -582,7 +582,7 @@ button:disabled {
 /* 弹窗内容主体 */
 .modal-body {
   padding: 45px 15px;
-  height: 40%;
+  max-height: 40%;
   overflow-y: auto;
 }
 
