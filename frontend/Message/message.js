@@ -215,20 +215,31 @@ function adjustChatForKeyboard() {
     const keyboardHeight = initialHeight - vh;
 
     if (keyboardHeight > 100) {
-      // 键盘弹出：让聊天窗口底部贴近键盘
+      // 键盘弹出：窗口底部贴近键盘
       chatWindow.style.top = 'auto';
-      chatWindow.style.bottom = keyboardHeight + 'px';
+      chatWindow.style.bottom = '0';
       chatWindow.style.transform = 'translateX(-50%)';
     } else {
-      // 键盘收回：居中显示
+      // 键盘收回：居中
       chatWindow.style.top = '50%';
       chatWindow.style.bottom = 'auto';
       chatWindow.style.transform = 'translate(-50%, -50%)';
     }
 
-    chatWindow.style.maxHeight = vh * 0.8 + 'px';
     scrollToBottom();
   });
 }
 
+// 调整 textarea 高度和滚动
+chatInput.addEventListener("input", () => {
+  chatInput.style.height = "auto";
+  chatInput.style.height = chatInput.scrollHeight + "px";
+  scrollToBottom();
+});
+
+function scrollToBottom() {
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// 初始化
 adjustChatForKeyboard();
