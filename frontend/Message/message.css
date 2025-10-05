@@ -17,22 +17,36 @@
    聊天窗口整体
    ===================== */
 #chatWindow {
-  position: absolute; /* 由 fixed 改为 absolute */
-  bottom: env(safe-area-inset-bottom, 0);
+  position: fixed;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   width: 100%;
   max-width: 360px;
-  height: 50%;
+  height: 500px;
   background-color: var(--card-bg);
   border: 1px solid #ddd;
-  border-radius: 12px 12px 0 0;
+  border-radius: 12px;
   display: none;
   flex-direction: column;
   overflow: hidden;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
   z-index: 1000;
   font-family: "Helvetica", Arial, sans-serif;
+}
+
+/* 输入框改 textarea 支持多行 */
+.chat-input textarea {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  outline: none;
+  font-size: 14px;
+  background: white;
+  resize: none;
+  max-height: 120px;
+  overflow-y: auto;
 }
 
 /* =====================
