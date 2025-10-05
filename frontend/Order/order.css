@@ -519,7 +519,7 @@ button:disabled {
 .right-box {
   width: 48%;
   height: 100%;
-  background: rgba(255, 255, 255, 0.1); /* 半透明背景 */
+  background: white;
   border-radius: 15px;
   color: white;
   font-size: 30px;
