@@ -212,20 +212,23 @@ function adjustChatForKeyboard() {
 
   window.addEventListener('resize', () => {
     const vh = window.innerHeight;
-    const delta = initialHeight - vh;
+    const keyboardHeight = initialHeight - vh;
 
-    // 当键盘弹出时，窗口微调
-    if (delta > 100) { 
-      chatWindow.style.transform = `translate(-50%, calc(-50% - ${delta/2}px))`;
-    } else { 
-      chatWindow.style.transform = "translate(-50%, -50%)";
+    if (keyboardHeight > 100) {
+      // 键盘弹出：让聊天窗口底部贴近键盘
+      chatWindow.style.top = 'auto';
+      chatWindow.style.bottom = keyboardHeight + 'px';
+      chatWindow.style.transform = 'translateX(-50%)';
+    } else {
+      // 键盘收回：居中显示
+      chatWindow.style.top = '50%';
+      chatWindow.style.bottom = 'auto';
+      chatWindow.style.transform = 'translate(-50%, -50%)';
     }
 
-    // 更新聊天窗口最大高度，防止被键盘挡住
-    chatWindow.style.maxHeight = vh * 0.8 + "px";
+    chatWindow.style.maxHeight = vh * 0.8 + 'px';
     scrollToBottom();
   });
 }
 
-// 初始化键盘适配
 adjustChatForKeyboard();
