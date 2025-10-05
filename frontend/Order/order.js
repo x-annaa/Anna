@@ -755,12 +755,11 @@ document.getElementById("autoOrderBtn").addEventListener("click", function() {
 const historyModal = document.getElementById("historyModal");
 const rulesModal = document.getElementById("rulesModal");
 
+// 左盒子点击打开历史弹窗
 document.querySelector(".left-box").addEventListener("click", async () => {
-  // 清空列表
   const listEl = document.getElementById("orderHistoryList");
   listEl.innerHTML = "<li>加载中...</li>";
 
-  // 异步获取订单数据（示例用 fetch/supabase）
   if (window.supabaseClient && window.currentUserId) {
     const { data: orders, error } = await supabaseClient
       .from("orders")
@@ -781,16 +780,17 @@ document.querySelector(".left-box").addEventListener("click", async () => {
   historyModal.style.display = "block";
 });
 
+// 右盒子点击打开规则弹窗
 document.querySelector(".right-box").addEventListener("click", () => {
   rulesModal.style.display = "block";
 });
 
-// 点击关闭按钮
-document.querySelectorAll(".close").forEach(span => {
-  span.addEventListener("click", () => {
-    historyModal.style.display = "none";
-    rulesModal.style.display = "none";
-  });
+// 点击弹窗返回按钮关闭
+document.getElementById("closeHistoryBtn")?.addEventListener("click", () => {
+  historyModal.style.display = "none";
+});
+document.getElementById("closeRulesBtn")?.addEventListener("click", () => {
+  rulesModal.style.display = "none";
 });
 
 // 点击弹窗外区域关闭
