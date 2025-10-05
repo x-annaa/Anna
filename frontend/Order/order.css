@@ -508,34 +508,25 @@ button:disabled {
 
 .dulcontainer {
   display: flex;
-  justify-content: space-between;  /* 左右分布 */
-  align-items: center;             /* 垂直居中 */
-  width: 80%;                      /* 宽度稍微收窄，更居中视觉 */
-  margin: 40px auto;               /* 居中于页面其他内容下面 */
-  gap: 20px;                       /* 两盒子间距 */
-  position: relative;              /* 避免受父元素影响 */
-  z-index: 10;                     /* 确保不会被覆盖 */
+  justify-content: center;  /* ✅ 水平整体居中 */
+  align-items: center;      /* 垂直居中 */
+  gap: 15px;                /* 两个盒子之间的间距 */
+  width: 100%;
+  margin-top: 20px;         /* 和上方内容留距离 */
 }
 
-.left-box,
-.right-box {
-  flex: 1;                         /* 自动平分宽度 */
-  max-width: 200px;                /* 限制最大宽度 */
-  height: 150px;                   /* 固定高度 */
-  background: #fff;                /* 白色背景 */
-  border-radius: 14px;             /* 圆角 */
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1); /* 柔和阴影 */
+.left-box, .right-box {
+  flex: 0 0 auto;           /* ✅ 防止被拉伸 */
+  max-width: 40px;
+  height: 27px;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 36px;
+  font-size: 12px;
   font-weight: bold;
   color: #333;
   transition: all 0.3s ease;
-}
-
-.left-box:hover,
-.right-box:hover {
-  transform: scale(1.05);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
