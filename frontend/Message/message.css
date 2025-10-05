@@ -21,7 +21,8 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 360px;
+  width: 100%;      /* 改成占满页面宽度 */
+  max-width: 360px; /* 保持最大宽度 */
   height: 500px;
   background-color: var(--card-bg);
   border: 1px solid #ddd;
@@ -147,7 +148,7 @@
 }
 
 /* =====================
-   客服 & Telegram 卡片（图片左，文字垂直居中，颜色保持原样）
+   客服 & Telegram 卡片（图片左，文字+按钮横向排列，垂直居中）
    ===================== */
 .telegram-box,
 #openChatBtn {
@@ -196,13 +197,12 @@
   flex-shrink: 0;
 }
 
-/* 文字和按钮垂直居中排列在图片右边 */
+/* 文字和按钮横向排列在图片右边 */
 .telegram-info {
   display: flex;
-  flex-direction: column;   /* 垂直排列 */
-  justify-content: flex-end; 
-  align-items: flex-start;  /* 左对齐文字和按钮 */
-  gap: 4px;
+  flex-direction: row;      /* 横向排列 */
+  align-items: center;      /* 垂直居中 */
+  gap: 8px;                 /* 元素间距 */
   flex: 1;                  /* 占满剩余空间 */
 }
 
@@ -213,7 +213,9 @@
   color: #fff;              /* 白色文字 */
 }
 
+/* 复制按钮靠右 */
 #copyTelegramBtn {
+  margin-left: auto;
   padding: 4px 10px;
   border: none;
   border-radius: 6px;
@@ -235,7 +237,8 @@
    ===================== */
 @media (max-width: 420px) {
   #chatWindow {
-    width: 320px;
+    width: 100%;   /* 占满屏幕宽度 */
+    max-width: 320px;
     height: 460px;
   }
   .telegram-box,
