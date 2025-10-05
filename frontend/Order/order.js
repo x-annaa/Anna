@@ -763,14 +763,15 @@ document.querySelector(".left-box").addEventListener("click", async () => {
   if (window.supabaseClient && window.currentUserId) {
     const { data: orders, error } = await supabaseClient
       .from("orders")
-      .select(`id, total_price, profit, status, products(name, url)`)
+      .select(`id, total_price, profit, status, created_at, products(name, url)`)
       .eq("user_id", window.currentUserId)
       .order("created_at", { ascending: false });
 
     if (!error && orders?.length) {
       listEl.innerHTML = orders.map(o => {
         const img = o.products?.url ? `<img src="${o.products.url}" alt="${o.products.name}" width="50" style="margin-right:5px;">` : "";
-        return `<li>${img}${o.products?.name || '未知商品'} / ¥${Number(o.total_price).toFixed(2)} / 收入 +¥${Number(o.profit).toFixed(2)} / 状态: ${o.status}</li>`;
+        const time = o.created_at ? new Date(o.created_at).toLocaleString() : "未知时间";
+        return `<li>${img}${o.products?.name || '未知商品'} / ¥${Number(o.total_price).toFixed(2)} / 收入 +¥${Number(o.profit).toFixed(2)} / 状态: ${o.status} / <small>${time}</small></li>`;
       }).join("");
     } else {
       listEl.innerHTML = "<li>暂无订单！</li>";
@@ -779,6 +780,7 @@ document.querySelector(".left-box").addEventListener("click", async () => {
 
   historyModal.style.display = "block";
 });
+
 
 // 右盒子点击打开规则弹窗
 document.querySelector(".right-box").addEventListener("click", () => {
