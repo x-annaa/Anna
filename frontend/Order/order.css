@@ -505,3 +505,27 @@ button:disabled {
   border-radius: 3px;
   margin-top: 13px;
 }
+
+.dulcontainer {
+  display: flex;
+  justify-content: space-between; /* 左右分布 */
+  align-items: center;            /* 垂直居中 */
+  width: 80%;                     /* 宽度可调整 */
+  margin: 0 auto;                 /* 居中整个容器 */
+  height: 300px;                  /* 可调高度 */
+}
+
+.left-box,
+.right-box {
+  width: 48%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.1); /* 半透明背景 */
+  border-radius: 15px;
+  color: white;
+  font-size: 30px;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(8px); /* 模糊玻璃效果 */
+}
