@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>U9</title>
 
-  <!-- CSS 部分 --> 
+  <!-- CSS -->
   <link rel="stylesheet" href="Home/home.css">
   <link rel="stylesheet" href="About/about.css">
   <link rel="stylesheet" href="Order/order.css">
@@ -15,19 +15,16 @@
 
   <!-- Supabase SDK -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <!-- 全局 Supabase 初始化 -->
   <script src="../supabaseClient.js"></script>
 </head>
 <body>
 
   <!-- ===================== 首页 ===================== -->
   <div id="homePage" class="page active">
-    <!-- 广告轮播容器 -->
     <div class="ad-container">
       <img id="adImage" src="" alt="广告" />
     </div>
 
-    <!-- 广告跑马灯 -->
     <div class="marquee-container">
       <span class="marquee-icon">🔈</span>
       <div class="marquee-wrapper">
@@ -35,38 +32,34 @@
       </div>
     </div>
 
-    <!-- 分类广告选择 -->
     <div class="ad-category-container">
-      <!-- 广告网格 -->
       <div class="category-ad-grid">
-        <!-- 手机类 -->
         <div class="ad-item" data-category="phone"></div>
         <div class="ad-item" data-category="phone"></div>
         <div class="ad-item" data-category="phone"></div>
         <div class="ad-item" data-category="phone"></div>
-        <!-- 服饰类 -->
+
         <div class="ad-item" data-category="clothes"></div>
         <div class="ad-item" data-category="clothes"></div>
         <div class="ad-item" data-category="clothes"></div>
         <div class="ad-item" data-category="clothes"></div>
-        <!-- 汽车类 -->
+
         <div class="ad-item" data-category="car"></div>
         <div class="ad-item" data-category="car"></div>
         <div class="ad-item" data-category="car"></div>
         <div class="ad-item" data-category="car"></div>
-        <!-- 化妆品类 -->
+
         <div class="ad-item" data-category="cosmetics"></div>
         <div class="ad-item" data-category="cosmetics"></div>
         <div class="ad-item" data-category="cosmetics"></div>
         <div class="ad-item" data-category="cosmetics"></div>
-        <!-- 钻石类 -->
+
         <div class="ad-item" data-category="diamond"></div>
         <div class="ad-item" data-category="diamond"></div>
         <div class="ad-item" data-category="diamond"></div>
         <div class="ad-item" data-category="diamond"></div>
       </div>
 
-      <!-- 分类按钮 -->
       <div class="category-buttons">
         <button class="category-btn active" data-category="phone">Phones</button>
         <button class="category-btn" data-category="clothes">Clothing</button>
@@ -76,7 +69,6 @@
       </div>
     </div>
 
-    <!-- 排行榜 -->
     <div class="rank-section">
       <h3>🏆 Ranking list</h3>
       <ul class="rank-list">
@@ -97,7 +89,7 @@
       <span class="unread-dot">0</span>
     </div>
 
-   <div class="telegram-box">
+    <div class="telegram-box">
       <img src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/123.jpg" alt="Telegram 图标">
       <div class="telegram-info">
         <p id="telegramAccount">@U9_support</p>
@@ -210,19 +202,7 @@
     </div>
   </div>
 
-  <!-- ===================== 底部导航栏 ===================== -->
-  <div class="bottom-nav">
-    <button data-page="homePage" class="active">Home</button>
-    <button data-page="infoPage" id="messageBtn">
-      Message
-      <span id="bottomUnreadCount" class="unread-dot hidden">0</span>
-    </button>
-    <button data-page="orderPage">Order</button>
-    <button data-page="msgPage">About</button>
-    <button data-page="myPage">Me</button>
-  </div>
-
-  <!-- =============== 弹窗区域 =============== -->
+  <!-- ===================== 弹窗区域 ===================== -->
   <!-- Logout -->
   <div id="logoutModal" class="modal">
     <div class="modal-content">
@@ -299,19 +279,19 @@
     </div>
   </div>
 
-    <!-- 底部导航栏 -->
+  <!-- ===================== 底部导航栏 ===================== -->
   <div class="bottom-nav">
     <button data-page="homePage" class="active">Home</button>
     <button data-page="infoPage" id="messageBtn">
       Message
-      <span id="bottomUnreadCount" class="unread-dot hidden">0</span>
+      <span id="bottomUnreadCount" class="unread-dot">0</span>
     </button>
     <button data-page="orderPage">Order</button>
     <button data-page="msgPage">About</button>
     <button data-page="myPage">Me</button>
   </div>
 
-  <!-- JS 部分 --> 
+  <!-- JS -->
   <script src="Home/home.js"></script>
   <script src="Message/message.js"></script>
   <script src="Order/order.js"></script>
