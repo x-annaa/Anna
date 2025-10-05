@@ -97,9 +97,9 @@ h2, h3 {
 .order-result {
   margin-top: 2px;
   padding: 15px;
-  border: 1px solid #ddd;
+  border: 1px solid #a9c2e0;
   border-radius: 10px;
-  background: #fafafa;
+  background: #d7ddde4f;
 
   display: flex;           /* 左右布局 */
   align-items: center;     /* 图片垂直居中 */
