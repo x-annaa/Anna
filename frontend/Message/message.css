@@ -204,11 +204,11 @@
 
 /* Telegram 图片 */
 .telegram-box img {
-  width: 28px;        /* ✅ 控制图标尺寸 */
-  height: 28px;
+  width: 100px;        /* ✅ 控制图标尺寸 */
+  height: 100px;
   border-radius: 8px;
   object-fit: cover;
-  margin-right: 10px;
+  margin: 10px;
 }
 
 /* Telegram 信息区域 */
