@@ -157,3 +157,18 @@ document.getElementById("copyTelegramBtn")?.addEventListener("click", () => {
     alert("已复制 Telegram 账号：" + text)
   );
 });
+
+// 手机键盘兼容
+function adjustChatForKeyboard() {
+  if (!chatWindow) return;
+
+  // iOS 和 Android 都会触发 resize
+  window.addEventListener('resize', () => {
+    const vh = window.innerHeight;
+    chatWindow.style.maxHeight = vh * 0.8 + "px"; // 聊天窗口不超过屏幕高度80%
+    scrollToBottom();
+  });
+}
+
+// 初始化
+adjustChatForKeyboard();
