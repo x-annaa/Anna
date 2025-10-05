@@ -231,3 +231,8 @@ document.getElementById("copyTelegramBtn").addEventListener("click", () => {
     .then(() => alert("已复制 Telegram 账号：" + text))
     .catch(() => alert("复制失败，请手动复制"));
 });
+
+// 设置红点数字
+document.querySelector('#openChatBtn .unread-dot').textContent = 3;
+// 隐藏红点
+document.querySelector('#messageBtn .unread-dot').classList.add('hidden');
