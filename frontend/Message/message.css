@@ -14,19 +14,19 @@
 }
 
 /* =====================
-   聊天窗口整体
+   聊天窗口整体（底部显示）
    ===================== */
 #chatWindow {
   position: fixed;
-  top: 50%;
+  bottom: 0; /* 改为底部固定 */
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   width: 100%;
   max-width: 360px;
-  height: 500px;
+  height: 60%;
   background-color: var(--card-bg);
   border: 1px solid #ddd;
-  border-radius: 12px;
+  border-radius: 12px 12px 0 0;
   display: none;
   flex-direction: column;
   overflow: hidden;
@@ -88,6 +88,7 @@
   word-wrap: break-word;
   font-size: 14px;
   line-height: 1.4;
+  white-space: pre-wrap; /* 保证换行 */
 }
 .message-item.me {
   background-color: var(--primary-blue);
@@ -111,9 +112,9 @@
   padding: 8px;
   border-top: 1px solid #ddd;
   background-color: #fafafa;
-  align-items: center;
+  align-items: flex-end;
 }
-.chat-input input {
+.chat-input textarea {
   flex: 1;
   padding: 8px 12px;
   border-radius: 20px;
@@ -121,6 +122,9 @@
   outline: none;
   font-size: 14px;
   background: white;
+  resize: none;
+  max-height: 100px;
+  overflow-y: auto;
 }
 .chat-input button {
   padding: 8px 12px;
@@ -140,150 +144,12 @@
 }
 
 /* =====================
-   客服 & Telegram 卡片
-   ===================== */
-.telegram-box,
-#openChatBtn {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  padding: 12px 16px;
-  margin: 10px 0;
-  border-radius: 12px;
-  box-sizing: border-box;
-  gap: 12px;
-  font-weight: 600;
-  font-size: 14px;
-  color: white;
-  cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.2s ease;
-  position: relative;
-}
-
-/* Telegram 渐变 */
-.telegram-box {
-  background: linear-gradient(135deg, var(--telegram-grad-a), var(--telegram-grad-b));
-  box-shadow: 0 2px 8px rgba(34, 158, 217, 0.18);
-}
-.telegram-box:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(34, 158, 217, 0.24);
-}
-
-/* 客服渐变 */
-#openChatBtn {
-  background: linear-gradient(135deg, var(--support-grad-a), var(--support-grad-b));
-  box-shadow: 0 2px 8px rgba(255, 123, 0, 0.18);
-}
-#openChatBtn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(255, 123, 0, 0.26);
-}
-
-/* 图片 */
-.telegram-box img,
-#openChatBtn img {
-  width: 46px;
-  height: 46px;
-  border-radius: 6px;
-  object-fit: cover;
-  flex-shrink: 0;
-}
-
-/* 文字+按钮横向排列 */
-.telegram-info {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-  justify-content: flex-start;
-}
-.telegram-info p {
-  font-size: 13px;
-  font-weight: 600;
-  margin: 0;
-  color: #fff;
-}
-#copyTelegramBtn {
-  padding: 4px 10px;
-  border: none;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.18);
-  color: white;
-  cursor: pointer;
-  font-size: 12px;
-  transition: background 0.18s, transform 0.06s;
-}
-#copyTelegramBtn:hover {
-  background: rgba(255, 255, 255, 0.28);
-}
-#copyTelegramBtn:active {
-  transform: scale(0.97);
-}
-
-/* =====================
-   红点样式
-   ===================== */
-.unread-dot {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  background: red;
-  color: white;
-  border-radius: 50%;
-  padding: 2px 6px;
-  font-size: 12px;
-  line-height: 1;
-  display: none;
-  pointer-events: none;
-  animation: pulse 1.2s infinite;
-}
-.unread-dot.show {
-  display: inline-block;
-}
-
-/* 红点动画 */
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.3); }
-}
-
-/* =====================
-   Message按钮红点
-   ===================== */
-.bottom-nav button {
-  position: relative; /* 绝对定位参照 */
-  z-index: 1;
-}
-#bottomUnreadCount {
-  position: absolute;
-  top: 8px;
-  right: 16px;
-  transform: translateY(-50%);
-  background: red;
-  color: #fff;
-  border-radius: 999px;
-  padding: 2px 6px;
-  font-size: 11px;
-  line-height: 1;
-  display: none;
-  pointer-events: none;
-  z-index: 9999; /* 高于底部导航，确保覆盖 */
-  animation: pulse 1.2s infinite;
-}
-
-/* =====================
    小屏适配
    ===================== */
 @media (max-width: 420px) {
   #chatWindow {
     width: 100%;
-    max-width: 320px;
-    height: 460px;
-  }
-  .telegram-box,
-  #openChatBtn {
-    padding: 10px;
+    max-width: 360px;
+    height: 55%;
   }
 }
