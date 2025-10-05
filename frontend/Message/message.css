@@ -147,17 +147,14 @@
 }
 
 /* =====================
-   客服 & Telegram 卡片（全宽居中）
+   客服 & Telegram 卡片（图片左，文字居中）
    ===================== */
-
-/* 基础样式 */
 .telegram-box,
 #openChatBtn {
   display: flex;
-  align-items: center;
-  justify-content: center; /* 水平居中 */
-  width: 100%; /* 占满屏幕宽度 */
-  padding: 12px;
+  align-items: center;       /* 图片与文字垂直居中 */
+  width: 100%;               /* 占满屏幕宽度 */
+  padding: 12px 16px;
   margin: 10px 0;
   border-radius: 12px;
   box-sizing: border-box;
@@ -169,26 +166,24 @@
   transition: transform 0.15s ease, box-shadow 0.2s ease;
 }
 
-/* Telegram 卡片 */
-.telegram-box {
-  background: linear-gradient(135deg, var(--telegram-grad-a), var(--telegram-grad-b));
-  box-shadow: 0 2px 8px rgba(34, 158, 217, 0.18);
-  flex-direction: row;
-}
-
-.telegram-box img {
+/* 图片保持左边 */
+.telegram-box img,
+#openChatBtn img {
   width: 50px;
   height: 50px;
   border-radius: 6px;
   object-fit: cover;
+  flex-shrink: 0;
 }
 
+/* 文字和按钮垂直居中排列在图片右边 */
 .telegram-info {
   display: flex;
-  flex-direction: column; /* 账号和按钮上下排列 */
-  align-items: center; /* 垂直居中 */
-  justify-content: center;
-  gap: 6px;
+  flex-direction: column;   /* 垂直排列 */
+  justify-content: center;  /* 垂直居中 */
+  align-items: flex-start;  /* 靠左对齐文字和按钮 */
+  gap: 4px;
+  flex: 1;                  /* 占满剩余空间 */
 }
 
 #copyTelegramBtn {
@@ -209,46 +204,13 @@
   transform: scale(0.97);
 }
 
-.telegram-box:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(34, 158, 217, 0.24);
-}
-
-/* 客服卡片 */
-#openChatBtn {
-  background: linear-gradient(135deg, var(--support-grad-a), var(--support-grad-b));
-  box-shadow: 0 2px 8px rgba(255, 123, 0, 0.18);
-  flex-direction: row;
-}
-
-#openChatBtn img {
-  width: 50px;
-  height: 50px;
-  border-radius: 6px;
-  object-fit: cover;
-}
-
+/* 悬停效果保持 */
+.telegram-box:hover,
 #openChatBtn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(255, 123, 0, 0.26);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.24);
 }
 
-/* unread 红点 */
-.unread-dot {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  background: red;
-  color: white;
-  border-radius: 50%;
-  padding: 2px 6px;
-  font-size: 12px;
-  line-height: 1;
-  pointer-events: none;
-}
-.hidden {
-  display: none;
-}
 
 /* =====================
    小屏适配
