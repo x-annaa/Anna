@@ -17,16 +17,16 @@
    聊天窗口整体
    ===================== */
 #chatWindow {
-  position: fixed;
-  top: 50%;
+  position: absolute; /* 由 fixed 改为 absolute */
+  bottom: env(safe-area-inset-bottom, 0);
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   width: 100%;
   max-width: 360px;
-  height: 500px;
+  height: 50%;
   background-color: var(--card-bg);
   border: 1px solid #ddd;
-  border-radius: 12px;
+  border-radius: 12px 12px 0 0;
   display: none;
   flex-direction: column;
   overflow: hidden;
