@@ -511,8 +511,8 @@ button:disabled {
   justify-content: space-between; /* 左右分布 */
   align-items: center;            /* 垂直居中 */
   width: 80%;                     /* 宽度可调整 */
-  margin: 0 auto;                 /* 居中整个容器 */
-  height: 300px;                  /* 可调高度 */
+  margin: 3 auto;                 /* 居中整个容器 */
+  height: 0px;                  /* 可调高度 */
 }
 
 .left-box,
