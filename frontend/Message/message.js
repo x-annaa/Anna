@@ -1,32 +1,42 @@
+// =====================
 // DOM 元素
+// =====================
 const openChatBtn = document.getElementById("openChatBtn");
 const chatWindow = document.getElementById("chatWindow");
 const backBtn = document.getElementById("backBtn");
 const sendBtn = document.getElementById("sendBtn");
-const chatInput = document.getElementById("chatInput");
+const chatInput = document.getElementById("chatInput"); // textarea
 const chatMessages = document.getElementById("chatMessages");
 
-const bottomUnreadEl = document.getElementById("bottomUnreadCount"); 
-const chatBtnUnreadEl = document.getElementById("chatBtnUnreadCount"); 
+const bottomUnreadEl = document.getElementById("bottomUnreadCount");
+const chatBtnUnreadEl = document.getElementById("chatBtnUnreadCount");
 
 let chatSubscription = null;
 
+// =====================
+// 获取当前用户 ID
+// =====================
 function getCurrentUserId() {
   const id = localStorage.getItem("currentUserId");
   return id ? Number(id) : null;
 }
 
-// 自动调整 textarea 高度
+// =====================
+// 自动增高 textarea
+// =====================
 chatInput.addEventListener("input", () => {
   chatInput.style.height = "auto";
   chatInput.style.height = chatInput.scrollHeight + "px";
   scrollToBottom();
 });
 
+// =====================
 // 打开聊天窗口
+// =====================
 openChatBtn?.addEventListener("click", async () => {
   const userId = getCurrentUserId();
   if (!userId) return alert("请先登录！");
+
   chatWindow.style.display = "flex";
   chatMessages.innerHTML = "";
   await loadMessages();
@@ -36,7 +46,9 @@ openChatBtn?.addEventListener("click", async () => {
   scrollToBottom();
 });
 
+// =====================
 // 返回按钮
+// =====================
 backBtn?.addEventListener("click", () => {
   chatWindow.style.display = "none";
   if (chatSubscription) {
@@ -45,23 +57,31 @@ backBtn?.addEventListener("click", () => {
   }
 });
 
+// =====================
 // 发送消息
+// =====================
 sendBtn?.addEventListener("click", async () => {
   const userId = getCurrentUserId();
   if (!userId) return alert("请先登录！");
+
   const content = chatInput.value.trim();
   if (!content) return;
+
   const { error } = await supabaseClient.from("messages").insert([
     { sender_id: userId, receiver_id: 1, content, is_read: false }
   ]);
+
   if (error) return alert("发送失败");
+
   appendMessage("我", content);
   chatInput.value = "";
   chatInput.style.height = "auto";
   scrollToBottom();
 });
 
+// =====================
 // 显示消息
+// =====================
 function appendMessage(sender, text) {
   const msg = document.createElement("div");
   msg.classList.add("message-item", sender === "我" ? "me" : "bot");
@@ -70,30 +90,40 @@ function appendMessage(sender, text) {
   scrollToBottom();
 }
 
+// =====================
 // 滚动到底部
+// =====================
 function scrollToBottom() {
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
+// =====================
 // 加载历史消息
+// =====================
 async function loadMessages() {
   const userId = getCurrentUserId();
   if (!userId) return;
+
   const { data, error } = await supabaseClient
     .from("messages")
     .select("*")
     .or(`and(sender_id.eq.${userId},receiver_id.eq.1),and(sender_id.eq.1,receiver_id.eq.${userId})`)
     .order("created_at", { ascending: true });
+
   if (error) return console.error(error);
+
   data.forEach(msg =>
     appendMessage(msg.sender_id === userId ? "我" : "客服", msg.content)
   );
 }
 
+// =====================
 // 标记为已读
+// =====================
 async function markMessagesAsRead() {
   const userId = getCurrentUserId();
   if (!userId) return;
+
   await supabaseClient
     .from("messages")
     .update({ is_read: true })
@@ -101,19 +131,25 @@ async function markMessagesAsRead() {
     .eq("is_read", false);
 }
 
+// =====================
 // 更新红点显示
+// =====================
 async function updateUnreadCount() {
   const userId = getCurrentUserId();
   if (!userId) return;
+
   const { count, error } = await supabaseClient
     .from("messages")
     .select("id", { count: "exact", head: true })
     .eq("receiver_id", userId)
     .eq("is_read", false);
+
   if (error) return console.error(error);
+
   const unread = count || 0;
   const show = unread > 0;
   const text = unread > 99 ? "99+" : unread;
+
   [bottomUnreadEl, chatBtnUnreadEl, document.querySelector("#openChatBtn .unread-dot")].forEach(el => {
     if (!el) return;
     el.textContent = text;
@@ -121,11 +157,15 @@ async function updateUnreadCount() {
   });
 }
 
+// =====================
 // 监听实时消息
+// =====================
 function listenForMessages() {
   const userId = getCurrentUserId();
   if (!userId) return;
+
   if (chatSubscription) supabaseClient.removeChannel(chatSubscription);
+
   chatSubscription = supabaseClient.channel("realtime-messages")
     .on("postgres_changes", {
       event: "INSERT",
@@ -143,13 +183,17 @@ function listenForMessages() {
     .subscribe();
 }
 
+// =====================
 // 页面加载初始化
+// =====================
 document.addEventListener("DOMContentLoaded", () => {
   updateUnreadCount();
   listenForMessages();
 });
 
+// =====================
 // Telegram 一键复制
+// =====================
 document.getElementById("copyTelegramBtn")?.addEventListener("click", () => {
   const text = document.getElementById("telegramAccount")?.textContent || "";
   if (!text) return;
@@ -158,17 +202,30 @@ document.getElementById("copyTelegramBtn")?.addEventListener("click", () => {
   );
 });
 
+// =====================
 // 手机键盘兼容
+// =====================
 function adjustChatForKeyboard() {
   if (!chatWindow) return;
 
-  // iOS 和 Android 都会触发 resize
+  let initialHeight = window.innerHeight;
+
   window.addEventListener('resize', () => {
     const vh = window.innerHeight;
-    chatWindow.style.maxHeight = vh * 0.8 + "px"; // 聊天窗口不超过屏幕高度80%
+    const delta = initialHeight - vh;
+
+    // 当键盘弹出时，窗口微调
+    if (delta > 100) { 
+      chatWindow.style.transform = `translate(-50%, calc(-50% - ${delta/2}px))`;
+    } else { 
+      chatWindow.style.transform = "translate(-50%, -50%)";
+    }
+
+    // 更新聊天窗口最大高度，防止被键盘挡住
+    chatWindow.style.maxHeight = vh * 0.8 + "px";
     scrollToBottom();
   });
 }
 
-// 初始化
+// 初始化键盘适配
 adjustChatForKeyboard();
