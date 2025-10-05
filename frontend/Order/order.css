@@ -424,7 +424,7 @@ button:disabled {
   font-family: Arial, sans-serif;
   border: 1px solid #ddd;        /* 边框 */
   border-radius: 10px;           /* 圆角 */
-  background-color: #fafafa;     /* 背景色 */
+  background-color: #ecf1ff00;     /* 背景色 */
   box-sizing: border-box;
 }
 
