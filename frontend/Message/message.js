@@ -7,12 +7,11 @@ const chatInput = document.getElementById("chatInput");
 const chatMessages = document.getElementById("chatMessages");
 
 const bottomUnreadEl = document.getElementById("bottomUnreadCount"); // 底部导航红点
-const chatBtnUnreadEl = document.getElementById("chatBtnUnreadCount"); // ⛑︎按钮红点
+const chatBtnUnreadEl = document.getElementById("chatBtnUnreadCount"); // message页按钮红点
 
-// 当前聊天订阅
 let chatSubscription = null;
 
-// 获取当前用户
+// 获取当前用户ID
 function getCurrentUserId() {
   const id = localStorage.getItem("currentUserId");
   return id ? Number(id) : null;
@@ -21,7 +20,7 @@ function getCurrentUserId() {
 // 打开聊天窗口
 openChatBtn?.addEventListener("click", async () => {
   const userId = getCurrentUserId();
-  if (!userId) { alert("请先登录！"); return; }
+  if (!userId) return alert("请先登录！");
 
   chatWindow.style.display = "flex";
   chatMessages.innerHTML = "";
@@ -44,16 +43,19 @@ backBtn?.addEventListener("click", () => {
 // 发送消息
 sendBtn?.addEventListener("click", async () => {
   const userId = getCurrentUserId();
-  if (!userId) { alert("请先登录！"); return; }
+  if (!userId) return alert("请先登录！");
 
   const content = chatInput.value.trim();
   if (!content) return;
 
-  const { data, error } = await supabaseClient.from("messages").insert([
+  const { error } = await supabaseClient.from("messages").insert([
     { sender_id: userId, receiver_id: 1, content, is_read: false }
   ]);
 
-  if (error) { console.error(error); alert("发送失败"); return; }
+  if (error) {
+    console.error(error);
+    return alert("发送失败");
+  }
 
   appendMessage("我", content);
   chatInput.value = "";
@@ -73,45 +75,56 @@ async function loadMessages() {
   const userId = getCurrentUserId();
   if (!userId) return;
 
-  const { data, error } = await supabaseClient.from("messages")
+  const { data, error } = await supabaseClient
+    .from("messages")
     .select("*")
     .or(`and(sender_id.eq.${userId},receiver_id.eq.1),and(sender_id.eq.1,receiver_id.eq.${userId})`)
     .order("created_at", { ascending: true });
 
-  if (error) { console.error(error); return; }
-  data.forEach(msg => appendMessage(msg.sender_id === userId ? "我" : "客服", msg.content));
+  if (error) return console.error(error);
+
+  data.forEach(msg =>
+    appendMessage(msg.sender_id === userId ? "我" : "客服", msg.content)
+  );
 }
 
-// 标记已读
+// 标记消息为已读
 async function markMessagesAsRead() {
   const userId = getCurrentUserId();
   if (!userId) return;
-  await supabaseClient.from("messages")
+  await supabaseClient
+    .from("messages")
     .update({ is_read: true })
     .eq("receiver_id", userId)
     .eq("is_read", false);
 }
 
-// 更新未读红点
+// 更新红点显示
 async function updateUnreadCount() {
   const userId = getCurrentUserId();
   if (!userId) return;
 
-  const { count, error } = await supabaseClient.from("messages")
+  const { count, error } = await supabaseClient
+    .from("messages")
     .select("id", { count: "exact", head: true })
     .eq("receiver_id", userId)
     .eq("is_read", false);
 
-  if (error) { console.error(error); return; }
+  if (error) return console.error(error);
 
-  const openDot = document.querySelector("#openChatBtn .unread-dot");
-  if (openDot) openDot.style.display = count > 0 ? "inline-block" : "none", openDot.textContent = count || "";
+  const unread = count || 0;
+  const show = unread > 0;
+  const text = unread > 99 ? "99+" : unread;
 
-  if (bottomUnreadEl) bottomUnreadEl.style.display = count > 0 ? "inline-block" : "none", bottomUnreadEl.textContent = count || "";
-  if (chatBtnUnreadEl) chatBtnUnreadEl.style.display = count > 0 ? "inline-block" : "none", chatBtnUnreadEl.textContent = count || "";
+  [bottomUnreadEl, chatBtnUnreadEl, document.querySelector("#openChatBtn .unread-dot")]
+    .forEach(el => {
+      if (!el) return;
+      el.textContent = text;
+      el.style.display = show ? "inline-block" : "none";
+    });
 }
 
-// 实时监听
+// 监听实时消息
 function listenForMessages() {
   const userId = getCurrentUserId();
   if (!userId) return;
@@ -120,7 +133,10 @@ function listenForMessages() {
 
   chatSubscription = supabaseClient.channel("realtime-messages")
     .on("postgres_changes", {
-      event: "INSERT", schema: "public", table: "messages", filter: `receiver_id=eq.${userId}`
+      event: "INSERT",
+      schema: "public",
+      table: "messages",
+      filter: `receiver_id=eq.${userId}`
     }, async payload => {
       const msg = payload.new;
       if (msg.sender_id === 1 && chatWindow.style.display === "flex") {
@@ -138,9 +154,11 @@ document.addEventListener("DOMContentLoaded", () => {
   listenForMessages();
 });
 
-// 复制 Telegram
+// 复制 Telegram 账号
 document.getElementById("copyTelegramBtn")?.addEventListener("click", () => {
   const text = document.getElementById("telegramAccount")?.textContent || "";
   if (!text) return;
-  navigator.clipboard.writeText(text).then(() => alert("已复制 Telegram 账号：" + text));
+  navigator.clipboard.writeText(text).then(() =>
+    alert("已复制 Telegram 账号：" + text)
+  );
 });
