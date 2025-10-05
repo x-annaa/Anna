@@ -517,7 +517,7 @@ button:disabled {
 
 .left-box, .right-box {
   flex: 0 0 auto;           /* ✅ 防止被拉伸 */
-  max-width: 40px;
+  width: 35px;
   height: 27px;
   background: #fff;
   border-radius: 4px;
