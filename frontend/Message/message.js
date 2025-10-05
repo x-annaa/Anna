@@ -232,7 +232,18 @@ document.getElementById("copyTelegramBtn").addEventListener("click", () => {
     .catch(() => alert("复制失败，请手动复制"));
 });
 
-// 设置红点数字
-document.querySelector('#openChatBtn .unread-dot').textContent = 3;
-// 隐藏红点
-document.querySelector('#messageBtn .unread-dot').classList.add('hidden');
+function setUnreadCount(count) {
+  const dot = document.querySelector('#openChatBtn .unread-dot');
+  if (count > 0) {
+    dot.textContent = count;
+    dot.style.display = 'inline-block';
+  } else {
+    dot.style.display = 'none';
+  }
+}
+
+// 示例：收到 1 条消息
+setUnreadCount(1);
+
+// 示例：消息被查看或清空
+setUnreadCount(0);
