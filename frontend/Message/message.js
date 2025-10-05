@@ -6,27 +6,30 @@ const sendBtn = document.getElementById("sendBtn");
 const chatInput = document.getElementById("chatInput");
 const chatMessages = document.getElementById("chatMessages");
 
-const bottomUnreadEl = document.getElementById("bottomUnreadCount"); // 底部导航红点
-const chatBtnUnreadEl = document.getElementById("chatBtnUnreadCount"); // 信息页红点
+const bottomUnreadEl = document.getElementById("bottomUnreadCount"); 
+const chatBtnUnreadEl = document.getElementById("chatBtnUnreadCount"); 
 
 let chatSubscription = null;
 
-// 获取当前用户ID
 function getCurrentUserId() {
   const id = localStorage.getItem("currentUserId");
   return id ? Number(id) : null;
 }
 
+// 自动调整 textarea 高度
+chatInput.addEventListener("input", () => {
+  chatInput.style.height = "auto";
+  chatInput.style.height = chatInput.scrollHeight + "px";
+});
+
 // 打开聊天窗口
 openChatBtn?.addEventListener("click", async () => {
   const userId = getCurrentUserId();
   if (!userId) return alert("请先登录！");
-
   chatWindow.style.display = "flex";
   chatMessages.innerHTML = "";
   await loadMessages();
   listenForMessages();
-
   await markMessagesAsRead();
   updateUnreadCount();
 });
@@ -44,21 +47,15 @@ backBtn?.addEventListener("click", () => {
 sendBtn?.addEventListener("click", async () => {
   const userId = getCurrentUserId();
   if (!userId) return alert("请先登录！");
-
   const content = chatInput.value.trim();
   if (!content) return;
-
   const { error } = await supabaseClient.from("messages").insert([
     { sender_id: userId, receiver_id: 1, content, is_read: false }
   ]);
-
-  if (error) {
-    console.error(error);
-    return alert("发送失败");
-  }
-
+  if (error) return alert("发送失败");
   appendMessage("我", content);
   chatInput.value = "";
+  chatInput.style.height = "auto";
 });
 
 // 显示消息
@@ -74,15 +71,12 @@ function appendMessage(sender, text) {
 async function loadMessages() {
   const userId = getCurrentUserId();
   if (!userId) return;
-
   const { data, error } = await supabaseClient
     .from("messages")
     .select("*")
     .or(`and(sender_id.eq.${userId},receiver_id.eq.1),and(sender_id.eq.1,receiver_id.eq.${userId})`)
     .order("created_at", { ascending: true });
-
   if (error) return console.error(error);
-
   data.forEach(msg =>
     appendMessage(msg.sender_id === userId ? "我" : "客服", msg.content)
   );
@@ -103,20 +97,15 @@ async function markMessagesAsRead() {
 async function updateUnreadCount() {
   const userId = getCurrentUserId();
   if (!userId) return;
-
   const { count, error } = await supabaseClient
     .from("messages")
     .select("id", { count: "exact", head: true })
     .eq("receiver_id", userId)
     .eq("is_read", false);
-
   if (error) return console.error(error);
-
   const unread = count || 0;
   const show = unread > 0;
   const text = unread > 99 ? "99+" : unread;
-
-  // 三处红点同步更新
   [bottomUnreadEl, chatBtnUnreadEl, document.querySelector("#openChatBtn .unread-dot")].forEach(el => {
     if (!el) return;
     el.textContent = text;
@@ -128,9 +117,7 @@ async function updateUnreadCount() {
 function listenForMessages() {
   const userId = getCurrentUserId();
   if (!userId) return;
-
   if (chatSubscription) supabaseClient.removeChannel(chatSubscription);
-
   chatSubscription = supabaseClient.channel("realtime-messages")
     .on("postgres_changes", {
       event: "INSERT",
