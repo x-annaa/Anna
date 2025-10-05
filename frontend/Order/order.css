@@ -496,3 +496,24 @@ button:disabled {
   50% { opacity: 1; transform: scale(1.3) rotate(25deg); }
   100% { opacity: 0; transform: scale(0.8) rotate(0deg); }
 }
+
+/* 图 */
+.imgorder {
+  display: flex;
+  justify-content: center;  /* 水平居中 */
+  align-items: center;       /* 垂直居中 */
+  margin: 20px auto;
+  width: 100%;               /* 容器宽度自适应 */
+  max-width: 300px;          /* 最大宽度（防止太大）*/
+  height: 180px;             /* 固定高度，可调整 */
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #f0f0f0; /* 加个底色防止加载慢时空白 */
+}
+
+.imgorder img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;         /* 保持比例裁切填满 */
+  border-radius: 12px;
+}
