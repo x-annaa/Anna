@@ -177,54 +177,52 @@
   border-radius: 3px;
 }
 
-/* ======================
-   Telegram 联系容器（精致版）
-   ====================== */
 .telegram-box {
   display: flex;
   align-items: center;
   justify-content: space-between;
   background: linear-gradient(135deg, #2aabee, #229ed9);
-  padding: 10px 16px;
-  border-radius: 12px;
-  box-shadow: 0 3px 10px rgba(34, 158, 217, 0.25);
+  padding: 6px 12px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(34, 158, 217, 0.25);
   color: white;
-  margin-top: 16px;
+  margin-top: 12px;
   transition: transform 0.2s ease, box-shadow 0.3s ease;
 }
 
 .telegram-box:hover {
   transform: translateY(-1px);
-  box-shadow: 0 5px 14px rgba(34, 158, 217, 0.35);
+  box-shadow: 0 4px 10px rgba(34, 158, 217, 0.35);
 }
 
 .telegram-icon {
-  width: 10px;
-  height: 10px;
+  width: 16px;   /* ✅ 缩小图标尺寸 */
+  height: 16px;
   flex-shrink: 0;
-  border-radius: 6px;
+  margin-right: 6px;
+  opacity: 0.9;
 }
 
 .telegram-info {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-grow: 1;
   justify-content: flex-end;
 }
 
 .telegram-info p {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   margin: 0;
   letter-spacing: 0.3px;
 }
 
 #copyTelegramBtn {
-  padding: 4px 10px;
+  padding: 2px 8px;
   border: none;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.25);
   color: white;
   cursor: pointer;
   font-size: 12px;
@@ -232,9 +230,9 @@
 }
 
 #copyTelegramBtn:hover {
-  background: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.4);
 }
 
 #copyTelegramBtn:active {
-  transform: scale(0.96);
+  transform: scale(0.95);
 }
