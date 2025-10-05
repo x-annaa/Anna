@@ -238,23 +238,22 @@
   }
 }
 
-/* 在线客服或消息按钮的红点 */
-.unread-dot {
+/* 红点样式（初始隐藏） */
+#openChatBtn .unread-dot {
   position: absolute;
-  top: -6px;        /* 红点偏上 */
-  right: -6px;      /* 红点偏右 */
+  top: -6px;        /* 红点位置 */
+  right: -6px;
   background: red;
   color: white;
   border-radius: 50%;
   padding: 2px 6px;
   font-size: 12px;
   line-height: 1;
+  display: none;    /* 默认隐藏 */
   pointer-events: none;
 }
 
-/* 按钮父容器必须 relative */
-#openChatBtn,
-#messageBtn {  /* 假设消息按钮 id 是 messageBtn */
+/* 父容器必须 relative */
+#openChatBtn {
   position: relative;
 }
-
