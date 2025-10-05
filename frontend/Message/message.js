@@ -231,10 +231,3 @@ document.getElementById("copyTelegramBtn").addEventListener("click", () => {
     .then(() => alert("已复制 Telegram 账号：" + text))
     .catch(() => alert("复制失败，请手动复制"));
 });
-
-// =======================
-// telegram url
-// =======================
-const telegramBox = document.getElementById('telegramBox');
-  telegramBox.addEventListener('click', () => {
-    window.open('https://t.me/u9support', '_blank');
