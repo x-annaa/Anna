@@ -237,3 +237,24 @@
     padding: 10px;
   }
 }
+
+/* 在线客服或消息按钮的红点 */
+.unread-dot {
+  position: absolute;
+  top: -6px;        /* 红点偏上 */
+  right: -6px;      /* 红点偏右 */
+  background: red;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 12px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* 按钮父容器必须 relative */
+#openChatBtn,
+#messageBtn {  /* 假设消息按钮 id 是 messageBtn */
+  position: relative;
+}
+
