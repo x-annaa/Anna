@@ -761,26 +761,29 @@ document.querySelector(".left-box").addEventListener("click", async () => {
   listEl.innerHTML = "<li>加载中...</li>";
 
   if (window.supabaseClient && window.currentUserId) {
-    const { data: orders, error } = await supabaseClient
+    const { data: orders, error, count } = await supabaseClient
       .from("orders")
-      .select(`id, total_price, profit, status, created_at, products(name, profit, url)`)
+      .select(`id, total_price, profit, status, created_at, products(name, url)`, { count: "exact" })
       .eq("user_id", window.currentUserId)
       .order("created_at", { ascending: false });
 
+    // 更新标题显示总订单数
+    const headerH3 = document.querySelector("#historyModal .modal-header h3");
+    if (headerH3) headerH3.textContent = `All: ${count || 0}单`;
+
     if (!error && orders?.length) {
       listEl.innerHTML = orders.map(o => {
-        const img = o.products?.url ? `<img src="${o.products.url}" alt="${o.products.name}" width="50" style="margin-bottom:5px;">` : "";
-        const time = o.created_at ? new Date(o.created_at).toLocaleString() : "未知时间";
-        const profitRatio = Number(o.products?.profit || 0);
+        const img = o.products?.url ? `<img src="${o.products.url}" alt="${o.products.name}" width="50" style="margin-right:5px;">` : "";
+        const time = o.created_at ? `<div>时间：${new Date(o.created_at).toLocaleString()}</div>` : "";
         return `
-          <li style="border-bottom:1px solid #eee; margin-bottom:10px; padding-bottom:10px;">
-            ${img ? `<div>${img}</div>` : ''}
+          <li>
+            ${img}
             <div>商品：${o.products?.name || '未知商品'}</div>
             <div>价格：¥${Number(o.total_price).toFixed(2)}</div>
-            <div>利润率：${profitRatio}</div>
+            <div>利润率：${Number(o.products?.profit || 0)}</div>
             <div>收入：+¥${Number(o.profit).toFixed(2)}</div>
             <div>状态：${o.status === "completed" ? "✅ 已完成" : "⏳ 待完成"}</div>
-            <div>时间：${time}</div>
+            ${time}
           </li>
         `;
       }).join("");
@@ -791,6 +794,7 @@ document.querySelector(".left-box").addEventListener("click", async () => {
 
   historyModal.style.display = "block";
 });
+
 
 // 右盒子点击打开规则弹窗
 document.querySelector(".right-box").addEventListener("click", () => {
