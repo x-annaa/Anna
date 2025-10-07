@@ -54,18 +54,32 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ---- 钱包地址复制 ----
-  copyAddressBtn.addEventListener("click", async () => {
+  document.getElementById("copyAddressBtn")?.addEventListener("click", async () => {
   try {
-    const textToCopy = walletAddressEl.innerText.replace(/\s+/g, "").trim(); // 去掉空格和换行
+    const walletEl = document.getElementById("walletAddress");
+    if (!walletEl) throw new Error("找不到钱包地址元素");
+    const textToCopy = walletEl.textContent.trim(); // 保留原本空格
+    if (!textToCopy) throw new Error("钱包地址为空");
+
     await navigator.clipboard.writeText(textToCopy);
-    copyAddressBtn.textContent = "已复制 ✅";
-    setTimeout(() => (copyAddressBtn.textContent = "复制"), 1800);
+
+    const btn = document.getElementById("copyAddressBtn");
+    if (btn) {
+      btn.textContent = "已复制 ✅";
+      setTimeout(() => (btn.textContent = "复制"), 1800);
+    }
+
+    console.log("复制成功：", textToCopy);
   } catch (err) {
     console.error("复制失败：", err);
-    copyAddressBtn.textContent = "复制失败";
-    setTimeout(() => (copyAddressBtn.textContent = "复制"), 1800);
+    const btn = document.getElementById("copyAddressBtn");
+    if (btn) {
+      btn.textContent = "复制失败";
+      setTimeout(() => (btn.textContent = "复制"), 1800);
+    }
   }
 });
+
 
 
   // ---- 上传与保存逻辑 ----
