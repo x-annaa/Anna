@@ -1,6 +1,6 @@
 // frontend/Recharge/recharge.js
 // =============================
-// 充值文件上传逻辑 + 写入数据库 + 模态框控制（改进 & 更稳）
+// 充值文件上传逻辑 + 写入数据库 + 模态框控制（完整 & 稳定版）
 // =============================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -13,9 +13,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const uploadBtn = document.getElementById("uploadBtn");
   const status = document.getElementById("status");
   const amountInput = document.getElementById("amountInput");
-
-  const copyAddressBtn = document.getElementById("copyAddressBtn");
-  const walletAddressEl = document.getElementById("walletAddress");
 
   // --- 基本检查 ---
   if (typeof supabaseClient === "undefined") {
@@ -31,9 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (depositBtn && rechargeModal && cancelRecharge) {
     depositBtn.addEventListener("click", () => {
       rechargeModal.style.display = "flex";
-      if (status) {
-        status.textContent = "";
-      }
+      if (status) status.textContent = "";
       if (fileInput) fileInput.value = "";
       if (amountInput) amountInput.value = "";
     });
@@ -42,45 +37,43 @@ document.addEventListener("DOMContentLoaded", () => {
       rechargeModal.style.display = "none";
     });
 
-    // 点击模态框外部关闭
     window.addEventListener("click", (e) => {
       if (e.target === rechargeModal) rechargeModal.style.display = "none";
     });
 
-    // ESC 关闭（增强体验）
     window.addEventListener("keydown", (e) => {
       if (e.key === "Escape") rechargeModal.style.display = "none";
     });
   }
 
-  // ---- 钱包地址复制 ----
+  // ---- 钱包地址复制（稳定版） ----
   document.getElementById("copyAddressBtn")?.addEventListener("click", async () => {
-  try {
-    const walletEl = document.getElementById("walletAddress");
-    if (!walletEl) throw new Error("找不到钱包地址元素");
-    const textToCopy = walletEl.textContent.trim(); // 保留原本空格
-    if (!textToCopy) throw new Error("钱包地址为空");
+    try {
+      const walletEl = document.getElementById("walletAddress");
+      if (!walletEl) throw new Error("找不到钱包地址元素");
 
-    await navigator.clipboard.writeText(textToCopy);
+      // 动态获取文本，保留空格和字符
+      const textToCopy = walletEl.textContent?.trim();
+      if (!textToCopy) throw new Error("钱包地址为空");
 
-    const btn = document.getElementById("copyAddressBtn");
-    if (btn) {
-      btn.textContent = "已复制 ✅";
-      setTimeout(() => (btn.textContent = "复制"), 1800);
+      await navigator.clipboard.writeText(textToCopy);
+
+      const btn = document.getElementById("copyAddressBtn");
+      if (btn) {
+        btn.textContent = "已复制 ✅";
+        setTimeout(() => (btn.textContent = "复制"), 1800);
+      }
+
+      console.log("复制成功：", textToCopy);
+    } catch (err) {
+      console.error("复制失败：", err);
+      const btn = document.getElementById("copyAddressBtn");
+      if (btn) {
+        btn.textContent = "复制失败";
+        setTimeout(() => (btn.textContent = "复制"), 1800);
+      }
     }
-
-    console.log("复制成功：", textToCopy);
-  } catch (err) {
-    console.error("复制失败：", err);
-    const btn = document.getElementById("copyAddressBtn");
-    if (btn) {
-      btn.textContent = "复制失败";
-      setTimeout(() => (btn.textContent = "复制"), 1800);
-    }
-  }
-});
-
-
+  });
 
   // ---- 上传与保存逻辑 ----
   if (!fileInput || !uploadBtn || !status || !amountInput) {
@@ -89,8 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   uploadBtn.addEventListener("click", async () => {
-    // 输入校验
-    const file = fileInput.files && fileInput.files[0];
+    const file = fileInput.files?.[0];
     const rawAmount = amountInput.value;
     const amount = parseFloat(rawAmount);
 
@@ -106,69 +98,49 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // 准备上传
     status.textContent = "上传中...";
     status.style.color = "#333";
     uploadBtn.disabled = true;
     uploadBtn.textContent = "上传中...";
 
-    // 生成文件名（加时间戳与随机后缀，降低冲突概率）
     const rand = Math.floor(Math.random() * 9000) + 1000;
     const safeFileName = `${Date.now()}_${rand}_${file.name.replace(/\s+/g, "_")}`;
 
     try {
-      // 1) 上传到 Storage
+      // 上传到 Storage
       const { data: uploadData, error: uploadError } = await supabaseClient.storage
         .from("Recharge")
         .upload(safeFileName, file);
+      if (uploadError) throw uploadError;
 
-      if (uploadError) {
-        // 如果是已存在冲突，可以尝试重试一次（加后缀）
-        console.error("storage.upload 错误：", uploadError);
-        throw uploadError;
-      }
-
-      // 2) 取公共 URL（getPublicUrl 在 supabase-js v2 是同步返回一个对象）
       const { data: publicUrlData } = supabaseClient.storage
         .from("Recharge")
         .getPublicUrl(safeFileName);
-
       const publicUrl = publicUrlData?.publicUrl ?? "";
 
-      // 3) 获取当前登录用户（优先使用 getSession，然后回退到 getUser，再回退到 localStorage 存的 currentUserId）
+      // 获取用户 ID（优先 session -> getUser -> localStorage）
       let userId = null;
       try {
         const { data: sessionData } = await supabaseClient.auth.getSession();
         const session = sessionData?.session;
-        if (session && session.user && session.user.id) {
-          userId = session.user.id;
-        }
-      } catch (e) {
-        // 不致命，继续尝试其他方法
-        console.warn("auth.getSession() 出错（可忽略，尝试回退）：", e);
-      }
+        if (session?.user?.id) userId = session.user.id;
+      } catch {}
 
       if (!userId) {
         try {
           const { data: userData } = await supabaseClient.auth.getUser();
-          const user = userData?.user ?? userData; // 有些版本返回结构不同
-          if (user && user.id) userId = user.id;
-        } catch (e) {
-          console.warn("auth.getUser() 回退尝试失败：", e);
-        }
+          const user = userData?.user ?? userData;
+          if (user?.id) userId = user.id;
+        } catch {}
       }
 
       if (!userId) {
-        // 最后再尝试从本地存储读 currentUserId（你在 me.js 中有写入）
-        const localUUID = localStorage.getItem("currentUserUUID");
-        if (localUUID) userId = localUUID;
+        userId = localStorage.getItem("currentUserUUID");
       }
 
-      if (!userId) {
-        throw new Error("未登录用户，无法提交充值记录。");
-      }
+      if (!userId) throw new Error("未登录用户，无法提交充值记录。");
 
-      // 4) 写入数据库 recharges 表
+      // 写入数据库
       const payload = {
         user_id: userId,
         amount: Number(amount.toFixed(2)),
@@ -179,23 +151,16 @@ document.addEventListener("DOMContentLoaded", () => {
       const { data: insertData, error: insertError } = await supabaseClient
         .from("recharges")
         .insert([payload]);
+      if (insertError) throw insertError;
 
-      if (insertError) {
-        console.error("插入 recharges 表失败：", insertError);
-        throw insertError;
-      }
-
-      // 成功反馈（不显示 URL）
       status.textContent = "✅ 上传成功，等待审核！";
       status.style.color = "green";
 
-      // 清空表单
       fileInput.value = "";
       amountInput.value = "";
 
       console.log("充值记录保存成功：", { payload, storage: safeFileName });
 
-      // 自动关闭（短暂等待）
       setTimeout(() => {
         rechargeModal.style.display = "none";
         status.textContent = "";
@@ -209,5 +174,5 @@ document.addEventListener("DOMContentLoaded", () => {
       uploadBtn.disabled = false;
       uploadBtn.textContent = "上传";
     }
-  }); // end uploadBtn click
+  });
 });
