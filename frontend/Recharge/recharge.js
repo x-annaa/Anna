@@ -31,9 +31,9 @@ document.addEventListener("DOMContentLoaded", () => {
   if (depositBtn && rechargeModal && cancelRecharge) {
     depositBtn.addEventListener("click", () => {
       rechargeModal.style.display = "flex";
-      if (status) status.textContent = "";
-      if (fileInput) fileInput.value = "";
-      if (amountInput) amountInput.value = "";
+      status.textContent = "";
+      fileInput.value = "";
+      amountInput.value = "";
     });
 
     cancelRecharge.addEventListener("click", () => {
@@ -94,17 +94,17 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // 上传准备
     status.textContent = "上传中...";
     status.style.color = "#333";
     uploadBtn.disabled = true;
     uploadBtn.textContent = "上传中...";
 
-    // 安全文件名
     const rand = Math.floor(Math.random() * 9000) + 1000;
     const safeFileName = `${Date.now()}_${rand}_${file.name.replace(/\s+/g, "_")}`;
 
     try {
-      // 1) 上传到 Storage
+      // 1) 上传到 Supabase Storage
       const { error: uploadError } = await supabaseClient.storage
         .from("Recharge")
         .upload(safeFileName, file);
@@ -117,16 +117,26 @@ document.addEventListener("DOMContentLoaded", () => {
         .getPublicUrl(safeFileName);
       const publicUrl = publicUrlData?.publicUrl ?? "";
 
-      // 3) 获取当前登录用户 UUID
-      let userUUID = localStorage.getItem("currentUserUUID");
+      // 3) 获取当前登录用户 UUID 和平台账号
+      const userUUID = localStorage.getItem("currentUserUUID");
       let platformAccount = localStorage.getItem("platformAccount");
 
       if (!userUUID) throw new Error("未登录用户，无法提交充值记录。");
 
+      if (!platformAccount) {
+        // 额外从 users 表取一次 platform_account（防止 localStorage 丢失）
+        const { data: userData } = await supabaseClient
+          .from("users")
+          .select("platform_account")
+          .eq("uuid", userUUID)
+          .maybeSingle();
+        platformAccount = userData?.platform_account ?? null;
+      }
+
       // 4) 写入 recharges 表
       const payload = {
         user_id: userUUID,
-        platform_account: platformAccount ?? null,
+        platform_account: platformAccount,
         amount: Number(amount.toFixed(2)),
         recharge_url: publicUrl,
         status: "pending",
@@ -138,14 +148,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (insertError) throw insertError;
 
+      // 成功提示
       status.textContent = "✅ 上传成功，等待审核！";
       status.style.color = "green";
 
+      // 清空表单
       fileInput.value = "";
       amountInput.value = "";
 
       console.log("充值记录保存成功：", { payload, storage: safeFileName });
 
+      // 自动关闭模态框
       setTimeout(() => {
         rechargeModal.style.display = "none";
         status.textContent = "";
