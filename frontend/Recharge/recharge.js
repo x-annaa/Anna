@@ -1,6 +1,6 @@
 // frontend/Recharge/recharge.js
 // =============================
-// 充值文件上传逻辑 + 写入数据库 + 模态框控制（完整 & 稳定版）
+// 充值文件上传逻辑 + 写入数据库 + 模态框控制（稳定版，复制兼容所有浏览器）
 // =============================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -46,17 +46,18 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ---- 钱包地址复制（稳定版） ----
-  document.getElementById("copyAddressBtn")?.addEventListener("click", async () => {
+  // ---- 钱包地址复制（稳定方法：临时 input） ----
+  document.getElementById("copyAddressBtn")?.addEventListener("click", () => {
     try {
       const walletEl = document.getElementById("walletAddress");
-      if (!walletEl) throw new Error("找不到钱包地址元素");
+      if (!walletEl || !walletEl.textContent.trim()) throw new Error("钱包地址为空");
 
-      // 动态获取文本，保留空格和字符
-      const textToCopy = walletEl.textContent?.trim();
-      if (!textToCopy) throw new Error("钱包地址为空");
-
-      await navigator.clipboard.writeText(textToCopy);
+      const tempInput = document.createElement("input");
+      tempInput.value = walletEl.textContent.trim();
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand("copy");
+      document.body.removeChild(tempInput);
 
       const btn = document.getElementById("copyAddressBtn");
       if (btn) {
@@ -64,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => (btn.textContent = "复制"), 1800);
       }
 
-      console.log("复制成功：", textToCopy);
+      console.log("复制成功：", walletEl.textContent.trim());
     } catch (err) {
       console.error("复制失败：", err);
       const btn = document.getElementById("copyAddressBtn");
@@ -118,7 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .getPublicUrl(safeFileName);
       const publicUrl = publicUrlData?.publicUrl ?? "";
 
-      // 获取用户 ID（优先 session -> getUser -> localStorage）
+      // 获取用户 ID
       let userId = null;
       try {
         const { data: sessionData } = await supabaseClient.auth.getSession();
@@ -134,10 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch {}
       }
 
-      if (!userId) {
-        userId = localStorage.getItem("currentUserUUID");
-      }
-
+      if (!userId) userId = localStorage.getItem("currentUserUUID");
       if (!userId) throw new Error("未登录用户，无法提交充值记录。");
 
       // 写入数据库
