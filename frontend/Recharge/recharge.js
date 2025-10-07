@@ -146,8 +146,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (!userId) {
         // 最后再尝试从本地存储读 currentUserId（你在 me.js 中有写入）
-        const localId = localStorage.getItem("currentUserId");
-        if (localId) userId = localId;
+        const localUUID = localStorage.getItem("currentUserUUID");
+        if (localUUID) userId = localUUID;
       }
 
       if (!userId) {
