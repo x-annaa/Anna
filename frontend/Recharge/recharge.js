@@ -1,6 +1,6 @@
 // frontend/Recharge/recharge.js
 // =============================
-// 充值文件上传逻辑 + 写入数据库 + 模态框控制（稳定版）
+// 充值文件上传逻辑 + 写入数据库 + 模态框控制（完整版，写入 platform_account）
 // =============================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ---- 钱包地址复制（稳定方法：data-wallet + 临时 input） ----
+  // ---- 钱包地址复制 ----
   copyAddressBtn?.addEventListener("click", () => {
     try {
       const walletAddress = copyAddressBtn.dataset.wallet;
@@ -63,7 +63,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       copyAddressBtn.textContent = "已复制 ✅";
       setTimeout(() => (copyAddressBtn.textContent = "复制"), 1800);
-
       console.log("复制成功：", walletAddress);
     } catch (err) {
       console.error("复制失败：", err);
@@ -136,12 +135,27 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!userId) userId = localStorage.getItem("currentUserUUID");
       if (!userId) throw new Error("未登录用户，无法提交充值记录。");
 
+      // 获取用户平台账号
+      let platformAccount = null;
+      try {
+        const { data: userInfo, error: userInfoError } = await supabaseClient
+          .from("users")
+          .select("platform_account")
+          .eq("id", userId)
+          .single();
+        if (userInfoError) console.warn("获取平台账号失败:", userInfoError);
+        platformAccount = userInfo?.platform_account ?? null;
+      } catch (e) {
+        console.warn("获取平台账号异常:", e);
+      }
+
       // 写入数据库
       const payload = {
         user_id: userId,
         amount: Number(amount.toFixed(2)),
         recharge_url: publicUrl,
         status: "pending",
+        platform_account: platformAccount, // ✅ 写入 platform_account
       };
 
       const { data: insertData, error: insertError } = await supabaseClient
