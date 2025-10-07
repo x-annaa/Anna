@@ -197,3 +197,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }); // end uploadBtn click
 });
+
+// 获取当前用户
+const userUUID = localStorage.getItem("currentUserUUID");      // uuid
+const platformAccount = localStorage.getItem("platformAccount"); // 平台账号
+
+const { error: insertError } = await supabaseClient.from("recharges").insert([
+  {
+    user_id: userUUID,
+    platform_account: platformAccount,
+    amount: amount,
+    recharge_url: publicUrl,
+    status: "pending",
+  },
+]);
