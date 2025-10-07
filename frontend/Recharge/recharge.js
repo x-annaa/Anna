@@ -1,6 +1,6 @@
 // frontend/Recharge/recharge.js
 // =============================
-// 充值文件上传逻辑 + 写入数据库 + 模态框控制（稳定版，复制兼容所有浏览器）
+// 充值文件上传逻辑 + 写入数据库 + 模态框控制（稳定版）
 // =============================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -13,6 +13,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const uploadBtn = document.getElementById("uploadBtn");
   const status = document.getElementById("status");
   const amountInput = document.getElementById("amountInput");
+
+  const copyAddressBtn = document.getElementById("copyAddressBtn");
 
   // --- 基本检查 ---
   if (typeof supabaseClient === "undefined") {
@@ -46,33 +48,27 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ---- 钱包地址复制（稳定方法：临时 input） ----
-  document.getElementById("copyAddressBtn")?.addEventListener("click", () => {
+  // ---- 钱包地址复制（稳定方法：data-wallet + 临时 input） ----
+  copyAddressBtn?.addEventListener("click", () => {
     try {
-      const walletEl = document.getElementById("walletAddress");
-      if (!walletEl || !walletEl.textContent.trim()) throw new Error("钱包地址为空");
+      const walletAddress = copyAddressBtn.dataset.wallet;
+      if (!walletAddress) throw new Error("钱包地址为空");
 
       const tempInput = document.createElement("input");
-      tempInput.value = walletEl.textContent.trim();
+      tempInput.value = walletAddress;
       document.body.appendChild(tempInput);
       tempInput.select();
       document.execCommand("copy");
       document.body.removeChild(tempInput);
 
-      const btn = document.getElementById("copyAddressBtn");
-      if (btn) {
-        btn.textContent = "已复制 ✅";
-        setTimeout(() => (btn.textContent = "复制"), 1800);
-      }
+      copyAddressBtn.textContent = "已复制 ✅";
+      setTimeout(() => (copyAddressBtn.textContent = "复制"), 1800);
 
-      console.log("复制成功：", walletEl.textContent.trim());
+      console.log("复制成功：", walletAddress);
     } catch (err) {
       console.error("复制失败：", err);
-      const btn = document.getElementById("copyAddressBtn");
-      if (btn) {
-        btn.textContent = "复制失败";
-        setTimeout(() => (btn.textContent = "复制"), 1800);
-      }
+      copyAddressBtn.textContent = "复制失败";
+      setTimeout(() => (copyAddressBtn.textContent = "复制"), 1800);
     }
   });
 
@@ -87,6 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const rawAmount = amountInput.value;
     const amount = parseFloat(rawAmount);
 
+    // 输入校验
     if (!rawAmount || isNaN(amount) || amount <= 0) {
       status.textContent = "请输入有效的充值金额！";
       status.style.color = "red";
@@ -99,6 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // 上传中状态
     status.textContent = "上传中...";
     status.style.color = "#333";
     uploadBtn.disabled = true;
