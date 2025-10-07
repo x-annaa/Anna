@@ -31,9 +31,9 @@ document.addEventListener("DOMContentLoaded", () => {
   if (depositBtn && rechargeModal && cancelRecharge) {
     depositBtn.addEventListener("click", () => {
       rechargeModal.style.display = "flex";
-      if (status) status.textContent = "";
-      if (fileInput) fileInput.value = "";
-      if (amountInput) amountInput.value = "";
+      status.textContent = "";
+      fileInput.value = "";
+      amountInput.value = "";
     });
 
     cancelRecharge.addEventListener("click", () => {
@@ -52,13 +52,16 @@ document.addEventListener("DOMContentLoaded", () => {
   // ---- 钱包地址复制 ----
   if (copyAddressBtn && walletAddressEl) {
     copyAddressBtn.addEventListener("click", async () => {
+      const textToCopy = walletAddressEl.textContent.trim();
+      if (!textToCopy) return;
+
       try {
-        await navigator.clipboard.writeText(walletAddressEl.textContent.trim());
+        await navigator.clipboard.writeText(textToCopy);
         copyAddressBtn.textContent = "已复制 ✅";
         setTimeout(() => (copyAddressBtn.textContent = "复制"), 1800);
       } catch (err) {
         console.error("复制失败：", err);
-        copyAddressBtn.textContent = "复制失败";
+        copyAddressBtn.textContent = "复制失败 ❌";
         setTimeout(() => (copyAddressBtn.textContent = "复制"), 1800);
       }
     });
@@ -66,105 +69,78 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ---- 上传与保存逻辑 ----
   if (!fileInput || !uploadBtn || !status || !amountInput) {
-    console.error("Recharge 页面缺少必要的 DOM 元素（fileInput / uploadBtn / status / amountInput）。");
+    console.error("Recharge 页面缺少必要的 DOM 元素。");
     return;
   }
 
   uploadBtn.addEventListener("click", async () => {
-    const file = fileInput.files && fileInput.files[0];
-    const rawAmount = amountInput.value;
-    const amount = parseFloat(rawAmount);
+    const file = fileInput.files?.[0];
+    const amount = parseFloat(amountInput.value);
 
-    if (!rawAmount || isNaN(amount) || amount <= 0) {
+    // 校验输入
+    if (!amount || isNaN(amount) || amount <= 0) {
       status.textContent = "请输入有效的充值金额！";
       status.style.color = "red";
       return;
     }
-
     if (!file) {
       status.textContent = "请上传转账截图！";
       status.style.color = "red";
       return;
     }
 
-    // 准备上传
     status.textContent = "上传中...";
     status.style.color = "#333";
     uploadBtn.disabled = true;
     uploadBtn.textContent = "上传中...";
 
-    const rand = Math.floor(Math.random() * 9000) + 1000;
-    const safeFileName = `${Date.now()}_${rand}_${file.name.replace(/\s+/g, "_")}`;
+    const safeFileName = `${Date.now()}_${Math.floor(Math.random() * 9000 + 1000)}_${file.name.replace(/\s+/g, "_")}`;
 
     try {
-      // 1) 上传到 Storage
-      const { error: uploadError } = await supabaseClient.storage
-        .from("Recharge")
-        .upload(safeFileName, file);
-
+      // 上传到 Supabase Storage
+      const { error: uploadError } = await supabaseClient.storage.from("Recharge").upload(safeFileName, file);
       if (uploadError) throw uploadError;
 
-      // 2) 获取公共 URL
-      const { data: publicUrlData } = supabaseClient.storage
-        .from("Recharge")
-        .getPublicUrl(safeFileName);
-
+      // 获取公共 URL
+      const { data: publicUrlData } = supabaseClient.storage.from("Recharge").getPublicUrl(safeFileName);
       const publicUrl = publicUrlData?.publicUrl ?? "";
 
-      // 3) 获取当前用户信息
-      let userId = null;
-      let platformAccount = null;
+      // 获取当前用户 UUID
+      let userUUID = localStorage.getItem("currentUserUUID");
+      let platformAccount = localStorage.getItem("platformAccount");
 
-      try {
-        const { data: sessionData } = await supabaseClient.auth.getSession();
-        const session = sessionData?.session;
-        if (session?.user?.id) {
-          userId = session.user.id;
-        }
-      } catch {}
-
-      if (!userId) {
-        const localUUID = localStorage.getItem("currentUserUUID");
-        const localPlatform = localStorage.getItem("platformAccount");
-        if (localUUID) userId = localUUID;
-        if (localPlatform) platformAccount = localPlatform;
+      if (!userUUID) {
+        // 尝试从 Supabase Auth 获取
+        const { data: userData } = await supabaseClient.auth.getUser();
+        userUUID = userData?.user?.id ?? null;
       }
 
-      if (!userId) throw new Error("未登录用户，无法提交充值记录。");
+      if (!userUUID) throw new Error("未登录用户，无法提交充值记录。");
 
       if (!platformAccount) {
-        // 从 users 表取一次 platform_account
-        const { data: userData } = await supabaseClient
-          .from("users")
-          .select("platform_account")
-          .eq("uuid", userId)
-          .maybeSingle();
-        platformAccount = userData?.platform_account ?? null;
+        // 从 users 表查询 platform_account
+        const { data: userDbData } = await supabaseClient.from("users").select("platform_account").eq("uuid", userUUID).maybeSingle();
+        platformAccount = userDbData?.platform_account ?? null;
       }
 
-      // 4) 写入数据库
-      const payload = {
-        user_id: userId,
+      // 写入数据库
+      const { error: insertError } = await supabaseClient.from("recharges").insert([{
+        user_id: userUUID,
         platform_account: platformAccount,
         amount: Number(amount.toFixed(2)),
         recharge_url: publicUrl,
         status: "pending",
-      };
-
-      const { error: insertError } = await supabaseClient
-        .from("recharges")
-        .insert([payload]);
+      }]);
 
       if (insertError) throw insertError;
 
       // 成功反馈
       status.textContent = "✅ 上传成功，等待审核！";
       status.style.color = "green";
-
       fileInput.value = "";
       amountInput.value = "";
 
-      console.log("充值记录保存成功：", { payload, storage: safeFileName });
+      console.log("充值记录保存成功：", { userUUID, platformAccount, amount, publicUrl });
 
       setTimeout(() => {
         rechargeModal.style.display = "none";
