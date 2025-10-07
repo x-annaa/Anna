@@ -1,6 +1,6 @@
 // frontend/Recharge/recharge.js
 // =============================
-// 充值文件上传逻辑 + 写入数据库 + 模态框控制（完整版，写入 platform_account）
+// 充值文件上传逻辑 + 写入数据库 + 模态框控制（稳定版，UUID 支持 platform_account）
 // =============================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -16,17 +16,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const copyAddressBtn = document.getElementById("copyAddressBtn");
 
-  // --- 基本检查 ---
+  // --- 检查 supabaseClient ---
   if (typeof supabaseClient === "undefined") {
-    console.error("supabaseClient 未定义，请确保已正确初始化 Supabase 客户端。");
+    console.error("supabaseClient 未定义");
     if (status) {
-      status.textContent = "系统错误：未检测到 Supabase 客户端。";
+      status.textContent = "系统错误：未检测到 Supabase 客户端";
       status.style.color = "red";
     }
     return;
   }
 
-  // ---- 打开 / 关闭模态框 ----
+  // ---- 模态框控制 ----
   if (depositBtn && rechargeModal && cancelRecharge) {
     depositBtn.addEventListener("click", () => {
       rechargeModal.style.display = "flex";
@@ -63,6 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       copyAddressBtn.textContent = "已复制 ✅";
       setTimeout(() => (copyAddressBtn.textContent = "复制"), 1800);
+
       console.log("复制成功：", walletAddress);
     } catch (err) {
       console.error("复制失败：", err);
@@ -73,7 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ---- 上传与保存逻辑 ----
   if (!fileInput || !uploadBtn || !status || !amountInput) {
-    console.error("Recharge 页面缺少必要的 DOM 元素（fileInput / uploadBtn / status / amountInput）。");
+    console.error("Recharge 页面缺少必要的 DOM 元素");
     return;
   }
 
@@ -82,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const rawAmount = amountInput.value;
     const amount = parseFloat(rawAmount);
 
-    // 输入校验
+    // 校验
     if (!rawAmount || isNaN(amount) || amount <= 0) {
       status.textContent = "请输入有效的充值金额！";
       status.style.color = "red";
@@ -95,7 +96,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // 上传中状态
     status.textContent = "上传中...";
     status.style.color = "#333";
     uploadBtn.disabled = true;
@@ -116,7 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .getPublicUrl(safeFileName);
       const publicUrl = publicUrlData?.publicUrl ?? "";
 
-      // 获取用户 ID
+      // 获取用户 UUID
       let userId = null;
       try {
         const { data: sessionData } = await supabaseClient.auth.getSession();
@@ -133,15 +133,15 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       if (!userId) userId = localStorage.getItem("currentUserUUID");
-      if (!userId) throw new Error("未登录用户，无法提交充值记录。");
+      if (!userId) throw new Error("未登录用户，无法提交充值记录");
 
-      // 获取用户平台账号
+      // 获取 platform_account
       let platformAccount = null;
       try {
         const { data: userInfo, error: userInfoError } = await supabaseClient
           .from("users")
           .select("platform_account")
-          .eq("id", userId)
+          .eq("uuid", userId)  // ⚠️ 使用 uuid 类型字段
           .single();
         if (userInfoError) console.warn("获取平台账号失败:", userInfoError);
         platformAccount = userInfo?.platform_account ?? null;
@@ -152,10 +152,10 @@ document.addEventListener("DOMContentLoaded", () => {
       // 写入数据库
       const payload = {
         user_id: userId,
+        platform_account: platformAccount,
         amount: Number(amount.toFixed(2)),
         recharge_url: publicUrl,
         status: "pending",
-        platform_account: platformAccount, // ✅ 写入 platform_account
       };
 
       const { data: insertData, error: insertError } = await supabaseClient
