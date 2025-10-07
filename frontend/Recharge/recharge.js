@@ -54,19 +54,19 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ---- 钱包地址复制 ----
-  if (copyAddressBtn && walletAddressEl) {
-    copyAddressBtn.addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText(walletAddressEl.textContent.trim());
-        copyAddressBtn.textContent = "已复制 ✅";
-        setTimeout(() => (copyAddressBtn.textContent = "复制"), 1800);
-      } catch (err) {
-        console.error("复制失败：", err);
-        copyAddressBtn.textContent = "复制失败";
-        setTimeout(() => (copyAddressBtn.textContent = "复制"), 1800);
-      }
-    });
+  copyAddressBtn.addEventListener("click", async () => {
+  try {
+    const textToCopy = walletAddressEl.innerText.replace(/\s+/g, "").trim(); // 去掉空格和换行
+    await navigator.clipboard.writeText(textToCopy);
+    copyAddressBtn.textContent = "已复制 ✅";
+    setTimeout(() => (copyAddressBtn.textContent = "复制"), 1800);
+  } catch (err) {
+    console.error("复制失败：", err);
+    copyAddressBtn.textContent = "复制失败";
+    setTimeout(() => (copyAddressBtn.textContent = "复制"), 1800);
   }
+});
+
 
   // ---- 上传与保存逻辑 ----
   if (!fileInput || !uploadBtn || !status || !amountInput) {
