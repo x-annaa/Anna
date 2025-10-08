@@ -85,7 +85,7 @@ sendBtn?.addEventListener("click", async () => {
 function appendMessage(sender, text) {
   const msg = document.createElement("div");
   msg.classList.add("message-item", sender === "我" ? "me" : "bot");
-  msg.textContent = text;
+  msg.innerHTML = text.replace(/\n/g, "<br>");
   chatMessages.prepend(msg);
   scrollToBottom();
 }
