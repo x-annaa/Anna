@@ -1,22 +1,19 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const robot = document.querySelector(".robot-gif");
+// 页面切换 // 
+const buttons = document.querySelectorAll(".bottom-nav button");
+const pages = document.querySelectorAll(".page");
 
-  // 点击机器人让它“摇头”一下
-  robot.addEventListener("click", () => {
-    robot.style.animation = "shake 0.5s ease";
-    setTimeout(() => {
-      robot.style.animation = "floatRobot 3s ease-in-out infinite";
-    }, 500);
+buttons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    // 1️⃣ 先把所有导航按钮的 active 样式去掉
+    buttons.forEach(b => b.classList.remove("active"));
+    // 2️⃣ 给当前点击的按钮加上 active 样式
+    btn.classList.add("active");
+
+    // 3️⃣ 找到按钮上 data-page 对应的页面 ID
+    const pageId = btn.dataset.page;
+    // 4️⃣ 隐藏所有页面
+    pages.forEach(p => p.classList.remove("active"));
+    // 5️⃣ 显示对应的页面
+    document.getElementById(pageId).classList.add("active");
   });
 });
-
-const style = document.createElement("style");
-style.textContent = `
-@keyframes shake {
-  0% { transform: rotate(0deg); }
-  25% { transform: rotate(10deg); }
-  50% { transform: rotate(-10deg); }
-  75% { transform: rotate(8deg); }
-  100% { transform: rotate(0deg); }
-}`;
-document.head.appendChild(style);
