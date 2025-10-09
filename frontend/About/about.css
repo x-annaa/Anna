@@ -1,140 +1,107 @@
-/* ========== 未来赛博风 ========== */
-.about-cyber-container {
-  max-width: 950px;
-  margin: 0 auto;
-  padding: 40px 25px;
-  text-align: center;
-  font-family: "Orbitron", "Rajdhani", "Microsoft YaHei", sans-serif;
-  background: radial-gradient(circle at center, #0a0a12 0%, #05050a 100%);
-  color: #e0e0ff;
+/* ==================== 自然清新自由风 ==================== */
+.nature-fullpage {
+  font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+  background: linear-gradient(to bottom, #e0f7f1, #ffffff);
   min-height: 100vh;
-  overflow: hidden;
-  position: relative;
+  color: #3a3a3a;
+  padding: 20px;
 }
 
-/* 💜 背景发光网格 */
-.about-cyber-container::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: linear-gradient(45deg, rgba(255,255,255,0.04) 1px, transparent 1px),
-                    linear-gradient(-45deg, rgba(255,255,255,0.04) 1px, transparent 1px);
-  background-size: 40px 40px;
-  z-index: 0;
+/* 顶部横幅 */
+.hero-banner {
+  text-align: center;
+  padding: 60px 20px 40px 20px;
 }
 
-.about-cyber-title {
-  font-size: 2.2em;
-  color: #00fff7;
-  text-shadow: 0 0 15px #00fff7, 0 0 30px #0099ff;
-  margin-bottom: 15px;
-  position: relative;
-  z-index: 1;
+.hero-banner h1 {
+  font-size: 2.5em;
+  color: #2e7d32;
+  margin-bottom: 10px;
 }
 
-.about-cyber-text {
-  color: #b0b0ff;
-  font-size: 1em;
-  margin-bottom: 40px;
+.hero-banner p {
+  font-size: 1.1em;
+  color: #555;
+  max-width: 600px;
+  margin: 0 auto 20px auto;
   line-height: 1.6;
-  max-width: 700px;
-  margin-left: auto;
-  margin-right: auto;
-  position: relative;
-  z-index: 1;
 }
 
-.glow {
-  color: #00fff7;
-  text-shadow: 0 0 10px #00fff7, 0 0 20px #0077ff;
+.hero-img {
+  width: 100%;
+  max-width: 500px;
+  margin-top: 20px;
+  border-radius: 15px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
 }
 
-/* ⚙️ 三个赛博卡片 */
-.about-cyber-content {
+/* 中间互动区 */
+.interactive-zone {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 25px;
+  margin: 50px 0;
   position: relative;
-  z-index: 1;
 }
 
-.about-cyber-item {
-  width: 270px;
-  background: rgba(15, 15, 35, 0.8);
-  border: 1px solid rgba(0, 255, 247, 0.3);
+.floating-item {
+  width: 180px;
+  background: rgba(255, 255, 255, 0.8);
   border-radius: 15px;
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.15);
-  padding: 25px 15px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  backdrop-filter: blur(8px);
+  padding: 15px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  cursor: pointer;
 }
 
-.about-cyber-item:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 0 25px rgba(0, 255, 255, 0.5);
+.floating-item:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.12);
 }
 
-.about-cyber-item img {
-  width: 80px;
-  margin-bottom: 15px;
-  filter: drop-shadow(0 0 8px #00fff7);
-  animation: float 3s ease-in-out infinite;
+.floating-item img {
+  width: 60px;
+  margin-bottom: 10px;
 }
 
-.about-cyber-item h3 {
-  color: #00fff7;
-  margin-bottom: 8px;
-  font-size: 1.1em;
-}
-
-.about-cyber-item p {
-  color: #a0a0ff;
+.floating-item p {
   font-size: 0.9em;
+  color: #3a3a3a;
 }
 
-/* 🤖 机器人动画 */
-.robot-cyber-section {
-  margin-top: 50px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  z-index: 1;
+/* 底部机器人互动区 */
+.robot-interaction {
+  text-align: center;
+  margin: 60px 0 20px 0;
 }
 
-.robot-cyber-gif {
-  width: 160px;
-  animation: pulse 2.5s infinite ease-in-out;
+.robot-gif {
+  width: 140px;
+  animation: float 2.5s infinite ease-in-out;
+  cursor: pointer;
 }
 
-.robot-cyber-caption {
-  margin-top: 12px;
-  color: #00fff7;
+.robot-text p {
+  margin: 6px 0;
   font-weight: bold;
-  text-shadow: 0 0 10px #00fff7;
+  color: #2e7d32;
 }
 
-/* ✨ 动画 */
+/* 动画 */
 @keyframes float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  50% { transform: translateY(-8px); }
 }
 
-@keyframes pulse {
-  0%, 100% { filter: drop-shadow(0 0 5px #00fff7); }
-  50% { filter: drop-shadow(0 0 20px #00fff7); }
-}
-
-/* 📱 响应式 */
-@media (max-width: 600px) {
-  .about-cyber-content {
+/* 响应式 */
+@media (max-width: 800px) {
+  .interactive-zone {
     flex-direction: column;
+    align-items: center;
   }
-  .about-cyber-item {
-    width: 90%;
-  }
-  .about-cyber-title {
-    font-size: 1.8em;
+  .floating-item {
+    width: 80%;
   }
 }
