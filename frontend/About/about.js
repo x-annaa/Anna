@@ -1,13 +1,13 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const robot = document.querySelector(".robot-cyber-gif");
-  const caption = document.querySelector(".robot-cyber-caption");
+  const robot = document.querySelector(".robot-gif");
+  const robotTexts = document.querySelectorAll(".robot-text p");
 
   robot.addEventListener("click", () => {
-    caption.textContent = "⚡ SYSTEM REBOOTING...";
-    robot.style.filter = "drop-shadow(0 0 25px #ff00ff)";
+    robotTexts[1].textContent = "彩蛋已触发 🍃✨";
+    robot.style.filter = "drop-shadow(0 0 15px #2e7d32)";
     setTimeout(() => {
-      caption.textContent = "U9 ONLINE... ⚙️🤖";
-      robot.style.filter = "drop-shadow(0 0 10px #00fff7)";
+      robotTexts[1].textContent = "点击我，发现隐藏彩蛋 🌱✨";
+      robot.style.filter = "drop-shadow(0 0 5px #2e7d32)";
     }, 1500);
   });
 });
