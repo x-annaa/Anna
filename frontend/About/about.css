@@ -1,1 +1,107 @@
+.about-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  text-align: center;
+  color: #fff;
+  font-family: "Microsoft YaHei", sans-serif;
+  animation: fadeIn 1s ease-in;
+}
 
+.about-title {
+  font-size: 1.8em;
+  margin-bottom: 10px;
+  color: #00c3ff;
+}
+
+.about-text {
+  font-size: 1em;
+  margin-bottom: 25px;
+  color: #ccc;
+  line-height: 1.6;
+}
+
+.about-content {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 40px;
+}
+
+.about-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 15px;
+  width: 250px;
+  transition: all 0.3s ease;
+}
+
+.about-item:hover {
+  transform: translateY(-5px);
+  background: rgba(0, 195, 255, 0.1);
+}
+
+.about-item img {
+  width: 70px;
+  height: 70px;
+  margin-bottom: 10px;
+}
+
+.about-item h3 {
+  color: #00c3ff;
+  margin-bottom: 8px;
+  font-size: 1.1em;
+}
+
+.about-item p {
+  font-size: 0.9em;
+  color: #ddd;
+  line-height: 1.4;
+}
+
+/* 机器人部分 */
+.robot-section {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.robot-gif {
+  width: 180px;
+  height: auto;
+  animation: floatRobot 3s ease-in-out infinite;
+}
+
+.robot-caption {
+  color: #00c3ff;
+  margin-top: 10px;
+  font-size: 1.1em;
+}
+
+@keyframes floatRobot {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 移动端适配 */
+@media (max-width: 600px) {
+  .about-content {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .about-item {
+    width: 90%;
+  }
+
+  .robot-gif {
+    width: 140px;
+  }
+}
