@@ -1,17 +1,22 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const page = document.getElementById("msgPage");
+  const robot = document.querySelector(".robot-gif");
 
-  // 页面切换到关于我们时触发动画
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          page.classList.add("fade-in");
-        }
-      });
-    },
-    { threshold: 0.2 }
-  );
-
-  observer.observe(page);
+  // 点击机器人让它“摇头”一下
+  robot.addEventListener("click", () => {
+    robot.style.animation = "shake 0.5s ease";
+    setTimeout(() => {
+      robot.style.animation = "floatRobot 3s ease-in-out infinite";
+    }, 500);
+  });
 });
+
+const style = document.createElement("style");
+style.textContent = `
+@keyframes shake {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(10deg); }
+  50% { transform: rotate(-10deg); }
+  75% { transform: rotate(8deg); }
+  100% { transform: rotate(0deg); }
+}`;
+document.head.appendChild(style);
