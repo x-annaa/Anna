@@ -1,1 +1,90 @@
+/* ===================== About 页面样式 ===================== */
 
+#msgPage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background: linear-gradient(180deg, #ffffff 0%, #f4f7fa 100%);
+  min-height: 100vh;
+  font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+  color: #333;
+}
+
+.about-container {
+  max-width: 800px;
+  background: #fff;
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin-top: 30px;
+  animation: fadeIn 0.6s ease;
+}
+
+.about-logo {
+  width: 100px;
+  height: 100px;
+  border-radius: 20%;
+  object-fit: cover;
+  margin-bottom: 15px;
+}
+
+.about-container h2 {
+  text-align: center;
+  color: #222;
+  font-size: 22px;
+  margin-bottom: 10px;
+}
+
+.about-container p {
+  line-height: 1.8;
+  font-size: 15px;
+  text-align: justify;
+}
+
+.about-section {
+  margin-top: 25px;
+}
+
+.about-section h3 {
+  color: #1a73e8;
+  margin-bottom: 8px;
+  font-size: 18px;
+}
+
+.about-contact {
+  background: #f8faff;
+  border: 1px solid #e2ecf9;
+  border-radius: 10px;
+  padding: 15px;
+  margin-top: 15px;
+}
+
+.about-contact p {
+  margin: 5px 0;
+}
+
+.about-contact button {
+  background: #1a73e8;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.about-contact button:hover {
+  background: #125abc;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
