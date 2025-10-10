@@ -15,6 +15,7 @@ html, body { height: 100%; margin: 0; padding: 0; }
   width: 100%;
   height: 100%;         /* 填满 30vh 的容器 */
   object-fit: cover;
+  border-radius: 12px;
   display: block;
   filter: brightness(0.95);
   transition: transform 2s ease;
