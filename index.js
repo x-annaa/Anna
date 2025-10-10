@@ -96,9 +96,9 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  // 密码至少 6 位数字
-  if (!/^\d{6,}$/.test(password)) {
-    alert("密码至少 6 位数字");
+  // ✅ 密码至少 6 位，可包含字母和数字
+  if (!/^[A-Za-z0-9]{6,}$/.test(password)) {
+    alert("密码至少 6 位，可包含字母和数字");
     return;
   }
 
@@ -123,7 +123,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  const platformAccount = generatePlatformAccount(); // 依然是混合字母+数字
+  const platformAccount = generatePlatformAccount(); // 混合字母+数字
   const uuid = generateUUID();
   const sessionToken = generateUUID();
 
