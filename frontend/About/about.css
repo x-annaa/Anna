@@ -1,3 +1,25 @@
+/* 顶部 20% 容器 */
+.about-top-banner {
+  width: 100%;
+  height: 20vh; /* 占页面高度的 20% */
+  overflow: hidden;
+  position: relative;
+}
+
+.about-top-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 保持比例填充容器 */
+  display: block;
+  filter: brightness(0.95);
+  transition: transform 2s ease;
+}
+
+.about-top-banner img:hover {
+  transform: scale(1.05);
+}
+
+/* 主体内容 */
 .about-container {
   max-width: 800px;
   margin: 60px auto;
@@ -31,6 +53,7 @@
   line-height: 1.8;
 }
 
+/* 动画 */
 @keyframes fadeUp {
   from {
     transform: translateY(30px);
