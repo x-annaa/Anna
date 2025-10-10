@@ -8,7 +8,7 @@
 
 .about-top-banner img {
   width: 100%;
-  height: 100%; /* 填满容器（原来是50%，会留空，现在改满）*/
+  height: 50%; /* 👈 只显示容器高度的 50% */
   object-fit: cover; /* 保持比例填充容器 */
   display: block;
   filter: brightness(0.95);
@@ -22,7 +22,7 @@
 /* 主体内容 */
 .about-container {
   max-width: 800px;
-  margin: 30px auto 0 auto; /* 👈 上间距改为30px，更靠近顶部 */
+  margin: 15px auto 0 auto; /* 👈 距离更近（从30px缩小到15px） */
   background: #fff;
   border-radius: 20px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
