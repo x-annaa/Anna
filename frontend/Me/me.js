@@ -30,30 +30,75 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.location.href = "../index.html";
   });
 
-  // ====== 提现逻辑 ======
-  const withdrawBtn = document.getElementById("withdrawBtn");
-  const withdrawModal = document.getElementById("withdrawModal");
-  const withdrawBalance = document.getElementById("withdrawBalance");
+// ====== 提现逻辑 ======
+const withdrawBtn = document.getElementById("withdrawBtn");
+const withdrawModal = document.getElementById("withdrawModal");
+const withdrawBalance = document.getElementById("withdrawBalance");
 
-  withdrawBtn.addEventListener("click", () => {
-    withdrawBalance.textContent = document.getElementById("balance").textContent;
-    withdrawModal.style.display = "flex";
-  });
+// 打开提现弹窗
+withdrawBtn.addEventListener("click", () => {
+  withdrawBalance.textContent = document.getElementById("balance").textContent;
+  withdrawModal.style.display = "flex";
+});
 
-  document.getElementById("cancelWithdraw").addEventListener("click", () => withdrawModal.style.display = "none");
+// 取消提现
+document.getElementById("cancelWithdraw").addEventListener("click", () => withdrawModal.style.display = "none"));
 
-  document.getElementById("confirmWithdraw").addEventListener("click", () => {
-    const amount = document.getElementById("withdrawAmount").value;
-    const address = document.getElementById("walletAddress").value;
+// 点击“确认提现”
+document.getElementById("confirmWithdraw").addEventListener("click", () => {
+  const amount = document.getElementById("withdrawAmount").value;
+  const address = document.getElementById("walletAddress").value;
 
-    if (!amount || !address) return alert("请输入金额和钱包地址");
+  if (!amount || !address) return alert("请输入金额和钱包地址");
 
-    if (localStorage.getItem("hasWithdrawPwd") === "true") {
-      document.getElementById("confirmPwdModal").style.display = "flex";
-    } else {
-      alert("请先设置提现密码！");
-    }
-  });
+  // 判断是否已设置提现密码
+  if (localStorage.getItem("hasWithdrawPwd") === "true") {
+    // 已设置密码，需要输入提现密码
+    document.getElementById("confirmPwdModal").style.display = "flex";
+  } else {
+    // 未设置密码，可以直接提现
+    submitWithdraw();
+  }
+});
+
+// 提交提现申请函数
+async function submitWithdraw() {
+  const inputPwdField = document.getElementById("inputWithdrawPwd");
+  const inputPwd = inputPwdField ? inputPwdField.value : null;
+
+  // 如果用户设置了提现密码，校验密码
+  if (localStorage.getItem("hasWithdrawPwd") === "true") {
+    if (inputPwd !== currentUser.withdraw_password) return alert("提现密码错误！");
+  }
+
+  const amount = parseFloat(document.getElementById("withdrawAmount").value);
+  const address = document.getElementById("walletAddress").value;
+
+  if (!amount || amount < 10) return alert("提现金额必须 ≥ 10");
+  if (!address) return alert("请输入钱包地址");
+  if (amount > Number(currentUser.balance)) return alert("余额不足");
+
+  const { error } = await supabaseClient.from("withdrawals").insert([{
+    user_id: currentUser.id,
+    amount,
+    wallet_address: address,
+    status: "pending"
+  }]);
+  if (error) return alert("提现申请失败：" + error.message);
+
+  alert("提现申请已提交，等待后台审核！");
+
+  // 关闭弹窗
+  withdrawModal.style.display = "none";
+  if (inputPwdField) document.getElementById("confirmPwdModal").style.display = "none";
+
+  // 更新页面余额
+  currentUser.balance -= amount;
+  document.getElementById("balance").textContent = currentUser.balance.toFixed(2);
+}
+
+// 点击“最终提交提现”按钮（弹窗中输入密码后）
+document.getElementById("submitWithdrawFinal").addEventListener("click", submitWithdraw);
 
   // ====== 设置/更新提现密码 ======
   const setPasswordBtn = document.getElementById("setPasswordBtn");
