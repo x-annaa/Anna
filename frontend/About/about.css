@@ -26,7 +26,7 @@ html, body { height: 100%; margin: 0; padding: 0; }
 /* 第二个容器：紧贴在第一个容器下面（无上外边距） */
 .about-container {
   max-width: 1000px;
-  margin: 20px;       /* 注意：没有 margin-top，紧贴上方 */
+  margin: 20px auto;       /* 注意：没有 margin-top，紧贴上方 */
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.06);
