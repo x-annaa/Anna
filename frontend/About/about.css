@@ -10,7 +10,8 @@
 
 .about-top-banner img {
   width: 100%;
-  height: 100%;
+  height: 70%;
+  border-radius: 20px;
   object-fit: cover; /* 保持比例填充容器 */
   display: block;
   filter: brightness(0.95);
