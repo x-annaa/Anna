@@ -6,19 +6,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link rel="stylesheet" href="index.css" />
 
+  <!-- Supabase SDK（必须在 supabaseClient.js 之前） -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- 全局 Supabase 初始化（把 supabaseClient 挂到 window） -->
   <script src="supabaseClient.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1 class="title">U9</h1>
-    <p class="desc">Please register or login below!</p>
+    <h1 class="title">Welcome</h1>
+    <p class="desc">Please register or login below:</p>
 
+    <!-- Tab -->
     <div class="tab-container">
       <button id="showLogin" class="tab-btn active">Login</button>
       <button id="showRegister" class="tab-btn">Register</button>
     </div>
 
+    <!-- 登录 -->
     <div id="loginForm" class="form-container">
       <div class="field">
         <input type="text" id="loginUsername" placeholder="Username" autocomplete="username" />
@@ -33,6 +37,7 @@
       <button id="loginBtn" class="primary-btn">Login</button>
     </div>
 
+    <!-- 注册 -->
     <div id="registerForm" class="form-container hidden">
       <div class="field">
         <input type="text" id="regUsername" placeholder="Username" autocomplete="username" />
@@ -58,6 +63,7 @@
     </div>
   </div>
 
+  <!-- 业务逻辑 -->
   <script src="index.js"></script>
 </body>
 </html>
