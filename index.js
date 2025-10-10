@@ -36,6 +36,19 @@ showRegisterBtn.addEventListener("click", () => {
 });
 
 // =======================
+// 生成随机平台账号（数据库风格：6 位混合字母和数字）
+// =======================
+function generatePlatformAccount() {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let result = "";
+  for (let i = 0; i < 6; i++) {
+    const index = Math.floor(Math.random() * chars.length);
+    result += chars[index];
+  }
+  return result;
+}
+
+// =======================
 // 生成 UUID
 // =======================
 function generateUUID() {
@@ -45,7 +58,7 @@ function generateUUID() {
 }
 
 // =======================
-// 注册逻辑（平台账号由数据库生成）
+// 注册逻辑
 // =======================
 document.getElementById("registerBtn").addEventListener("click", async () => {
   const username = document.getElementById("regUsername").value.trim();
@@ -66,7 +79,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  // 检查用户名是否已存在
+  // 检查是否已有用户
   const { data: exist } = await supabaseClient
     .from("users")
     .select("id")
@@ -78,21 +91,23 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  const uuid = generateUUID();        // 用户唯一 UUID
-  const sessionToken = generateUUID(); // session token
+  const platformAccount = generatePlatformAccount(); // 前端生成账号
+  const uuid = generateUUID();        // 自动生成 UUID
+  const sessionToken = generateUUID(); // session_token
 
-  // 插入新用户，platform_account 由数据库生成
+  // 插入新用户
   const { data, error } = await supabaseClient
     .from("users")
     .insert({
       username,
-      password,  // ⚠️ 建议 hash 后存储
+      password, // ⚠️ 建议 hash
       coins: 0,
       balance: 0,
+      platform_account: platformAccount,
       uuid,
       session_token: sessionToken
     })
-    .select("id, username, platform_account, uuid") // 返回 platform_account
+    .select()
     .single();
 
   if (error) {
@@ -103,7 +118,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   // 保存到 localStorage
   localStorage.setItem("currentUserId", data.id);
   localStorage.setItem("currentUser", data.username);
-  localStorage.setItem("platformAccount", data.platform_account); // ✅ 数据库生成
+  localStorage.setItem("platformAccount", platformAccount);
   localStorage.setItem("currentUserUUID", data.uuid);
   localStorage.setItem("sessionToken", sessionToken);
 
