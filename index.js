@@ -45,7 +45,7 @@ function generateUUID() {
 }
 
 // =======================
-// 注册逻辑
+// 注册逻辑（平台账号由数据库生成）
 // =======================
 document.getElementById("registerBtn").addEventListener("click", async () => {
   const username = document.getElementById("regUsername").value.trim();
@@ -66,7 +66,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  // 检查是否已有用户
+  // 检查用户名是否已存在
   const { data: exist } = await supabaseClient
     .from("users")
     .select("id")
@@ -78,22 +78,21 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  const uuid = generateUUID(); // 自动生成 UUID
-  const sessionToken = generateUUID(); // 新增 session_token
+  const uuid = generateUUID();        // 用户唯一 UUID
+  const sessionToken = generateUUID(); // session token
 
-  // 插入新用户
+  // 插入新用户，platform_account 由数据库生成
   const { data, error } = await supabaseClient
     .from("users")
     .insert({
       username,
-      password, // ⚠️ 明文存储不安全，建议 hash
+      password,  // ⚠️ 建议 hash 后存储
       coins: 0,
       balance: 0,
       uuid,
-      session_token: sessionToken // 保存 token
-      // platform_account 由数据库生成
+      session_token: sessionToken
     })
-    .select()
+    .select("id, username, platform_account, uuid") // 返回 platform_account
     .single();
 
   if (error) {
@@ -104,9 +103,9 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   // 保存到 localStorage
   localStorage.setItem("currentUserId", data.id);
   localStorage.setItem("currentUser", data.username);
-  localStorage.setItem("platformAccount", data.platform_account);
+  localStorage.setItem("platformAccount", data.platform_account); // ✅ 数据库生成
   localStorage.setItem("currentUserUUID", data.uuid);
-  localStorage.setItem("sessionToken", sessionToken); // 保存 token
+  localStorage.setItem("sessionToken", sessionToken);
 
   alert("注册成功！");
   window.location.href = "frontend/HOME.html";
@@ -143,7 +142,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     return;
   }
 
-  // === 生成新的 session_token ===
+  // 生成新的 session_token
   const sessionToken = generateUUID();
 
   // 更新数据库中的 session_token
