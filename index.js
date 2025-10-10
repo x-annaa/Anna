@@ -39,18 +39,39 @@ showRegisterBtn.addEventListener("click", () => {
   showRegisterBtn.classList.add("active");
 });
 
-// =======================
-// 生成随机平台账号（6 位混合字母和数字）
-// =======================
 function generatePlatformAccount() {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const digits = "0123456789";
+  const allChars = letters + digits;
+
   let result = "";
-  for (let i = 0; i < 6; i++) {
-    const index = Math.floor(Math.random() * chars.length);
-    result += chars[index];
+
+  // 第一个字符必须是字母
+  const firstIndex = Math.floor(Math.random() * letters.length);
+  result += letters[firstIndex];
+
+  // 剩下5位，先确保至少有一个数字
+  const remaining = [];
+
+  // 随机选择一个位置放数字（1~5位置）
+  const digitPosition = Math.floor(Math.random() * 5);
+
+  for (let i = 0; i < 5; i++) {
+    if (i === digitPosition) {
+      // 放一个数字
+      const digitIndex = Math.floor(Math.random() * digits.length);
+      remaining.push(digits[digitIndex]);
+    } else {
+      // 放字母或数字
+      const charIndex = Math.floor(Math.random() * allChars.length);
+      remaining.push(allChars[charIndex]);
+    }
   }
+
+  result += remaining.join("");
   return result;
 }
+
 
 // =======================
 // 生成 UUID
