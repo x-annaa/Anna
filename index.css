@@ -1,6 +1,12 @@
-/* Reset 小整理 */
-* { box-sizing: border-box; }
-html, body { height: 100%; }
+/* ===========================
+   Reset 小整理
+=========================== */
+* {
+  box-sizing: border-box;
+}
+html, body {
+  height: 100%;
+}
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
@@ -10,7 +16,9 @@ body {
   place-items: center;
 }
 
-/* 卡片容器 */
+/* ===========================
+   卡片容器
+=========================== */
 .container {
   width: 92%;
   max-width: 420px;
@@ -18,12 +26,45 @@ body {
   border-radius: 14px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.08);
   padding: 28px 24px 24px;
+
+  /* 🌟 动画效果 */
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeUp 0.8s ease-out forwards;
 }
 
-.title { margin: 0 0 6px; font-size: 24px; font-weight: 700; }
-.desc { margin: 0 0 18px; color: #666; font-size: 14px; }
+/* 动画定义 */
+@keyframes fadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
-/* Tab */
+/* ===========================
+   标题与描述
+=========================== */
+.title {
+  margin: 0 0 6px;
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.desc {
+  margin: 0 0 18px;
+  color: #666;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* ===========================
+   Tab
+=========================== */
 .tab-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -41,6 +82,7 @@ body {
   font-weight: 600;
   color: #555;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 .tab-btn.active {
   background: #fff;
@@ -48,11 +90,19 @@ body {
   color: #111;
 }
 
-/* 表单 */
-.form-container { display: block; }
-.hidden { display: none; }
+/* ===========================
+   表单
+=========================== */
+.form-container {
+  display: block;
+}
+.hidden {
+  display: none;
+}
 
-.field { margin-bottom: 12px; }
+.field {
+  margin-bottom: 12px;
+}
 .field input {
   width: 100%;
   height: 42px;
@@ -68,6 +118,9 @@ body {
   box-shadow: 0 0 0 3px rgba(59,130,246,.15);
 }
 
+/* ===========================
+   密码可见切换
+=========================== */
 .password-wrapper {
   position: relative;
 }
@@ -84,7 +137,9 @@ body {
   padding: 6px;
 }
 
-/* 勾选框 */
+/* ===========================
+   勾选框
+=========================== */
 .agreement {
   display: flex;
   align-items: center;
@@ -94,9 +149,9 @@ body {
   color: #555;
 }
 
-
-
-/* 按钮 */
+/* ===========================
+   按钮
+=========================== */
 .primary-btn {
   width: 100%;
   height: 44px;
@@ -109,8 +164,12 @@ body {
   cursor: pointer;
   transition: transform .08s ease, filter .2s ease, opacity .2s ease;
 }
-.primary-btn:hover { filter: brightness(1.05); }
-.primary-btn:active { transform: translateY(1px); }
+.primary-btn:hover {
+  filter: brightness(1.05);
+}
+.primary-btn:active {
+  transform: translateY(1px);
+}
 .primary-btn[disabled] {
   opacity: .6;
   cursor: not-allowed;
