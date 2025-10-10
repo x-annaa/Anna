@@ -17,7 +17,6 @@ document.querySelectorAll(".toggle-password").forEach(btn => {
   });
 });
 
-
 // =======================
 // 登录 / 注册 Tab 切换
 // =======================
@@ -41,7 +40,7 @@ showRegisterBtn.addEventListener("click", () => {
 });
 
 // =======================
-// 生成随机平台账号（数据库风格：6 位混合字母和数字）
+// 生成随机平台账号（6 位混合字母和数字）
 // =======================
 function generatePlatformAccount() {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -63,7 +62,7 @@ function generateUUID() {
 }
 
 // =======================
-// 注册逻辑
+// 注册逻辑 (密码至少 6 位数字)
 // =======================
 document.getElementById("registerBtn").addEventListener("click", async () => {
   const username = document.getElementById("regUsername").value.trim();
@@ -75,6 +74,13 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     alert("请输入用户名和密码");
     return;
   }
+
+  // 密码至少 6 位且仅数字
+  if (!/^\d{6,}$/.test(password)) {
+    alert("密码至少 6 位数字");
+    return;
+  }
+
   if (password !== confirm) {
     alert("两次输入的密码不一致");
     return;
@@ -84,7 +90,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  // 检查是否已有用户
+  // 检查用户名是否已存在
   const { data: exist } = await supabaseClient
     .from("users")
     .select("id")
@@ -96,16 +102,16 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  const platformAccount = generatePlatformAccount(); // 前端生成账号
-  const uuid = generateUUID();        // 自动生成 UUID
-  const sessionToken = generateUUID(); // session_token
+  const platformAccount = generatePlatformAccount();
+  const uuid = generateUUID();
+  const sessionToken = generateUUID();
 
   // 插入新用户
   const { data, error } = await supabaseClient
     .from("users")
     .insert({
       username,
-      password, // ⚠️ 建议 hash
+      password, // ⚠️ 建议在服务端 hash
       coins: 0,
       balance: 0,
       platform_account: platformAccount,
@@ -162,10 +168,9 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     return;
   }
 
-  // 生成新的 session_token
   const sessionToken = generateUUID();
 
-  // 更新数据库中的 session_token
+  // 更新 session_token
   const { error: updateErr } = await supabaseClient
     .from("users")
     .update({ session_token: sessionToken })
@@ -176,7 +181,6 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     return;
   }
 
-  // 保存到 localStorage
   localStorage.setItem("currentUserId", data.id);
   localStorage.setItem("currentUser", data.username);
   localStorage.setItem("platformAccount", data.platform_account);
