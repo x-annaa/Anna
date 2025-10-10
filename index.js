@@ -35,17 +35,6 @@ showRegisterBtn.addEventListener("click", () => {
   showRegisterBtn.classList.add("active");
 });
 
-// =======================
-// 生成随机平台账号（2位大写字母 + 4位数字，如 AB1234）
-// =======================
-function generatePlatformAccount() {
-  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  const numbers = "0123456789";
-  let acc = "";
-  for (let i = 0; i < 2; i++) acc += letters[Math.floor(Math.random() * letters.length)];
-  for (let i = 0; i < 4; i++) acc += numbers[Math.floor(Math.random() * numbers.length)];
-  return acc;
-}
 
 // =======================
 // 生成 UUID
