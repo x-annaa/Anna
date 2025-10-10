@@ -174,3 +174,49 @@ body {
   opacity: .6;
   cursor: not-allowed;
 }
+
+/* ===========================
+   流星背景
+=========================== */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: transparent;
+  z-index: 0;
+  overflow: hidden;
+}
+
+@keyframes meteor {
+  0% {
+    transform: translate(0, 0) rotate(45deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(800px, 600px) rotate(45deg);
+    opacity: 0;
+  }
+}
+
+/* 创建多个伪流星 */
+body::before {
+  background-image: 
+    linear-gradient(45deg, #fff, rgba(255,255,255,0) 70%),
+    linear-gradient(45deg, #fff, rgba(255,255,255,0) 70%),
+    linear-gradient(45deg, #fff, rgba(255,255,255,0) 70%);
+  background-repeat: no-repeat;
+  background-size: 2px 100px;
+  background-position: 
+    10% 20%,
+    50% 40%,
+    80% 10%;
+  animation: meteor 2s linear infinite;
+  animation-delay: 0s, 1s, 2s;
+}
