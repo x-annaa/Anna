@@ -1,35 +1,40 @@
-/* 顶部 20% 容器 */
+/* reset & base */
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; padding: 0; }
+
+/* 第一个容器：占页面高度的 30% */
 .about-top-banner {
   width: 100%;
-  height: 20vh; /* 占页面高度的 20% */
+  height: 30vh;          /* <-- 30% 高度 */
   overflow: hidden;
   position: relative;
 }
 
+/* 图片填满该容器 */
 .about-top-banner img {
   width: 100%;
-  height: 50%; /* 👈 只显示容器高度的 50% */
-  object-fit: cover; /* 保持比例填充容器 */
+  height: 100%;         /* 填满 30vh 的容器 */
+  object-fit: cover;
   display: block;
   filter: brightness(0.95);
   transition: transform 2s ease;
 }
-
 .about-top-banner img:hover {
-  transform: scale(1.05);
+  transform: scale(1.03);
 }
 
-/* 主体内容 */
+/* 第二个容器：紧贴在第一个容器下面（无上外边距） */
 .about-container {
-  max-width: 800px;
-  margin: 15px auto 0 auto; /* 👈 距离更近（从30px缩小到15px） */
+  max-width: 1000px;
+  margin: 0 auto;       /* 注意：没有 margin-top，紧贴上方 */
   background: #fff;
-  border-radius: 20px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
   overflow: hidden;
-  animation: fadeUp 0.8s ease;
+  padding: 32px;        /* 内边距控制内容与边框距离 */
 }
 
+/* 内部图片与文字样式 */
 .about-image img {
   width: 100%;
   height: auto;
@@ -37,30 +42,26 @@
 }
 
 .about-text {
-  padding: 30px 40px;
+  padding-top: 18px;
   text-align: center;
 }
 
 .about-text h2 {
-  font-size: 28px;
-  color: #333;
-  margin-bottom: 16px;
+  font-size: 26px;
+  color: #222;
+  margin: 8px 0 12px;
 }
 
 .about-text p {
-  font-size: 16px;
-  color: #666;
-  line-height: 1.8;
+  font-size: 15px;
+  color: #555;
+  line-height: 1.7;
 }
 
-/* 动画 */
-@keyframes fadeUp {
-  from {
-    transform: translateY(30px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+/* 响应式：小屏时调整布局与高度 */
+@media (max-width: 700px) {
+  .about-top-banner { height: 28vh; } /* 手机上稍微短一点 */
+  .about-container { padding: 20px; border-radius: 8px; }
+  .about-text h2 { font-size: 20px; }
+  .about-text p { font-size: 14px; }
 }
