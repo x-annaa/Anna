@@ -176,47 +176,51 @@ body {
 }
 
 /* ===========================
-   流星背景
+   流星背景 - 改进版
 =========================== */
-body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  background: transparent;
-  z-index: 0;
+body {
+  position: relative;
   overflow: hidden;
 }
 
-@keyframes meteor {
-  0% {
-    transform: translate(0, 0) rotate(45deg);
-    opacity: 0;
-  }
-  10% {
-    opacity: 1;
-  }
-  100% {
-    transform: translate(800px, 600px) rotate(45deg);
-    opacity: 0;
-  }
+/* 每条流星 */
+body::after {
+  content: "";
+  position: absolute;
+  top: -100px;
+  left: 20%;
+  width: 2px;
+  height: 100px;
+  background: linear-gradient(45deg, #fff, rgba(255,255,255,0));
+  opacity: 0.8;
+  transform: rotate(45deg);
+  animation: meteor1 2s linear infinite;
 }
 
-/* 创建多个伪流星 */
-body::before {
-  background-image: 
-    linear-gradient(45deg, #fff, rgba(255,255,255,0) 70%),
-    linear-gradient(45deg, #fff, rgba(255,255,255,0) 70%),
-    linear-gradient(45deg, #fff, rgba(255,255,255,0) 70%);
-  background-repeat: no-repeat;
-  background-size: 2px 100px;
-  background-position: 
-    10% 20%,
-    50% 40%,
-    80% 10%;
-  animation: meteor 2s linear infinite;
-  animation-delay: 0s, 1s, 2s;
+@keyframes meteor1 {
+  0% { transform: translate(0,0) rotate(45deg); opacity: 0; }
+  10% { opacity: 1; }
+  100% { transform: translate(800px,600px) rotate(45deg); opacity: 0; }
 }
+
+/* 用多个伪元素来模拟多条流星 */
+body::before {
+  content: "";
+  position: absolute;
+  top: -120px;
+  left: 60%;
+  width: 2px;
+  height: 120px;
+  background: linear-gradient(45deg, #fff, rgba(255,255,255,0));
+  opacity: 0.7;
+  transform: rotate(45deg);
+  animation: meteor2 3s linear infinite;
+}
+
+@keyframes meteor2 {
+  0% { transform: translate(0,0) rotate(45deg); opacity: 0; }
+  10% { opacity: 1; }
+  100% { transform: translate(900px,700px) rotate(45deg); opacity: 0; }
+}
+
+/* 可以继续增加更多伪元素或者改用更多元素模拟 */
