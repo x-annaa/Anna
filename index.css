@@ -174,3 +174,12 @@ body {
   opacity: .6;
   cursor: not-allowed;
 }
+
+.form-msg {
+  text-align: center;
+  font-size: 13px;
+  color: #e11d48; /* 默认红色 */
+  min-height: 18px;
+  margin-bottom: 10px;
+  transition: color 0.3s ease, opacity 0.3s ease;
+}
