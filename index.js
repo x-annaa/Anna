@@ -75,7 +75,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  // 密码至少 6 位且仅数字
+  // 密码至少 6 位数字
   if (!/^\d{6,}$/.test(password)) {
     alert("密码至少 6 位数字");
     return;
@@ -102,7 +102,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  const platformAccount = generatePlatformAccount();
+  const platformAccount = generatePlatformAccount(); // 依然是混合字母+数字
   const uuid = generateUUID();
   const sessionToken = generateUUID();
 
@@ -111,7 +111,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     .from("users")
     .insert({
       username,
-      password, // ⚠️ 建议在服务端 hash
+      password, // ⚠️ 建议 hash
       coins: 0,
       balance: 0,
       platform_account: platformAccount,
