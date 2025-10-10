@@ -35,7 +35,6 @@ showRegisterBtn.addEventListener("click", () => {
   showRegisterBtn.classList.add("active");
 });
 
-
 // =======================
 // 生成 UUID
 // =======================
@@ -79,7 +78,6 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  const platformAccount = generatePlatformAccount();
   const uuid = generateUUID(); // 自动生成 UUID
   const sessionToken = generateUUID(); // 新增 session_token
 
@@ -91,9 +89,9 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
       password, // ⚠️ 明文存储不安全，建议 hash
       coins: 0,
       balance: 0,
-      platform_account: platformAccount,
       uuid,
       session_token: sessionToken // 保存 token
+      // platform_account 由数据库生成
     })
     .select()
     .single();
@@ -113,7 +111,6 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   alert("注册成功！");
   window.location.href = "frontend/HOME.html";
 });
-
 
 // =======================
 // 登录逻辑 (带 session_token)
