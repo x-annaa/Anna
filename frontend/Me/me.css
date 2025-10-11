@@ -29,7 +29,6 @@
 .user-info .info-text {
   display: flex;
   flex-direction: column;
-  margin-top: 15px;
 }
 
 .user-info p {
@@ -297,4 +296,5 @@
 #logoutModal #confirmLogout {
   background-color: #007bff;
   color: #fff;
+  margin-top: 15px;
 }
