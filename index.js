@@ -105,11 +105,20 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
+  let registerIp = null;
+  try {
+    const res = await fetch("https://api.ipify.org?format=json");
+    const json = await res.json();
+    registerIp = json.ip;
+  } catch (e) {
+    console.warn("获取IP失败，不影响注册", e);
+  }
+
   const platformAccount = generatePlatformAccount();
   const uuid = generateUUID();
   const sessionToken = generateUUID();
 
-  
+  // 插入数据库时带上 register_ip
   const { data, error } = await supabaseClient
     .from("users")
     .insert({
@@ -119,7 +128,8 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
       balance: 0,
       platform_account: platformAccount,
       uuid,
-      session_token: sessionToken
+      session_token: sessionToken,
+      register_ip: registerIp
     })
     .select()
     .single();
@@ -129,6 +139,15 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
+  localStorage.setItem("currentUserId", data.id);
+  localStorage.setItem("currentUser", data.username);
+  localStorage.setItem("platformAccount", platformAccount);
+  localStorage.setItem("currentUserUUID", data.uuid);
+  localStorage.setItem("sessionToken", sessionToken);
+
+  alert("注册成功！");
+  window.location.href = "frontend/HOME.html";
+});
   
   localStorage.setItem("currentUserId", data.id);
   localStorage.setItem("currentUser", data.username);
