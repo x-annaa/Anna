@@ -1,6 +1,3 @@
-/* ===========================
-   Reset 小整理
-=========================== */
 * {
   box-sizing: border-box;
 }
@@ -16,9 +13,6 @@ body {
   place-items: center;
 }
 
-/* ===========================
-   卡片容器
-=========================== */
 .container {
   width: 92%;
   max-width: 420px;
@@ -27,13 +21,13 @@ body {
   box-shadow: 0 8px 24px rgba(0,0,0,0.08);
   padding: 28px 24px 24px;
 
-  /* 🌟 动画效果 */
+
   opacity: 0;
   transform: translateY(20px);
   animation: fadeUp 0.8s ease-out forwards;
 }
 
-/* 动画定义 */
+
 @keyframes fadeUp {
   0% {
     opacity: 0;
@@ -45,9 +39,6 @@ body {
   }
 }
 
-/* ===========================
-   标题与描述
-=========================== */
 .title {
   margin: 0 0 6px;
   font-size: 24px;
@@ -62,9 +53,6 @@ body {
   text-align: center;
 }
 
-/* ===========================
-   Tab
-=========================== */
 .tab-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -90,9 +78,6 @@ body {
   color: #111;
 }
 
-/* ===========================
-   表单
-=========================== */
 .form-container {
   display: block;
 }
@@ -118,9 +103,6 @@ body {
   box-shadow: 0 0 0 3px rgba(59,130,246,.15);
 }
 
-/* ===========================
-   密码可见切换
-=========================== */
 .password-wrapper {
   position: relative;
 }
@@ -137,9 +119,6 @@ body {
   padding: 6px;
 }
 
-/* ===========================
-   勾选框
-=========================== */
 .agreement {
   display: flex;
   align-items: center;
@@ -149,9 +128,6 @@ body {
   color: #555;
 }
 
-/* ===========================
-   按钮
-=========================== */
 .primary-btn {
   width: 100%;
   height: 44px;
