@@ -28,7 +28,8 @@
 
 .user-info .info-text {
   display: flex;
-  flex-direction: column;  /* 文字上下排列 */
+  flex-direction: column;
+  margin-top: 15px;
 }
 
 .user-info p {
