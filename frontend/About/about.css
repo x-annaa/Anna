@@ -1,6 +1,6 @@
 /* ================= About 页面 ================= */
 
-/* 顶部 Banner 区域（20% 高度） */
+/* 顶部 Banner 区域（占页面高度 20%） */
 .about-top-banner {
   width: 100%;
   height: 20vh;
@@ -10,6 +10,7 @@
   justify-content: center;
   align-items: center;
   background: linear-gradient(to right, #001F3F, #007BFF, #00BFFF);
+  margin-bottom: 50px; /* ✅ 与下方容器留出空间 */
 }
 
 .about-top-banner img {
@@ -31,7 +32,7 @@
 /* 主体内容容器 */
 .about-container {
   max-width: 900px;
-  margin: -40px auto 60px auto; /* 负 margin 上移，贴近 banner */
+  margin: 0 auto 80px auto; /* ✅ 上下间距平衡 */
   background: #ffffffee;
   border-radius: 20px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
@@ -40,13 +41,17 @@
   backdrop-filter: blur(6px);
 }
 
-/* 顶部展示图片 */
+/* 图片区域 */
+.about-image {
+  margin-bottom: 25px; /* ✅ 图片与文字分开 */
+}
+
 .about-image img {
   width: 100%;
   height: auto;
   display: block;
-  border-bottom: 2px solid rgba(0, 0, 0, 0.05);
   object-fit: cover;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.05);
   transition: transform 0.3s ease;
 }
 
@@ -54,9 +59,9 @@
   transform: scale(1.02);
 }
 
-/* 文字内容部分 */
+/* 文字内容 */
 .about-text {
-  padding: 40px 50px;
+  padding: 35px 45px;
   text-align: center;
 }
 
@@ -76,7 +81,7 @@
   text-justify: inter-word;
 }
 
-/* 入场动画 */
+/* 动画 */
 @keyframes fadeUp {
   from {
     transform: translateY(30px);
@@ -88,10 +93,15 @@
   }
 }
 
-/* 响应式调整 */
+/* 响应式设计 */
 @media screen and (max-width: 768px) {
+  .about-top-banner {
+    height: 18vh;
+    margin-bottom: 40px;
+  }
+
   .about-container {
-    margin: -30px 15px 40px 15px;
+    margin: 0 15px 60px 15px;
   }
 
   .about-text {
@@ -108,8 +118,13 @@
 }
 
 @media screen and (max-width: 480px) {
+  .about-top-banner {
+    height: 16vh;
+    margin-bottom: 30px;
+  }
+
   .about-container {
-    margin: -20px 10px 30px 10px;
+    margin: 0 10px 40px 10px;
   }
 
   .about-text {
