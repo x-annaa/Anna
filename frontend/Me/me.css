@@ -245,11 +245,48 @@
 /* ======================
    Logout 弹窗单独调整
    ====================== */
+#logoutModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none; /* 默认隐藏 */
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0,0,0,0.4);
+  z-index: 1000;
+}
+
 #logoutModal .modal-content {
-  width: 260px;
+  background-color: #fff;
+  padding: 15px 20px;
+  border-radius: 8px;
+  width: 260px; /* 单独调整宽度 */
+  text-align: center;
 }
 
 #logoutModal p {
-  margin-bottom: 15px;
+  margin-bottom: 15px; /* 单独调整间距 */
   font-size: 15px;
 }
+
+#logoutModal button {
+  padding: 6px 12px;
+  margin: 0 5px;
+  font-size: 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#logoutModal #cancelLogout {
+  background-color: #ccc;
+  color: #333;
+}
+
+#logoutModal #confirmLogout {
+  background-color: #007bff;
+  color: #fff;
+}
+
