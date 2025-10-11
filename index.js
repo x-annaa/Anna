@@ -190,3 +190,16 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   alert("登录成功！");
   window.location.href = "frontend/HOME.html";
 });
+
+window.alert = function(message) {
+  const overlay = document.getElementById("customAlert");
+  const text = document.getElementById("alertText");
+  const ok = document.getElementById("alertOk");
+
+  text.textContent = message;
+  overlay.style.display = "flex";
+
+  ok.onclick = () => {
+    overlay.style.display = "none";
+  };
+};
