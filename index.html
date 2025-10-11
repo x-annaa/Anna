@@ -6,9 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link rel="stylesheet" href="index.css" />
 
-  <!-- Supabase SDK（必须在 supabaseClient.js 之前） -->
+  <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- 全局 Supabase 初始化（把 supabaseClient 挂到 window） -->
+  <!-- SupabaseClien -->
   <script src="supabaseClient.js"></script>
 </head>
 <body>
@@ -22,7 +22,7 @@
       <button id="showRegister" class="tab-btn">Register</button>
     </div>
 
-    <!-- 登录 -->
+    <!-- login -->
     <div id="loginForm" class="form-container">
       <div class="field">
         <input type="text" id="loginUsername" placeholder="Username" autocomplete="username" />
@@ -37,7 +37,7 @@
       <button id="loginBtn" class="primary-btn">Login</button>
     </div>
 
-    <!-- 注册 -->
+    <!-- register -->
     <div id="registerForm" class="form-container hidden">
       <div class="field">
         <input type="text" id="regUsername" placeholder="Username" autocomplete="username" />
@@ -63,7 +63,7 @@
     </div>
   </div>
 
-  <!-- 自定义 alert 容器 -->
+  
   <div id="customAlert" class="alert-overlay" style="display:none;">
     <div class="alert-box">
       <p id="alertText"></p>
@@ -71,7 +71,7 @@
     </div>
   </div>
   
-  <!-- 业务逻辑 -->
+  
   <script src="index.js"></script>
 </body>
 </html>
