@@ -262,18 +262,26 @@
   background-color: #fff;
   padding: 15px 20px;
   border-radius: 8px;
-  width: 260px; /* 单独调整宽度 */
+  width: 260px; /* 弹窗宽度 */
   text-align: center;
 }
 
 #logoutModal p {
-  margin-bottom: 15px; /* 单独调整间距 */
+  margin-bottom: 15px; /* 段落间距 */
   font-size: 15px;
 }
 
+/* 按钮容器，横向排列 */
+#logoutModal .modal-content .button-group {
+  display: flex;
+  justify-content: center; /* 居中对齐 */
+  gap: 10px;               /* 按钮间距 */
+  margin-top: 10px;
+}
+
 #logoutModal button {
+  flex: 1;                 /* 平分宽度，可选 */
   padding: 6px 12px;
-  margin: 0 5px;
   font-size: 14px;
   border: none;
   border-radius: 5px;
@@ -289,4 +297,3 @@
   background-color: #007bff;
   color: #fff;
 }
-
