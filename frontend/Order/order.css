@@ -446,7 +446,7 @@ button:disabled {
   font-size: 13px;
   font-weight: bold;
   color: #fff8dc; /* 淡奶油字色 */
-  background: linear-gradient(to right, #001F3F, #007BFF, #00BFFF);
+  background: linear-gradient(to right, #0358f6, #007BFF, #00BFFF);
   border: none;
   border-radius: 12px; /* 圆润，像糖果 */
   cursor: pointer;
@@ -462,7 +462,7 @@ button:disabled {
 
 /* 悬停：亮闪闪，轻微跳动 */
 #autoOrderBtn:hover {
-  background: linear-gradient(to right, #001F3F, #007BFF, #00BFFF);
+  background: linear-gradient(to right, #0358f6, #007BFF, #00BFFF);
   transform: scale(1.07) rotate(-1deg);
 }
 
