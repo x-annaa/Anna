@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>U9</title>
 
-  <!-- CSS -->
   <link rel="stylesheet" href="Home/home.css">
   <link rel="stylesheet" href="About/about.css">
   <link rel="stylesheet" href="Order/order.css">
@@ -14,22 +13,20 @@
   <link rel="stylesheet" href="Button/button.css">
   <link rel="stylesheet" href="common/alert.css">
 
-  <!-- Supabase SDK -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script src="../supabaseClient.js"></script>
 </head>
 <body>
-
-  <!-- ===================== 首页 ===================== -->
+  
   <div id="homePage" class="page active">
     <div class="ad-container">
-      <img id="adImage" src="" alt="广告" />
+      <img id="adImage" src="" alt="Advertise" />
     </div>
 
     <div class="marquee-container">
       <span class="marquee-icon">🔈</span>
       <div class="marquee-wrapper">
-        <span class="marquee-text">欢迎来到我的平台，恭喜发出🎉！</span>
+        <span class="marquee-text">Welcome to my platform, congratulations on posting!</span>
       </div>
     </div>
 
@@ -65,8 +62,8 @@
         <button class="category-btn active" data-category="phone">Phones</button>
         <button class="category-btn" data-category="clothes">Clothing</button>
         <button class="category-btn" data-category="car">Car</button>
-        <button class="category-btn" data-category="cosmetics">化妆品</button>
-        <button class="category-btn" data-category="diamond">钻石</button>
+        <button class="category-btn" data-category="cosmetics">Cosmetic</button>
+        <button class="category-btn" data-category="diamond">Backpack</button>
       </div>
     </div>
 
@@ -82,51 +79,48 @@
     </div>
   </div>
 
-  <!-- ===================== 信息页面 ===================== -->
   <div id="infoPage" class="page">
     <div id="openChatBtn" class="support-box">
-      <img src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/123.jpg" alt="客服图标">
-      <span>在线客服</span>
+      <img src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/123.jpg" alt="U9">
+      <span>Customer service</span>
       <span class="unread-dot">0</span>
     </div>
 
     <div class="telegram-box">
-      <img src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/123.jpg" alt="Telegram 图标">
+      <img src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/123.jpg" alt="Telegram">
       <div class="telegram-info">
         <p id="telegramAccount">@U9_support</p>
-        <button id="copyTelegramBtn">复制</button>
+        <button id="copyTelegramBtn">Copy</button>
       </div>
     </div>
   </div>
 
-  <!-- 聊天窗口 -->
   <div id="chatWindow" class="chat-window hidden">
     <div class="chat-header">
-      <button id="backBtn">⬅ 返回</button>
+      <button id="backBtn">⬅ Back</button>
     </div>
     <div id="chatMessages" class="chat-messages"></div>
     <div class="chat-input">
-      <textarea id="chatInput" placeholder="输入消息..."></textarea>
-      <button id="sendBtn">发送</button>
+      <textarea id="chatInput" placeholder="enter..."></textarea>
+      <button id="sendBtn">Send</button>
     </div>
   </div>
 
-  <!-- ===================== 订单页面 ===================== -->
   <div id="orderPage" class="page">
     <div class="order-header">
       <div class="coins-box">
         Coins: <span id="ordercoins">0</span>
-        <button id="addCoinsBtn" title="从余额兑换Coins">+</button>
+        <button id="addCoinsBtn" title="Exchange your balance for Coins">+</button>
       </div>
     </div>
 
     <div class="imgorder">
-      <img src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/12314.png" alt="图">
+      <img src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/12314.png" alt="U9">
     </div>
 
     <div class="order-actions">
       <div class="left-side">
-        <img id="fixedImg" src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Home%20Photos/331.png" alt="固定图片" class="fixed-img">
+        <img id="fixedImg" src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Home%20Photos/331.png" alt="U9" class="fixed-img">
         <img id="matchingGif" src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/Qbox.gif" alt="Ordering..." style="width:150px; height:150px; display:none; margin-top:10px;">
       </div>
       <div class="right-side">
@@ -147,41 +141,38 @@
     </div>
 
     <div class="white-container">
-      
+
     </div>
 
-    <!-- 弹窗：订单历史 -->
     <div id="historyModal" class="modal hidden">
       <div class="modal-content">
         <div class="modal-header">
-          <button id="closeHistoryBtn">⬅ 返回</button>
-          <h3>订单历史</h3>
+          <button id="closeHistoryBtn">⬅ Back</button>
+          <h3>Order history</h3>
         </div>
         <div id="orderHistoryList" class="modal-body">
           <ul>
             <li>
-              <img src="https://dummyimage.com/40x40/ccc/fff.png&text=图" alt="商品图">
-              <span>商品名称 / ¥价格 / 收入 / 状态</span>
+              <img src="https://dummyimage.com/40x40/ccc/fff.png&text=Photos" alt="Product photos">
+              <span>Product Name / $Price / Revenue / Status</span>
             </li>
           </ul>
         </div>
       </div>
     </div>
 
-    <!-- 弹窗：阅读规则 -->
     <div id="rulesModal" class="modal hidden">
       <div class="modal-content">
         <div class="modal-header">
-          <button id="closeRulesBtn">⬅ 返回</button>
-          <h3>📜 使用规则</h3>
+          <button id="closeRulesBtn">⬅ Back</button>
+          <h3>Rules of Use</h3>
         </div>
         <div class="modal-body">
-          <p>这里写规则内容，支持多行文字，内容过多会自动滚动...</p>
+          <p>Write the rules here, support multiple lines of text, too much content will automatically scroll...</p>
         </div>
       </div>
     </div>
   
-    <!-- Balance / Coins 兑换弹窗 -->
     <div id="addCoinsModal" class="modal">
       <div class="modal-content">
         <h3>Exchange</h3>
@@ -189,179 +180,162 @@
           <button id="balanceToCoinsBtn" class="exchange-btn active" data-type="toCoins">Balance → Coins</button>
           <button id="coinsToBalanceBtn" class="exchange-btn" data-type="toBalance">Coins → Balance</button>
         </div>
-        <p>请输入要兑换的数量：</p>
-        <input type="number" id="addCoinsInput" min="1" placeholder="输入数量" />
+        <p>Please enter the amount to be exchanged:</p>
+        <input type="number" id="addCoinsInput" min="1" placeholder="Amount" />
         <div class="modal-actions">
-          <button id="cancelExchange">取消</button>
-          <button id="confirmExchange">确认</button>
+          <button id="cancelExchange">Cancel</button>
+          <button id="confirmExchange">Confirm</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ===================== 关于我们 ===================== -->
   <div id="msgPage" class="page">
 
-    <!-- 顶部 20% 高度容器 -->
     <div class="about-top-banner">
-      <img src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/123.jpg" alt="图">
+      <img src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/123.jpg" alt="U9">
     </div>
 
-    <!-- 容器 -->
     <div class="about-container">
-      <!-- 顶部图片 -->
+
       <div class="about-image">
-        <img src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/5551.jpg" alt="图">
+        <img src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/5551.jpg" alt="U9">
       </div>
 
-      <!-- 文字内容 -->
       <div class="about-text">
-        <h2>关于我们</h2>
+        <h2>About</h2>
         <p>
-          我们是一支充满创造力与热情的团队，专注于打造有趣、实用、富有情感的产品体验。
-          在这里，我们相信设计不仅是视觉的艺术，更是情感与灵感的连接。
+          We are a creative and passionate team focused on creating fun, practical and emotional product experiences.
+          Here, we believe that design is not only a visual art, but also a connection between emotion and inspiration.
         </p>
       </div>
     </div>
   </div>
 
-  <!-- ===================== 我的页面 ===================== -->
   <div id="myPage" class="page">
     <div class="user-info">
       <img class="avatar" src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/123.jpg" alt="头像">
       <div class="info-text">
-        <p class="username"><strong>用户名：</strong><span id="username">加载中...</span></p>
-        <p class="platform"><strong>平台账号：</strong><span id="platformAccount">加载中...</span></p>
+        <p class="username"><strong>Username：</strong><span id="username">loading...</span></p>
+        <p class="platform"><strong>Account：</strong><span id="platformAccount">loading...</span></p>
       </div>
     </div>
 
     <div class="balance-box">
       <p><strong>Balance：</strong><span id="balance">0.00</span></p>
       <div class="balance-actions">
-        <button id="depositBtn">充值</button>
-        <button id="withdrawBtn">提现</button>
+        <button id="depositBtn">Deposit</button>
+        <button id="withdrawBtn">Withdraw</button>
       </div>
     </div>
 
     <div class="my-buttons">
-      <button id="changeLoginPwdBtn">登入密码</button>
+      <button id="changeLoginPwdBtn">Password</button>
       <button id="logoutBtn">Logout</button>
     </div>
 
-    <!-- 修改登录密码弹窗 -->
     <div id="changeLoginPwdModal" class="modal">
       <div class="modal-content">
-        <h3>修改登录密码</h3>
-        <input type="password" id="currentLoginPwd" placeholder="输入当前登录密码" />
-        <input type="password" id="newLoginPwd" placeholder="输入新密码" />
-        <input type="password" id="confirmLoginPwd" placeholder="确认新密码" />
+        <h3>Change login password</h3>
+        <input type="password" id="currentLoginPwd" placeholder="Enter current password" />
+        <input type="password" id="newLoginPwd" placeholder="new password" />
+        <input type="password" id="confirmLoginPwd" placeholder="Confirm password" />
         <div class="modal-actions">
-          <button id="cancelChangeLoginPwd">取消</button>
-          <button id="saveChangeLoginPwd">保存</button>
+          <button id="cancelChangeLoginPwd">Cancel</button>
+          <button id="saveChangeLoginPwd">Save</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ===================== 弹窗区域 ===================== -->
-  <!-- Logout -->
   <div id="logoutModal" class="modal">
     <div class="modal-content">
-      <p>确定要退出吗？</p>
-      <button id="cancelLogout">否</button>
-      <button id="confirmLogout">确定</button>
+      <p>Are you sure you want to exit?</p>
+      <button id="cancelLogout">NO</button>
+      <button id="confirmLogout">YES</button>
     </div>
   </div>
 
-  <!-- 提现 -->
   <div id="withdrawModal" class="modal">
     <div class="modal-content">
-      <h3>提现</h3>
-      <p>当前余额：<span id="withdrawBalance">0.00</span></p>
-      <input type="number" id="withdrawAmount" placeholder="输入提现金额" />
-      <input type="text" id="walletAddress" placeholder="USDT-TRC20钱包地址" />
-      <button id="setPasswordBtn">添加提现密码</button>
+      <h3>Withdraw</h3>
+      <p>Balance：<span id="withdrawBalance">0.00</span></p>
+      <input type="number" id="withdrawAmount" placeholder="withdrawal amount" />
+      <input type="text" id="walletAddress" placeholder="USDT-TRC20 wallet address" />
+      <button id="setPasswordBtn">Add withdrawal password</button>
       <div class="modal-actions">
-        <button id="cancelWithdraw">取消</button>
-        <button id="confirmWithdraw">提交</button>
+        <button id="cancelWithdraw">Cancel</button>
+        <button id="confirmWithdraw">Done</button>
       </div>
     </div>
   </div>
 
-  <!-- 设置提现密码 -->
   <div id="setPasswordModal" class="modal">
     <div class="modal-content">
-      <h3>设置提现密码</h3>
-      <input type="password" id="withdrawPwd" maxlength="6" inputmode="numeric" placeholder="输入6位数字密码" />
-      <input type="password" id="confirmWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="确认密码" />
+      <h3>Set withdrawal password</h3>
+      <input type="password" id="withdrawPwd" maxlength="6" inputmode="numeric" placeholder="Enter a 6-digit password" />
+      <input type="password" id="confirmWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="Confirm Password" />
       <div class="modal-actions">
-        <button id="cancelSetPwd">取消</button>
-        <button id="saveWithdrawPwd">保存</button>
+        <button id="cancelSetPwd">Cancel</button>
+        <button id="saveWithdrawPwd">Save</button>
       </div>
     </div>
   </div>
 
-  <!-- 更新提现密码 -->
   <div id="updatePasswordModal" class="modal">
     <div class="modal-content">
-      <h3>更改提现密码</h3>
-      <input type="password" id="oldWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="输入原密码" />
-      <input type="password" id="newWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="输入新密码" />
-      <input type="password" id="confirmNewWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="确认新密码" />
+      <h3>Change withdrawal password</h3>
+      <input type="password" id="oldWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="Enter password" />
+      <input type="password" id="newWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="new password" />
+      <input type="password" id="confirmNewWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="confirm password" />
       <div class="modal-actions">
-        <button id="cancelUpdatePwd">取消</button>
-        <button id="saveUpdatePwd">保存</button>
+        <button id="cancelUpdatePwd">Cancel</button>
+        <button id="saveUpdatePwd">Save</button>
       </div>
     </div>
   </div>
 
-  <!-- 确认提现密码 -->
   <div id="confirmPwdModal" class="modal">
     <div class="modal-content">
-      <h3>输入提现密码</h3>
-      <input type="password" id="inputWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="请输入密码" />
+      <h3>Enter withdrawal password</h3>
+      <input type="password" id="inputWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="Please enter password" />
       <div class="modal-actions">
-        <button id="cancelConfirmPwd">取消</button>
-        <button id="submitWithdrawFinal">提交</button>
+        <button id="cancelConfirmPwd">Cancel</button>
+        <button id="submitWithdrawFinal">Done</button>
       </div>
     </div>
   </div>
 
-  <!-- 充值 -->
   <div id="rechargeModal" class="modal">
     <div class="modal-content">
-      <h3>充值</h3>
+      <h3>Recharge</h3>
 
-      <!-- 输入充值金额 -->
-      <label for="amountInput">充值金额 (USDT)：</label>
-      <input type="number" id="amountInput" placeholder="请输入充值金额" min="1" step="0.01" />
+      <label for="amountInput">Recharge(USDT)：</label>
+      <input type="number" id="amountInput" placeholder="Please enter the recharge amount" min="1" step="0.01" />
 
-      <!-- 钱包地址与二维码 -->
       <div class="wallet-section">
-        <p>收款钱包地址：</p>
+        <p>Receiving wallet address</p>
         <div class="wallet-address">
           <span id="walletAddress">TRX1234abcd5678efgh9012ijklmnop3456</span>
-          <button id="copyAddressBtn" data-wallet="TRX1234abcd5678efgh9012ijklmnop3456">复制</button>
+          <button id="copyAddressBtn" data-wallet="TRX1234abcd5678efgh9012ijklmnop3456">Copy</button>
         </div>
-        <img id="qrCode" src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/123.jpg" alt="USDT 收款二维码" width="160" />
+        <img id="qrCode" src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/123.jpg" alt="USDT Payment QR code" width="160" />
       </div>
 
-      <!-- 上传截图 -->
       <div class="upload-section">
-        <label for="fileInput">上传转账截图：</label>
+        <label for="fileInput">Upload transfer photo</label>
         <input type="file" id="fileInput" accept="image/*" />
       </div>
 
       <p id="status"></p>
 
       <div class="modal-actions">
-        <button id="cancelRecharge">取消</button>
-        <button id="uploadBtn">上传</button>
+        <button id="cancelRecharge">Cancel</button>
+        <button id="uploadBtn">Done</button>
       </div>
     </div>
   </div>
 
-  <!-- ===================== 底部导航栏 ===================== -->
   <div class="bottom-nav">
     <button data-page="homePage" class="active">Home</button>
     <button data-page="infoPage" id="messageBtn">
@@ -373,7 +347,6 @@
     <button data-page="myPage">Me</button>
   </div>
 
-  <!-- JS -->
   <script src="Home/home.js"></script>
   <script src="Message/message.js"></script>
   <script src="Order/order.js"></script>
