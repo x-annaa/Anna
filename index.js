@@ -94,6 +94,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
+  // 检查用户名是否存在
   const { data: exist } = await supabaseClient
     .from("users")
     .select("id")
@@ -105,11 +106,21 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
+  // 尝试获取公网 IP（可选，不强制）
+  let registerIp = null;
+  try {
+    const res = await fetch("https://api.ipify.org?format=json");
+    const json = await res.json();
+    registerIp = json.ip;
+  } catch (e) {
+    console.warn("获取IP失败，不影响注册", e);
+  }
+
   const platformAccount = generatePlatformAccount();
   const uuid = generateUUID();
   const sessionToken = generateUUID();
 
-  
+  // 插入数据库时带上 register_ip
   const { data, error } = await supabaseClient
     .from("users")
     .insert({
@@ -119,7 +130,8 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
       balance: 0,
       platform_account: platformAccount,
       uuid,
-      session_token: sessionToken
+      session_token: sessionToken,
+      register_ip: registerIp // ✅ 这里新增
     })
     .select()
     .single();
@@ -129,7 +141,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  
+  // 保存登录状态
   localStorage.setItem("currentUserId", data.id);
   localStorage.setItem("currentUser", data.username);
   localStorage.setItem("platformAccount", platformAccount);
@@ -139,6 +151,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   alert("注册成功！");
   window.location.href = "frontend/HOME.html";
 });
+
 
 document.getElementById("loginBtn").addEventListener("click", async () => {
   const username = document.getElementById("loginUsername").value.trim();
