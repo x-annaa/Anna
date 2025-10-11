@@ -9,15 +9,14 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(to right, #001F3F, #007BFF, #00BFFF);
-  margin-bottom: 50px; /* ✅ 与下方容器留出空间 */
+  margin-bottom: 20px;
 }
 
 .about-top-banner img {
-  width: 90%;
-  height: 70%;
-  margin: 10px auto;
-  border-radius: 20px;
+  width: 100%;
+  height: 100%;
+  margin: 0px auto;
+  border-radius: 10px;
   object-fit: cover;
   display: block;
   filter: brightness(0.95);
