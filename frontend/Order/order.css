@@ -442,7 +442,7 @@ button:disabled {
 
 /* 按钮 */
 #autoOrderBtn {
-  padding: 14px 28px;
+  padding: 10px 28px;
   font-size: 13px;
   font-weight: bold;
   color: #fff8dc; /* 淡奶油字色 */
