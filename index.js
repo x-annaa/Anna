@@ -141,7 +141,6 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  // 保存登录状态  localStorage.setItem("currentUserId", data.id);
   localStorage.setItem("currentUser", data.username);
   localStorage.setItem("platformAccount", platformAccount);
   localStorage.setItem("currentUserUUID", data.uuid);
