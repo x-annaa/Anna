@@ -1,6 +1,3 @@
-// =======================
-// 绑定所有“👁️”按钮点击事件
-// =======================
 document.querySelectorAll(".toggle-password").forEach(btn => {
   btn.addEventListener("click", () => {
     const targetId = btn.getAttribute("data-target");
@@ -17,9 +14,6 @@ document.querySelectorAll(".toggle-password").forEach(btn => {
   });
 });
 
-// =======================
-// 登录 / 注册 Tab 切换
-// =======================
 const loginForm = document.getElementById("loginForm");
 const registerForm = document.getElementById("registerForm");
 const showLoginBtn = document.getElementById("showLogin");
@@ -45,24 +39,21 @@ function generatePlatformAccount() {
   const allChars = letters + digits;
 
   let result = "";
-
-  // 第一个字符必须是字母
+  
   const firstIndex = Math.floor(Math.random() * letters.length);
   result += letters[firstIndex];
-
-  // 剩下5位，先确保至少有一个数字
+  
   const remaining = [];
-
-  // 随机选择一个位置放数字（1~5位置）
+  
   const digitPosition = Math.floor(Math.random() * 5);
 
   for (let i = 0; i < 5; i++) {
     if (i === digitPosition) {
-      // 放一个数字
+      
       const digitIndex = Math.floor(Math.random() * digits.length);
       remaining.push(digits[digitIndex]);
     } else {
-      // 放字母或数字
+      
       const charIndex = Math.floor(Math.random() * allChars.length);
       remaining.push(allChars[charIndex]);
     }
@@ -72,19 +63,12 @@ function generatePlatformAccount() {
   return result;
 }
 
-
-// =======================
-// 生成 UUID
-// =======================
 function generateUUID() {
   return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
     (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
   );
 }
 
-// =======================
-// 注册逻辑 (密码至少 6 位数字)
-// =======================
 document.getElementById("registerBtn").addEventListener("click", async () => {
   const username = document.getElementById("regUsername").value.trim();
   const password = document.getElementById("regPassword").value;
@@ -96,7 +80,6 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  // ✅ 密码至少 6 位，可包含字母和数字
   if (!/^[A-Za-z0-9]{6,}$/.test(password)) {
     alert("密码至少 6 位，可包含字母和数字");
     return;
@@ -111,7 +94,6 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  // 检查用户名是否已存在
   const { data: exist } = await supabaseClient
     .from("users")
     .select("id")
@@ -123,16 +105,16 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  const platformAccount = generatePlatformAccount(); // 混合字母+数字
+  const platformAccount = generatePlatformAccount();
   const uuid = generateUUID();
   const sessionToken = generateUUID();
 
-  // 插入新用户
+  
   const { data, error } = await supabaseClient
     .from("users")
     .insert({
       username,
-      password, // ⚠️ 建议 hash
+      password,
       coins: 0,
       balance: 0,
       platform_account: platformAccount,
@@ -147,7 +129,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  // 保存到 localStorage
+  
   localStorage.setItem("currentUserId", data.id);
   localStorage.setItem("currentUser", data.username);
   localStorage.setItem("platformAccount", platformAccount);
@@ -158,9 +140,6 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   window.location.href = "frontend/HOME.html";
 });
 
-// =======================
-// 登录逻辑 (带 session_token)
-// =======================
 document.getElementById("loginBtn").addEventListener("click", async () => {
   const username = document.getElementById("loginUsername").value.trim();
   const password = document.getElementById("loginPassword").value;
@@ -191,7 +170,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
 
   const sessionToken = generateUUID();
 
-  // 更新 session_token
+  
   const { error: updateErr } = await supabaseClient
     .from("users")
     .update({ session_token: sessionToken })
