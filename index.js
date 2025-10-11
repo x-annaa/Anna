@@ -76,25 +76,25 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   const agree = document.getElementById("agreeTerms").checked;
 
   if (!username || !password) {
-    alert("请输入用户名和密码");
+    alert("Please enter your username and password");
     return;
   }
 
   if (!/^[A-Za-z0-9]{6,}$/.test(password)) {
-    alert("密码至少 6 位，可包含字母和数字");
+    alert("Password must be at least 6 characters long");
     return;
   }
 
   if (password !== confirm) {
-    alert("两次输入的密码不一致");
+    alert("The passwords entered twice do not match");
     return;
   }
   if (!agree) {
-    alert("请先勾选同意条款");
+    alert("Please tick the box to agree to the terms");
     return;
   }
 
-  // 检查用户名是否存在
+
   const { data: exist } = await supabaseClient
     .from("users")
     .select("id")
@@ -102,25 +102,25 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     .maybeSingle();
 
   if (exist) {
-    alert("该用户名已存在，请换一个");
+    alert("This username already exists");
     return;
   }
 
-  // 尝试获取公网 IP（可选，不强制）
+
   let registerIp = null;
   try {
     const res = await fetch("https://api.ipify.org?format=json");
     const json = await res.json();
     registerIp = json.ip;
   } catch (e) {
-    console.warn("获取IP失败，不影响注册", e);
+    console.warn("Registration successful!", e);
   }
 
   const platformAccount = generatePlatformAccount();
   const uuid = generateUUID();
   const sessionToken = generateUUID();
 
-  // 插入数据库时带上 register_ip
+
   const { data, error } = await supabaseClient
     .from("users")
     .insert({
@@ -131,24 +131,23 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
       platform_account: platformAccount,
       uuid,
       session_token: sessionToken,
-      register_ip: registerIp // ✅ 这里新增
+      register_ip: registerIp
     })
     .select()
     .single();
 
   if (error) {
-    alert("注册失败: " + error.message);
+    alert("Registration failed: " + error.message);
     return;
   }
 
-  // 保存登录状态
-  localStorage.setItem("currentUserId", data.id);
+  // 保存登录状态  localStorage.setItem("currentUserId", data.id);
   localStorage.setItem("currentUser", data.username);
   localStorage.setItem("platformAccount", platformAccount);
   localStorage.setItem("currentUserUUID", data.uuid);
   localStorage.setItem("sessionToken", sessionToken);
 
-  alert("注册成功！");
+  alert("Registration successful!");
   window.location.href = "frontend/HOME.html";
 });
 
@@ -158,7 +157,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   const password = document.getElementById("loginPassword").value;
 
   if (!username || !password) {
-    alert("请输入用户名和密码");
+    alert("Please enter your username and password");
     return;
   }
 
@@ -169,15 +168,15 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     .maybeSingle();
 
   if (error) {
-    alert("登录失败: " + error.message);
+    alert("Login failed: " + error.message);
     return;
   }
   if (!data) {
-    alert("用户不存在");
+    alert("User does not exist");
     return;
   }
   if (data.password !== password) {
-    alert("密码错误");
+    alert("Wrong password");
     return;
   }
 
@@ -190,7 +189,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     .eq("id", data.id);
 
   if (updateErr) {
-    alert("更新 session 失败: " + updateErr.message);
+    alert("Update session failed: " + updateErr.message);
     return;
   }
 
@@ -200,7 +199,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   localStorage.setItem("currentUserUUID", data.uuid);
   localStorage.setItem("sessionToken", sessionToken);
 
-  alert("登录成功！");
+  alert("Login successful!");
   window.location.href = "frontend/HOME.html";
 });
 
