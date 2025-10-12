@@ -311,7 +311,11 @@
   margin-bottom: 6px;     /* 和下方地址留点间距 */
 }
 
-.amountInput {
-  font-weight: 700;
+.wallet-label {
+  font-weight: 700;     /* 粗体 */
+  text-align: center;   /* 居中 */
+  display: block;       /* 让它独占一行，居中才生效 */
+  color: #111;          /* 深色文字 */
+  margin-bottom: 6px;   /* 和输入框间留点距离 */
 }
-   
+
