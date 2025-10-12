@@ -1,12 +1,9 @@
-// =======================
-// HOME 页面登录状态检查
-// =======================
 async function checkSession() {
   const userId = localStorage.getItem("currentUserId");
   const sessionToken = localStorage.getItem("sessionToken");
 
   if (!userId || !sessionToken) {
-    alert("请先登录");
+    alert("Please log in first");
     window.location.href = "../index.html";
     return;
   }
@@ -18,24 +15,20 @@ async function checkSession() {
     .maybeSingle();
 
   if (error || !data) {
-    alert("验证失败，请重新登录");
+    alert("Verification failed, please log in again");
     window.location.href = "../index.html";
     return;
   }
 
   if (data.session_token !== sessionToken) {
-    alert("您的账号已在别处登录");
+    alert("Your account has been logged in elsewhere");
     localStorage.clear();
     window.location.href = "../index.html";
   }
 }
 
-// 页面一加载就检查
 checkSession();
 
-// =======================
-// 登出按钮
-// =======================
 window.logout = async function () {
   const userId = localStorage.getItem("currentUserId");
 
@@ -50,9 +43,6 @@ window.logout = async function () {
   window.location.href = "../index.html";
 };
 
-// =======================
-// 广告轮播
-// =======================
 const adUrls = [
   "https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/w1.jpg",
   "https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/w2.png",
@@ -64,39 +54,34 @@ const adImage = document.getElementById("adImage");
 
 function showAd(index) {
   if (adImage) {
-    adImage.style.opacity = 0; // 先淡出
+    adImage.style.opacity = 0;
     setTimeout(() => {
       adImage.src = adUrls[index];
-      adImage.style.opacity = 1; // 再淡入
+      adImage.style.opacity = 1;
     }, 300);
   }
 }
 
-// 初始化显示第一张
 showAd(currentAdIndex);
 
-// 每 5 秒切换
 setInterval(() => {
   currentAdIndex = (currentAdIndex + 1) % adUrls.length;
   showAd(currentAdIndex);
 }, 15000);
 
-// =======================
-// 跑马灯动画
-// =======================
 const marqueeText = document.querySelector(".marquee-text");
 
 function animateMarquee() {
   const wrapper = document.querySelector(".marquee-wrapper");
   const wrapperWidth = wrapper.offsetWidth;
   const textWidth = marqueeText.offsetWidth;
-  let pos = -textWidth; // 初始位置：完全在左边外面
-  const speed = 1; // 每帧移动像素
+  let pos = -textWidth;
+  const speed = 1;
 
   function step() {
-    pos += speed; // 文字向右移动
+    pos += speed;
     if (pos > wrapperWidth) {
-      pos = -textWidth; // 移动到左侧重新开始
+      pos = -textWidth;
     }
     marqueeText.style.transform = `translateX(${pos}px)`;
     requestAnimationFrame(step);
@@ -105,15 +90,11 @@ function animateMarquee() {
   requestAnimationFrame(step);
 }
 
-// 等 DOM 加载完再启动动画
 window.addEventListener("load", animateMarquee);
 
-
-// ===== 分类广告切换 =====
 const categoryBtns = document.querySelectorAll(".category-btn");
 const adItems = document.querySelectorAll(".ad-item");
 
-// 示例广告 URL 数据
 const adsData = {
   phone: [
     "https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Home%20Photos/p1.avif",
@@ -147,24 +128,22 @@ const adsData = {
   ]
 };
 
-// 初始显示 phone 分类
 updateAds("phone");
 
-// 点击按钮切换
 categoryBtns.forEach(btn => {
   btn.addEventListener("click", () => {
-    // 更新按钮样式
+
     categoryBtns.forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
 
-    // 切换广告
+
     const category = btn.dataset.category;
     updateAds(category);
   });
 });
 
 function updateAds(category) {
-  // 遍历所有 ad-item
+
   let idx = 0;
   adItems.forEach(item => {
     if (item.dataset.category === category) {
