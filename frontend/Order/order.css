@@ -1,19 +1,18 @@
-/* ========= 全局基础 ========= */
 body {
   margin: 0;
   font-family: "Segoe UI", Arial, sans-serif;
   background: 
-    /* 大气泡 */
+
     radial-gradient(circle at 20% 30%, rgba(255,255,255,0.6) 0px, transparent 40px),
     radial-gradient(circle at 70% 20%, rgba(255,255,255,0.5) 0px, transparent 50px),
     radial-gradient(circle at 40% 70%, rgba(255,255,255,0.4) 0px, transparent 60px),
     radial-gradient(circle at 80% 60%, rgba(255,255,255,0.3) 0px, transparent 40px),
-    /* 小气泡 */
+
     radial-gradient(circle at 15% 80%, rgba(255,255,255,0.25) 0px, transparent 20px),
     radial-gradient(circle at 60% 85%, rgba(255,255,255,0.2) 0px, transparent 15px),
     radial-gradient(circle at 90% 40%, rgba(255,255,255,0.3) 0px, transparent 18px),
     radial-gradient(circle at 35% 15%, rgba(255,255,255,0.25) 0px, transparent 12px),
-    /* 背景渐变 */
+
     linear-gradient(135deg, #a8e6ff, #d0f0ff, #f5f7fa);
   background-repeat: no-repeat;
   background-size: cover;
@@ -35,8 +34,6 @@ h2, h3 {
   display: block;
 }
 
-
-/* ========= 底部导航 ========= */
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -64,7 +61,6 @@ h2, h3 {
   font-weight: bold;
 }
 
-/* ========= 订单中心 ========= */
 .order-header {
   display: flex;
   justify-content: end;
@@ -101,9 +97,9 @@ h2, h3 {
   border-radius: 10px;
   background: #d7ddde05;
 
-  display: flex;           /* 左右布局 */
-  align-items: center;     /* 图片垂直居中 */
-  gap: 20px;               /* 左右间距 */
+  display: flex;
+  align-items: center;
+  gap: 20px;
   font-size: 15px;
   color: #555;
 }
@@ -113,15 +109,15 @@ h2, h3 {
   height: 120px;
   object-fit: cover;
   border-radius: 8px;
-  flex-shrink: 0;          /* 防止图片缩小 */
+  flex-shrink: 0;
 }
 
 .order-result .order-info {
-  line-height: 1.4;       /* 紧凑行距 */
+  line-height: 1.4;
 }
 
 .order-result .order-info p {
-  margin: 4px 0;          /* 每行文字间距 */
+  margin: 4px 0;
 }
 
 .order-result .order-info button {
@@ -140,9 +136,6 @@ h2, h3 {
   background-color: #1565c0;
 }
 
-
-/* ========= 最近订单历史 ========= */
-
 .order-history {
   width: 100%;
   margin-top: 0px;
@@ -150,8 +143,8 @@ h2, h3 {
 
 .order-history h3 {
     display: flex;
-    justify-content: center;  /* 横向居中 */
-    align-items: center;      /* 垂直居中 */
+    justify-content: center;
+    align-items: center;
     background: #fafafa;
     padding: 5px 12px;
     font-size: 15px;
@@ -175,7 +168,7 @@ h2, h3 {
     background: #fafafa;
     border-bottom: 1px solid #eee;
     font-size: 13px;
-    text-align: center;   /* 文字居中 */
+    text-align: center;
 }
 
 
@@ -183,7 +176,6 @@ h2, h3 {
   border-bottom: none;
 }
 
-/* ========= 通用按钮 ========= */
 button {
   font-family: inherit;
   outline: none;
@@ -194,7 +186,6 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* ========= 通用 Modal 样式 ========= */
 .modal {
   display: none;
   position: fixed;
@@ -269,7 +260,6 @@ button:disabled {
   transition: 0.2s;
 }
 
-/* ========= AddCoins 按钮 ========= */
 #cancelAddCoins {
   background-color: #e0e0e0;
   color: #333;
@@ -285,7 +275,6 @@ button:disabled {
   background-color: #45a049;
 }
 
-/* ========= Balance/Coins 弹窗新增 ========= */
 #exchangeModal h3 {
   color: #1976d2;
 }
@@ -313,13 +302,11 @@ button:disabled {
   background-color: #1565c0;
 }
 
-/* ========= 弹窗渐显动画 ========= */
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.9); }
   to { opacity: 1; transform: scale(1); }
 }
 
-/* 横排切换按钮 */
 .exchange-toggle {
   display: flex;
   justify-content: center;
@@ -349,29 +336,26 @@ button:disabled {
   background-color: #bdbdbd;
 }
 
-/* ========= 容器变成左右布局 ========= */
 .order-actions {
   display: flex;
-  justify-content: space-between; /* 左右两边分开 */
-  align-items: center;            /* 左右垂直居中 */
+  justify-content: space-between;
+  align-items: center;
   width: 100%;
-  height: 150px;                  /* 根据需要调整整体高度 */
-  padding: 0 20px;                /* 左右内边距 */
+  height: 150px;
+  padding: 0 20px;
   box-sizing: border-box;
   position: relative;
 }
 
-/* 左侧容器 */
 .left-side {
   width: 150px;
   height: 150px;
-  position: relative;             /* 为绝对定位提供参考 */
+  position: relative;
   display: flex;
-  justify-content: center;        /* 水平居中内容 */
-  align-items: center;            /* 垂直居中内容 */
+  justify-content: center;
+  align-items: center;
 }
 
-/* 固定图片和 GIF 同位置 */
 .fixed-img, .matching-gif {
   width: 150px;
   height: 150px;
@@ -381,22 +365,20 @@ button:disabled {
 }
 
 .matching-gif {
-  display: none; /* 默认隐藏 GIF */
+  display: none;
 }
 
-/* 右侧容器 */
 .right-side {
   width: 150px;
   height: 150px;
-  position: relative;             /* 可以控制右侧内容移动 */
+  position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: center;        /* 垂直居中 */
-  align-items: center;            /* 水平居中 */
+  justify-content: center;
+  align-items: center;
   gap: 10px;
 }
 
-/* 右侧文本样式 */
 #roundProgress {
   font-weight: bold;
 }
@@ -407,72 +389,64 @@ button:disabled {
   font-weight: bold;
 }
 
-/* 可选：按钮样式 */
 #autoOrderBtn {
   padding: 5px 10px;
   font-size: 16px;
 }
 
-/* 轮次-倒计时 */
 .order-roundandcoldown {
   display: flex;
-  justify-content: space-between; /* 左右分开 */
-  align-items: center;           /* 垂直居中 */
+  justify-content: space-between;
+  align-items: center;
   width: 100%;
-  padding: 5px 12px;            /* 内边距 */
+  padding: 5px 12px;
   margin-bottom: 10px;
   font-family: Arial, sans-serif;
-  border: 1px solid #a9c2e0;       /* 边框 */
-  border-radius: 10px;           /* 圆角 */
-  background-color: #ecf1ff00;     /* 背景色 */
+  border: 1px solid #a9c2e0;
+  border-radius: 10px;
+  background-color: #ecf1ff00;
   box-sizing: border-box;
 }
 
 #roundProgress {
   font-weight: bold;
-  font-size: 13px; /* 左边字体大小 */
+  font-size: 13px;
   color: #8fbbec;
 }
 
 #cooldownDisplay {
   font-weight: bold;
-  font-size: 13px; /* 右边字体大小 */
+  font-size: 13px;
   color: red;
 }
 
-/* 按钮 */
 #autoOrderBtn {
   padding: 10px 28px;
   font-size: 13px;
   font-weight: bold;
-  color: #fff8dc; /* 淡奶油字色 */
+  color: #fff8dc;
   background: linear-gradient(to right, #0358f6, #007BFF, #00BFFF);
   border: none;
-  border-radius: 12px; /* 圆润，像糖果 */
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
   letter-spacing: 1px;
-  position: relative;  /* 相对自身偏移 */
+  position: relative;
   overflow: hidden;
-
-  top: 35px;   /* 必须写单位 */
-  left: 13px;  /* 必须写单位 */
-  /* right / bottom 通常不用和 top/left 同时写 */
+  top: 35px;
+  left: 13px;
 }
 
-/* 悬停：亮闪闪，轻微跳动 */
 #autoOrderBtn:hover {
   background: linear-gradient(to right, #0358f6, #007BFF, #00BFFF);
   transform: scale(1.07) rotate(-1deg);
 }
 
-/* 点击：像果冻一样缩小 */
 #autoOrderBtn:active {
   transform: scale(0.93);
   box-shadow: 0 3px 8px rgba(255, 193, 7, 0.6) inset;
 }
 
-/* 禁用状态 */
 #autoOrderBtn:disabled {
   background: #f0e68c;
   color: #ffffff
@@ -480,26 +454,25 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* 图 */
 .imgorder img {
   width: 100%;
   height: 25%;
-  object-fit: cover;         /* 保持比例裁切填满 */
+  object-fit: cover;
   border-radius: 3px;
   margin-top: 13px;
 }
 
 .dulcontainer {
   display: flex;
-  justify-content: center;  /* ✅ 水平整体居中 */
-  align-items: center;      /* 垂直居中 */
-  gap: 8px;                /* 两个盒子之间的间距 */
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
   width: 100%;
-  margin-top: 10px;         /* 和上方内容留距离 */
+  margin-top: 10px;
 }
 
 .left-box, .right-box {
-  flex: 0 0 auto;           /* ✅ 防止被拉伸 */
+  flex: 0 0 auto;
   width: 20%;
   height: 27px;
   background: #ffffff4a;
@@ -515,10 +488,8 @@ button:disabled {
   border: 1px solid #a9c2e0;
 }
 
-/* ================= 弹窗通用样式 ================= */
-/* 弹窗通用 */
 .modal {
-  display: none; /* 默认隐藏 */
+  display: none;
   position: fixed;
   z-index: 1000;
   left: 0;
@@ -529,7 +500,6 @@ button:disabled {
   overflow-y: auto;
 }
 
-/* 弹窗内容 */
 .modal-content {
   background-color: #fff;
   margin: 5% auto;
@@ -541,7 +511,6 @@ button:disabled {
   animation: fadeIn 0.3s ease-out;
 }
 
-/* 弹窗头部 */
 .modal-header {
   display: flex;
   align-items: center;
@@ -562,21 +531,19 @@ button:disabled {
   color: #333;
 }
 
-/* 弹窗内容主体 */
 .modal-body {
   padding: 45px 15px;
   max-height: 400px;
   overflow-y: auto;
 }
 
-/* 历史订单列表 */
 #orderHistoryList li {
-  background-color: #fff;      /* 白色卡片背景 */
-  padding: 10px;               /* 内边距 */
-  border-radius: 8px;          /* 圆角 */
-  margin-bottom: 10px;         /* 卡片间距 */
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* 轻微阴影 */
-  list-style: none;            /* 去掉默认点 */
+  background-color: #fff;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  list-style: none;
 }
 
 #orderHistoryList li div {
@@ -589,8 +556,6 @@ button:disabled {
   display: ;
 }
 
-
-/* 动画 */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-20px); }
   to { opacity: 1; transform: translateY(0); }
