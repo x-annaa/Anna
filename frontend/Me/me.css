@@ -310,3 +310,8 @@
   color: #111;            /* 深一点的文字颜色 */
   margin-bottom: 6px;     /* 和下方地址留点间距 */
 }
+
+.amountInput {
+  font-weight: 700;
+}
+   
