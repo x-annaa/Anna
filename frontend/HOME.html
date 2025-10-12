@@ -310,13 +310,14 @@
     <div class="modal-content">
       <h3>Recharge</h3>
 
-      <label for="amountInput">Recharge(USDT)：</label>
-      <input type="number" id="amountInput" placeholder="Please enter the recharge amount" min="1" step="0.01" />
+      <label for="amountInput">USDT (TRC20)</label>
+      <input type="number" id="amountInput" placeholder="Recharge amount" min="1" step="0.01" />
 
       <div class="wallet-section">
-        <p>Receiving wallet address</p>
+        <p>Receiving address</p>
         <div class="wallet-address">
           <span id="walletAddress">TRX1234abcd5678efgh9012ijklmnop3456</span>
+        </div>
           <button id="copyAddressBtn" data-wallet="TRX1234abcd5678efgh9012ijklmnop3456">Copy</button>
         </div>
         <img id="qrCode" src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/QR.png" alt="USDT Payment QR code" width="160" />
