@@ -1,10 +1,5 @@
-// frontend/Recharge/recharge.js
-// =============================
-// 充值文件上传逻辑 + 写入数据库 + 模态框控制（稳定版，UUID 支持 platform_account）
-// =============================
-
 document.addEventListener("DOMContentLoaded", () => {
-  // --- DOM 元素 ---
+
   const depositBtn = document.getElementById("depositBtn");
   const rechargeModal = document.getElementById("rechargeModal");
   const cancelRecharge = document.getElementById("cancelRecharge");
@@ -16,17 +11,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const copyAddressBtn = document.getElementById("copyAddressBtn");
 
-  // --- 检查 supabaseClient ---
+
   if (typeof supabaseClient === "undefined") {
-    console.error("supabaseClient 未定义");
+    console.error("supabaseClient undefined");
     if (status) {
-      status.textContent = "系统错误：未检测到 Supabase 客户端";
+      status.textContent = "System Error: Supabase client not detected";
       status.style.color = "red";
     }
     return;
   }
 
-  // ---- 模态框控制 ----
   if (depositBtn && rechargeModal && cancelRecharge) {
     depositBtn.addEventListener("click", () => {
       rechargeModal.style.display = "flex";
@@ -48,11 +42,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ---- 钱包地址复制 ----
+
   copyAddressBtn?.addEventListener("click", () => {
     try {
       const walletAddress = copyAddressBtn.dataset.wallet;
-      if (!walletAddress) throw new Error("钱包地址为空");
+      if (!walletAddress) throw new Error("Wallet address is empty");
 
       const tempInput = document.createElement("input");
       tempInput.value = walletAddress;
@@ -61,20 +55,20 @@ document.addEventListener("DOMContentLoaded", () => {
       document.execCommand("copy");
       document.body.removeChild(tempInput);
 
-      copyAddressBtn.textContent = "已复制 ✅";
-      setTimeout(() => (copyAddressBtn.textContent = "复制"), 1800);
+      copyAddressBtn.textContent = "Copied ✅";
+      setTimeout(() => (copyAddressBtn.textContent = "Copy"), 1800);
 
-      console.log("复制成功：", walletAddress);
+      console.log("Copied successfully：", walletAddress);
     } catch (err) {
-      console.error("复制失败：", err);
-      copyAddressBtn.textContent = "复制失败";
-      setTimeout(() => (copyAddressBtn.textContent = "复制"), 1800);
+      console.error("Copy failed：", err);
+      copyAddressBtn.textContent = "Copy failed";
+      setTimeout(() => (copyAddressBtn.textContent = "Copy"), 1800);
     }
   });
 
-  // ---- 上传与保存逻辑 ----
+
   if (!fileInput || !uploadBtn || !status || !amountInput) {
-    console.error("Recharge 页面缺少必要的 DOM 元素");
+    console.error("The Recharge page is missing necessary DOM elements");
     return;
   }
 
@@ -83,29 +77,29 @@ document.addEventListener("DOMContentLoaded", () => {
     const rawAmount = amountInput.value;
     const amount = parseFloat(rawAmount);
 
-    // 校验
+
     if (!rawAmount || isNaN(amount) || amount <= 0) {
-      status.textContent = "请输入有效的充值金额！";
+      status.textContent = "Please enter a valid recharge amount!";
       status.style.color = "red";
       return;
     }
 
     if (!file) {
-      status.textContent = "请上传转账截图！";
+      status.textContent = "Please upload a screenshot of the transfer!";
       status.style.color = "red";
       return;
     }
 
-    status.textContent = "上传中...";
+    status.textContent = "Uploading...";
     status.style.color = "#333";
     uploadBtn.disabled = true;
-    uploadBtn.textContent = "上传中...";
+    uploadBtn.textContent = "Uploading...";
 
     const rand = Math.floor(Math.random() * 9000) + 1000;
     const safeFileName = `${Date.now()}_${rand}_${file.name.replace(/\s+/g, "_")}`;
 
     try {
-      // 上传到 Storage
+
       const { data: uploadData, error: uploadError } = await supabaseClient.storage
         .from("Recharge")
         .upload(safeFileName, file);
@@ -116,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .getPublicUrl(safeFileName);
       const publicUrl = publicUrlData?.publicUrl ?? "";
 
-      // 获取用户 UUID
+
       let userId = null;
       try {
         const { data: sessionData } = await supabaseClient.auth.getSession();
@@ -133,23 +127,23 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       if (!userId) userId = localStorage.getItem("currentUserUUID");
-      if (!userId) throw new Error("未登录用户，无法提交充值记录");
+      if (!userId) throw new Error("Unable to submit recharge records if the user is not logged in");
 
-      // 获取 platform_account
+     
       let platformAccount = null;
       try {
         const { data: userInfo, error: userInfoError } = await supabaseClient
           .from("users")
           .select("platform_account")
-          .eq("uuid", userId)  // ⚠️ 使用 uuid 类型字段
+          .eq("uuid", userId)
           .single();
-        if (userInfoError) console.warn("获取平台账号失败:", userInfoError);
+        if (userInfoError) console.warn("Failed to obtain platform account:", userInfoError);
         platformAccount = userInfo?.platform_account ?? null;
       } catch (e) {
-        console.warn("获取平台账号异常:", e);
+        console.warn("Abnormal acquisition of platform account:", e);
       }
 
-      // 写入数据库
+
       const payload = {
         user_id: userId,
         platform_account: platformAccount,
@@ -163,13 +157,13 @@ document.addEventListener("DOMContentLoaded", () => {
         .insert([payload]);
       if (insertError) throw insertError;
 
-      status.textContent = "✅ 上传成功，等待审核！";
+      status.textContent = "✅ Uploaded successfully, waiting for review!";
       status.style.color = "green";
 
       fileInput.value = "";
       amountInput.value = "";
 
-      console.log("充值记录保存成功：", { payload, storage: safeFileName });
+      console.log("Recharge record saved successfully：", { payload, storage: safeFileName });
 
       setTimeout(() => {
         rechargeModal.style.display = "none";
@@ -177,12 +171,12 @@ document.addEventListener("DOMContentLoaded", () => {
       }, 2000);
 
     } catch (err) {
-      console.error("上传或写入失败：", err);
-      status.textContent = "❌ 上传失败：" + (err.message || String(err));
+      console.error("Upload or write failure：", err);
+      status.textContent = "Upload failed：" + (err.message || String(err));
       status.style.color = "red";
     } finally {
       uploadBtn.disabled = false;
-      uploadBtn.textContent = "上传";
+      uploadBtn.textContent = "Upload";
     }
   });
 });
