@@ -1,8 +1,7 @@
-// === 全局自定义 alert() 替换 ===
 window.alert = function(message) {
   let overlay = document.getElementById("customAlert");
   if (!overlay) {
-    // 如果 alert 容器不存在，动态创建它（适用于任何页面）
+
     overlay = document.createElement("div");
     overlay.id = "customAlert";
     overlay.className = "alert-overlay";
