@@ -1,6 +1,3 @@
-/* ================= About 页面 ================= */
-
-/* 顶部 Banner 区域（占页面高度 20%） */
 .about-top-banner {
   width: 100%;
   height: 20vh;
@@ -28,10 +25,9 @@
   filter: brightness(1);
 }
 
-/* 主体内容容器 */
 .about-container {
   max-width: 900px;
-  margin: 0 auto 80px auto; /* ✅ 上下间距平衡 */
+  margin: 0 auto 80px auto;
   background: #ffffffee;
   border-radius: 20px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
@@ -40,9 +36,8 @@
   backdrop-filter: blur(6px);
 }
 
-/* 图片区域 */
 .about-image {
-  margin-bottom: 25px; /* ✅ 图片与文字分开 */
+  margin-bottom: 25px;
 }
 
 .about-image img {
@@ -58,7 +53,6 @@
   transform: scale(1.02);
 }
 
-/* 文字内容 */
 .about-text {
   padding: 35px 45px;
   text-align: center;
@@ -80,7 +74,6 @@
   text-justify: inter-word;
 }
 
-/* 动画 */
 @keyframes fadeUp {
   from {
     transform: translateY(30px);
@@ -92,7 +85,6 @@
   }
 }
 
-/* 响应式设计 */
 @media screen and (max-width: 768px) {
   .about-top-banner {
     height: 18vh;
