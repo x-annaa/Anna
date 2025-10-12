@@ -298,3 +298,8 @@
   color: #fff;
   margin-top: 15px;
 }
+
+.wallet-address-text {
+  word-break: break-all;
+  text-align: center;
+}
