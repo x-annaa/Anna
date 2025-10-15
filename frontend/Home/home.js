@@ -44,9 +44,9 @@ window.logout = async function () {
 };
 
 const adUrls = [
-  "https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/w1.jpg",
-  "https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/w2.png",
-  "https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/w3.jpg"
+  "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/U9shopping.jpg",
+  "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/U9shopping.jpg",
+  "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/U9shopping.jpg"
 ];
 
 let currentAdIndex = 0;
@@ -97,19 +97,19 @@ const adItems = document.querySelectorAll(".ad-item");
 
 const adsData = {
   phone: [
-    "https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Home%20Photos/p1.avif",
-    "https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Home%20Photos/p1.jpg",
-    "https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Home%20Photos/p2.webp",
-    "https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Home%20Photos/c1.avif"
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/iPhone17ProMax.jpg",
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/iPhone15ProMax.jpg",
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/GooglePixel9.jpg",
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/GalaxyS25Ultra.jpg"
   ],
   clothes: [
-    "https://via.placeholder.com/200x200?text=衣服1",
-    "https://via.placeholder.com/200x200?text=衣服2",
-    "https://via.placeholder.com/200x200?text=衣服3",
-    "https://via.placeholder.com/200x200?text=衣服4"
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/ZARA.jpg",
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/GUCCI.jpg",
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/Adidas.jpg",
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/ZARAHighWaist.jpg"
   ],
   car: [
-    "https://via.placeholder.com/200x200?text=汽车1",
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/Swissgoldenwristwatch.jpg",
     "https://via.placeholder.com/200x200?text=汽车2",
     "https://via.placeholder.com/200x200?text=汽车3",
     "https://via.placeholder.com/200x200?text=汽车4"
