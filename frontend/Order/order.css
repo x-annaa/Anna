@@ -31,7 +31,9 @@ h2, h3 {
 }
 
 .page.active {
-  height: 80%;
+  display: block;
+  height: 80vh; /* 占视窗高度的80%，不依赖父级 */
+  overflow-y: auto; /* 如果内容超过80%，可滚动 */
 }
 
 .bottom-nav {
