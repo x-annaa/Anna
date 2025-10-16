@@ -45,7 +45,7 @@ window.logout = async function () {
 
 const adUrls = [
   "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/U9shopping.jpg",
-  "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/SALE.jpg",
+  "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/SEALU9.jpg",
   "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/SALE.jpg"
 ];
 
