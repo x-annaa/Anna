@@ -9,7 +9,7 @@ document.querySelectorAll(".toggle-password").forEach(btn => {
       btn.textContent = "🙈";
     } else {
       input.type = "password";
-      btn.textContent = "👁️";
+      btn.textContent = "🙈";
     }
   });
 });
@@ -141,13 +141,6 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  const sessionToken = generateUUID();
-
-  await supabaseClient
-    .from("users")
-    .update({ session_token: sessionToken })
-    .eq("id", data.id);
-  
   localStorage.setItem("currentUser", data.username);
   localStorage.setItem("platformAccount", platformAccount);
   localStorage.setItem("currentUserUUID", data.uuid);
