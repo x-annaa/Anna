@@ -186,7 +186,7 @@
 }
 
 .modal-actions button:first-child {
-  background: #f1f1f1;
+  background: linear-gradient(135deg, #0038ff, #52c0ff);
 }
 
 .modal-actions button:first-child:hover {
