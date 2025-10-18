@@ -77,13 +77,22 @@ function animateMarquee() {
   const textWidth = marqueeText.offsetWidth;
   let pos = wrapperWidth;
   const speed = 1;
+  let paused = false;
 
   function step() {
-    pos -= speed;
-    if (pos < -textWidth) {
-      pos = wrapperWidth;
+    if (!paused) {
+      pos -= speed;
+      marqueeText.style.transform = `translateX(${pos}px)`;
+
+      if (pos < -textWidth) {
+        paused = true;
+        setTimeout(() => {
+          pos = wrapperWidth;
+          paused = false;
+        }, 3000);
+      }
     }
-    marqueeText.style.transform = `translateX(${pos}px)`;
+
     requestAnimationFrame(step);
   }
 
