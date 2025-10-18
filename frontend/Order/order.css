@@ -573,11 +573,3 @@ button:disabled {
   color: #333;           
   overflow: auto;      
 }
-
-#fixedImg {
-  width: 150px;
-  height: 150px;
-  object-fit: cover; /* 保持比例裁切 */
-  border-radius: 10px; /* 可选，圆角 */
-}
-
