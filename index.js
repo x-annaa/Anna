@@ -141,6 +141,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
+  localStorage.setItem("currentUserId", data.id);
   localStorage.setItem("currentUser", data.username);
   localStorage.setItem("platformAccount", platformAccount);
   localStorage.setItem("currentUserUUID", data.uuid);
