@@ -75,7 +75,7 @@ function animateMarquee() {
   const wrapper = document.querySelector(".marquee-wrapper");
   const wrapperWidth = wrapper.offsetWidth;
   const textWidth = marqueeText.offsetWidth;
-  let pos = wrapper.offsetWidth;
+  let pos = -textWidth;
   const speed = 1;
 
   function step() {
