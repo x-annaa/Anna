@@ -108,9 +108,9 @@ const adsData = {
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/Adidas.jpg",
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/clothesblue.jpg"
   ],
-  car: [
-    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/Swissgoldenwristwatch.jpg",
-    "https://via.placeholder.com/200x200?text=汽车2",
+  watch: [
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/Layer%201.jpg",
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/Layer%207.jpg",
     "https://via.placeholder.com/200x200?text=汽车3",
     "https://via.placeholder.com/200x200?text=汽车4"
   ],
