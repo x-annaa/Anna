@@ -115,8 +115,7 @@ const adsData = {
   clothes: [
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/ZARA.jpg",
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/GUCCI.jpg",
-    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/Adidas.jpg",
-    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/clothesblue.jpg"
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/USAUK.jpg"
   ],
   car: [
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/Layer%201.jpg",
