@@ -464,6 +464,7 @@ button:disabled {
 }
 
 .imgorder img {
+  border: 1px solid #a9c2e0;
   width: 100%;
   height: 25%;
   object-fit: cover;
