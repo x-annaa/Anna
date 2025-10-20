@@ -124,10 +124,10 @@ const adsData = {
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/w34521.jpg"
   ],
   cosmetics: [
-    "https://via.placeholder.com/200x200?text=化妆品1",
-    "https://via.placeholder.com/200x200?text=化妆品2",
-    "https://via.placeholder.com/200x200?text=化妆品3",
-    "https://via.placeholder.com/200x200?text=化妆品4"
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/S11231.jpg",
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/S2.jpg",
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/S31314.jpg",
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/S4.jpg"
   ],
   diamond: [
     "https://via.placeholder.com/200x200?text=钻石1",
