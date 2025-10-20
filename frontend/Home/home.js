@@ -130,10 +130,10 @@ const adsData = {
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/S4.jpg"
   ],
   diamond: [
-    "https://via.placeholder.com/200x200?text=钻石1",
-    "https://via.placeholder.com/200x200?text=钻石2",
-    "https://via.placeholder.com/200x200?text=钻石3",
-    "https://via.placeholder.com/200x200?text=钻石4"
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/h1.jpg",
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/h2.jpg",
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/h3.jpg",
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/h4.jpg"
   ]
 };
 
