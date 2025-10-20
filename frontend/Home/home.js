@@ -105,19 +105,19 @@ const categoryBtns = document.querySelectorAll(".category-btn");
 const adItems = document.querySelectorAll(".ad-item");
 
 const adsData = {
-  1phone: [
+  phone: [
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/iPhone17ProMax.jpg",
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/iPhone15ProMax.jpg",
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/GooglePixel9.jpg",
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/GalaxyS25Ultra.jpg"
   ],
-  1clothes: [
+  clothes: [
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/ZARA.jpg",
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/GUCCI.jpg",
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/clothesblue.jpg",
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/Adidas.jpg"
   ],
-  1car: [
+  car: [
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/Layer%201.jpg",
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/Layer%207.jpg",
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/w124.jpg",
