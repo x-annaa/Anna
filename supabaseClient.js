@@ -1,4 +1,4 @@
-window.supabaseClient = window.supabase.createClient(1
+window.supabaseClient = window.supabase.createClient(
   "https://airkbwolmkidaokqhxjj.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpcmtid29sbWtpZGFva3FoeGpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NDU0NzIsImV4cCI6MjA3NDIyMTQ3Mn0.vs0jWR6_FEeEhZ8h7-WruTyjWmxm2qmN5b-hzjvw2zQ"
 );
