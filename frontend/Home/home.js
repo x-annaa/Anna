@@ -107,8 +107,8 @@ const adItems = document.querySelectorAll(".ad-item");
 const adsData = {
   phone: [
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/HD/A1.jpg",
-    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/HD/A2.jpg",
-    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/HD/A3.jpg",
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/HD/A5.jpg",
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/HD/A7.jpg",
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/HD/A4.jpg"
   ],
   clothes: [
