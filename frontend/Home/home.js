@@ -44,9 +44,9 @@ window.logout = async function () {
 };
 
 const adUrls = [
-  "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/U9shopping.jpg",
-  "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/SEALU9.jpg",
-  "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/UN9.jpg"
+  "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/U91.jpg",
+  "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/U92.jpg",
+  "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/U93.jpg"
 ];
 
 let currentAdIndex = 0;
@@ -106,10 +106,10 @@ const adItems = document.querySelectorAll(".ad-item");
 
 const adsData = {
   phone: [
-    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/P1.jpg",
-    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/P2.jpg",
-    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/P3.jpg",
-    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/P4.jpg"
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/p1.jpg",
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/p2.jpg",
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/p3.jpg",
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/p4.jpg"
   ],
   clothes: [
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Phones/ZARA.jpg",
