@@ -558,11 +558,11 @@ button:disabled {
 
 #orderHistoryList li div {
   margin: 2px 0;   
-  display: block;
+  display: flex
 }
 
 #orderHistoryList li img {
-  max-width: 50px;
+  max-width: 100%;
   display: ;
 }
 
