@@ -562,7 +562,7 @@ button:disabled {
 }
 
 #orderHistoryList li img {
-  max-width: 100%;
+  width: 100%;
   display: ;
 }
 
