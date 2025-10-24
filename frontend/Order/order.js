@@ -816,21 +816,22 @@ window.addEventListener("click", (e) => {
 });
 
 // 获取元素
+const rankingModal = document.getElementById('rankingModal');
 const rankingBox = document.getElementById('rankingBox');
-const rankingPopup = document.getElementById('rankingPopup');
+const closeRankingBtn = document.getElementById('closeRankingBtn');
 
-// 点击 Ranking List 显示/隐藏弹窗
+// 点击 Ranking List 显示 modal
 rankingBox.addEventListener('click', (e) => {
-  e.stopPropagation(); // 阻止事件冒泡
-  rankingPopup.style.display = (rankingPopup.style.display === 'block') ? 'none' : 'block';
-});
-
-// 点击页面其他地方关闭弹窗
-document.addEventListener('click', () => {
-  rankingPopup.style.display = 'none';
-});
-
-// 点击弹窗本身不关闭
-rankingPopup.addEventListener('click', (e) => {
   e.stopPropagation();
+  rankingModal.style.display = 'flex';
+});
+
+// 点击返回按钮关闭
+closeRankingBtn.addEventListener('click', () => {
+  rankingModal.style.display = 'none';
+});
+
+// 点击弹窗外区域关闭
+window.addEventListener('click', (e) => {
+  if (e.target === rankingModal) rankingModal.style.display = 'none';
 });
