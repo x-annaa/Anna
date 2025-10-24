@@ -59,6 +59,13 @@
   width: 100%;
 }
 
+.container-h7 {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+}
+
 .category-buttons {
   display: flex;
   width: 100%;
@@ -89,13 +96,6 @@
 
 .category-btn:not(.active):hover {
   background-color: #bdbdbd;
-}
-
-.category-ad-grid {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  margin-top: 10px;
 }
 
 .ad-item {
