@@ -814,3 +814,23 @@ window.addEventListener("click", (e) => {
   if (e.target === historyModal) historyModal.style.display = "none";
   if (e.target === rulesModal) rulesModal.style.display = "none";
 });
+
+// 获取元素
+const rankingBox = document.getElementById('rankingBox');
+const rankingPopup = document.getElementById('rankingPopup');
+
+// 点击 Ranking List 显示/隐藏弹窗
+rankingBox.addEventListener('click', (e) => {
+  e.stopPropagation(); // 阻止事件冒泡
+  rankingPopup.style.display = (rankingPopup.style.display === 'block') ? 'none' : 'block';
+});
+
+// 点击页面其他地方关闭弹窗
+document.addEventListener('click', () => {
+  rankingPopup.style.display = 'none';
+});
+
+// 点击弹窗本身不关闭
+rankingPopup.addEventListener('click', (e) => {
+  e.stopPropagation();
+});
