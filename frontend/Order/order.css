@@ -609,3 +609,38 @@ button:disabled {
   color: #333;           
   overflow: auto;      
 }
+
+.rank-section.hidden {
+  display: none;
+}
+
+.rank-section {
+  margin: 12px 0;
+  padding: 12px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.rank-section h3 {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.rank-section .rank-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.rank-section .rank-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.rank-section .rank-num {
+  font-weight: bold;
+  width: 20px;
+}
