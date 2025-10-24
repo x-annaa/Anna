@@ -294,3 +294,16 @@
     padding: 10px;
   }
 }
+
+.chat-window {
+  position: absolute;
+  inset: 0; /* 顶部到底部全屏 */
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  z-index: 10;
+}
+
+.hidden {
+  display: none !important;
+}
