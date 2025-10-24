@@ -814,3 +814,10 @@ window.addEventListener("click", (e) => {
   if (e.target === historyModal) historyModal.style.display = "none";
   if (e.target === rulesModal) rulesModal.style.display = "none";
 });
+
+const showRankBtn = document.getElementById('showRankBtn');
+const rankSection = document.getElementById('rankSection');
+
+showRankBtn.addEventListener('click', () => {
+  rankSection.classList.toggle('hidden');
+});
