@@ -39,7 +39,7 @@ openChatBtn?.addEventListener("click", async () => {
   if (!userId) return alert("请先登录！");
 
   chatWindow.style.display = "flex";
-  chatOverlay.classList.remove("hidden");
+  chatOverlay.style.display = "block";
   chatMessages.innerHTML = "";
   await loadMessages();
   listenForMessages();
