@@ -69,7 +69,7 @@ setInterval(() => {
   showAd(currentAdIndex);
 }, 15000);
 
-const marqueeText = document.querySelector(".marquee-text");
+const marqueeText = document.querySelector(".container-h5");
 
 function animateMarquee() {
   const wrapper = document.querySelector(".container-h5");
