@@ -101,7 +101,7 @@ function animateMarquee() {
 
 window.addEventListener("load", animateMarquee);
 
-const categoryBtns = document.querySelectorAll(".category-btn");
+const categoryBtns = document.querySelectorAll(".container-h9");
 const adItems = document.querySelectorAll(".ad-item");
 
 const adsData = {
