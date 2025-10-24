@@ -204,14 +204,14 @@ async function loadUserInfo(username) {
     const setPasswordBtn = document.getElementById("setPasswordBtn");
     if (data.withdraw_password) {
       localStorage.setItem("hasWithdrawPwd", "true");
-      setPasswordBtn.textContent = "更新密码";
+      setPasswordBtn.textContent = "Update password";
     } else {
       localStorage.setItem("hasWithdrawPwd", "false");
-      setPasswordBtn.textContent = "添加提现密码";
+      setPasswordBtn.textContent = "Add withdrawal password";
     }
   } catch (e) {
     console.error("加载用户信息异常：", e);
-    document.getElementById("platformAccount").textContent = "错误";
-    document.getElementById("balance").textContent = "错误";
+    document.getElementById("platformAccount").textContent = "Mistake";
+    document.getElementById("balance").textContent = "Mistake";
   }
 }
