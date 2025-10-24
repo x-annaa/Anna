@@ -220,20 +220,6 @@ button:disabled {
   animation: fadeIn 0.25s ease;
 }
 
-/* 弹窗主体 */
-.modal-content {
-  background-color: #fff;
-  margin: 5% auto;
-  border-radius: 10px;
-  width: 80%;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-  display: flex;
-  flex-direction: column;
-  animation: fadeIn 0.3s ease-out;
-  padding: 20px;
-  position: relative;
-}
-
 .modal-content h3 {
   margin-top: 0;
   margin-bottom: 12px;
@@ -526,7 +512,19 @@ button:disabled {
   align-items: center;
 }
 
-
+/* 弹窗主体 */
+.modal-content {
+  background-color: #fff;
+  margin: 5% auto;
+  border-radius: 10px;
+  width: 80%;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.3s ease-out;
+  padding: 20px;
+  position: relative;
+}
 
 /* 关闭按钮 */
 .close {
@@ -608,65 +606,4 @@ button:disabled {
   background-color: #ffffff00;
   color: #333;           
   overflow: auto;      
-}
-
-/* Ranking Modal 与 rulesModal/historyModal 一致 */
-.ranking-popup {
-  display: none;           /* 默认隐藏 */
-  position: fixed;         /* 固定在屏幕中央 */
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0,0,0,0.4); /* 半透明背景 */
-  justify-content: center;
-  align-items: center;
-  z-index: 999;
-}
-
-.ranking-popup .modal-content {
-  width: 300px;
-  max-height: 400px;
-  overflow-y: auto;
-  background-color: #fff;
-  border-radius: 12px;
-  padding: 15px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.2);
-  animation: fadeIn 0.3s ease-out;
-}
-
-.ranking-popup ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.ranking-popup li {
-  padding: 8px 10px;
-  border-bottom: 1px solid #eee;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 14px;
-  color: #333;
-}
-
-.ranking-popup li:last-child {
-  border-bottom: none;
-}
-
-.rank-num {
-  font-weight: bold;
-  margin-right: 6px;
-  color: #1976d2;
-}
-
-.ranking-popup strong {
-  color: #d32f2f;
-}
-
-/* 淡入动画 */
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
 }
