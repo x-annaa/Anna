@@ -814,24 +814,3 @@ window.addEventListener("click", (e) => {
   if (e.target === historyModal) historyModal.style.display = "none";
   if (e.target === rulesModal) rulesModal.style.display = "none";
 });
-
-// 获取元素
-const rankingModal = document.getElementById('rankingModal');
-const rankingBox = document.getElementById('rankingBox');
-const closeRankingBtn = document.getElementById('closeRankingBtn');
-
-// 点击 Ranking List 显示 modal
-rankingBox.addEventListener('click', (e) => {
-  e.stopPropagation();
-  rankingModal.style.display = 'flex';
-});
-
-// 点击返回按钮关闭
-closeRankingBtn.addEventListener('click', () => {
-  rankingModal.style.display = 'none';
-});
-
-// 点击弹窗外区域关闭
-window.addEventListener('click', (e) => {
-  if (e.target === rankingModal) rankingModal.style.display = 'none';
-});
