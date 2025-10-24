@@ -49,12 +49,9 @@ openChatBtn?.addEventListener("click", async () => {
 // =====================
 // 返回按钮
 // =====================
-backBtn?.addEventListener("click", () => {
-  chatWindow.style.display = "none";
-  if (chatSubscription) {
-    supabaseClient.removeChannel(chatSubscription);
-    chatSubscription = null;
-  }
+openChatBtn.addEventListener("click", () => {
+  document.getElementById("chatWindow").classList.remove("hidden");
+  document.getElementById("infoPage").classList.add("hidden");
 });
 
 // =====================
