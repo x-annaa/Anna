@@ -5,7 +5,7 @@ const openChatBtn = document.getElementById("openChatBtn");
 const chatWindow = document.getElementById("chatWindow");
 const backBtn = document.getElementById("backBtn");
 const sendBtn = document.getElementById("sendBtn");
-const chatInput = document.getElementById("chatInput"); // textarea
+const chatInput = document.getElementById("chatInput");
 const chatMessages = document.getElementById("chatMessages");
 
 const bottomUnreadEl = document.getElementById("bottomUnreadCount");
@@ -40,10 +40,12 @@ openChatBtn?.addEventListener("click", async () => {
   chatWindow.style.display = "flex";
   chatMessages.innerHTML = "";
   await loadMessages();
-  listenForMessages();
   await markMessagesAsRead();
   updateUnreadCount();
   scrollToBottom();
+
+  // 启动实时监听
+  startRealtimeListener();
 });
 
 // =====================
@@ -51,10 +53,7 @@ openChatBtn?.addEventListener("click", async () => {
 // =====================
 backBtn?.addEventListener("click", () => {
   chatWindow.style.display = "none";
-  if (chatSubscription) {
-    supabaseClient.removeChannel(chatSubscription);
-    chatSubscription = null;
-  }
+  stopRealtimeListener();
 });
 
 // =====================
@@ -86,7 +85,7 @@ function appendMessage(sender, text) {
   const msg = document.createElement("div");
   msg.classList.add("message-item", sender === "我" ? "me" : "bot");
   msg.innerHTML = text.replace(/\n/g, "<br>");
-  chatMessages.prepend(msg);
+  chatMessages.appendChild(msg); // append 到底部
   scrollToBottom();
 }
 
@@ -158,13 +157,13 @@ async function updateUnreadCount() {
 }
 
 // =====================
-// 监听实时消息
+// 启动实时监听
 // =====================
-function listenForMessages() {
+function startRealtimeListener() {
   const userId = getCurrentUserId();
   if (!userId) return;
 
-  if (chatSubscription) supabaseClient.removeChannel(chatSubscription);
+  if (chatSubscription) stopRealtimeListener();
 
   chatSubscription = supabaseClient.channel("realtime-messages")
     .on("postgres_changes", {
@@ -174,7 +173,10 @@ function listenForMessages() {
       filter: `receiver_id=eq.${userId}`
     }, async payload => {
       const msg = payload.new;
-      if (msg.sender_id === 1 && chatWindow.style.display === "flex") {
+      console.log("收到新消息:", msg);
+
+      // 判断发送者
+      if (msg.sender_id === 1) {
         appendMessage("客服", msg.content);
         await markMessagesAsRead();
       }
@@ -183,23 +185,20 @@ function listenForMessages() {
     .subscribe();
 }
 
+// 停止监听
+function stopRealtimeListener() {
+  if (chatSubscription) {
+    supabaseClient.removeChannel(chatSubscription);
+    chatSubscription = null;
+  }
+}
+
 // =====================
 // 页面加载初始化
 // =====================
 document.addEventListener("DOMContentLoaded", () => {
   updateUnreadCount();
-  listenForMessages();
-});
-
-// =====================
-// Telegram 一键复制
-// =====================
-document.getElementById("copyTelegramBtn")?.addEventListener("click", () => {
-  const text = document.getElementById("telegramAccount")?.textContent || "";
-  if (!text) return;
-  navigator.clipboard.writeText(text).then(() =>
-    alert("已复制 Telegram 账号：" + text)
-  );
+  startRealtimeListener();
 });
 
 // =====================
@@ -207,7 +206,6 @@ document.getElementById("copyTelegramBtn")?.addEventListener("click", () => {
 // =====================
 function adjustChatForKeyboard() {
   if (!chatWindow) return;
-
   let initialHeight = window.innerHeight;
 
   window.addEventListener('resize', () => {
@@ -215,31 +213,16 @@ function adjustChatForKeyboard() {
     const keyboardHeight = initialHeight - vh;
 
     if (keyboardHeight > 100) {
-      // 键盘弹出：窗口底部贴近键盘
       chatWindow.style.top = 'auto';
       chatWindow.style.bottom = '0';
       chatWindow.style.transform = 'translateX(-50%)';
     } else {
-      // 键盘收回：居中
       chatWindow.style.top = '50%';
       chatWindow.style.bottom = 'auto';
       chatWindow.style.transform = 'translate(-50%, -50%)';
     }
-
     scrollToBottom();
   });
 }
 
-// 调整 textarea 高度和滚动
-chatInput.addEventListener("input", () => {
-  chatInput.style.height = "auto";
-  chatInput.style.height = chatInput.scrollHeight + "px";
-  scrollToBottom();
-});
-
-function scrollToBottom() {
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
-// 初始化
 adjustChatForKeyboard();
