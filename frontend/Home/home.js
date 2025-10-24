@@ -126,7 +126,7 @@ const adsData = {
   shoe: [
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/s5.jpg",
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/s2.jpg",
-    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/s3.jpg",
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/s6.jpg",
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/s4.jpg"
   ],
   backpack: [
