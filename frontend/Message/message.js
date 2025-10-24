@@ -33,7 +33,6 @@ chatInput.addEventListener("input", () => {
 // =====================
 // 打开聊天窗口
 // =====================
-// 打开聊天窗口
 openChatBtn?.addEventListener("click", async () => {
   const userId = getCurrentUserId();
   if (!userId) return alert("请先登录！");
@@ -46,28 +45,6 @@ openChatBtn?.addEventListener("click", async () => {
   updateUnreadCount();
   scrollToBottom();
 });
-
-// 点击聊天窗口外部关闭
-document.addEventListener("click", (e) => {
-  if (!chatWindow || chatWindow.style.display !== "flex") return;
-
-  // 如果点击的元素不是聊天窗口本身，也不在聊天窗口内
-  if (!chatWindow.contains(e.target) && e.target !== openChatBtn) {
-    chatWindow.style.display = "none";
-
-    // 停止监听实时消息
-    if (chatSubscription) {
-      supabaseClient.removeChannel(chatSubscription);
-      chatSubscription = null;
-    }
-  }
-});
-
-// 阻止点击聊天窗口内部关闭
-chatWindow.addEventListener("click", (e) => {
-  e.stopPropagation();
-});
-
 
 // =====================
 // 返回按钮
