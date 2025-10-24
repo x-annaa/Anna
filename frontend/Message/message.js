@@ -7,7 +7,6 @@ const backBtn = document.getElementById("backBtn");
 const sendBtn = document.getElementById("sendBtn");
 const chatInput = document.getElementById("chatInput"); // textarea
 const chatMessages = document.getElementById("chatMessages");
-const chatOverlay = document.getElementById("chatOverlay");
 
 const bottomUnreadEl = document.getElementById("bottomUnreadCount");
 const chatBtnUnreadEl = document.getElementById("chatBtnUnreadCount");
@@ -39,7 +38,6 @@ openChatBtn?.addEventListener("click", async () => {
   if (!userId) return alert("请先登录！");
 
   chatWindow.style.display = "flex";
-  chatOverlay.style.display = "block";
   chatMessages.innerHTML = "";
   await loadMessages();
   listenForMessages();
