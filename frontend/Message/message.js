@@ -243,3 +243,18 @@ function scrollToBottom() {
 
 // 初始化
 adjustChatForKeyboard();
+
+const chatOverlay = document.getElementById("chatOverlay");
+
+openChatBtn?.addEventListener("click", async () => {
+  chatOverlay.classList.remove("hidden");
+  chatWindow.style.display = "flex";
+  ...
+});
+
+backBtn?.addEventListener("click", () => {
+  chatOverlay.classList.add("hidden");
+  chatWindow.style.display = "none";
+  ...
+});
+
