@@ -72,7 +72,7 @@ setInterval(() => {
 const marqueeText = document.querySelector(".marquee-text");
 
 function animateMarquee() {
-  const wrapper = document.querySelector(".marquee-wrapper");
+  const wrapper = document.querySelector(".container-h5");
   const wrapperWidth = wrapper.offsetWidth;
   const textWidth = marqueeText.offsetWidth;
   let pos = wrapperWidth;
