@@ -3,6 +3,7 @@
 // =====================
 const openChatBtn = document.getElementById("openChatBtn");
 const chatWindow = document.getElementById("chatWindow");
+const chatOverlay = document.getElementById("chatOverlay"); // 新增遮罩层
 const backBtn = document.getElementById("backBtn");
 const sendBtn = document.getElementById("sendBtn");
 const chatInput = document.getElementById("chatInput"); // textarea
@@ -37,6 +38,7 @@ openChatBtn?.addEventListener("click", async () => {
   const userId = getCurrentUserId();
   if (!userId) return alert("请先登录！");
 
+  chatOverlay.classList.remove("hidden"); // 显示遮罩
   chatWindow.style.display = "flex";
   chatMessages.innerHTML = "";
   await loadMessages();
@@ -49,13 +51,17 @@ openChatBtn?.addEventListener("click", async () => {
 // =====================
 // 返回按钮
 // =====================
-backBtn?.addEventListener("click", () => {
+backBtn?.addEventListener("click", closeChat);
+chatOverlay?.addEventListener("click", closeChat); // 点击遮罩也关闭聊天
+
+function closeChat() {
   chatWindow.style.display = "none";
+  chatOverlay.classList.add("hidden"); // 隐藏遮罩
   if (chatSubscription) {
     supabaseClient.removeChannel(chatSubscription);
     chatSubscription = null;
   }
-});
+}
 
 // =====================
 // 发送消息
@@ -230,31 +236,5 @@ function adjustChatForKeyboard() {
   });
 }
 
-// 调整 textarea 高度和滚动
-chatInput.addEventListener("input", () => {
-  chatInput.style.height = "auto";
-  chatInput.style.height = chatInput.scrollHeight + "px";
-  scrollToBottom();
-});
-
-function scrollToBottom() {
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
 // 初始化
 adjustChatForKeyboard();
-
-const chatOverlay = document.getElementById("chatOverlay");
-
-openChatBtn?.addEventListener("click", async () => {
-  chatOverlay.classList.remove("hidden");
-  chatWindow.style.display = "flex";
-  ...
-});
-
-backBtn?.addEventListener("click", () => {
-  chatOverlay.classList.add("hidden");
-  chatWindow.style.display = "none";
-  ...
-});
-
