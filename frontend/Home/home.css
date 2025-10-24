@@ -113,11 +113,9 @@
   border-left: none;
 }
 
-
 .container-h9:not(.active):hover {
   background-color: #bdbdbd;
 }
-
 
 .hidden {
   display: none;
