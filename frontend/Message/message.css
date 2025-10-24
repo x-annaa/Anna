@@ -13,22 +13,6 @@
   --text-dark: #333;
 }
 
-#chatOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: transparent; /* 可以改成半透明效果 */
-  z-index: 999; 
-  display: none; /* 默认隐藏 */
-}
-
-
-.hidden {
-  display: none;
-}
-
 /* =====================
    聊天窗口整体
    ===================== */
