@@ -90,7 +90,7 @@
   width: 100%;
 }
 
-.container-h9 {
+.container-h9.active {
   background-color: #00a0fd;
   color: #ffffff;
 }
