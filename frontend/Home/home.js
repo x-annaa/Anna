@@ -114,17 +114,17 @@ const adsData = {
   clothes: [
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/c1.jpg",
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/c2.jpg",
-    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/c.jpg",
-    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/c.jpg"
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/c5.jpg",
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/c5.jpg"
   ],
   watch: [
-    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/w.jpg",
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/w6.jpg",
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/w2.jpg",
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/w3.jpg",
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/w4.jpg"
   ],
   shoe: [
-    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/s.jpg",
+    "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/s5.jpg",
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/s2.jpg",
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/s3.jpg",
     "https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/s4.jpg"
