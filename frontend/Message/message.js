@@ -23,7 +23,7 @@ function getCurrentUserId() {
 }
 
 // =====================
-// 自动增高 textarea
+// 调整 textarea 高度
 // =====================
 function adjustTextareaHeight() {
   chatInput.style.height = "auto";
@@ -47,7 +47,7 @@ async function openChat() {
   listenForMessages();
   await markMessagesAsRead();
   updateUnreadCount();
-  scrollToBottom();
+  adjustTextareaHeight();
 }
 openChatBtn?.addEventListener("click", openChat);
 
@@ -57,6 +57,7 @@ openChatBtn?.addEventListener("click", openChat);
 function closeChat() {
   chatWindow.classList.add("hidden");
   chatOverlay.classList.remove("show");
+
   if (chatSubscription) {
     supabaseClient.removeChannel(chatSubscription);
     chatSubscription = null;
@@ -139,7 +140,7 @@ async function markMessagesAsRead() {
 }
 
 // =====================
-// 更新红点显示
+// 更新未读红点
 // =====================
 async function updateUnreadCount() {
   const userId = getCurrentUserId();
@@ -191,14 +192,6 @@ function listenForMessages() {
 }
 
 // =====================
-// 页面加载初始化
-// =====================
-document.addEventListener("DOMContentLoaded", () => {
-  updateUnreadCount();
-  listenForMessages();
-});
-
-// =====================
 // Telegram 一键复制
 // =====================
 document.getElementById("copyTelegramBtn")?.addEventListener("click", () => {
@@ -235,5 +228,11 @@ function adjustChatForKeyboard() {
   });
 }
 
-// 初始化
-adjustChatForKeyboard();
+// =====================
+// 页面加载初始化
+// =====================
+document.addEventListener("DOMContentLoaded", () => {
+  updateUnreadCount();
+  listenForMessages();
+  adjustChatForKeyboard();
+});
