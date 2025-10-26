@@ -789,7 +789,7 @@ document.querySelector(".left-box").addEventListener("click", async () => {
             <div style="font-weight:700; font-size:25px;">
               ${o.products?.name || '未知商品'}
             </div>
-            <div style="text-align:left; border-top:1px solid #ccc; border-bottom:1px solid #ccc; padding:5px 0; margin:5px 0;">
+            <div style="text-align:left; border-top:1px solid #ccc; border-bottom:1px solid #ccc; padding:10px 0; margin:5px 0;">
               ${o.products?.description || '暂无描述'}
             </div>
             <div>价格：¥${Number(o.total_price).toFixed(2)}</div>
