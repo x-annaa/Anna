@@ -765,7 +765,7 @@ document.querySelector(".left-box").addEventListener("click", async () => {
   if (window.supabaseClient && window.currentUserId) {
     const { data: orders, error, count } = await supabaseClient
       .from("orders")
-      .select(`id, total_price, status, created_at, products(name, url, description)`, { count: "exact" })
+      .select(`id, total_price, profit, status, created_at, products(name, url, description)`, { count: "exact" })
       .eq("user_id", window.currentUserId)
       .order("created_at", { ascending: false });
 
@@ -787,6 +787,7 @@ document.querySelector(".left-box").addEventListener("click", async () => {
               描述：${o.products?.description || '暂无描述'}
             </div>
             <div>价格：¥${Number(o.total_price).toFixed(2)}</div>
+            <div>利润率：${Number(o.products?.profit || 0)}</div>
             <div>收入：+¥${Number(o.profit).toFixed(2)}</div>
             <div>状态：${o.status === "completed" ? "✅ 已完成" : "⏳ 待完成"}</div>
             ${time}
