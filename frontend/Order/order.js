@@ -779,7 +779,7 @@ document.querySelector(".left-box").addEventListener("click", async () => {
           <li>
             ${img}
             <div>商品：${o.products?.name || '未知商品'}</div>
-            <div style="color:#999; font-size:12px;">
+            <div style="text-align:left;">
               描述：${o.products?.description || '暂无描述'}
             </div>
             <div>价格：¥${Number(o.total_price).toFixed(2)}</div>
