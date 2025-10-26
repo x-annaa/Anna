@@ -200,7 +200,9 @@ function renderLastOrder(order, coinsRaw) {
     <div style="display:flex; align-items:center; gap:20px;">
       ${productUrl ? `<img src="${productUrl}" alt="${order.products?.name || ''}">` : ''}
       <div class="order-info">
-        <p>商品：${order.products?.name || "未知商品"}</p>
+        <p style="font-weight:700; font-size:20px;">
+          商品：${order.products?.name || "未知商品"}
+        </p>
         <p>价格：¥${price.toFixed(2)}</p>
         <p>利润率：${profitRatio}</p>
         <p>收入：+¥${profit.toFixed(2)}</p>
