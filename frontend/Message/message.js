@@ -33,17 +33,40 @@ chatInput.addEventListener("input", () => {
 // =====================
 // 打开聊天窗口
 // =====================
-openChatBtn?.addEventListener("click", async () => {
+// 打开聊天
+document.getElementById("openChatBtn")?.addEventListener("click", async () => {
   const userId = getCurrentUserId();
   if (!userId) return alert("请先登录！");
 
-  chatWindow.style.display = "flex";
+  chatOverlay.classList.add("show"); // 显示遮罩
+  chatWindow.classList.remove("hidden");
+
   chatMessages.innerHTML = "";
   await loadMessages();
   listenForMessages();
   await markMessagesAsRead();
   updateUnreadCount();
   scrollToBottom();
+});
+
+// 点击返回按钮关闭
+backBtn?.addEventListener("click", () => {
+  chatWindow.classList.add("hidden");
+  chatOverlay.classList.remove("show");
+  if (chatSubscription) {
+    supabaseClient.removeChannel(chatSubscription);
+    chatSubscription = null;
+  }
+});
+
+// 点击遮罩关闭
+chatOverlay?.addEventListener("click", () => {
+  chatWindow.classList.add("hidden");
+  chatOverlay.classList.remove("show");
+  if (chatSubscription) {
+    supabaseClient.removeChannel(chatSubscription);
+    chatSubscription = null;
+  }
 });
 
 // =====================
