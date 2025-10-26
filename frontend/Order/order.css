@@ -583,7 +583,7 @@ button:disabled {
 }
 
 #orderHistoryList li div {
-  margin: 2px 0;   
+  margin: 5px 0;   
   display: flex
 }
 
