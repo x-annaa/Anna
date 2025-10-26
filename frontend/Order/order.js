@@ -779,7 +779,7 @@ document.querySelector(".left-box").addEventListener("click", async () => {
           <li>
             ${img}
             <div style="font-weight:600;">
-              商品：${o.products?.name || '未知商品'}
+              ${o.products?.name || '未知商品'}
             </div>
             <div style="text-align:left;">
               描述：${o.products?.description || '暂无描述'}
