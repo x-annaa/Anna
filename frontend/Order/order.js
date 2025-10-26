@@ -765,8 +765,14 @@ document.querySelector(".left-box").addEventListener("click", async () => {
   if (window.supabaseClient && window.currentUserId) {
     const { data: orders, error, count } = await supabaseClient
       .from("orders")
-      .select(`id, total_price, profit, status, created_at, products(name, url, description)`, { count: "exact" })
-      .eq("user_id", window.currentUserId)
+      .select(`
+        id,
+        total_price,
+        profit,
+        status,
+        created_at,
+        products(name, url, description, profit)
+      `, { count: "exact" })
       .order("created_at", { ascending: false });
 
     // 更新标题显示总订单数
