@@ -33,59 +33,11 @@ function adjustTextareaHeight() {
 chatInput.addEventListener("input", adjustTextareaHeight);
 
 // =====================
-// 打开聊天窗口
+// 滚动到底部
 // =====================
-async function openChat() {
-  const userId = getCurrentUserId();
-  if (!userId) return alert("请先登录！");
-
-  chatOverlay.classList.add("show");
-  chatWindow.classList.remove("hidden");
-
-  chatMessages.innerHTML = "";
-  await loadMessages();
-  listenForMessages();
-  await markMessagesAsRead();
-  updateUnreadCount();
-  adjustTextareaHeight();
+function scrollToBottom() {
+  chatMessages.scrollTop = chatMessages.scrollHeight;
 }
-openChatBtn?.addEventListener("click", openChat);
-
-// =====================
-// 关闭聊天窗口
-// =====================
-function closeChat() {
-  chatWindow.classList.add("hidden");
-  chatOverlay.classList.remove("show");
-
-  if (chatSubscription) {
-    supabaseClient.removeChannel(chatSubscription);
-    chatSubscription = null;
-  }
-}
-backBtn?.addEventListener("click", closeChat);
-chatOverlay?.addEventListener("click", closeChat);
-
-// =====================
-// 发送消息
-// =====================
-sendBtn?.addEventListener("click", async () => {
-  const userId = getCurrentUserId();
-  if (!userId) return alert("请先登录！");
-
-  const content = chatInput.value.trim();
-  if (!content) return;
-
-  const { error } = await supabaseClient.from("messages").insert([
-    { sender_id: userId, receiver_id: 1, content, is_read: false }
-  ]);
-
-  if (error) return alert("发送失败");
-
-  appendMessage("我", content);
-  chatInput.value = "";
-  adjustTextareaHeight();
-});
 
 // =====================
 // 显示消息
@@ -96,13 +48,6 @@ function appendMessage(sender, text) {
   msg.innerHTML = text.replace(/\n/g, "<br>");
   chatMessages.appendChild(msg);
   scrollToBottom();
-}
-
-// =====================
-// 滚动到底部
-// =====================
-function scrollToBottom() {
-  chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
 // =====================
@@ -190,6 +135,61 @@ function listenForMessages() {
     })
     .subscribe();
 }
+
+// =====================
+// 打开聊天窗口
+// =====================
+async function openChat() {
+  const userId = getCurrentUserId();
+  if (!userId) return alert("请先登录！");
+
+  chatOverlay.classList.add("show");
+  chatWindow.classList.remove("hidden");
+
+  chatMessages.innerHTML = "";
+  await loadMessages();
+  listenForMessages();
+  await markMessagesAsRead();
+  updateUnreadCount();
+  adjustTextareaHeight();
+}
+openChatBtn?.addEventListener("click", openChat);
+
+// =====================
+// 关闭聊天窗口
+// =====================
+function closeChat() {
+  chatWindow.classList.add("hidden");
+  chatOverlay.classList.remove("show");
+
+  if (chatSubscription) {
+    supabaseClient.removeChannel(chatSubscription);
+    chatSubscription = null;
+  }
+}
+backBtn?.addEventListener("click", closeChat);
+chatOverlay?.addEventListener("click", closeChat);
+
+// =====================
+// 发送消息
+// =====================
+sendBtn?.addEventListener("click", async () => {
+  const userId = getCurrentUserId();
+  if (!userId) return alert("请先登录！");
+
+  const content = chatInput.value.trim();
+  if (!content) return;
+
+  const { error } = await supabaseClient.from("messages").insert([
+    { sender_id: userId, receiver_id: 1, content, is_read: false }
+  ]);
+
+  if (error) return alert("发送失败");
+
+  appendMessage("我", content);
+  chatInput.value = "";
+  adjustTextareaHeight();
+});
 
 // =====================
 // Telegram 一键复制
