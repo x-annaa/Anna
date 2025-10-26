@@ -2,11 +2,10 @@
 // DOM 元素
 // =====================
 const openChatBtn = document.getElementById("openChatBtn");
-const chatOverlay = document.getElementById("chatOverlay");
 const chatWindow = document.getElementById("chatWindow");
 const backBtn = document.getElementById("backBtn");
 const sendBtn = document.getElementById("sendBtn");
-const chatInput = document.getElementById("chatInput");
+const chatInput = document.getElementById("chatInput"); // textarea
 const chatMessages = document.getElementById("chatMessages");
 
 const bottomUnreadEl = document.getElementById("bottomUnreadCount");
@@ -23,21 +22,62 @@ function getCurrentUserId() {
 }
 
 // =====================
-// 调整 textarea 高度
+// 自动增高 textarea
 // =====================
-function adjustTextareaHeight() {
+chatInput.addEventListener("input", () => {
   chatInput.style.height = "auto";
   chatInput.style.height = chatInput.scrollHeight + "px";
   scrollToBottom();
-}
-chatInput.addEventListener("input", adjustTextareaHeight);
+});
 
 // =====================
-// 滚动到底部
+// 打开聊天窗口
 // =====================
-function scrollToBottom() {
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-}
+openChatBtn?.addEventListener("click", async () => {
+  const userId = getCurrentUserId();
+  if (!userId) return alert("请先登录！");
+
+  chatWindow.style.display = "flex";
+  chatMessages.innerHTML = "";
+  await loadMessages();
+  listenForMessages();
+  await markMessagesAsRead();
+  updateUnreadCount();
+  scrollToBottom();
+});
+
+// =====================
+// 返回按钮
+// =====================
+backBtn?.addEventListener("click", () => {
+  chatWindow.style.display = "none";
+  if (chatSubscription) {
+    supabaseClient.removeChannel(chatSubscription);
+    chatSubscription = null;
+  }
+});
+
+// =====================
+// 发送消息
+// =====================
+sendBtn?.addEventListener("click", async () => {
+  const userId = getCurrentUserId();
+  if (!userId) return alert("请先登录！");
+
+  const content = chatInput.value.trim();
+  if (!content) return;
+
+  const { error } = await supabaseClient.from("messages").insert([
+    { sender_id: userId, receiver_id: 1, content, is_read: false }
+  ]);
+
+  if (error) return alert("发送失败");
+
+  appendMessage("我", content);
+  chatInput.value = "";
+  chatInput.style.height = "auto";
+  scrollToBottom();
+});
 
 // =====================
 // 显示消息
@@ -46,8 +86,15 @@ function appendMessage(sender, text) {
   const msg = document.createElement("div");
   msg.classList.add("message-item", sender === "我" ? "me" : "bot");
   msg.innerHTML = text.replace(/\n/g, "<br>");
-  chatMessages.appendChild(msg);
+  chatMessages.prepend(msg);
   scrollToBottom();
+}
+
+// =====================
+// 滚动到底部
+// =====================
+function scrollToBottom() {
+  chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
 // =====================
@@ -85,7 +132,7 @@ async function markMessagesAsRead() {
 }
 
 // =====================
-// 更新未读红点
+// 更新红点显示
 // =====================
 async function updateUnreadCount() {
   const userId = getCurrentUserId();
@@ -127,7 +174,7 @@ function listenForMessages() {
       filter: `receiver_id=eq.${userId}`
     }, async payload => {
       const msg = payload.new;
-      if (msg.sender_id === 1 && !chatWindow.classList.contains("hidden")) {
+      if (msg.sender_id === 1 && chatWindow.style.display === "flex") {
         appendMessage("客服", msg.content);
         await markMessagesAsRead();
       }
@@ -137,58 +184,11 @@ function listenForMessages() {
 }
 
 // =====================
-// 打开聊天窗口
+// 页面加载初始化
 // =====================
-async function openChat() {
-  const userId = getCurrentUserId();
-  if (!userId) return alert("请先登录！");
-
-  chatOverlay.classList.add("show");
-  chatWindow.classList.remove("hidden");
-
-  chatMessages.innerHTML = "";
-  await loadMessages();
-  listenForMessages();
-  await markMessagesAsRead();
+document.addEventListener("DOMContentLoaded", () => {
   updateUnreadCount();
-  adjustTextareaHeight();
-}
-openChatBtn?.addEventListener("click", openChat);
-
-// =====================
-// 关闭聊天窗口
-// =====================
-function closeChat() {
-  chatWindow.classList.add("hidden");
-  chatOverlay.classList.remove("show");
-
-  if (chatSubscription) {
-    supabaseClient.removeChannel(chatSubscription);
-    chatSubscription = null;
-  }
-}
-backBtn?.addEventListener("click", closeChat);
-chatOverlay?.addEventListener("click", closeChat);
-
-// =====================
-// 发送消息
-// =====================
-sendBtn?.addEventListener("click", async () => {
-  const userId = getCurrentUserId();
-  if (!userId) return alert("请先登录！");
-
-  const content = chatInput.value.trim();
-  if (!content) return;
-
-  const { error } = await supabaseClient.from("messages").insert([
-    { sender_id: userId, receiver_id: 1, content, is_read: false }
-  ]);
-
-  if (error) return alert("发送失败");
-
-  appendMessage("我", content);
-  chatInput.value = "";
-  adjustTextareaHeight();
+  listenForMessages();
 });
 
 // =====================
@@ -215,10 +215,12 @@ function adjustChatForKeyboard() {
     const keyboardHeight = initialHeight - vh;
 
     if (keyboardHeight > 100) {
+      // 键盘弹出：窗口底部贴近键盘
       chatWindow.style.top = 'auto';
       chatWindow.style.bottom = '0';
       chatWindow.style.transform = 'translateX(-50%)';
     } else {
+      // 键盘收回：居中
       chatWindow.style.top = '50%';
       chatWindow.style.bottom = 'auto';
       chatWindow.style.transform = 'translate(-50%, -50%)';
@@ -228,11 +230,16 @@ function adjustChatForKeyboard() {
   });
 }
 
-// =====================
-// 页面加载初始化
-// =====================
-document.addEventListener("DOMContentLoaded", () => {
-  updateUnreadCount();
-  listenForMessages();
-  adjustChatForKeyboard();
+// 调整 textarea 高度和滚动
+chatInput.addEventListener("input", () => {
+  chatInput.style.height = "auto";
+  chatInput.style.height = chatInput.scrollHeight + "px";
+  scrollToBottom();
 });
+
+function scrollToBottom() {
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// 初始化
+adjustChatForKeyboard();
