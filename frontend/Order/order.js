@@ -778,7 +778,7 @@ document.querySelector(".left-box").addEventListener("click", async () => {
         return `
           <li>
             ${img}
-            <div style="font-weight:600;">
+            <div style="font-weight:700; font-size:14px;">
               ${o.products?.name || '未知商品'}
             </div>
             <div style="text-align:left;">
