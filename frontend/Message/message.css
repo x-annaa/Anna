@@ -14,6 +14,23 @@
 }
 
 /* =====================
+   遮罩层
+   ===================== */
+#chatOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 999;
+  display: none;
+}
+#chatOverlay.show {
+  display: block;
+}
+
+/* =====================
    聊天窗口整体
    ===================== */
 #chatWindow {
@@ -33,34 +50,6 @@
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
   z-index: 1000;
   font-family: "Helvetica", Arial, sans-serif;
-}
-
-/* 输入框改 textarea 支持多行 */
-.chat-input textarea {
-  flex: 1;
-  padding: 8px 12px;
-  border-radius: 20px;
-  border: 1px solid #ccc;
-  outline: none;
-  font-size: 14px;
-  background: white;
-  resize: none;
-  max-height: 120px;
-  overflow-y: auto;
-}
-
-#chatOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.3);
-  z-index: 999;
-  display: none;
-}
-#chatOverlay.show {
-  display: block;
 }
 
 /* =====================
@@ -307,20 +296,4 @@
   #openChatBtn {
     padding: 10px;
   }
-}
-
-.chat-window {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 90%;
-  max-width: 400px;
-  height: 70%;
-  background: #fff;
-  border-radius: 10px;
-  overflow: hidden;
-  z-index: 1001;
-  display: flex;
-  flex-direction: column;
 }
