@@ -773,6 +773,7 @@ document.querySelector(".left-box").addEventListener("click", async () => {
         created_at,
         products(name, url, description, profit)
       `, { count: "exact" })
+      .eq("user_id", window.currentUserId)
       .order("created_at", { ascending: false });
 
     // 更新标题显示总订单数
