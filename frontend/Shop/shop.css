@@ -5,7 +5,6 @@
   gap: 20px;
   padding: 0px;
   justify-items: center; /* 居中对齐单元格 */
-  width: 100%;
 }
 
 /* ======= 产品卡片 ======= */
@@ -40,6 +39,7 @@
   overflow: hidden;         /* 超出隐藏 */
   text-overflow: ellipsis;  /* 显示省略号 ... */
 }
+
 
 .container-s4 p {
   margin: 5px 10px;
@@ -97,18 +97,6 @@
   margin-bottom: 15px;
   text-align: center;
   font-size: 20px;
-}
-
-/* 弹窗产品名称换行 */
-#buyProductName {
-  font-weight: bold;
-  font-size: 20px;
-  margin-bottom: 15px;
-  text-align: center;
-
-  white-space: normal;      /* 可以换行 */
-  word-wrap: break-word;    /* 超长单词换行 */
-  overflow-wrap: break-word;
 }
 
 /* 三张产品图片 */
@@ -195,9 +183,15 @@
     width: 100%;
     margin: 0;
   }
+}
 
-  /* 产品卡片每行两列仍然保持 */
-  #shopProducts {
-    grid-template-columns: repeat(2, 1fr);
-  }
+#buyProductName {
+  font-weight: bold;
+  font-size: 20px;
+  margin-bottom: 15px;
+  text-align: center;
+
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
