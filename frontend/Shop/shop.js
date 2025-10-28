@@ -130,3 +130,29 @@ function addBuyButtonListeners() {
     }
   });
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  const searchInput = document.getElementById("shopSearchInput");
+  const searchBtn = document.getElementById("shopSearchBtn");
+  const shopProducts = document.getElementById("shopProducts");
+
+  function doSearch() {
+    const keyword = searchInput.value.toLowerCase();
+    const productCards = shopProducts.querySelectorAll(".container-s4");
+
+    productCards.forEach(card => {
+      const name = card.querySelector(".product-name").textContent.toLowerCase();
+      card.style.display = name.includes(keyword) ? "" : "none";
+    });
+  }
+
+  // 点击按钮搜索
+  searchBtn.addEventListener("click", doSearch);
+
+  // 按回车搜索
+  searchInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      doSearch();
+    }
+  });
+});
