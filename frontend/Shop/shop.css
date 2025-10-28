@@ -3,7 +3,7 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr); /* 每行两列 */
   gap: 20px;
-  padding: 20px;
+  padding: 0px;
   justify-items: center; /* 居中对齐单元格 */
 }
 
