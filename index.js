@@ -1,114 +1,217 @@
-document.addEventListener("DOMContentLoaded", () => {
-    // 显示当前用户信息到 Buy 弹窗
-    const username = localStorage.getItem("currentUser") || "";
-    const platform = localStorage.getItem("platformAccount") || "";
+document.querySelectorAll(".toggle-password").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const targetId = btn.getAttribute("data-target");
+    const input = document.getElementById(targetId);
+    if (!input) return;
 
-    document.getElementById("buyUsername").innerText = username;
-    document.getElementById("buyPlatform").innerText = platform;
-
-    loadShopProducts();
+    if (input.type === "password") {
+      input.type = "text";
+      btn.textContent = "👁️";
+    } else {
+      input.type = "password";
+      btn.textContent = "👁️";
+    }
+  });
 });
 
-// 加载 products2 表数据
-async function loadShopProducts() {
-    try {
-        const { data: products2, error } = await supabaseClient
-            .from("products2")
-            .select("*");
+const loginForm = document.getElementById("loginForm");
+const registerForm = document.getElementById("registerForm");
+const showLoginBtn = document.getElementById("showLogin");
+const showRegisterBtn = document.getElementById("showRegister");
 
-        if (error) {
-            console.error("❌ Failed to load products2:", error.message);
-            return;
-        }
+showLoginBtn.addEventListener("click", () => {
+  loginForm.classList.remove("hidden");
+  registerForm.classList.add("hidden");
+  showLoginBtn.classList.add("active");
+  showRegisterBtn.classList.remove("active");
+});
 
-        const shopContainer = document.getElementById("shopProducts");
-        shopContainer.innerHTML = "";
+showRegisterBtn.addEventListener("click", () => {
+  loginForm.classList.add("hidden");
+  registerForm.classList.remove("hidden");
+  showLoginBtn.classList.remove("active");
+  showRegisterBtn.classList.add("active");
+});
 
-        products2.forEach(item => {
-            const productDiv = document.createElement("div");
-            productDiv.classList.add("container-s4");
-            productDiv.innerHTML = `
-                <img src="${item.image1_url}" class="product-image" alt="product" />
-                <p><strong>Code:</strong> ${item.product_code}</p>
-                <p><strong>Rating:</strong> ⭐ ${item.rating}</p>
-                <button class="buyBtn" data-id="${item.id}">Buy</button>
-            `;
-            shopContainer.appendChild(productDiv);
-        });
+function generatePlatformAccount() {
+  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const digits = "0123456789";
+  const allChars = letters + digits;
 
-        addBuyButtonListeners();
+  let result = "";
+  
+  const firstIndex = Math.floor(Math.random() * letters.length);
+  result += letters[firstIndex];
+  
+  const remaining = [];
+  
+  const digitPosition = Math.floor(Math.random() * 5);
 
-    } catch (e) {
-        console.error("⚠️ Unexpected error:", e);
+  for (let i = 0; i < 5; i++) {
+    if (i === digitPosition) {
+      
+      const digitIndex = Math.floor(Math.random() * digits.length);
+      remaining.push(digits[digitIndex]);
+    } else {
+      
+      const charIndex = Math.floor(Math.random() * allChars.length);
+      remaining.push(allChars[charIndex]);
     }
+  }
+
+  result += remaining.join("");
+  return result;
 }
 
-// Buy 模态框事件
-function addBuyButtonListeners() {
-    const buyButtons = document.querySelectorAll(".buyBtn");
-    const buyModal = document.getElementById("buyModal");
-
-    buyButtons.forEach(btn => {
-        btn.addEventListener("click", () => {
-            const productId = btn.getAttribute("data-id");
-            buyModal.dataset.id = productId;
-            buyModal.style.display = "flex";
-        });
-    });
-
-    // 取消按钮
-    document.getElementById("cancelBuy").addEventListener("click", () => {
-        buyModal.style.display = "none";
-    });
-
-    // 确认提交
-    document.getElementById("confirmBuy").addEventListener("click", async () => {
-        const productId = buyModal.dataset.id;
-        const userId = localStorage.getItem("currentUserId");
-        const username = localStorage.getItem("currentUser");
-        const platform = localStorage.getItem("platformAccount");
-        const address = document.getElementById("buyAddress").value.trim();
-        const phone = document.getElementById("buyPhone").value.trim();
-        const email = document.getElementById("buyEmail").value.trim();
-
-        if (!address || !phone || !email) {
-            alert("Please fill out all fields");
-            return;
-        }
-
-        try {
-            const { data, error } = await supabaseClient
-                .from("order_reviews")
-                .insert({
-                    product_id: productId,
-                    user_id: userId,
-                    username,
-                    platform,
-                    address,
-                    phone,
-                    email,
-                    status: "pending"
-                })
-                .select()
-                .single();
-
-            if (error) {
-                console.error("❌ Failed to submit order:", error.message);
-                alert("Failed to submit order: " + error.message);
-                return;
-            }
-
-            alert("✅ Your order has been submitted for review!");
-            buyModal.style.display = "none";
-
-            // 清空输入框
-            document.getElementById("buyAddress").value = "";
-            document.getElementById("buyPhone").value = "";
-            document.getElementById("buyEmail").value = "";
-
-        } catch (e) {
-            console.error("⚠️ Unexpected error:", e);
-            alert("An unexpected error occurred.");
-        }
-    });
+function generateUUID() {
+  return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+  );
 }
+
+document.getElementById("registerBtn").addEventListener("click", async () => {
+  const username = document.getElementById("regUsername").value.trim();
+  const password = document.getElementById("regPassword").value;
+  const confirm = document.getElementById("regConfirmPassword").value;
+  const agree = document.getElementById("agreeTerms").checked;
+
+  if (!username || !password) {
+    alert("Please enter your username and password");
+    return;
+  }
+
+  if (!/^[A-Za-z0-9]{6,}$/.test(password)) {
+    alert("Password must be at least 6 characters long");
+    return;
+  }
+
+  if (password !== confirm) {
+    alert("The passwords entered twice do not match");
+    return;
+  }
+  if (!agree) {
+    alert("Please tick the box to agree to the terms");
+    return;
+  }
+
+
+  const { data: exist } = await supabaseClient
+    .from("users")
+    .select("id")
+    .eq("username", username)
+    .maybeSingle();
+
+  if (exist) {
+    alert("This username already exists");
+    return;
+  }
+
+
+  let registerIp = null;
+  try {
+    const res = await fetch("https://api.ipify.org?format=json");
+    const json = await res.json();
+    registerIp = json.ip;
+  } catch (e) {
+    console.warn("Registration successful!", e);
+  }
+
+  const platformAccount = generatePlatformAccount();
+  const uuid = generateUUID();
+  const sessionToken = generateUUID();
+
+
+  const { data, error } = await supabaseClient
+    .from("users")
+    .insert({
+      username,
+      password,
+      coins: 0,
+      balance: 0,
+      platform_account: platformAccount,
+      uuid,
+      session_token: sessionToken,
+      register_ip: registerIp
+    })
+    .select()
+    .single();
+
+  if (error) {
+    alert("Registration failed: " + error.message);
+    return;
+  }
+
+  localStorage.setItem("currentUserId", data.id);
+  localStorage.setItem("currentUser", data.username);
+  localStorage.setItem("platformAccount", platformAccount);
+  localStorage.setItem("currentUserUUID", data.uuid);
+  localStorage.setItem("sessionToken", sessionToken);
+
+  alert("Registration successful!");
+  window.location.href = "frontend/HOME.html";
+});
+
+
+document.getElementById("loginBtn").addEventListener("click", async () => {
+  const username = document.getElementById("loginUsername").value.trim();
+  const password = document.getElementById("loginPassword").value;
+
+  if (!username || !password) {
+    alert("Please enter your username and password");
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("users")
+    .select("id, username, password, platform_account, uuid")
+    .eq("username", username)
+    .maybeSingle();
+
+  if (error) {
+    alert("Login failed: " + error.message);
+    return;
+  }
+  if (!data) {
+    alert("User does not exist");
+    return;
+  }
+  if (data.password !== password) {
+    alert("Wrong password");
+    return;
+  }
+
+  const sessionToken = generateUUID();
+
+  
+  const { error: updateErr } = await supabaseClient
+    .from("users")
+    .update({ session_token: sessionToken })
+    .eq("id", data.id);
+
+  if (updateErr) {
+    alert("Update session failed: " + updateErr.message);
+    return;
+  }
+
+  localStorage.setItem("currentUserId", data.id);
+  localStorage.setItem("currentUser", data.username);
+  localStorage.setItem("platformAccount", data.platform_account);
+  localStorage.setItem("currentUserUUID", data.uuid);
+  localStorage.setItem("sessionToken", sessionToken);
+
+  alert("Login successful!");
+  window.location.href = "frontend/HOME.html";
+});
+
+window.alert = function(message) {
+  const overlay = document.getElementById("customAlert");
+  const text = document.getElementById("alertText");
+  const ok = document.getElementById("alertOk");
+
+  text.textContent = message;
+  overlay.style.display = "flex";
+
+  ok.onclick = () => {
+    overlay.style.display = "none";
+  };
+};
