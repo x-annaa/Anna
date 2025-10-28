@@ -14,7 +14,7 @@ async function loadShopProducts() {
     try {
         const { data: products2, error } = await supabaseClient
             .from("products2")
-            .select("*");
+            .select("*"); // 如果你有 price 字段也可以加上
 
         if (error) {
             console.error("❌ Failed to load products2:", error.message);
@@ -26,15 +26,13 @@ async function loadShopProducts() {
 
         products2.forEach(item => {
             const productDiv = document.createElement("div");
-            productDiv.classList.add("product-card");
+            productDiv.classList.add("container-s4");
             productDiv.innerHTML = `
                 <img src="${item.image1_url}" class="product-image" alt="product" />
-                <div class="product-info">
-                    <h4>Code: ${item.product_code}</h4>
-                    <p>Rating: ⭐ ${item.rating}</p>
-                    <p>Price: $${item.price ? item.price.toFixed(2) : "0.00"}</p>
-                    <button class="buyBtn" data-id="${item.id}">Buy</button>
-                </div>
+                <p><strong>Code:</strong> ${item.product_code}</p>
+                <p><strong>Rating:</strong> ⭐ ${item.rating}</p>
+                <p><strong>Price:</strong> $${item.price.toFixed(2)}</p>
+                <button class="buyBtn" data-id="${item.id}" data-price="${item.price}">Buy</button>
             `;
             shopContainer.appendChild(productDiv);
         });
@@ -54,7 +52,9 @@ function addBuyButtonListeners() {
     buyButtons.forEach(btn => {
         btn.addEventListener("click", () => {
             const productId = btn.getAttribute("data-id");
+            const productPrice = parseFloat(btn.getAttribute("data-price")) || 0;
             buyModal.dataset.id = productId;
+            buyModal.dataset.price = productPrice;
             buyModal.style.display = "flex";
         });
     });
@@ -67,6 +67,8 @@ function addBuyButtonListeners() {
     // 确认提交
     document.getElementById("confirmBuy").addEventListener("click", async () => {
         const productId = buyModal.dataset.id;
+        const productPrice = parseFloat(buyModal.dataset.price) || 0;
+
         const userId = localStorage.getItem("currentUserId");
         const username = localStorage.getItem("currentUser");
         const platform = localStorage.getItem("platformAccount");
@@ -80,80 +82,36 @@ function addBuyButtonListeners() {
         }
 
         try {
-            // 1️⃣ 获取产品信息
-            const { data: product, error: prodErr } = await supabaseClient
-                .from("products2")
-                .select("id, product_code, price")
-                .eq("id", productId)
-                .maybeSingle();
-
-            if (prodErr || !product) {
-                alert("Product not found!");
-                return;
-            }
-
-            const productPrice = parseFloat(product.price || 0);
-
-            // 2️⃣ 获取用户余额
-            const { data: user, error: userErr } = await supabaseClient
-                .from("users")
-                .select("balance")
-                .eq("id", userId)
-                .maybeSingle();
-
-            if (userErr || !user) {
-                alert("User not found!");
-                return;
-            }
-
-            if (user.balance < productPrice) {
-                alert("Insufficient balance!");
-                return;
-            }
-
-            // 3️⃣ 扣除余额
-            const newBalance = parseFloat(user.balance) - productPrice;
-            const { error: updateErr } = await supabaseClient
-                .from("users")
-                .update({ balance: newBalance })
-                .eq("id", userId);
-
-            if (updateErr) {
-                alert("Failed to deduct balance: " + updateErr.message);
-                return;
-            }
-
-            // 4️⃣ 提交到审核表
-            const { data: review, error: reviewErr } = await supabaseClient
+            // 插入到 order_reviews
+            const { data, error } = await supabaseClient
                 .from("order_reviews")
                 .insert({
-                    product_id: productId,
+                    product2_id: productId,
                     user_id: userId,
                     username,
                     platform,
                     address,
                     phone,
                     email,
+                    amount: productPrice,
                     status: "pending"
                 })
                 .select()
                 .single();
 
-            if (reviewErr) {
-                alert("Failed to submit order: " + reviewErr.message);
+            if (error) {
+                console.error("❌ Failed to submit order:", error.message);
+                alert("Failed to submit order: " + error.message);
                 return;
             }
 
-            alert(`✅ Order submitted! Balance deducted: $${productPrice.toFixed(2)}`);
+            alert("✅ Your order has been submitted for review!");
             buyModal.style.display = "none";
 
             // 清空输入框
             document.getElementById("buyAddress").value = "";
             document.getElementById("buyPhone").value = "";
             document.getElementById("buyEmail").value = "";
-
-            // 更新余额显示
-            document.getElementById("balance").innerText = newBalance.toFixed(2);
 
         } catch (e) {
             console.error("⚠️ Unexpected error:", e);
