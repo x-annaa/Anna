@@ -127,7 +127,7 @@
   font-size: 14px;
 }
 
-/* Confirm 和 Cancel 按钮，桌面左右，手机上下 */
+/* Confirm 和 Cancel 按钮，桌面左右排列 */
 .container-s3 button {
   padding: 8px 0;
   width: 48%;
@@ -138,19 +138,19 @@
   font-size: 14px;
 }
 
-#confirmBuy {
+#confirmBuy1 {
   background-color: #28a745;
   color: #fff;
-  margin-right: 4%;
+  margin-right: 4%; /* 给左右按钮留间距 */
 }
 
-#cancelBuy {
+#cancelBuy1 {
   background-color: #dc3545;
   color: #fff;
   margin-right: 0;
 }
 
-/* 响应式：手机屏幕 */
+/* 响应式：手机屏幕，按钮上下排列 */
 @media (max-width: 600px) {
   .container-s4 {
     width: 90%;
