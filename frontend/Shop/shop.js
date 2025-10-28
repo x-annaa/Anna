@@ -26,7 +26,10 @@ async function loadShopProducts() {
       productDiv.innerHTML = `
         <img src="${item.image1_url || 'placeholder.png'}" class="product-image" alt="${item.product_code}" />
         <p class="product-name">${item.product_code}</p>
-        <p><strong>Price:</strong> <span style="color:red;">$${discountedPrice}${item.discount > 0 ? ` ${item.discount}%` : ''}</span></p>
+        <p>
+          <strong>Price:</strong> $${discountedPrice} 
+          ${item.discount > 0 ? `<span style="color:red;">${item.discount}%</span>` : ''}
+        <p>
         <p><strong>Rating:</strong> ⭐ ${item.rating ? item.rating.toFixed(1) : '0.0'}</p>
         <button class="buyBtn" 
           data-id="${item.id}" 
