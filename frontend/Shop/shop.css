@@ -184,3 +184,13 @@
     margin: 0;
   }
 }
+
+/* 弹窗产品名称 */
+#buyProductName {
+  font-weight: bold;
+  font-size: 18px;
+  margin-bottom: 10px;
+
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
