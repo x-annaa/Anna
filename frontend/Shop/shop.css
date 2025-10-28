@@ -13,11 +13,11 @@
   background: #fff;
   border-radius: 12px;
   padding: 12px;
-  text-align: left;
+  text-align: left;          /* 文本靠左 */
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: flex-start;   /* 文本靠左 */
 }
 
 /* 产品图片统一大小 */
@@ -28,7 +28,7 @@
   object-fit: cover;
   border-radius: 8px;
   margin-bottom: 8px;
-  align-self: center;
+  align-self: center;        /* 图片居中 */
 }
 
 /* 产品信息 */
@@ -36,10 +36,10 @@
   margin: 4px 0;
   font-size: 13px;
   color: #333;
-  text-align: left;
+  text-align: left;          /* 文本靠左 */
 }
 
-/* Buy 按钮 */
+/* Buy 按钮保持居中 */
 .container-s4 button.buyBtn {
   margin-top: 8px;
   padding: 6px 12px;
@@ -50,11 +50,13 @@
   cursor: pointer;
   font-weight: bold;
   transition: 0.2s;
+  align-self: center;        /* 按钮居中 */
 }
 
 .container-s4 button.buyBtn:hover {
   background-color: #0056b3;
 }
+
 
 /* ======================
    Buy Modal 弹窗
