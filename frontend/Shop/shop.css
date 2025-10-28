@@ -21,7 +21,7 @@
   flex-direction: column;
   align-items: flex-start;
   position: relative;
-  height: 280px;            /* 卡片高度固定 */
+  height: 280px;
   box-sizing: border-box;
 }
 
@@ -33,7 +33,7 @@
   object-fit: cover;
   border-radius: 8px;
   margin-bottom: 6px;
-  align-self: center;       /* 图片居中 */
+  align-self: center;
 }
 
 /* 产品名称：单行，超出显示 ... */
@@ -51,15 +51,14 @@
 /* 产品价格 */
 .container-s4 .product-price {
   font-size: 13px;
-  color: black;             /* Price 文字黑色 */
-  margin: 2px 0;
+  color: black;
   display: inline;
 }
 
 /* 产品折扣信息 */
 .container-s4 .product-discount {
   font-size: 13px;
-  color: red;               /* 折扣数字红色 */
+  color: red;
   margin-left: 4px;
   display: inline;
 }
@@ -68,12 +67,12 @@
 .container-s4 .product-rating {
   font-size: 12px;
   color: #555;
-  margin: 4px 0 6px 0;      /* 保证距离 Buy 按钮一致 */
+  margin: 4px 0 6px 0;
 }
 
-/* Buy 按钮：固定底部，铺满宽度 */
+/* Buy 按钮 */
 .container-s4 button.buyBtn {
-  margin-top: auto;          /* 自动推到底部 */
+  margin-top: auto;
   padding: 10px 0;
   width: 100%;
   background-color: #007bff;
@@ -98,13 +97,11 @@
   text-align: left;
 }
 
-/* label 和内容紧凑 */
 .container-s4 p strong {
   display: inline-block;
   margin-right: 4px;
-  min-width: 0;             /* 避免 Name: 占过多空间 */
+  min-width: 0;
 }
-
 
 /* ======================
    Buy Modal 弹窗
@@ -133,7 +130,6 @@
   animation: fadeIn 0.25s ease;
 }
 
-/* Buy Modal 图片区域 */
 #buyImages {
   display: flex;
   justify-content: center;
@@ -150,16 +146,17 @@
   border: 1px solid #ccc;
 }
 
-/* Buy Modal 产品信息 */
 #buyProductName {
   font-size: 18px;
   margin-bottom: 8px;
 }
+
 #buyProductPrice {
   font-size: 16px;
   margin-bottom: 6px;
   color: #007bff;
 }
+
 #buyProductDesc {
   font-size: 14px;
   margin-bottom: 12px;
@@ -198,6 +195,7 @@
   background-color: #28a745;
   color: white;
 }
+
 #confirmBuy:hover {
   background-color: #218838;
 }
@@ -206,6 +204,7 @@
   background-color: #dc3545;
   color: white;
 }
+
 #cancelBuy:hover {
   background-color: #c82333;
 }
