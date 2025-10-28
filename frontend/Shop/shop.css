@@ -75,6 +75,7 @@
   display: flex;
 }
 
+/* 弹窗主体 */
 .container-s3 {
   background: #fff;
   padding: 20px;
@@ -93,7 +94,7 @@
   font-size: 20px;
 }
 
-/* 三张图片 */
+/* 三张产品图片 */
 #buyImages {
   display: flex;
   gap: 5px;
@@ -110,7 +111,7 @@
   cursor: pointer;
 }
 
-/* 用户信息 */
+/* 产品信息文本 */
 .container-s3 p {
   width: 100%;
   font-size: 14px;
@@ -127,11 +128,19 @@
   font-size: 14px;
 }
 
-/* Confirm 和 Cancel 按钮，桌面左右排列 */
-.container-s3 button {
-  padding: 8px 0;
-  width: 48%;
+/* Confirm & Cancel 按钮容器 */
+.button-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between; /* 桌面左右分开 */
   margin-top: 10px;
+  gap: 4%;
+}
+
+/* 桌面左右按钮 */
+.button-row button {
+  width: 48%;
+  padding: 8px 0;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -141,31 +150,36 @@
 #confirmBuy1 {
   background-color: #28a745;
   color: #fff;
-  margin-right: 4%; /* 给左右按钮留间距 */
 }
 
 #cancelBuy1 {
   background-color: #dc3545;
   color: #fff;
-  margin-right: 0;
 }
 
-/* 响应式：手机屏幕，按钮上下排列 */
+/* ======= 响应式 ======= */
 @media (max-width: 600px) {
+
+  /* 产品卡片变宽，图片变矮 */
   .container-s4 {
     width: 90%;
   }
-
   .container-s4 img.product-image {
     height: 150px;
   }
 
+  /* buyModal 三张图片缩小 */
   #buyImages img {
     height: 80px;
   }
 
-  .container-s3 button {
+  /* 按钮上下排列 */
+  .button-row {
+    flex-direction: column;
+    gap: 10px; /* 上下间距 */
+  }
+  .button-row button {
     width: 100%;
-    margin: 5px 0 0 0;
+    margin: 0;
   }
 }
