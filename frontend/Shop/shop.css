@@ -15,28 +15,25 @@
   background: #fff;
   border-radius: 12px;
   padding: 12px;
-  text-align: left;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  position: relative;
-  min-height: 280px;     /* 最小高度，屏幕大时会自动撑开 */
+  align-items: stretch;  /* 元素铺满宽度 */
+  min-height: 280px;     /* 最小高度 */
   box-sizing: border-box;
 }
 
-/* 产品图片统一大小 */
+/* 产品图片 */
 .container-s4 img.product-image {
   width: 100%;
   max-width: 160px;
   height: 160px;
   object-fit: cover;
   border-radius: 8px;
-  margin-bottom: 6px;
-  align-self: center;
+  margin: 0 auto 6px; /* 居中 + 下间距 */
 }
 
-/* 产品名称：单行，超出显示 ... */
+/* 产品名称：单行 ellipsis */
 .container-s4 .product-name {
   font-weight: bold;
   font-size: 14px;
@@ -45,17 +42,41 @@
   overflow: hidden;
   text-overflow: ellipsis;
   margin-bottom: 4px;
-  width: 100%;
 }
 
-/* Buy 按钮固定在底部 */
+/* 价格 + 折扣同行显示 */
+.container-s4 .price-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.container-s4 .product-price {
+  font-size: 13px;
+  color: black;
+}
+
+.container-s4 .product-discount {
+  font-size: 13px;
+  color: red;
+  margin-left: 4px;
+}
+
+/* 产品评分 */
+.container-s4 .product-rating {
+  font-size: 12px;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+/* Buy 按钮固定底部 */
 .container-s4 button.buyBtn {
-  margin-top: auto;    /* 自动推到卡片底部 */
+  margin-top: auto;       /* 推到底部 */
   width: 100%;
   padding: 10px 0;
   background-color: #007bff;
   border-radius: 8px;
-  color: #fff;
+  color: white;
   border: none;
   cursor: pointer;
   font-weight: bold;
@@ -66,6 +87,7 @@
 .container-s4 button.buyBtn:hover {
   background-color: #0056b3;
 }
+
 
 /* ======================
    Buy Modal 弹窗
