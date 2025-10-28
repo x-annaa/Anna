@@ -24,20 +24,26 @@ async function loadShopProducts() {
     shopContainer.innerHTML = "";
 
     products2.forEach(item => {
+      const discountedPrice = item.discount > 0
+      ? (item.price * (1 - item.discount / 100)).toFixed(2)
+      : item.price.toFixed(2);
+
       const productDiv = document.createElement("div");
       productDiv.classList.add("container-s4");
       productDiv.innerHTML = `
-        <img src="${item.image1_url}" class="product-image" alt="product" />
-        <p><strong>Code:</strong> ${item.product_code}</p>
-        <p><strong>Rating:</strong> ⭐ ${item.rating}</p>
-        <button class="buyBtn" data-id="${item.id}" 
-                data-img1="${item.image1_url}" 
-                data-img2="${item.image2_url}" 
-                data-img3="${item.image3_url}" 
-                data-price="${item.price}">Buy</button>
-      `;
-      shopContainer.appendChild(productDiv);
-    });
+        <img src="${item.image1_url}" class="product-image" alt="${item.product_code}" />
+        <p><strong>Name:</strong> ${item.product_code}</p>
+        <p><strong>Price:</strong> $${discountedPrice} ${item.discount > 0 ? `<span style="color:red;">(${item.discount}% off)</span>` : ''}</p>
+        <p><strong>Rating:</strong> ⭐ ${item.rating.toFixed(1)}</p>
+        <button class="buyBtn" 
+          data-id="${item.id}" 
+          data-image1="${item.image1_url}" 
+          data-image2="${item.image2_url}" 
+          data-image3="${item.image3_url}"
+          data-price="${discountedPrice}">Buy</button>
+        `;
+        shopContainer.appendChild(productDiv);
+      });
 
     addBuyButtonListeners();
   } catch (e) {
