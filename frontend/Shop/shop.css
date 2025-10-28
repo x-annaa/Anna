@@ -196,14 +196,19 @@
   overflow-wrap: break-word;
 }
 
+/* 搜索栏容器固定 */
 .shop-search-container {
-  width: 100%;
+  position: sticky;        /* 粘性定位 */
+  top: 0;                  /* 距离页面顶部0 */
+  background-color: #fff;  /* 背景颜色，避免覆盖产品内容时透明 */
+  z-index: 100;            /* 保证在产品上方 */
   padding: 10px 20px;
-  box-sizing: border-box;
   display: flex;
   gap: 10px;
+  border-bottom: 1px solid #ddd; /* 可以加分隔线 */
 }
 
+/* 输入框和按钮样式保持不变 */
 #shopSearchInput {
   flex: 1;
   padding: 8px 12px;
