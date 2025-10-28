@@ -1,15 +1,16 @@
 /* ======= Shop 产品容器 ======= */
 #shopProducts {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 每行两列 */
+  grid-template-columns: repeat(2, minmax(150px, 1fr)); /* 每行两列，最小 150px */
   gap: 20px;
   padding: 20px;
-  justify-items: center; /* 居中对齐单元格 */
+  justify-items: center; /* 单元格居中 */
 }
 
 /* ======= 产品卡片 ======= */
 .container-s4 {
-  width: 100%; /* 填充单元格 */
+  width: 90%;        /* 占单元格 90% 宽度 */
+  max-width: 250px;  /* 最大宽度 250px，视觉更舒适 */
   border: 1px solid #ddd;
   border-radius: 10px;
   overflow: hidden;
@@ -158,6 +159,12 @@
 
 /* ======= 响应式 ======= */
 @media (max-width: 600px) {
+
+  /* 产品卡片宽度稍大，更舒适 */
+  .container-s4 {
+    width: 95%;
+    max-width: none;
+  }
 
   /* 产品卡片图片变矮 */
   .container-s4 img.product-image {
