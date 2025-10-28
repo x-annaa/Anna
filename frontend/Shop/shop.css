@@ -39,26 +39,30 @@
   text-align: left;          /* 文本靠左 */
 }
 
-/* Buy 按钮拉满整个卡片宽度 */
-.container-s4 button.buyBtn {
-  margin-top: 8px;
-  padding: 10px 0;           /* 上下内边距增大 */
-  width: 100%;               /* 横向铺满 container-s4 */
+/* 按钮放在卡片下面，横向铺满 */
+.buyBtn-container {
+  width: 100%;
+  display: flex;
+  justify-content: center; /* 可去掉，让按钮和卡片左对齐 */
+  margin-top: 4px;
+}
+
+.buyBtn-container button.buyBtn {
+  width: 100%;
+  max-width: 160px; /* 可与 container-s4 宽度一致 */
+  padding: 10px 0;
   background-color: #007bff;
-  color: white;
+  color: #fff;
   border: none;
-  border-radius: 0 0 12px 12px; /* 卡片底部圆角 */
-  cursor: pointer;
+  border-radius: 8px;
   font-weight: bold;
-  font-size: 14px;
+  cursor: pointer;
   transition: 0.2s;
 }
 
-.container-s4 button.buyBtn:hover {
+.buyBtn-container button.buyBtn:hover {
   background-color: #0056b3;
 }
-
-
 
 /* ======================
    Buy Modal 弹窗
