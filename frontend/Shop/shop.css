@@ -8,9 +8,7 @@
   margin-top: 10px;
 }
 
-/* ======================
-   每个产品卡片
-====================== */
+/* 每个产品卡片 */
 .container-s4 {
   background: #fff;
   border-radius: 12px;
@@ -18,69 +16,72 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   display: flex;
   flex-direction: column;
-  align-items: stretch;  /* 元素铺满宽度 */
-  min-height: 280px;     /* 最小高度 */
+  align-items: stretch;
+  min-height: 280px;
   box-sizing: border-box;
 }
 
-/* 产品图片 */
+/* 图片 */
 .container-s4 img.product-image {
   width: 100%;
   max-width: 160px;
   height: 160px;
   object-fit: cover;
   border-radius: 8px;
-  margin: 0 auto 6px; /* 居中 + 下间距 */
+  margin: 0 auto 6px; /* 下间距统一 */
 }
 
-/* 产品名称：单行 ellipsis */
+/* 所有文本元素统一间距 */
+.container-s4 .product-name,
+.container-s4 .price-container,
+.container-s4 .product-rating {
+  margin-bottom: 6px; /* 统一间距 */
+}
+
+/* 产品名称单行 */
 .container-s4 .product-name {
   font-weight: bold;
   font-size: 14px;
-  line-height: 1.2em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-bottom: 4px;
 }
 
-/* 价格 + 折扣同行显示 */
+/* 价格 + 折扣 */
 .container-s4 .price-container {
   display: flex;
   align-items: center;
-  margin-bottom: 4px;
 }
 
 .container-s4 .product-price {
-  font-size: 13px;
   color: black;
+  font-size: 13px;
 }
 
 .container-s4 .product-discount {
-  font-size: 13px;
   color: red;
-  margin-left: 4px;
+  font-size: 13px;
+  margin-left: 4px; /* 保持价格和折扣间距 */
 }
 
 /* 产品评分 */
 .container-s4 .product-rating {
   font-size: 12px;
   color: #555;
-  margin-bottom: 6px;
 }
 
-/* Buy 按钮固定底部 */
+/* Buy 按钮铺满底部 */
 .container-s4 button.buyBtn {
-  margin-top: auto;       /* 推到底部 */
+  margin-top: auto;
   width: 100%;
   padding: 10px 0;
   background-color: #007bff;
   border-radius: 8px;
   color: white;
   border: none;
-  cursor: pointer;
   font-weight: bold;
   font-size: 14px;
+  cursor: pointer;
   transition: 0.2s;
 }
 
