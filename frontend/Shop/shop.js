@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", () => {
     // 显示当前用户信息到 Buy 弹窗
     const username = localStorage.getItem("currentUser") || "";
     const platform = localStorage.getItem("platformAccount") || "";
@@ -6,7 +6,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("buyUsername").innerText = username;
     document.getElementById("buyPlatform").innerText = platform;
 
-    await loadShopProducts();
+    // 加载产品列表
+    loadShopProducts();
 });
 
 // 加载 products2 表数据
@@ -32,7 +33,7 @@ async function loadShopProducts() {
                 <p><strong>Code:</strong> ${item.product_code}</p>
                 <p><strong>Price:</strong> $${item.price?.toFixed(2) || 0}</p>
                 <p><strong>Rating:</strong> ⭐ ${item.rating}</p>
-                <button class="buyBtn" data-id="${item.id}" data-price="${item.price || 0}">Buy</button>
+                <button class="buyBtn" data-id="${item.id}">Buy</button>
             `;
             shopContainer.appendChild(productDiv);
         });
@@ -44,17 +45,16 @@ async function loadShopProducts() {
     }
 }
 
-// Buy 模态框事件
+// Buy 弹窗按钮事件
 function addBuyButtonListeners() {
     const buyButtons = document.querySelectorAll(".buyBtn");
     const buyModal = document.getElementById("buyModal");
 
+    // 点击 Buy 显示弹窗
     buyButtons.forEach(btn => {
         btn.addEventListener("click", () => {
             const productId = btn.getAttribute("data-id");
-            const price = parseFloat(btn.getAttribute("data-price"));
             buyModal.dataset.id = productId;
-            buyModal.dataset.price = price;
             buyModal.style.display = "flex";
         });
     });
@@ -64,11 +64,10 @@ function addBuyButtonListeners() {
         buyModal.style.display = "none";
     });
 
-    // 确认提交
+    // 确认提交订单
     document.getElementById("confirmBuy").addEventListener("click", async () => {
-        const productId = parseInt(buyModal.dataset.id);
-        const price = parseFloat(buyModal.dataset.price);
-        const userId = parseInt(localStorage.getItem("currentUserId"));
+        const productId = buyModal.dataset.id;
+        const userId = localStorage.getItem("currentUserId");
         const username = localStorage.getItem("currentUser");
         const platform = localStorage.getItem("platformAccount");
         const address = document.getElementById("buyAddress").value.trim();
@@ -81,60 +80,51 @@ function addBuyButtonListeners() {
         }
 
         try {
-            // 先刷新 schema cache 避免 product_id 找不到
-            await supabaseClient.from("order_reviews").select("*").limit(1);
+            // 获取产品价格
+            const { data: product, error: prodErr } = await supabaseClient
+                .from("products2")
+                .select("id, price")
+                .eq("id", productId)
+                .maybeSingle();
 
-            // 获取用户当前余额
-            const { data: userData, error: userErr } = await supabaseClient
+            if (prodErr || !product) throw new Error(prodErr?.message || "Product not found");
+
+            // 获取用户余额
+            const { data: user, error: userErr } = await supabaseClient
                 .from("users")
-                .select("balance")
+                .select("id, balance")
                 .eq("id", userId)
                 .maybeSingle();
 
-            if (userErr || !userData) {
-                alert("Failed to get user balance");
-                return;
-            }
+            if (userErr || !user) throw new Error(userErr?.message || "User not found");
 
-            if (userData.balance < price) {
+            if (user.balance < product.price) {
                 alert("❌ Not enough balance to buy this product");
                 return;
             }
 
             // 扣除余额
-            const { error: updateErr } = await supabaseClient
+            const { error: deductErr } = await supabaseClient
                 .from("users")
-                .update({ balance: userData.balance - price })
+                .update({ balance: user.balance - product.price })
                 .eq("id", userId);
 
-            if (updateErr) {
-                alert("Failed to deduct balance: " + updateErr.message);
-                return;
-            }
+            if (deductErr) throw new Error(deductErr.message);
 
-            // 插入订单审核表
-            const { data, error } = await supabaseClient
-                .from("order_reviews")
-                .insert({
-                    product_id: productId,
-                    user_id: userId,
-                    username,
-                    platform,
-                    address,
-                    phone,
-                    email,
-                    status: "pending"
-                })
-                .select()
-                .single();
+            // 调用 RPC 插入 order_reviews
+            const { data: order, error: orderErr } = await supabaseClient.rpc('add_order_review', {
+                p_product_id: productId,
+                p_user_id: userId,
+                p_username: username,
+                p_platform: platform,
+                p_address: address,
+                p_phone: phone,
+                p_email: email
+            });
 
-            if (error) {
-                console.error("❌ Failed to submit order:", error.message);
-                alert("Failed to submit order: " + error.message);
-                return;
-            }
+            if (orderErr) throw new Error(orderErr.message);
 
-            alert(`✅ Your order has been submitted for review! $${price.toFixed(2)} has been deducted from your balance.`);
+            alert("✅ Your order has been submitted for review!");
             buyModal.style.display = "none";
 
             // 清空输入框
@@ -143,8 +133,8 @@ function addBuyButtonListeners() {
             document.getElementById("buyEmail").value = "";
 
         } catch (e) {
-            console.error("⚠️ Unexpected error:", e);
-            alert("An unexpected error occurred.");
+            console.error("❌ Failed to submit order:", e.message);
+            alert("Failed to submit order: " + e.message);
         }
     });
 }
