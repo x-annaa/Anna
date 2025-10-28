@@ -4,18 +4,19 @@
   flex-wrap: wrap;
   gap: 20px;
   padding: 20px;
-  justify-content: center;
+  justify-content: center; /* 居中对齐 */
 }
 
 /* ======= 产品卡片 ======= */
 .container-s4 {
-  flex: 0 0 calc(50% - 10px); /* 每行两个产品 */
+  flex: 0 0 calc(50% - 10px); /* 每行 2 个，左右间距 10px */
   border: 1px solid #ddd;
   border-radius: 10px;
   overflow: hidden;
   background: #fff;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   transition: transform 0.2s;
+  margin-bottom: 20px;
 }
 
 .container-s4:hover {
@@ -157,10 +158,10 @@
 /* ======= 响应式：手机屏幕 ======= */
 @media (max-width: 600px) {
   .container-s4 {
-    flex: 0 0 calc(50% - 10px); /* 手机仍然两列 */
+    flex: 0 0 100%; /* 手机 1 行显示 1 个 */
   }
   .container-s4 img.product-image {
-    height: 140px;
+    height: 150px;
   }
 
   #buyImages img {
