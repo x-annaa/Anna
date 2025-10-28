@@ -2,14 +2,14 @@
 #shopProducts {
   display: grid;
   grid-template-columns: repeat(2, 1fr); /* 每行两列 */
-  gap: 30px; /* 间距调大一点 */
+  gap: 20px;
   padding: 20px;
-  justify-items: center;
+  justify-items: center; /* 居中对齐单元格 */
 }
 
+/* ======= 产品卡片 ======= */
 .container-s4 {
-  width: 100%;       /* 填充单元格 */
-  max-width: 260px;  /* 限制最大宽度，让卡片更宽 */
+  width: 100%; /* 填充单元格 */
   border: 1px solid #ddd;
   border-radius: 10px;
   overflow: hidden;
@@ -17,7 +17,6 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   transition: transform 0.2s;
 }
-
 
 .container-s4:hover {
   transform: translateY(-3px);
