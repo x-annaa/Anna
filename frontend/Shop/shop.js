@@ -25,25 +25,25 @@ async function loadShopProducts() {
 
     products2.forEach(item => {
       const discountedPrice = item.discount > 0
-      ? (item.price * (1 - item.discount / 100)).toFixed(2)
-      : item.price.toFixed(2);
+        ? (item.price * (1 - item.discount / 100)).toFixed(2)
+        : item.price.toFixed(2);
 
       const productDiv = document.createElement("div");
       productDiv.classList.add("container-s4");
       productDiv.innerHTML = `
-        <img src="${item.image1_url}" class="product-image" alt="${item.product_code}" />
+        <img src="${item.image1_url || 'placeholder.png'}" class="product-image" alt="${item.product_code}" />
         <p><strong>Name:</strong> ${item.product_code}</p>
         <p><strong>Price:</strong> $${discountedPrice} ${item.discount > 0 ? `<span style="color:red;">(${item.discount}% off)</span>` : ''}</p>
-        <p><strong>Rating:</strong> ⭐ ${item.rating.toFixed(1)}</p>
+        <p><strong>Rating:</strong> ⭐ ${item.rating ? item.rating.toFixed(1) : '0.0'}</p>
         <button class="buyBtn" 
           data-id="${item.id}" 
-          data-image1="${item.image1_url}" 
-          data-image2="${item.image2_url}" 
-          data-image3="${item.image3_url}"
+          data-image1="${item.image1_url || ''}" 
+          data-image2="${item.image2_url || ''}" 
+          data-image3="${item.image3_url || ''}"
           data-price="${discountedPrice}">Buy</button>
-        `;
-        shopContainer.appendChild(productDiv);
-      });
+      `;
+      shopContainer.appendChild(productDiv);
+    });
 
     addBuyButtonListeners();
   } catch (e) {
@@ -61,9 +61,9 @@ function addBuyButtonListeners() {
       const productId = btn.getAttribute("data-id");
       buyModal.dataset.id = productId;
 
-      document.getElementById("buyImg1").src = btn.getAttribute("data-img1");
-      document.getElementById("buyImg2").src = btn.getAttribute("data-img2");
-      document.getElementById("buyImg3").src = btn.getAttribute("data-img3");
+      document.getElementById("buyImg1").src = btn.getAttribute("data-image1") || 'placeholder.png';
+      document.getElementById("buyImg2").src = btn.getAttribute("data-image2") || 'placeholder.png';
+      document.getElementById("buyImg3").src = btn.getAttribute("data-image3") || 'placeholder.png';
 
       buyModal.style.display = "flex";
     });
@@ -122,7 +122,7 @@ function addBuyButtonListeners() {
         return;
       }
 
-      alert(`✅ Your order has been submitted! Remaining balance: ${data[0].remaining_balance}`);
+      alert(`✅ Your order has been submitted! Remaining balance: $${data[0].remaining_balance}`);
       buyModal.style.display = "none";
 
       document.getElementById("buyAddress").value = "";
