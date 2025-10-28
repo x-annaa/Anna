@@ -45,6 +45,7 @@
   padding: 10px 0;           /* 上下内边距增大 */
   width: 100%;               /* 横向铺满 container-s4 */
   background-color: #007bff;
+   border-radius: 8px;
   color: white;
   border: none;
   cursor: pointer;
