@@ -6,7 +6,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("buyUsername").innerText = username;
     document.getElementById("buyPlatform").innerText = platform;
 
-    // 加载产品列表
     loadShopProducts();
 });
 
@@ -31,9 +30,9 @@ async function loadShopProducts() {
             productDiv.innerHTML = `
                 <img src="${item.image1_url}" class="product-image" alt="product" />
                 <p><strong>Code:</strong> ${item.product_code}</p>
-                <p><strong>Price:</strong> $${item.price?.toFixed(2) || 0}</p>
+                <p><strong>Price:</strong> ${item.price}</p>
                 <p><strong>Rating:</strong> ⭐ ${item.rating}</p>
-                <button class="buyBtn" data-id="${item.id}">Buy</button>
+                <button class="buyBtn" data-id="${item.id}" data-price="${item.price}">Buy</button>
             `;
             shopContainer.appendChild(productDiv);
         });
@@ -45,16 +44,18 @@ async function loadShopProducts() {
     }
 }
 
-// Buy 弹窗按钮事件
+// Buy 模态框事件
 function addBuyButtonListeners() {
     const buyButtons = document.querySelectorAll(".buyBtn");
     const buyModal = document.getElementById("buyModal");
 
-    // 点击 Buy 显示弹窗
     buyButtons.forEach(btn => {
         btn.addEventListener("click", () => {
             const productId = btn.getAttribute("data-id");
+            const price = parseFloat(btn.getAttribute("data-price")) || 0;
+
             buyModal.dataset.id = productId;
+            buyModal.dataset.price = price;
             buyModal.style.display = "flex";
         });
     });
@@ -64,9 +65,10 @@ function addBuyButtonListeners() {
         buyModal.style.display = "none";
     });
 
-    // 确认提交订单
+    // 确认提交
     document.getElementById("confirmBuy").addEventListener("click", async () => {
-        const productId = buyModal.dataset.id;
+        const product2Id = buyModal.dataset.id;
+        const price = parseFloat(buyModal.dataset.price) || 0;
         const userId = localStorage.getItem("currentUserId");
         const username = localStorage.getItem("currentUser");
         const platform = localStorage.getItem("platformAccount");
@@ -80,49 +82,57 @@ function addBuyButtonListeners() {
         }
 
         try {
-            // 获取产品价格
-            const { data: product, error: prodErr } = await supabaseClient
-                .from("products2")
-                .select("id, price")
-                .eq("id", productId)
-                .maybeSingle();
-
-            if (prodErr || !product) throw new Error(prodErr?.message || "Product not found");
-
-            // 获取用户余额
-            const { data: user, error: userErr } = await supabaseClient
+            // 1. 获取用户余额
+            const { data: userData, error: userError } = await supabaseClient
                 .from("users")
-                .select("id, balance")
+                .select("balance")
                 .eq("id", userId)
                 .maybeSingle();
 
-            if (userErr || !user) throw new Error(userErr?.message || "User not found");
-
-            if (user.balance < product.price) {
-                alert("❌ Not enough balance to buy this product");
+            if (userError || !userData) {
+                alert("Failed to get user info: " + (userError?.message || "No user found"));
                 return;
             }
 
-            // 扣除余额
-            const { error: deductErr } = await supabaseClient
+            if (userData.balance < price) {
+                alert("Insufficient balance!");
+                return;
+            }
+
+            // 2. 扣除余额
+            const { data: updatedUser, error: updateError } = await supabaseClient
                 .from("users")
-                .update({ balance: user.balance - product.price })
-                .eq("id", userId);
+                .update({ balance: userData.balance - price })
+                .eq("id", userId)
+                .select()
+                .single();
 
-            if (deductErr) throw new Error(deductErr.message);
+            if (updateError) {
+                alert("Failed to deduct balance: " + updateError.message);
+                return;
+            }
 
-            // 调用 RPC 插入 order_reviews
-            const { data: order, error: orderErr } = await supabaseClient.rpc('add_order_review', {
-                p_product_id: productId,
-                p_user_id: userId,
-                p_username: username,
-                p_platform: platform,
-                p_address: address,
-                p_phone: phone,
-                p_email: email
-            });
+            // 3. 插入订单
+            const { data: orderData, error: orderError } = await supabaseClient
+                .from("order_reviews")
+                .insert({
+                    product2_id: product2Id,
+                    user_id: userId,
+                    username,
+                    platform,
+                    address,
+                    phone,
+                    email,
+                    amount: price,
+                    status: "pending"
+                })
+                .select()
+                .single();
 
-            if (orderErr) throw new Error(orderErr.message);
+            if (orderError) {
+                alert("Failed to submit order: " + orderError.message);
+                return;
+            }
 
             alert("✅ Your order has been submitted for review!");
             buyModal.style.display = "none";
@@ -133,8 +143,8 @@ function addBuyButtonListeners() {
             document.getElementById("buyEmail").value = "";
 
         } catch (e) {
-            console.error("❌ Failed to submit order:", e.message);
-            alert("Failed to submit order: " + e.message);
+            console.error("⚠️ Unexpected error:", e);
+            alert("An unexpected error occurred.");
         }
     });
 }
