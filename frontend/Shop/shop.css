@@ -69,9 +69,9 @@
   margin: 2px 0 8px 0;      /* 距离 Buy 按钮固定 */
 }
 
-/* Buy 按钮：与上方内容间距固定 */
+/* Buy 按钮：固定底部，铺满宽度 */
 .container-s4 button.buyBtn {
-  margin-top: 8px;           /* 上方间距固定 */
+  margin-top: auto;          /* 自动推到底部 */
   padding: 10px 0;
   width: 100%;
   background-color: #007bff;
@@ -88,6 +88,20 @@
   background-color: #0056b3;
 }
 
+/* 文本紧凑 */
+.container-s4 p {
+  margin: 2px 0;
+  font-size: 13px;
+  color: #333;
+  text-align: left;
+}
+
+/* label 和内容紧凑 */
+.container-s4 p strong {
+  display: inline-block;
+  margin-right: 4px;
+  min-width: 0;             /* 避免 Name: 占过多空间 */
+}
 
 /* 文本紧凑 */
 .container-s4 p {
