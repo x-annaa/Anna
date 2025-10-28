@@ -204,6 +204,7 @@
   z-index: 100;            /* 保证在产品上方 */
   padding: 10px 20px;
   display: flex;
+  margin-bottom: 15px; /* 搜索栏和产品之间留空间 */
   gap: 10px;
   border-bottom: 1px solid #ddd; /* 可以加分隔线 */
 }
