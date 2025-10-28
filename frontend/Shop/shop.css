@@ -34,7 +34,12 @@
   font-size: 14px;
   margin: 5px 10px;
   color: #333;
+
+  white-space: nowrap;      /* 不换行 */
+  overflow: hidden;         /* 超出隐藏 */
+  text-overflow: ellipsis;  /* 显示省略号 ... */
 }
+
 
 .container-s4 p {
   margin: 5px 10px;
