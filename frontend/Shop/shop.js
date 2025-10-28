@@ -26,12 +26,15 @@ async function loadShopProducts() {
 
         products2.forEach(item => {
             const productDiv = document.createElement("div");
-            productDiv.classList.add("container-s4");
+            productDiv.classList.add("product-card");
             productDiv.innerHTML = `
                 <img src="${item.image1_url}" class="product-image" alt="product" />
-                <p><strong>Code:</strong> ${item.product_code}</p>
-                <p><strong>Rating:</strong> ⭐ ${item.rating}</p>
-                <button class="buyBtn" data-id="${item.id}">Buy</button>
+                <div class="product-info">
+                    <h4>Code: ${item.product_code}</h4>
+                    <p>Rating: ⭐ ${item.rating}</p>
+                    <p>Price: $${item.price ? item.price.toFixed(2) : "0.00"}</p>
+                    <button class="buyBtn" data-id="${item.id}">Buy</button>
+                </div>
             `;
             shopContainer.appendChild(productDiv);
         });
@@ -77,7 +80,51 @@ function addBuyButtonListeners() {
         }
 
         try {
-            const { data, error } = await supabaseClient
+            // 1️⃣ 获取产品信息
+            const { data: product, error: prodErr } = await supabaseClient
+                .from("products2")
+                .select("id, product_code, price")
+                .eq("id", productId)
+                .maybeSingle();
+
+            if (prodErr || !product) {
+                alert("Product not found!");
+                return;
+            }
+
+            const productPrice = parseFloat(product.price || 0);
+
+            // 2️⃣ 获取用户余额
+            const { data: user, error: userErr } = await supabaseClient
+                .from("users")
+                .select("balance")
+                .eq("id", userId)
+                .maybeSingle();
+
+            if (userErr || !user) {
+                alert("User not found!");
+                return;
+            }
+
+            if (user.balance < productPrice) {
+                alert("Insufficient balance!");
+                return;
+            }
+
+            // 3️⃣ 扣除余额
+            const newBalance = parseFloat(user.balance) - productPrice;
+            const { error: updateErr } = await supabaseClient
+                .from("users")
+                .update({ balance: newBalance })
+                .eq("id", userId);
+
+            if (updateErr) {
+                alert("Failed to deduct balance: " + updateErr.message);
+                return;
+            }
+
+            // 4️⃣ 提交到审核表
+            const { data: review, error: reviewErr } = await supabaseClient
                 .from("order_reviews")
                 .insert({
                     product_id: productId,
@@ -92,19 +139,21 @@ function addBuyButtonListeners() {
                 .select()
                 .single();
 
-            if (error) {
-                console.error("❌ Failed to submit order:", error.message);
-                alert("Failed to submit order: " + error.message);
+            if (reviewErr) {
+                alert("Failed to submit order: " + reviewErr.message);
                 return;
             }
 
-            alert("✅ Your order has been submitted for review!");
+            alert(`✅ Order submitted! Balance deducted: $${productPrice.toFixed(2)}`);
             buyModal.style.display = "none";
 
             // 清空输入框
             document.getElementById("buyAddress").value = "";
             document.getElementById("buyPhone").value = "";
             document.getElementById("buyEmail").value = "";
+
+            // 更新余额显示
+            document.getElementById("balance").innerText = newBalance.toFixed(2);
 
         } catch (e) {
             console.error("⚠️ Unexpected error:", e);
