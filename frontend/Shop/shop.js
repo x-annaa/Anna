@@ -14,7 +14,7 @@ async function loadShopProducts() {
     try {
         const { data: products2, error } = await supabaseClient
             .from("products2")
-            .select("*"); // 如果你有 price 字段也可以加上
+            .select("*");
 
         if (error) {
             console.error("❌ Failed to load products2:", error.message);
@@ -30,8 +30,8 @@ async function loadShopProducts() {
             productDiv.innerHTML = `
                 <img src="${item.image1_url}" class="product-image" alt="product" />
                 <p><strong>Code:</strong> ${item.product_code}</p>
-                <p><strong>Rating:</strong> ⭐ ${item.rating}</p>
                 <p><strong>Price:</strong> $${item.price.toFixed(2)}</p>
+                <p><strong>Rating:</strong> ⭐ ${item.rating}</p>
                 <button class="buyBtn" data-id="${item.id}" data-price="${item.price}">Buy</button>
             `;
             shopContainer.appendChild(productDiv);
@@ -52,9 +52,9 @@ function addBuyButtonListeners() {
     buyButtons.forEach(btn => {
         btn.addEventListener("click", () => {
             const productId = btn.getAttribute("data-id");
-            const productPrice = parseFloat(btn.getAttribute("data-price")) || 0;
+            const price = parseFloat(btn.getAttribute("data-price"));
             buyModal.dataset.id = productId;
-            buyModal.dataset.price = productPrice;
+            buyModal.dataset.price = price;
             buyModal.style.display = "flex";
         });
     });
@@ -67,8 +67,7 @@ function addBuyButtonListeners() {
     // 确认提交
     document.getElementById("confirmBuy").addEventListener("click", async () => {
         const productId = buyModal.dataset.id;
-        const productPrice = parseFloat(buyModal.dataset.price) || 0;
-
+        const productPrice = parseFloat(buyModal.dataset.price);
         const userId = localStorage.getItem("currentUserId");
         const username = localStorage.getItem("currentUser");
         const platform = localStorage.getItem("platformAccount");
@@ -82,30 +81,58 @@ function addBuyButtonListeners() {
         }
 
         try {
-            // 插入到 order_reviews
+            // 1️⃣ 获取用户余额
+            const { data: user, error: userErr } = await supabaseClient
+                .from("users")
+                .select("balance")
+                .eq("id", userId)
+                .maybeSingle();
+
+            if (userErr || !user) {
+                alert("Failed to fetch user balance");
+                return;
+            }
+
+            if (user.balance < productPrice) {
+                alert("❌ Insufficient balance. Please recharge.");
+                return;
+            }
+
+            // 2️⃣ 扣除余额
+            const { data: updatedUser, error: updateErr } = await supabaseClient
+                .from("users")
+                .update({ balance: user.balance - productPrice })
+                .eq("id", userId)
+                .select()
+                .single();
+
+            if (updateErr) {
+                alert("Failed to deduct balance: " + updateErr.message);
+                return;
+            }
+
+            // 3️⃣ 提交订单到审核表
             const { data, error } = await supabaseClient
                 .from("order_reviews")
                 .insert({
-                    product2_id: productId,
+                    product_id: productId,
                     user_id: userId,
                     username,
                     platform,
                     address,
                     phone,
                     email,
-                    amount: productPrice,
                     status: "pending"
                 })
                 .select()
                 .single();
 
             if (error) {
-                console.error("❌ Failed to submit order:", error.message);
                 alert("Failed to submit order: " + error.message);
                 return;
             }
 
-            alert("✅ Your order has been submitted for review!");
+            alert("✅ Order submitted for review! Balance has been deducted.");
             buyModal.style.display = "none";
 
             // 清空输入框
