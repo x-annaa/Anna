@@ -39,6 +39,17 @@
   text-align: left;          /* 文本靠左 */
 }
 
+.container-s4 p strong {
+  display: inline-block;
+  min-width: 55px; /* 保留 "Name:" 的宽度 */
+}
+
+.container-s4 .product-name {
+  display: inline-block;
+  word-break: break-word; /* 遇到长单词自动换行 */
+  max-width: calc(100% - 60px); /* 避免溢出 */
+}
+
 /* Buy 按钮拉满整个卡片宽度 */
 .container-s4 button.buyBtn {
   margin-top: 8px;
