@@ -1,9 +1,7 @@
-// shop.js
-
 document.addEventListener("DOMContentLoaded", () => {
+  // 显示当前用户信息到 Buy 弹窗
   const username = localStorage.getItem("currentUser") || "";
   const platform = localStorage.getItem("platformAccount") || "";
-  const userId = localStorage.getItem("currentUserId");
 
   document.getElementById("buyUsername").innerText = username;
   document.getElementById("buyPlatform").innerText = platform;
@@ -28,13 +26,17 @@ async function loadShopProducts() {
 
     products2.forEach(item => {
       const productDiv = document.createElement("div");
-      productDiv.classList.add("container-s4");
+      productDiv.classList.add("product-card");
       productDiv.innerHTML = `
-        <img src="${item.image1_url}" class="product-image" alt="product" />
+        <img src="${item.image1_url}" class="product-image" alt="product">
         <p><strong>Code:</strong> ${item.product_code}</p>
-        <p><strong>Price:</strong> $${item.price}</p>
+        <p><strong>Price:</strong> $${item.price?.toFixed(2) || 0}</p>
         <p><strong>Rating:</strong> ⭐ ${item.rating}</p>
-        <button class="buyBtn" data-id="${item.id}" data-img1="${item.image1_url}" data-img2="${item.image2_url}" data-img3="${item.image3_url}" data-price="${item.price}">Buy</button>
+        <button class="buyBtn" data-id="${item.id}" 
+                data-image1="${item.image1_url}" 
+                data-image2="${item.image2_url}" 
+                data-image3="${item.image3_url}" 
+                data-price="${item.price}">Buy</button>
       `;
       shopContainer.appendChild(productDiv);
     });
@@ -45,25 +47,27 @@ async function loadShopProducts() {
   }
 }
 
-// Buy 按钮事件
+// Buy 模态框事件
 function addBuyButtonListeners() {
   const buyButtons = document.querySelectorAll(".buyBtn");
   const buyModal = document.getElementById("buyModal");
 
   buyButtons.forEach(btn => {
     btn.addEventListener("click", () => {
-      const productId = btn.dataset.id;
-      const img1 = btn.dataset.img1;
-      const img2 = btn.dataset.img2;
-      const img3 = btn.dataset.img3;
-      const price = parseFloat(btn.dataset.price);
+      const productId = btn.getAttribute("data-id");
+      const image1 = btn.getAttribute("data-image1");
+      const image2 = btn.getAttribute("data-image2");
+      const image3 = btn.getAttribute("data-image3");
+      const price = parseFloat(btn.getAttribute("data-price")) || 0;
 
-      buyModal.dataset.id = productId;
+      // 显示图片
+      document.getElementById("buyImg1").src = image1;
+      document.getElementById("buyImg2").src = image2;
+      document.getElementById("buyImg3").src = image3;
+
+      // 保存 productId 和 price 到 modal dataset
+      buyModal.dataset.productId = productId;
       buyModal.dataset.price = price;
-
-      document.getElementById("buyImg1").src = img1;
-      document.getElementById("buyImg2").src = img2;
-      document.getElementById("buyImg3").src = img3;
 
       buyModal.style.display = "flex";
     });
@@ -74,16 +78,13 @@ function addBuyButtonListeners() {
     buyModal.style.display = "none";
   });
 
-  // 确认提交订单
+  // 确认提交
   document.getElementById("confirmBuy").addEventListener("click", async () => {
-    const buyModal = document.getElementById("buyModal");
-    const productId = buyModal.dataset.id;
+    const productId = buyModal.dataset.productId;
     const price = parseFloat(buyModal.dataset.price);
-
-    const userId = localStorage.getItem("currentUserId");
+    const userId = parseInt(localStorage.getItem("currentUserId"));
     const username = localStorage.getItem("currentUser");
     const platform = localStorage.getItem("platformAccount");
-
     const address = document.getElementById("buyAddress").value.trim();
     const phone = document.getElementById("buyPhone").value.trim();
     const email = document.getElementById("buyEmail").value.trim();
@@ -94,38 +95,32 @@ function addBuyButtonListeners() {
     }
 
     try {
-      // 获取用户余额
-      const { data: userData, error: userErr } = await supabaseClient
+      // 检查余额
+      const { data: user, error: userErr } = await supabaseClient
         .from("users")
         .select("balance")
         .eq("id", userId)
         .maybeSingle();
 
-      if (userErr || !userData) {
-        alert("Failed to fetch user balance");
-        return;
-      }
-
-      if (parseFloat(userData.balance) < price) {
-        alert("❌ Not enough balance to buy this product!");
+      if (userErr) throw new Error(userErr.message);
+      if (!user) throw new Error("User not found");
+      if (user.balance < price) {
+        alert("❌ Insufficient balance!");
         return;
       }
 
       // 扣除余额
-      const { error: updateErr } = await supabaseClient
+      const { error: deductErr } = await supabaseClient
         .from("users")
-        .update({ balance: parseFloat(userData.balance) - price })
+        .update({ balance: user.balance - price })
         .eq("id", userId);
 
-      if (updateErr) {
-        alert("Failed to update balance: " + updateErr.message);
-        return;
-      }
+      if (deductErr) throw new Error(deductErr.message);
 
-      // 插入到 order_reviews
-      const { data, error } = await supabaseClient.rpc("add_order_review", {
+      // 提交订单到 RPC
+      const { data, error: rpcErr } = await supabaseClient.rpc("add_order_review", {
         p_product_id: parseInt(productId),
-        p_user_id: parseInt(userId),
+        p_user_id: userId,
         p_username: username,
         p_platform: platform,
         p_address: address,
@@ -134,11 +129,7 @@ function addBuyButtonListeners() {
         p_amount: price
       });
 
-      if (error) {
-        console.error("❌ Failed to submit order:", error.message);
-        alert("Failed to submit order: " + error.message);
-        return;
-      }
+      if (rpcErr) throw new Error(rpcErr.message);
 
       alert("✅ Your order has been submitted for review!");
       buyModal.style.display = "none";
@@ -147,9 +138,10 @@ function addBuyButtonListeners() {
       document.getElementById("buyAddress").value = "";
       document.getElementById("buyPhone").value = "";
       document.getElementById("buyEmail").value = "";
+
     } catch (e) {
-      console.error("⚠️ Unexpected error:", e);
-      alert("An unexpected error occurred.");
+      console.error("❌ Failed to submit order:", e.message);
+      alert("Failed to submit order: " + e.message);
     }
   });
 }
