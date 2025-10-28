@@ -40,7 +40,6 @@
 }
 
 .container-s4 p strong {
-  display: inline-block;
   min-width: 55px; /* 保留 "Name:" 的宽度 */
 }
 
