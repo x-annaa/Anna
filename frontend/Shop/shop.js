@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     // 显示当前用户信息到 Buy 弹窗
     const username = localStorage.getItem("currentUser") || "";
     const platform = localStorage.getItem("platformAccount") || "";
@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("buyUsername").innerText = username;
     document.getElementById("buyPlatform").innerText = platform;
 
-    loadShopProducts();
+    await loadShopProducts();
 });
 
 // 加载 products2 表数据
@@ -30,9 +30,9 @@ async function loadShopProducts() {
             productDiv.innerHTML = `
                 <img src="${item.image1_url}" class="product-image" alt="product" />
                 <p><strong>Code:</strong> ${item.product_code}</p>
-                <p><strong>Price:</strong> $${item.price.toFixed(2)}</p>
+                <p><strong>Price:</strong> $${item.price?.toFixed(2) || 0}</p>
                 <p><strong>Rating:</strong> ⭐ ${item.rating}</p>
-                <button class="buyBtn" data-id="${item.id}" data-price="${item.price}">Buy</button>
+                <button class="buyBtn" data-id="${item.id}" data-price="${item.price || 0}">Buy</button>
             `;
             shopContainer.appendChild(productDiv);
         });
@@ -66,9 +66,9 @@ function addBuyButtonListeners() {
 
     // 确认提交
     document.getElementById("confirmBuy").addEventListener("click", async () => {
-        const productId = buyModal.dataset.id;
-        const productPrice = parseFloat(buyModal.dataset.price);
-        const userId = localStorage.getItem("currentUserId");
+        const productId = parseInt(buyModal.dataset.id);
+        const price = parseFloat(buyModal.dataset.price);
+        const userId = parseInt(localStorage.getItem("currentUserId"));
         const username = localStorage.getItem("currentUser");
         const platform = localStorage.getItem("platformAccount");
         const address = document.getElementById("buyAddress").value.trim();
@@ -81,37 +81,38 @@ function addBuyButtonListeners() {
         }
 
         try {
-            // 1️⃣ 获取用户余额
-            const { data: user, error: userErr } = await supabaseClient
+            // 先刷新 schema cache 避免 product_id 找不到
+            await supabaseClient.from("order_reviews").select("*").limit(1);
+
+            // 获取用户当前余额
+            const { data: userData, error: userErr } = await supabaseClient
                 .from("users")
                 .select("balance")
                 .eq("id", userId)
                 .maybeSingle();
 
-            if (userErr || !user) {
-                alert("Failed to fetch user balance");
+            if (userErr || !userData) {
+                alert("Failed to get user balance");
                 return;
             }
 
-            if (user.balance < productPrice) {
-                alert("❌ Insufficient balance. Please recharge.");
+            if (userData.balance < price) {
+                alert("❌ Not enough balance to buy this product");
                 return;
             }
 
-            // 2️⃣ 扣除余额
-            const { data: updatedUser, error: updateErr } = await supabaseClient
+            // 扣除余额
+            const { error: updateErr } = await supabaseClient
                 .from("users")
-                .update({ balance: user.balance - productPrice })
-                .eq("id", userId)
-                .select()
-                .single();
+                .update({ balance: userData.balance - price })
+                .eq("id", userId);
 
             if (updateErr) {
                 alert("Failed to deduct balance: " + updateErr.message);
                 return;
             }
 
-            // 3️⃣ 提交订单到审核表
+            // 插入订单审核表
             const { data, error } = await supabaseClient
                 .from("order_reviews")
                 .insert({
@@ -128,11 +129,12 @@ function addBuyButtonListeners() {
                 .single();
 
             if (error) {
+                console.error("❌ Failed to submit order:", error.message);
                 alert("Failed to submit order: " + error.message);
                 return;
             }
 
-            alert("✅ Order submitted for review! Balance has been deducted.");
+            alert(`✅ Your order has been submitted for review! $${price.toFixed(2)} has been deducted from your balance.`);
             buyModal.style.display = "none";
 
             // 清空输入框
