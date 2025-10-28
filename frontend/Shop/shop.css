@@ -2,7 +2,7 @@
 #shopProducts {
   display: grid;
   grid-template-columns: repeat(2, 1fr); /* 每行两列 */
-  gap: 5px;
+  gap: 10px;
   padding: 0px;
   justify-items: center; /* 居中对齐单元格 */
 }
@@ -202,7 +202,7 @@
   top: 0;                  /* 距离页面顶部0 */
   z-index: 100;            /* 保证在产品上方 */
   display: flex;
-  margin-bottom: 15px; /* 搜索栏和产品之间留空间 */
+  margin-bottom: 10px; /* 搜索栏和产品之间留空间 */
   gap: 10px;
 }
 
