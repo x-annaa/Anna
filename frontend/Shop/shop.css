@@ -39,23 +39,25 @@
   text-align: left;          /* 文本靠左 */
 }
 
-/* Buy 按钮保持居中 */
+/* Buy 按钮拉满整个卡片宽度 */
 .container-s4 button.buyBtn {
   margin-top: 8px;
-  padding: 6px 12px;
+  padding: 10px 0;           /* 上下内边距增大 */
+  width: 100%;               /* 横向铺满 container-s4 */
   background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 0 0 12px 12px; /* 卡片底部圆角 */
   cursor: pointer;
   font-weight: bold;
+  font-size: 14px;
   transition: 0.2s;
-  align-self: center;        /* 按钮居中 */
 }
 
 .container-s4 button.buyBtn:hover {
   background-color: #0056b3;
 }
+
 
 
 /* ======================
