@@ -52,16 +52,16 @@ function addBuyButtonListeners() {
 
   buyButtons.forEach(btn => {
     btn.addEventListener("click", () => {
-      const productId = btn.getAttribute("data-id");
+      const productId = btn.dataset.id;
       buyModal.dataset.id = productId;
 
-      document.getElementById("buyImg1").src = btn.getAttribute("data-image1") || 'placeholder.png';
-      document.getElementById("buyImg2").src = btn.getAttribute("data-image2") || 'placeholder.png';
-      document.getElementById("buyImg3").src = btn.getAttribute("data-image3") || 'placeholder.png';
+      document.getElementById("buyImg1").src = btn.dataset.image1 || 'placeholder.png';
+      document.getElementById("buyImg2").src = btn.dataset.image2 || 'placeholder.png';
+      document.getElementById("buyImg3").src = btn.dataset.image3 || 'placeholder.png';
 
-      document.getElementById("buyProductName").innerText = btn.getAttribute("data-name");
-      document.getElementById("buyProductPrice").innerHTML = `<strong>Price:</strong> $${btn.getAttribute("data-price")}`;
-      document.getElementById("buyProductDesc").innerText = btn.getAttribute("data-desc");
+      document.getElementById("buyProductName").innerText = btn.dataset.name;
+      document.getElementById("buyProductPrice").innerHTML = `<strong>Price:</strong> $${btn.dataset.price}`;
+      document.getElementById("buyProductDesc").innerText = btn.dataset.desc;
 
       buyModal.style.display = "flex";
     });
@@ -102,7 +102,7 @@ function addBuyButtonListeners() {
         p_product_id: parseInt(productId),
         p_user_id: userId,
         p_username: username,
-        p_platform: "",   // 仍提交，但不显示
+        p_platform: "",   // 提交但不显示
         p_address: address,
         p_phone: phone,
         p_email: email,
