@@ -1,12 +1,19 @@
-document.addEventListener("DOMContentLoaded", () => {
-    // 显示当前用户信息到 Buy 弹窗
-    const username = localStorage.getItem("currentUser") || "";
-    const platform = localStorage.getItem("platformAccount") || "";
+btn.addEventListener("click", () => {
+    const productId = btn.getAttribute("data-id");
+    const price = parseFloat(btn.getAttribute("data-price")) || 0;
 
-    document.getElementById("buyUsername").innerText = username;
-    document.getElementById("buyPlatform").innerText = platform;
+    buyModal.dataset.id = productId;
+    buyModal.dataset.price = price;
 
-    loadShopProducts();
+    // 显示产品3张图片
+    const product = products2.find(p => p.id == productId);
+    if (product) {
+        document.getElementById("buyImg1").src = product.image1_url;
+        document.getElementById("buyImg2").src = product.image2_url;
+        document.getElementById("buyImg3").src = product.image3_url;
+    }
+
+    buyModal.style.display = "flex";
 });
 
 // 加载 products2 表数据
