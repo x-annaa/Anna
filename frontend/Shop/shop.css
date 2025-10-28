@@ -9,7 +9,8 @@
 
 /* ======= 产品卡片 ======= */
 .container-s4 {
-  width: 220px;
+  flex: 1 1 200px; /* 最小 200px, 自动扩展 */
+  max-width: 220px; /* 最大宽度 */
   border: 1px solid #ddd;
   border-radius: 10px;
   overflow: hidden;
@@ -154,11 +155,22 @@
   margin-right: 0;
 }
 
-/* 响应式：手机屏幕 */
-@media (max-width: 600px) {
+/* ======= 响应式 ======= */
+@media (max-width: 900px) {
+  /* 平板，一行 2 个产品 */
   .container-s4 {
-    width: 90%;
+    flex: 1 1 45%; /* 两列 */
+    max-width: 45%;
   }
+}
+
+@media (max-width: 600px) {
+  /* 手机，一行 1 个产品 */
+  .container-s4 {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+
   .container-s4 img.product-image {
     height: 150px;
   }
