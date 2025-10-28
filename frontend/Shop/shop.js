@@ -70,11 +70,11 @@ function addBuyButtonListeners() {
     });
   });
 
-  document.getElementById("cancelBuy").addEventListener("click", () => {
+  document.getElementById("cancelBuy1").addEventListener("click", () => {
     buyModal.style.display = "none";
   });
 
-  document.getElementById("confirmBuy").addEventListener("click", async () => {
+  document.getElementById("confirmBuy1").addEventListener("click", async () => {
     const productId = buyModal.dataset.id;
     const userId = parseInt(localStorage.getItem("currentUserId"));
     const username = localStorage.getItem("currentUser");
