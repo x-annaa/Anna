@@ -1,14 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const username = localStorage.getItem("currentUser") || "";
-  const platform = localStorage.getItem("platformAccount") || "";
-
-  document.getElementById("buyUsername").innerText = username;
-  document.getElementById("buyPlatform").innerText = platform;
-
   loadShopProducts();
 });
 
-// 加载 products2 表数据
 async function loadShopProducts() {
   try {
     const { data: products2, error } = await supabaseClient
@@ -37,6 +30,8 @@ async function loadShopProducts() {
         <p><strong>Rating:</strong> ⭐ ${item.rating ? item.rating.toFixed(1) : '0.0'}</p>
         <button class="buyBtn" 
           data-id="${item.id}" 
+          data-name="${item.product_code}"
+          data-desc="${item.description || 'No description'}"
           data-image1="${item.image1_url || ''}" 
           data-image2="${item.image2_url || ''}" 
           data-image3="${item.image3_url || ''}"
@@ -51,7 +46,6 @@ async function loadShopProducts() {
   }
 }
 
-// Buy 模态框事件
 function addBuyButtonListeners() {
   const buyButtons = document.querySelectorAll(".buyBtn");
   const buyModal = document.getElementById("buyModal");
@@ -65,21 +59,22 @@ function addBuyButtonListeners() {
       document.getElementById("buyImg2").src = btn.getAttribute("data-image2") || 'placeholder.png';
       document.getElementById("buyImg3").src = btn.getAttribute("data-image3") || 'placeholder.png';
 
+      document.getElementById("buyProductName").innerText = btn.getAttribute("data-name");
+      document.getElementById("buyProductPrice").innerHTML = `<strong>Price:</strong> $${btn.getAttribute("data-price")}`;
+      document.getElementById("buyProductDesc").innerText = btn.getAttribute("data-desc");
+
       buyModal.style.display = "flex";
     });
   });
 
-  // 取消按钮
   document.getElementById("cancelBuy").addEventListener("click", () => {
     buyModal.style.display = "none";
   });
 
-  // 确认提交
   document.getElementById("confirmBuy").addEventListener("click", async () => {
     const productId = buyModal.dataset.id;
     const userId = parseInt(localStorage.getItem("currentUserId"));
     const username = localStorage.getItem("currentUser");
-    const platform = localStorage.getItem("platformAccount");
     const address = document.getElementById("buyAddress").value.trim();
     const phone = document.getElementById("buyPhone").value.trim();
     const email = document.getElementById("buyEmail").value.trim();
@@ -90,7 +85,6 @@ function addBuyButtonListeners() {
     }
 
     try {
-      // 获取产品价格
       const { data: productData, error: prodErr } = await supabaseClient
         .from("products2")
         .select("price")
@@ -104,12 +98,11 @@ function addBuyButtonListeners() {
 
       const price = parseFloat(productData.price);
 
-      // 调用 RPC 添加订单
       const { data, error } = await supabaseClient.rpc("add_order_review", {
         p_product_id: parseInt(productId),
         p_user_id: userId,
         p_username: username,
-        p_platform: platform,
+        p_platform: "",   // 仍提交，但不显示
         p_address: address,
         p_phone: phone,
         p_email: email,
