@@ -1,21 +1,20 @@
-/* ======= Shop 产品容器 ======= */
+/* ===== Shop 容器 ===== */
 #shopProducts {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
   padding: 20px;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
-/* ======= 产品卡片 ======= */
+/* 产品卡片 */
 .container-s4 {
-  flex: 1 1 200px; /* 最小 200px, 自动扩展 */
-  max-width: 220px; /* 最大宽度 */
+  width: calc(50% - 10px);
   border: 1px solid #ddd;
   border-radius: 10px;
   overflow: hidden;
   background: #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   transition: transform 0.2s;
 }
 
@@ -26,30 +25,28 @@
 /* 产品图片 */
 .container-s4 img.product-image {
   width: 100%;
-  height: 180px;
-  object-fit: cover;
   cursor: pointer;
+  display: block;
+  border-bottom: 1px solid #eee;
 }
 
-/* 产品名称 */
-.container-s4 .product-name {
+/* 产品信息 */
+.container-s4 p.product-name {
+  padding: 5px 10px;
   font-weight: bold;
-  font-size: 14px;
-  margin: 5px 10px;
-  color: #333;
+  font-size: 16px;
 }
 
-/* 价格和评分 */
 .container-s4 p {
-  margin: 5px 10px;
-  font-size: 13px;
+  padding: 0 10px;
+  margin: 3px 0;
+  font-size: 14px;
   color: #555;
 }
 
-/* Buy 按钮 */
 .container-s4 button.buyBtn {
-  width: calc(100% - 20px);
   margin: 10px;
+  width: calc(100% - 20px);
   padding: 8px 0;
   background-color: #007bff;
   color: #fff;
@@ -62,7 +59,7 @@
   background-color: #0056b3;
 }
 
-/* ======= Buy 弹窗 ======= */
+/* ===== Buy Modal 弹窗 ===== */
 #buyModal {
   position: fixed;
   top: 0;
@@ -87,39 +84,52 @@
   width: 90%;
   max-width: 500px;
   box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
 .container-s3 h3 {
   margin-bottom: 15px;
   text-align: center;
-  font-size: 20px;
 }
 
-/* 三张图片 */
-#buyImages {
+/* 图片区域 */
+.container-s3 .buy-images {
   display: flex;
-  gap: 5px;
-  margin-bottom: 15px;
-  width: 100%;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 10px;
 }
 
-#buyImages img {
-  width: calc(33.33% - 3.33px);
-  height: 100px;
+.container-s3 .buy-images img {
+  width: 80px;
+  height: 80px;
   object-fit: cover;
-  border-radius: 5px;
-  border: 1px solid #ccc;
   cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  transition: transform 0.2s, border-color 0.2s;
 }
 
-/* 用户信息 */
-.container-s3 p {
+.container-s3 .buy-images img:hover {
+  transform: scale(1.05);
+  border-color: #007bff;
+}
+
+/* 主图片 */
+.container-s3 #buyImg1 {
   width: 100%;
+  max-height: 250px;
+  object-fit: contain;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  border: 1px solid #eee;
+}
+
+/* 产品详情 */
+.container-s3 p, .container-s3 span {
+  display: block;
+  margin: 5px 0;
   font-size: 14px;
-  margin: 3px 0;
+  color: #333;
 }
 
 /* 输入框 */
@@ -132,55 +142,61 @@
   font-size: 14px;
 }
 
-/* 按钮 */
-.container-s3 button {
-  padding: 8px 0;
+/* 按钮容器 */
+.container-s3 .modal-actions {
+  display: flex;
+  justify-content: space-between; /* 左右分布 */
+  width: 100%;
   margin-top: 10px;
-  width: 48%;
-  margin-right: 4%;
+}
+
+/* 按钮样式 */
+.container-s3 .modal-actions button {
+  flex: 1;
+  padding: 8px 0;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   font-size: 14px;
 }
 
-#confirmBuy {
-  background-color: #28a745;
-  color: #fff;
+/* 左右间距 */
+.container-s3 .modal-actions button:first-child {
+  margin-right: 10px; /* Cancel 左边距 */
 }
 
-#cancelBuy {
-  background-color: #dc3545;
-  color: #fff;
-  margin-right: 0;
+.container-s3 .modal-actions button:last-child {
+  margin-left: 10px; /* Confirm 右边距 */
 }
 
-/* ======= 响应式 ======= */
-@media (max-width: 900px) {
-  /* 平板，一行 2 个产品 */
+/* ===== 响应式 ===== */
+@media (max-width: 800px) {
   .container-s4 {
-    flex: 1 1 45%; /* 两列 */
-    max-width: 45%;
+    width: calc(50% - 10px);
   }
 }
 
 @media (max-width: 600px) {
-  /* 手机，一行 1 个产品 */
+  /* 每行一个产品 */
   .container-s4 {
-    flex: 1 1 100%;
-    max-width: 100%;
-  }
-
-  .container-s4 img.product-image {
-    height: 150px;
-  }
-
-  #buyImages img {
-    height: 80px;
-  }
-
-  .container-s3 button {
     width: 100%;
+  }
+
+  /* 按钮垂直排列 */
+  .container-s3 .modal-actions {
+    flex-direction: column;
+  }
+
+  .container-s3 .modal-actions button {
     margin: 5px 0 0 0;
+  }
+
+  .container-s3 .buy-images {
+    gap: 5px;
+  }
+
+  .container-s3 .buy-images img {
+    width: 60px;
+    height: 60px;
   }
 }
