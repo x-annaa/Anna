@@ -9,7 +9,7 @@
 
 /* ======= 产品卡片 ======= */
 .container-s4 {
-  width: 220px;
+  width: calc(50% - 10px); /* 两列布局，间隙 20px */
   border: 1px solid #ddd;
   border-radius: 10px;
   overflow: hidden;
@@ -154,10 +154,10 @@
   margin-right: 0;
 }
 
-/* 响应式：手机屏幕 */
+/* ======= 响应式：手机屏幕 ======= */
 @media (max-width: 600px) {
   .container-s4 {
-    width: 90%;
+    width: 100%; /* 手机一列 */
   }
   .container-s4 img.product-image {
     height: 150px;
