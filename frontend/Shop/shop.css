@@ -200,13 +200,10 @@
 .shop-search-container {
   position: sticky;        /* 粘性定位 */
   top: 0;                  /* 距离页面顶部0 */
-  background-color: #fff;  /* 背景颜色，避免覆盖产品内容时透明 */
   z-index: 100;            /* 保证在产品上方 */
-  padding: 10px 20px;
   display: flex;
   margin-bottom: 15px; /* 搜索栏和产品之间留空间 */
   gap: 10px;
-  border-bottom: 1px solid #ddd; /* 可以加分隔线 */
 }
 
 /* 输入框和按钮样式保持不变 */
