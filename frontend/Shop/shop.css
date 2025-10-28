@@ -184,3 +184,15 @@
     margin: 0;
   }
 }
+
+#buyProductName {
+  font-weight: bold;
+  font-size: 20px;
+  margin-bottom: 15px;
+  text-align: center;
+
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
