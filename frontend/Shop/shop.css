@@ -19,14 +19,13 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; /* 顶部开始排列 */
   align-items: flex-start;
   position: relative;
-  height: 280px;               /* 固定高度，保证卡片统一 */
+  height: 280px;            /* 卡片高度固定 */
   box-sizing: border-box;
 }
 
-/* 产品图片 */
+/* 产品图片统一大小 */
 .container-s4 img.product-image {
   width: 100%;
   max-width: 160px;
@@ -34,17 +33,17 @@
   object-fit: cover;
   border-radius: 8px;
   margin-bottom: 8px;
-  align-self: center;           /* 图片居中 */
+  align-self: center;       /* 图片居中 */
 }
 
-/* 产品名称：单行超出显示 ... */
+/* 产品名称：单行，超出显示 ... */
 .container-s4 .product-name {
   font-weight: bold;
   font-size: 14px;
   line-height: 1.2em;
-  white-space: nowrap;          /* 单行显示 */
+  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;      /* 超出显示 ... */
+  text-overflow: ellipsis;
   margin-bottom: 4px;
   width: 100%;
 }
@@ -53,26 +52,26 @@
 .container-s4 .product-price {
   font-size: 13px;
   color: red;
-  margin-bottom: 2px;
+  margin: 2px 0;            /* 间距统一 */
 }
 
 /* 产品折扣信息 */
 .container-s4 .product-discount {
   font-size: 12px;
   color: #888;
-  margin-bottom: 2px;
+  margin: 2px 0;
 }
 
 /* 产品评分 */
 .container-s4 .product-rating {
   font-size: 12px;
   color: #555;
-  margin-bottom: 8px;
+  margin: 2px 0 8px 0;      /* 距离 Buy 按钮固定 */
 }
 
-/* Buy 按钮：固定在底部，铺满宽度 */
+/* Buy 按钮：固定底部，铺满宽度 */
 .container-s4 button.buyBtn {
-  margin-top: auto;             /* 自动推到底部 */
+  margin-top: auto;          /* 自动推到底部 */
   padding: 10px 0;
   width: 100%;
   background-color: #007bff;
@@ -95,14 +94,13 @@
   font-size: 13px;
   color: #333;
   text-align: left;
-  line-height: 1.2em;            /* 行高统一 */
 }
 
 /* label 和内容紧凑 */
 .container-s4 p strong {
   display: inline-block;
   margin-right: 4px;
-  min-width: 0;                  /* 不占过多空间 */
+  min-width: 0;             /* 避免 Name: 占过多空间 */
 }
 
 /* ======================
