@@ -39,28 +39,21 @@
   text-align: left;          /* 文本靠左 */
 }
 
-/* 按钮放在卡片下面，横向铺满 */
-.buyBtn-container {
-  width: 100%;
-  display: flex;
-  justify-content: center; /* 可去掉，让按钮和卡片左对齐 */
-  margin-top: 4px;
-}
-
-.buyBtn-container button.buyBtn {
-  width: 100%;
-  max-width: 160px; /* 可与 container-s4 宽度一致 */
-  padding: 10px 0;
+/* Buy 按钮拉满整个卡片宽度 */
+.container-s4 button.buyBtn {
+  margin-top: 8px;
+  padding: 10px 0;           /* 上下内边距增大 */
+  width: 100%;               /* 横向铺满 container-s4 */
   background-color: #007bff;
-  color: #fff;
+  color: white;
   border: none;
-  border-radius: 8px;
-  font-weight: bold;
   cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
   transition: 0.2s;
 }
 
-.buyBtn-container button.buyBtn:hover {
+.container-s4 button.buyBtn:hover {
   background-color: #0056b3;
 }
 
