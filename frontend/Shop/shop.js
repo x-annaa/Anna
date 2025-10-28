@@ -1,4 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // 显示当前用户信息到 Buy 弹窗
+    const username = localStorage.getItem("currentUser") || "";
+    const platform = localStorage.getItem("platformAccount") || "";
+
+    document.getElementById("buyUsername").innerText = username;
+    document.getElementById("buyPlatform").innerText = platform;
+
     loadShopProducts();
 });
 
@@ -10,7 +17,7 @@ async function loadShopProducts() {
             .select("*");
 
         if (error) {
-            console.error("❌ Failed to load product2:", error.message);
+            console.error("❌ Failed to load products2:", error.message);
             return;
         }
 
@@ -49,26 +56,59 @@ function addBuyButtonListeners() {
         });
     });
 
+    // 取消按钮
     document.getElementById("cancelBuy").addEventListener("click", () => {
         buyModal.style.display = "none";
     });
 
+    // 确认提交
     document.getElementById("confirmBuy").addEventListener("click", async () => {
         const productId = buyModal.dataset.id;
-        const username = document.getElementById("buyUsername").innerText;
-        const platform = document.getElementById("buyPlatform").innerText;
-        const address = document.getElementById("buyAddress").value;
-        const phone = document.getElementById("buyPhone").value;
-        const email = document.getElementById("buyEmail").value;
+        const userId = localStorage.getItem("currentUserId");
+        const username = localStorage.getItem("currentUser");
+        const platform = localStorage.getItem("platformAccount");
+        const address = document.getElementById("buyAddress").value.trim();
+        const phone = document.getElementById("buyPhone").value.trim();
+        const email = document.getElementById("buyEmail").value.trim();
 
         if (!address || !phone || !email) {
             alert("Please fill out all fields");
             return;
         }
 
-        console.log("✅ Submit order:", { productId, username, platform });
+        try {
+            const { data, error } = await supabaseClient
+                .from("order_reviews")
+                .insert({
+                    product_id: productId,
+                    user_id: userId,
+                    username,
+                    platform,
+                    address,
+                    phone,
+                    email,
+                    status: "pending"
+                })
+                .select()
+                .single();
 
-        alert("✅ Your order has been submitted for review!");
-        buyModal.style.display = "none";
+            if (error) {
+                console.error("❌ Failed to submit order:", error.message);
+                alert("Failed to submit order: " + error.message);
+                return;
+            }
+
+            alert("✅ Your order has been submitted for review!");
+            buyModal.style.display = "none";
+
+            // 清空输入框
+            document.getElementById("buyAddress").value = "";
+            document.getElementById("buyPhone").value = "";
+            document.getElementById("buyEmail").value = "";
+
+        } catch (e) {
+            console.error("⚠️ Unexpected error:", e);
+            alert("An unexpected error occurred.");
+        }
     });
 }
