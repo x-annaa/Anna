@@ -349,7 +349,7 @@
 }
 
 @media screen and (max-width: 420px) {
-  #chatWindow { width: 100%; max-width: 320px; height: 500px; }
+  #chatWindow { width: 90%; height: 500px; }
   .telegram-box,
   #openChatBtn { padding: 10px; }
 }
