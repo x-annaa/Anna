@@ -165,3 +165,18 @@ button-h {
   font-family: inherit;
   outline: none;
 }
+
+h-h1 {
+  margin-bottom: 1px;
+  font-weight: 600;
+}
+
+h-h1 {
+    display: block;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+    unicode-bidi: isolate;
+}
