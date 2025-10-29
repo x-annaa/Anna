@@ -265,3 +265,30 @@ function updateMsgButtonUnread(unread) {
 // 调用示例
 updateMsgButtonUnread(5);  // 红点显示 5
 updateMsgButtonUnread(0);  // 红点隐藏
+
+function adjustChatForKeyboard() {
+  if (!chatWindow) return;
+
+  let initialHeight = window.innerHeight;
+
+  window.addEventListener('resize', () => {
+    const vh = window.innerHeight;
+    const keyboardHeight = initialHeight - vh;
+
+    if (keyboardHeight > 100) { 
+      // 键盘弹起
+      chatWindow.style.height = vh + "px"; 
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+    } else { 
+      // 键盘收起
+      chatWindow.style.height = "100vh"; 
+    }
+
+    // 滚动到底部
+    scrollToBottom();
+  });
+}
+
+// 初始化
+adjustChatForKeyboard();
+
