@@ -1,3 +1,6 @@
+// =====================
+// ABOUT 页面聊天 JS
+// =====================
 document.addEventListener("DOMContentLoaded", () => {
   // =====================
   // DOM 元素
@@ -10,13 +13,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const chatMessages = document.getElementById("chatMessages");
   const copyTelegramBtn = document.getElementById("copyTelegramBtn");
   const telegramAccountEl = document.getElementById("telegramAccount");
-
+  
+  const bottomUnreadEl = document.querySelector("#bottomUnreadCount");
+  const chatBtnUnreadEl = document.querySelector("#chatBtnUnreadCount");
   const aboutBtnUnreadEl = document.querySelector('button[data-page="msgPage"] .bottom-unread-dot');
-
+  
   let chatSubscription = null;
 
   // =====================
-  // 当前用户 ID
+  // 获取当前用户 ID
   // =====================
   function getCurrentUserId() {
     const id = localStorage.getItem("currentUserId");
@@ -39,8 +44,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const userId = getCurrentUserId();
     if (!userId) return alert("请先登录！");
 
-    document.body.classList.add("chat-open");
     chatWindow.style.display = "flex";
+    chatWindow.classList.remove("hidden");
     chatMessages.innerHTML = "";
 
     await loadMessages();
@@ -55,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // =====================
   backBtn?.addEventListener("click", () => {
     chatWindow.style.display = "none";
-    document.body.classList.remove("chat-open");
+    chatWindow.classList.add("hidden");
 
     if (chatSubscription) {
       supabaseClient.removeChannel(chatSubscription);
@@ -69,6 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
   sendBtn?.addEventListener("click", async () => {
     const userId = getCurrentUserId();
     if (!userId) return alert("请先登录！");
+
     const content = chatInput.value.trim();
     if (!content) return;
 
@@ -96,6 +102,9 @@ document.addEventListener("DOMContentLoaded", () => {
     scrollToBottom();
   }
 
+  // =====================
+  // 滚动到底部
+  // =====================
   function scrollToBottom() {
     if (!chatMessages) return;
     chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -122,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // =====================
-  // 标记已读
+  // 标记为已读
   // =====================
   async function markMessagesAsRead() {
     const userId = getCurrentUserId();
@@ -151,14 +160,27 @@ document.addEventListener("DOMContentLoaded", () => {
     if (error) return console.error(error);
 
     const unread = count || 0;
-    if (aboutBtnUnreadEl) {
-      if (unread > 0) {
-        aboutBtnUnreadEl.textContent = unread > 99 ? "99+" : unread;
-        aboutBtnUnreadEl.classList.add("show");
+    const show = unread > 0;
+    const text = unread > 99 ? "99+" : unread;
+
+    [
+      bottomUnreadEl,
+      chatBtnUnreadEl,
+      document.querySelector("#openChatBtn .unread-dot"),
+      aboutBtnUnreadEl
+    ].forEach(el => {
+      if (!el) return;
+      if (show) {
+        el.textContent = text;
+        el.style.display = "inline-block";
+        el.classList.remove("show"); // 重置动画
+        void el.offsetWidth;          // 强制重绘
+        el.classList.add("show");     // 触发 popIn + pulse
       } else {
-        aboutBtnUnreadEl.classList.remove("show");
+        el.style.display = "none";
+        el.classList.remove("show");
       }
-    }
+    });
   }
 
   // =====================
@@ -199,34 +221,24 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // =====================
-  // 手机键盘自适应 + 全屏
+  // 手机键盘自适应
   // =====================
   function adjustChatForKeyboard() {
     if (!chatWindow) return;
-    chatWindow.style.top = "0";
-    chatWindow.style.left = "0";
-    chatWindow.style.width = "100vw";
-    chatWindow.style.height = "100vh";
-    chatWindow.style.transform = "none";
-
     let initialHeight = window.innerHeight;
-
     window.addEventListener('resize', () => {
       const vh = window.innerHeight;
       const keyboardHeight = initialHeight - vh;
 
       if (keyboardHeight > 100) {
-        chatWindow.style.height = vh + "px";
-        chatInput?.scrollIntoView({ behavior: "smooth", block: "end" });
+        chatWindow.style.top = 'auto';
+        chatWindow.style.bottom = '0';
+        chatWindow.style.transform = 'translateX(-50%)';
       } else {
-        chatWindow.style.height = "100vh";
+        chatWindow.style.top = '50%';
+        chatWindow.style.bottom = 'auto';
+        chatWindow.style.transform = 'translate(-50%, -50%)';
       }
-      scrollToBottom();
-    });
-
-    window.addEventListener('orientationchange', () => {
-      initialHeight = window.innerHeight;
-      chatWindow.style.height = initialHeight + "px";
       scrollToBottom();
     });
   }
