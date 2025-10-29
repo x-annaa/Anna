@@ -1,132 +1,251 @@
-// ==============================
-// 📌 DOM 元素获取
-// ==============================
-const openChatBtn = document.getElementById('openChatBtn');
-const chatWindow = document.getElementById('chatWindow');
-const closeChatBtn = document.getElementById('closeChatBtn');
-const chatMessages = document.getElementById('chatMessages');
-const chatInput = document.getElementById('chatInput');
-const sendChatBtn = document.getElementById('sendChatBtn');
-const unreadDot = document.querySelector('.unread-dot');
-const bottomUnreadDot = document.querySelector('.bottom-unread-dot'); // 底部导航红点
+// =====================
+// ABOUT 页面聊天 JS
+// =====================
+document.addEventListener("DOMContentLoaded", () => {
+  // =====================
+  // DOM 元素
+  // =====================
+  const openChatBtn = document.getElementById("openChatBtn");
+  const chatWindow = document.getElementById("chatWindow");
+  const backBtn = document.getElementById("backBtn");
+  const sendBtn = document.getElementById("sendBtn");
+  const chatInput = document.getElementById("chatInput");
+  const chatMessages = document.getElementById("chatMessages");
+  const copyTelegramBtn = document.getElementById("copyTelegramBtn");
+  const telegramAccountEl = document.getElementById("telegramAccount");
+  
+  const bottomUnreadEl = document.querySelector("#bottomUnreadCount");
+  const chatBtnUnreadEl = document.querySelector("#chatBtnUnreadCount");
+  const aboutBtnUnreadEl = document.querySelector('button[data-page="msgPage"] .bottom-unread-dot');
+  
+  let chatSubscription = null;
 
-// ==============================
-// 📌 未读消息逻辑
-// ==============================
-let unreadCount = 0;
+  // =====================
+  // 获取当前用户 ID
+  // =====================
+  function getCurrentUserId() {
+    const id = localStorage.getItem("currentUserId");
+    return id ? Number(id) : null;
+  }
 
-// 显示客服红点
-function showUnreadDot() {
-  unreadDot.style.display = 'inline-block';
-  unreadDot.classList.add('show');
-  unreadDot.textContent = unreadCount;
-}
-
-// 隐藏客服红点
-function hideUnreadDot() {
-  unreadDot.style.display = 'none';
-  unreadDot.classList.remove('show');
-  unreadCount = 0;
-}
-
-// 显示底部红点
-function showBottomDot() {
-  if (!bottomUnreadDot) return;
-  bottomUnreadDot.style.display = 'block';
-  bottomUnreadDot.classList.remove('show'); // 重置动画
-  void bottomUnreadDot.offsetWidth;         // 重新触发动画
-  bottomUnreadDot.classList.add('show');
-}
-
-// 隐藏底部红点
-function hideBottomDot() {
-  if (!bottomUnreadDot) return;
-  bottomUnreadDot.style.display = 'none';
-  bottomUnreadDot.classList.remove('show');
-}
-
-// ==============================
-// 📌 聊天窗口控制
-// ==============================
-
-// 打开聊天窗口
-if (openChatBtn) {
-  openChatBtn.addEventListener('click', () => {
-    chatWindow.style.display = 'flex';
-    hideUnreadDot();   // 清除红点
-    hideBottomDot();   // 同时清除底部红点
+  // =====================
+  // 自动增高 textarea
+  // =====================
+  chatInput?.addEventListener("input", () => {
+    chatInput.style.height = "auto";
+    chatInput.style.height = chatInput.scrollHeight + "px";
+    scrollToBottom();
   });
-}
 
-// 关闭聊天窗口
-if (closeChatBtn) {
-  closeChatBtn.addEventListener('click', () => {
-    chatWindow.style.display = 'none';
+  // =====================
+  // 打开聊天窗口
+  // =====================
+  openChatBtn?.addEventListener("click", async () => {
+    const userId = getCurrentUserId();
+    if (!userId) return alert("请先登录！");
+
+    chatWindow.style.display = "flex";
+    chatWindow.classList.remove("hidden");
+    chatMessages.innerHTML = "";
+
+    await loadMessages();
+    listenForMessages();
+    await markMessagesAsRead();
+    updateUnreadCount();
+    scrollToBottom();
   });
-}
 
-// ==============================
-// 📌 聊天发送功能
-// ==============================
-if (sendChatBtn) {
-  sendChatBtn.addEventListener('click', sendMessage);
-}
-if (chatInput) {
-  chatInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
+  // =====================
+  // 返回按钮
+  // =====================
+  backBtn?.addEventListener("click", () => {
+    chatWindow.style.display = "none";
+    chatWindow.classList.add("hidden");
+
+    if (chatSubscription) {
+      supabaseClient.removeChannel(chatSubscription);
+      chatSubscription = null;
     }
   });
-}
 
-function sendMessage() {
-  const text = chatInput.value.trim();
-  if (!text) return;
+  // =====================
+  // 发送消息
+  // =====================
+  sendBtn?.addEventListener("click", async () => {
+    const userId = getCurrentUserId();
+    if (!userId) return alert("请先登录！");
 
-  appendMessage(text, 'me');
-  chatInput.value = '';
+    const content = chatInput.value.trim();
+    if (!content) return;
 
-  // 模拟客服回复
-  setTimeout(() => {
-    appendMessage('Hello! How can I help you?', 'bot');
-  }, 800);
-}
+    const { error } = await supabaseClient.from("messages").insert([
+      { sender_id: userId, receiver_id: 1, content, is_read: false }
+    ]);
 
-// ==============================
-// 📌 消息显示函数
-// ==============================
-function appendMessage(text, type) {
-  const msg = document.createElement('div');
-  msg.classList.add('message-item', type);
-  msg.textContent = text;
-  chatMessages.appendChild(msg);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
+    if (error) return alert("发送失败：" + error.message);
 
-  // 如果聊天窗口未打开，增加未读数
-  if (chatWindow.style.display === 'none' && type === 'bot') {
-    unreadCount++;
-    showUnreadDot();
-    showBottomDot();
-  }
-}
-
-// ==============================
-// 📌 Telegram 复制按钮
-// ==============================
-const copyTelegramBtn = document.getElementById('copyTelegramBtn');
-const telegramAccount = document.getElementById('telegramAccount');
-if (copyTelegramBtn && telegramAccount) {
-  copyTelegramBtn.addEventListener('click', () => {
-    navigator.clipboard.writeText(telegramAccount.textContent.trim())
-      .then(() => {
-        copyTelegramBtn.textContent = '已复制 ✓';
-        setTimeout(() => (copyTelegramBtn.textContent = '复制'), 1500);
-      });
+    appendMessage("我", content);
+    chatInput.value = "";
+    chatInput.style.height = "auto";
+    scrollToBottom();
   });
-}
 
-// ==============================
-// ✅ 调试日志
-// ==============================
-console.log('✅ about.js 已加载完毕');
+  // =====================
+  // 显示消息
+  // =====================
+  function appendMessage(sender, text) {
+    if (!chatMessages) return;
+    const msg = document.createElement("div");
+    msg.classList.add("message-item", sender === "我" ? "me" : "bot");
+    msg.innerHTML = text.replace(/\n/g, "<br>");
+    chatMessages.appendChild(msg);
+    scrollToBottom();
+  }
+
+  // =====================
+  // 滚动到底部
+  // =====================
+  function scrollToBottom() {
+    if (!chatMessages) return;
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  // =====================
+  // 加载历史消息
+  // =====================
+  async function loadMessages() {
+    const userId = getCurrentUserId();
+    if (!userId) return;
+
+    const { data, error } = await supabaseClient
+      .from("messages")
+      .select("*")
+      .or(`and(sender_id.eq.${userId},receiver_id.eq.1),and(sender_id.eq.1,receiver_id.eq.${userId})`)
+      .order("created_at", { ascending: true });
+
+    if (error) return console.error(error);
+
+    data.forEach(msg =>
+      appendMessage(msg.sender_id === userId ? "我" : "客服", msg.content)
+    );
+  }
+
+  // =====================
+  // 标记为已读
+  // =====================
+  async function markMessagesAsRead() {
+    const userId = getCurrentUserId();
+    if (!userId) return;
+
+    await supabaseClient
+      .from("messages")
+      .update({ is_read: true })
+      .eq("receiver_id", userId)
+      .eq("is_read", false);
+  }
+
+  // =====================
+  // 更新未读红点
+  // =====================
+  async function updateUnreadCount() {
+    const userId = getCurrentUserId();
+    if (!userId) return;
+
+    const { count, error } = await supabaseClient
+      .from("messages")
+      .select("id", { count: "exact", head: true })
+      .eq("receiver_id", userId)
+      .eq("is_read", false);
+
+    if (error) return console.error(error);
+
+    const unread = count || 0;
+    const show = unread > 0;
+    const text = unread > 99 ? "99+" : unread;
+
+    [
+      bottomUnreadEl,
+      chatBtnUnreadEl,
+      document.querySelector("#openChatBtn .unread-dot"),
+      aboutBtnUnreadEl
+    ].forEach(el => {
+      if (!el) return;
+      if (show) {
+        el.textContent = text;
+        el.style.display = "inline-block";
+        el.classList.remove("show"); // 重置动画
+        void el.offsetWidth;          // 强制重绘
+        el.classList.add("show");     // 触发 popIn + pulse
+      } else {
+        el.style.display = "none";
+        el.classList.remove("show");
+      }
+    });
+  }
+
+  // =====================
+  // 监听实时消息
+  // =====================
+  function listenForMessages() {
+    const userId = getCurrentUserId();
+    if (!userId) return;
+
+    if (chatSubscription) supabaseClient.removeChannel(chatSubscription);
+
+    chatSubscription = supabaseClient.channel("realtime-messages")
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "messages",
+        filter: `receiver_id=eq.${userId}`
+      }, async payload => {
+        const msg = payload.new;
+        if (msg.sender_id === 1 && chatWindow?.style.display !== "none") {
+          appendMessage("客服", msg.content);
+          await markMessagesAsRead();
+        }
+        updateUnreadCount();
+      })
+      .subscribe();
+  }
+
+  // =====================
+  // Telegram 复制
+  // =====================
+  copyTelegramBtn?.addEventListener("click", () => {
+    const text = telegramAccountEl?.textContent || "";
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() =>
+      alert("已复制 Telegram 账号：" + text)
+    );
+  });
+
+  // =====================
+  // 手机键盘自适应
+  // =====================
+  function adjustChatForKeyboard() {
+    if (!chatWindow) return;
+    let initialHeight = window.innerHeight;
+    window.addEventListener('resize', () => {
+      const vh = window.innerHeight;
+      const keyboardHeight = initialHeight - vh;
+
+      if (keyboardHeight > 100) {
+        chatWindow.style.top = 'auto';
+        chatWindow.style.bottom = '0';
+        chatWindow.style.transform = 'translateX(-50%)';
+      } else {
+        chatWindow.style.top = '50%';
+        chatWindow.style.bottom = 'auto';
+        chatWindow.style.transform = 'translate(-50%, -50%)';
+      }
+      scrollToBottom();
+    });
+  }
+
+  // =====================
+  // 初始化
+  // =====================
+  adjustChatForKeyboard();
+  updateUnreadCount();
+});
