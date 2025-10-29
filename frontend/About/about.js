@@ -1,8 +1,7 @@
 // =====================
-// ABOUT 页面 JS
+// ABOUT 页面聊天 JS
 // =====================
 document.addEventListener("DOMContentLoaded", () => {
-
   // =====================
   // DOM 元素
   // =====================
@@ -12,13 +11,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const sendBtn = document.getElementById("sendBtn");
   const chatInput = document.getElementById("chatInput");
   const chatMessages = document.getElementById("chatMessages");
-
-  const bottomUnreadEl = document.getElementById("bottomUnreadCount");
-  const chatBtnUnreadEl = document.getElementById("chatBtnUnreadCount");
-
   const copyTelegramBtn = document.getElementById("copyTelegramBtn");
   const telegramAccountEl = document.getElementById("telegramAccount");
-
+  
+  const bottomUnreadEl = document.querySelector("#bottomUnreadCount");
+  const chatBtnUnreadEl = document.querySelector("#chatBtnUnreadCount");
+  
   let chatSubscription = null;
 
   // =====================
@@ -48,7 +46,6 @@ document.addEventListener("DOMContentLoaded", () => {
     chatWindow?.classList.remove("hidden");
     chatMessages && (chatMessages.innerHTML = "");
 
-    // 加载历史消息
     await loadMessages();
     listenForMessages();
     await markMessagesAsRead();
@@ -81,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
       { sender_id: userId, receiver_id: 1, content, is_read: false }
     ]);
 
-    if (error) return alert("发送失败");
+    if (error) return alert("发送失败：" + error.message);
 
     appendMessage("我", content);
     chatInput.value = "";
@@ -94,7 +91,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // =====================
   function appendMessage(sender, text) {
     if (!chatMessages) return;
-
     const msg = document.createElement("div");
     msg.classList.add("message-item", sender === "我" ? "me" : "bot");
     msg.innerHTML = text.replace(/\n/g, "<br>");
@@ -145,7 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // =====================
-  // 更新红点显示
+  // 更新未读红点
   // =====================
   async function updateUnreadCount() {
     const userId = getCurrentUserId();
@@ -197,7 +193,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // =====================
-  // Telegram 一键复制
+  // Telegram 复制
   // =====================
   copyTelegramBtn?.addEventListener("click", () => {
     const text = telegramAccountEl?.textContent || "";
@@ -208,13 +204,11 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // =====================
-  // 手机键盘兼容
+  // 手机键盘自适应
   // =====================
   function adjustChatForKeyboard() {
     if (!chatWindow) return;
-
     let initialHeight = window.innerHeight;
-
     window.addEventListener('resize', () => {
       const vh = window.innerHeight;
       const keyboardHeight = initialHeight - vh;
@@ -228,14 +222,13 @@ document.addEventListener("DOMContentLoaded", () => {
         chatWindow.style.bottom = 'auto';
         chatWindow.style.transform = 'translate(-50%, -50%)';
       }
-
       scrollToBottom();
     });
   }
 
+  // =====================
   // 初始化
+  // =====================
   adjustChatForKeyboard();
   updateUnreadCount();
-  listenForMessages();
-
 });
