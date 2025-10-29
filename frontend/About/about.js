@@ -13,11 +13,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const chatMessages = document.getElementById("chatMessages");
   const copyTelegramBtn = document.getElementById("copyTelegramBtn");
   const telegramAccountEl = document.getElementById("telegramAccount");
-  
+
   const bottomUnreadEl = document.querySelector("#bottomUnreadCount");
   const chatBtnUnreadEl = document.querySelector("#chatBtnUnreadCount");
   const aboutBtnUnreadEl = document.querySelector('button[data-page="msgPage"] .bottom-unread-dot');
-  
+
   let chatSubscription = null;
 
   // =====================
@@ -44,12 +44,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const userId = getCurrentUserId();
     if (!userId) return alert("请先登录！");
 
-     if (chatWindow) {
-       chatWindow.style.display = "flex"; // <-- 关键
-       chatWindow.classList.remove("hidden");
-     }
-  
-     if (chatMessages) chatMessages.innerHTML = "";
+    if (chatWindow) {
+      chatWindow.style.display = "flex";
+      chatWindow.classList.remove("hidden");
+    }
+
+    if (chatMessages) chatMessages.innerHTML = "";
 
     await loadMessages();
     listenForMessages();
@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // =====================
   backBtn?.addEventListener("click", () => {
     if (chatWindow) {
-      chatWindow.style.display = "none"; // <-- 关键
+      chatWindow.style.display = "none";
       chatWindow.classList.add("hidden");
     }
     if (chatSubscription) {
@@ -149,7 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // =====================
-  // 更新未读红点
+  // 更新未读红点（含动画）
   // =====================
   async function updateUnreadCount() {
     const userId = getCurrentUserId();
@@ -171,17 +171,19 @@ document.addEventListener("DOMContentLoaded", () => {
       bottomUnreadEl,
       chatBtnUnreadEl,
       document.querySelector("#openChatBtn .unread-dot"),
-      aboutBtnUnreadEl // ✅ 加上 About 的红点
+      aboutBtnUnreadEl
     ].forEach(el => {
       if (!el) return;
       if (show) {
         el.textContent = text;
         el.style.display = "inline-block";
-        el.classList.add("show");       // ✅ 添加动画类
-        setTimeout(() => el.classList.remove("show"), 400); // 动画结束后清除，方便下次再弹
+        el.classList.add("show");
+        setTimeout(() => el.classList.remove("show"), 400);
       } else {
         el.style.display = "none";
       }
+    });
+  }
 
   // =====================
   // 监听实时消息
@@ -248,4 +250,4 @@ document.addEventListener("DOMContentLoaded", () => {
   // =====================
   adjustChatForKeyboard();
   updateUnreadCount();
-});
+}); // ✅ 最后一定要有这两个括号！
