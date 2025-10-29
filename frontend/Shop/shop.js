@@ -159,24 +159,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
 let quantity = 1;
 let unitPrice = 0;
+let currentProduct = null;
 
 const qtyDisplay = document.getElementById("buyQuantity");
 const priceDisplay = document.getElementById("buyProductPrice");
 
 function openBuyModal(product) {
-  unitPrice = product.price; // 商品单价
-  resetQuantity();
+  currentProduct = product; // ✅ 保存商品对象
+  unitPrice = Number(product.price); // ✅ numeric 转 number
+  quantity = 1;
+  
+  qtyDisplay.textContent = quantity;
   updateTotalPrice();
+
+  // ✅ 显示初始单价
+  priceDisplay.textContent = `Price: $${unitPrice.toFixed(2)}`;
 }
 
 function updateTotalPrice() {
   const totalPrice = unitPrice * quantity;
-  priceDisplay.textContent = `Price: $${totalPrice}`;
-}
-
-function resetQuantity() {
-  quantity = 1;
-  qtyDisplay.textContent = quantity;
+  priceDisplay.textContent = `Price: $${totalPrice.toFixed(2)}`;
 }
 
 document.getElementById("qtyMinus").addEventListener("click", () => {
@@ -191,14 +193,4 @@ document.getElementById("qtyPlus").addEventListener("click", () => {
   quantity++;
   qtyDisplay.textContent = quantity;
   updateTotalPrice();
-});
-
-document.getElementById("confirmBuy1").addEventListener("click", () => {
-  const totalCost = unitPrice * quantity;
-
-  console.log("✅ Selected Quantity:", quantity);
-  console.log("✅ Total Price:", totalCost);
-
-  // ✅ 提交到数据库时带上数量和总价
-  // TODO: Supabase insert with { productId, quantity, totalCost, ...}
 });
