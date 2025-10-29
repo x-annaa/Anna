@@ -400,17 +400,17 @@ button[data-page="msgPage"] {
 /* 红点样式 */
 .bottom-unread-dot {
   position: absolute;
-  top: -4px;         /* 调整到按钮右上角 */
-  right: -4px;       /* 调整到按钮右上角 */
-  width: 12px;
-  height: 12px;
+  top: 10px;         /* 调整到按钮右上角 */
+  right: px;       /* 调整到按钮右上角 */
+  width: 17px;
+  height: 16px;
   background-color: red;
   border-radius: 50%;
   display: none;      /* 默认隐藏 */
   font-size: 10px;
   color: #fff;
   text-align: center;
-  line-height: 12px;
+  line-height: 15px;
   pointer-events: none;
   z-index: 10;        /* 保证在按钮上层 */
 }
