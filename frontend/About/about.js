@@ -1,6 +1,3 @@
-// =====================
-// ABOUT 页面聊天 JS
-// =====================
 document.addEventListener("DOMContentLoaded", () => {
   // =====================
   // DOM 元素
@@ -13,15 +10,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const chatMessages = document.getElementById("chatMessages");
   const copyTelegramBtn = document.getElementById("copyTelegramBtn");
   const telegramAccountEl = document.getElementById("telegramAccount");
-  
-  const bottomUnreadEl = document.querySelector("#bottomUnreadCount");
-  const chatBtnUnreadEl = document.querySelector("#chatBtnUnreadCount");
+
   const aboutBtnUnreadEl = document.querySelector('button[data-page="msgPage"] .bottom-unread-dot');
-  
+
   let chatSubscription = null;
 
   // =====================
-  // 获取当前用户 ID
+  // 当前用户 ID
   // =====================
   function getCurrentUserId() {
     const id = localStorage.getItem("currentUserId");
@@ -45,7 +40,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!userId) return alert("请先登录！");
 
     chatWindow.style.display = "flex";
-    chatWindow.classList.remove("hidden");
     chatMessages.innerHTML = "";
 
     await loadMessages();
@@ -60,7 +54,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // =====================
   backBtn?.addEventListener("click", () => {
     chatWindow.style.display = "none";
-    chatWindow.classList.add("hidden");
 
     if (chatSubscription) {
       supabaseClient.removeChannel(chatSubscription);
@@ -102,9 +95,6 @@ document.addEventListener("DOMContentLoaded", () => {
     scrollToBottom();
   }
 
-  // =====================
-  // 滚动到底部
-  // =====================
   function scrollToBottom() {
     if (!chatMessages) return;
     chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -131,7 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // =====================
-  // 标记为已读
+  // 标记已读
   // =====================
   async function markMessagesAsRead() {
     const userId = getCurrentUserId();
@@ -160,27 +150,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (error) return console.error(error);
 
     const unread = count || 0;
-    const show = unread > 0;
-    const text = unread > 99 ? "99+" : unread;
-
-    [
-      bottomUnreadEl,
-      chatBtnUnreadEl,
-      document.querySelector("#openChatBtn .unread-dot"),
-      aboutBtnUnreadEl
-    ].forEach(el => {
-      if (!el) return;
-      if (show) {
-        el.textContent = text;
-        el.style.display = "inline-block";
-        el.classList.remove("show"); // 重置动画
-        void el.offsetWidth;          // 强制重绘
-        el.classList.add("show");     // 触发 popIn + pulse
+    if (aboutBtnUnreadEl) {
+      if (unread > 0) {
+        aboutBtnUnreadEl.textContent = unread > 99 ? "99+" : unread;
+        aboutBtnUnreadEl.classList.add("show");
       } else {
-        el.style.display = "none";
-        el.classList.remove("show");
+        aboutBtnUnreadEl.classList.remove("show");
       }
-    });
+    }
   }
 
   // =====================
@@ -221,24 +198,28 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // =====================
-  // 手机键盘自适应
+  // 手机键盘自适应 + 全屏
   // =====================
   function adjustChatForKeyboard() {
     if (!chatWindow) return;
-    let initialHeight = window.innerHeight;
+    chatWindow.style.top = "0";
+    chatWindow.style.left = "0";
+    chatWindow.style.width = "100vw";
+    chatWindow.style.height = "100vh";
+    chatWindow.style.transform = "none";
+
+    const initialHeight = window.innerHeight;
+
     window.addEventListener('resize', () => {
       const vh = window.innerHeight;
       const keyboardHeight = initialHeight - vh;
 
       if (keyboardHeight > 100) {
-        chatWindow.style.top = 'auto';
-        chatWindow.style.bottom = '0';
-        chatWindow.style.transform = 'translateX(-50%)';
+        chatWindow.style.height = vh + "px";
       } else {
-        chatWindow.style.top = '50%';
-        chatWindow.style.bottom = 'auto';
-        chatWindow.style.transform = 'translate(-50%, -50%)';
+        chatWindow.style.height = "100vh";
       }
+
       scrollToBottom();
     });
   }
@@ -249,46 +230,3 @@ document.addEventListener("DOMContentLoaded", () => {
   adjustChatForKeyboard();
   updateUnreadCount();
 });
-
-function updateMsgButtonUnread(unread) {
-  const msgBtn = document.querySelector('button[data-page="msgPage"]');
-  const dot = msgBtn.querySelector(".bottom-unread-dot");
-  
-  if (unread > 0) {
-    dot.textContent = unread > 99 ? "99+" : unread;
-    dot.classList.add("show");
-  } else {
-    dot.classList.remove("show");
-  }
-}
-
-// 调用示例
-updateMsgButtonUnread(5);  // 红点显示 5
-updateMsgButtonUnread(0);  // 红点隐藏
-
-function adjustChatForKeyboard() {
-  if (!chatWindow) return;
-
-  let initialHeight = window.innerHeight;
-
-  window.addEventListener('resize', () => {
-    const vh = window.innerHeight;
-    const keyboardHeight = initialHeight - vh;
-
-    if (keyboardHeight > 100) { 
-      // 键盘弹起
-      chatWindow.style.height = vh + "px"; 
-      chatWindow.scrollTop = chatWindow.scrollHeight;
-    } else { 
-      // 键盘收起
-      chatWindow.style.height = "100vh"; 
-    }
-
-    // 滚动到底部
-    scrollToBottom();
-  });
-}
-
-// 初始化
-adjustChatForKeyboard();
-
