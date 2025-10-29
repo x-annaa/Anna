@@ -211,6 +211,34 @@
 
   <!-- ABOUT -->
   <div id="msgPage" class="page">
+
+      <div id="infoPage" class="page">
+    <div id="openChatBtn" class="support-box">
+      <img src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/123.jpg" alt="客服图标">
+      <span>在线客服</span>
+      <span class="unread-dot">0</span>
+    </div>
+
+    <div class="telegram-box">
+      <img src="https://airkbwolmkidaokqhxjj.supabase.co/storage/v1/object/public/Photos/123.jpg" alt="Telegram 图标">
+      <div class="telegram-info">
+        <p id="telegramAccount">@U9_support</p>
+        <button id="copyTelegramBtn">复制</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 聊天窗口 -->
+  <div id="chatWindow" class="chat-window hidden">
+    <div class="chat-header">
+      <button id="backBtn">⬅ 返回</button>
+    </div>
+    <div id="chatMessages" class="chat-messages"></div>
+    <div class="chat-input">
+      <textarea id="chatInput" placeholder="输入消息..."></textarea>
+      <button id="sendBtn">发送</button>
+    </div>
+    
     <div class="about-container">
       <div class="about-image">
         <img src="https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Photos/About.jpg" alt="U9">
