@@ -25,20 +25,16 @@
   animation: fadeUp 0.8s ease;
   backdrop-filter: blur(6px);
 }
-.about-image {
-  margin-bottom: 25px;
-}
+.about-image { margin-bottom: 25px; }
 .about-image img {
   width: 100%;
   height: auto;
   display: block;
   object-fit: cover;
-  border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 2px solid rgba(0,0,0,0.05);
   transition: transform 0.3s ease;
 }
-.about-image img:hover {
-  transform: scale(1.02);
-}
+.about-image img:hover { transform: scale(1.02); }
 .about-text {
   padding: 35px 45px;
   text-align: center;
@@ -87,12 +83,14 @@
   width: 100vw;
   height: 100vh;
   background-color: var(--card-bg);
-  display: none;
+  display: none; /* JS 控制显示 */
   flex-direction: column;
   overflow: hidden;
   z-index: 1000;
   font-family: "Helvetica", Arial, sans-serif;
 }
+
+/* 聊天头部 */
 .chat-header {
   display: flex;
   align-items: center;
@@ -102,7 +100,7 @@
   padding: 14px 12px;
   font-weight: 700;
   font-size: 15px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid rgba(255,255,255,0.12);
 }
 .chat-header button {
   background: transparent;
@@ -112,6 +110,8 @@
   font-size: 16px;
   padding: 0 6px;
 }
+
+/* 消息列表 */
 #chatMessages {
   flex: 1 1 auto;
   padding: 10px;
@@ -125,13 +125,11 @@
   width: 6px;
 }
 #chatMessages::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.18);
+  background: rgba(0,0,0,0.18);
   border-radius: 3px;
 }
 
-/* =====================
-   单条消息
-   ===================== */
+/* 单条消息 */
 .message-item {
   max-width: 70%;
   padding: 8px 12px;
@@ -151,9 +149,7 @@
   align-self: flex-start;
 }
 
-/* =====================
-   输入区域
-   ===================== */
+/* 输入区域 */
 .chat-input {
   flex: 0 0 auto;
   display: flex;
@@ -162,6 +158,7 @@
   border-top: 1px solid #ddd;
   background-color: #fafafa;
   align-items: flex-end;
+  box-sizing: border-box;
 }
 .chat-input textarea {
   flex: 1;
@@ -189,11 +186,8 @@
 .chat-input button:hover { background-color: var(--primary-blue-dark); }
 .chat-input button:active { transform: scale(0.98); }
 
-/* =====================
-   客服 & Telegram 卡片
-   ===================== */
-.telegram-box,
-#openChatBtn {
+/* 客服 & Telegram 卡片 */
+.telegram-box, #openChatBtn {
   display: flex;
   align-items: center;
   width: 100%;
@@ -211,60 +205,38 @@
 }
 .telegram-box {
   background: linear-gradient(135deg, var(--telegram-grad-a), var(--telegram-grad-b));
-  box-shadow: 0 2px 8px rgba(34, 158, 217, 0.18);
+  box-shadow: 0 2px 8px rgba(34,158,217,0.18);
 }
-.telegram-box:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(34, 158, 217, 0.24);
-}
+.telegram-box:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(34,158,217,0.24); }
 #openChatBtn {
   background: linear-gradient(135deg, var(--support-grad-a), var(--support-grad-b));
-  box-shadow: 0 2px 8px rgba(255, 123, 0, 0.18);
+  box-shadow: 0 2px 8px rgba(255,123,0,0.18);
 }
-#openChatBtn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(255, 123, 0, 0.26);
-}
-.telegram-box img,
-#openChatBtn img {
+#openChatBtn:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(255,123,0,0.26); }
+.telegram-box img, #openChatBtn img {
   width: 46px;
   height: 46px;
   border-radius: 6px;
   object-fit: cover;
   flex-shrink: 0;
 }
-.telegram-info {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-  justify-content: flex-start;
-}
-.telegram-info p {
-  font-size: 13px;
-  font-weight: 600;
-  margin: 0;
-  color: #fff;
-}
+.telegram-info { display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-start; }
+.telegram-info p { font-size: 13px; font-weight: 600; margin: 0; color: #fff; }
 #copyTelegramBtn {
   padding: 4px 10px;
   border: none;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255,255,255,0.18);
   color: white;
   cursor: pointer;
   font-size: 12px;
   transition: background 0.18s, transform 0.06s;
 }
-#copyTelegramBtn:hover { background: rgba(255, 255, 255, 0.28); }
+#copyTelegramBtn:hover { background: rgba(255,255,255,0.28); }
 #copyTelegramBtn:active { transform: scale(0.97); }
 
-/* =====================
-   红点样式
-   ===================== */
-.unread-dot,
-.bottom-unread-dot {
+/* 红点样式 */
+.unread-dot, .bottom-unread-dot {
   position: absolute;
   background-color: red;
   color: #fff;
@@ -276,66 +248,32 @@
   z-index: 10;
   animation: pulse 1.5s infinite ease-in-out;
 }
-.unread-dot.show,
-.bottom-unread-dot.show { display: block; }
-
+.unread-dot.show, .bottom-unread-dot.show { display: block; }
 @keyframes pulse {
   0%, 100% { transform: scale(1); opacity: 1; }
   50% { transform: scale(1.3); opacity: 0.85; }
 }
 
-/* =====================
-   移动端适配
-   ===================== */
+/* 移动端适配 */
 @media screen and (max-width: 768px) {
   .about-top-banner { height: 18vh; margin-bottom: 40px; }
   .about-container { margin: 0; }
   .about-text { padding: 25px 20px; }
   .about-text h2 { font-size: 24px; }
   .about-text p { font-size: 14px; }
-
   #chatWindow { width: 100vw; height: 100vh; left: 0; }
   .chat-input textarea { font-size: 13px; }
   .chat-input button { font-size: 13px; padding: 7px 12px; }
 }
-
 @media screen and (max-width: 480px) {
   .about-top-banner { height: 16vh; margin-bottom: 30px; }
   .about-container { margin: 20px 0; }
   .about-text { padding: 0 12px; }
   .about-text h2 { font-size: 20px; }
   .about-text p { font-size: 13px; }
-
   #chatWindow { width: 100vw !important; height: 100vh !important; left: 0 !important; }
   .telegram-box, #openChatBtn { padding: 10px; }
 }
 
 /* 当聊天窗口打开时禁止页面滚动 */
-body.chat-open {
-  overflow: hidden;
-}
-
-/* 保证聊天窗口固定全屏 */
-#chatWindow {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  display: none; /* JS 控制显示 */
-  flex-direction: column;
-  background-color: var(--card-bg);
-  z-index: 1000;
-}
-
-/* 输入框固定在底部 */
-.chat-input {
-  flex: 0 0 auto;
-  display: flex;
-  gap: 8px;
-  padding: 8px;
-  border-top: 1px solid #ddd;
-  background-color: #fafafa;
-  align-items: flex-end;
-  box-sizing: border-box;
-}
+body.chat-open { overflow: hidden; }
