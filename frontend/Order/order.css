@@ -545,10 +545,11 @@ button:disabled {
 }
 
 .modal-body {
-  padding: 45px 15px;
-  max-height: 400px;
+  flex: 1;
   overflow-y: auto;
+  padding: 15px;
 }
+
 
 #orderHistoryList li {
   background-color: #fff;
