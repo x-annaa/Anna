@@ -375,3 +375,22 @@ button[data-page="msgPage"] {
   text-align: center;
   line-height: 12px;
 }
+
+/* 红点出现时轻轻弹一下 */
+@keyframes popIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.bottom-unread-dot.show {
+  animation: popIn 0.3s ease-out;
+}
