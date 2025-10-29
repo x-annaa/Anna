@@ -39,6 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const userId = getCurrentUserId();
     if (!userId) return alert("请先登录！");
 
+    document.body.classList.add("chat-open");
     chatWindow.style.display = "flex";
     chatMessages.innerHTML = "";
 
@@ -54,6 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // =====================
   backBtn?.addEventListener("click", () => {
     chatWindow.style.display = "none";
+    document.body.classList.remove("chat-open");
 
     if (chatSubscription) {
       supabaseClient.removeChannel(chatSubscription);
@@ -67,7 +69,6 @@ document.addEventListener("DOMContentLoaded", () => {
   sendBtn?.addEventListener("click", async () => {
     const userId = getCurrentUserId();
     if (!userId) return alert("请先登录！");
-
     const content = chatInput.value.trim();
     if (!content) return;
 
@@ -208,7 +209,7 @@ document.addEventListener("DOMContentLoaded", () => {
     chatWindow.style.height = "100vh";
     chatWindow.style.transform = "none";
 
-    const initialHeight = window.innerHeight;
+    let initialHeight = window.innerHeight;
 
     window.addEventListener('resize', () => {
       const vh = window.innerHeight;
@@ -216,10 +217,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (keyboardHeight > 100) {
         chatWindow.style.height = vh + "px";
+        chatInput?.scrollIntoView({ behavior: "smooth", block: "end" });
       } else {
         chatWindow.style.height = "100vh";
       }
+      scrollToBottom();
+    });
 
+    window.addEventListener('orientationchange', () => {
+      initialHeight = window.innerHeight;
+      chatWindow.style.height = initialHeight + "px";
       scrollToBottom();
     });
   }
