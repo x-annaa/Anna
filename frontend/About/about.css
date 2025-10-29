@@ -401,7 +401,6 @@ button[data-page="msgPage"] {
 .bottom-unread-dot {
   position: absolute;
   top: 10px;         /* 调整到按钮右上角 */
-  right: px;       /* 调整到按钮右上角 */
   width: 17px;
   height: 16px;
   background-color: red;
