@@ -360,23 +360,12 @@ button[data-page="msgPage"] {
   position: relative;
 }
 
-/* 红点样式 */
-.bottom-unread-dot {
-  position: absolute;
-  top: 4px;
-  right: 6px;
-  width: 12px;
-  height: 12px;
-  background-color: red;
-  border-radius: 50%;
-  display: none;           /* 默认隐藏 */
-  font-size: 10px;
-  color: #fff;
-  text-align: center;
-  line-height: 12px;
+/* 红点出现时带呼吸闪动效果 */
+.bottom-unread-dot.show {
+  display: block;
+  animation: popIn 0.3s ease-out, pulse 1.5s infinite ease-in-out;
 }
 
-/* 红点出现时轻轻弹一下 */
 @keyframes popIn {
   0% {
     transform: scale(0);
@@ -388,9 +377,17 @@ button[data-page="msgPage"] {
   }
   100% {
     transform: scale(1);
+    opacity: 1;
   }
 }
 
-.bottom-unread-dot.show {
-  animation: popIn 0.3s ease-out;
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0.85;
+  }
 }
