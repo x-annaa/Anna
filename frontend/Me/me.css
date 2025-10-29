@@ -32,39 +32,39 @@
 }
 
 .balance-box {
-  position: relative;
-  text-align: center;
-  margin: 20px 0;
-  padding: 20px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #4b6cb7, #182848);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-  overflow: hidden;
-  color: white;
+    position: relative;
+    text-align: center;
+    margin: 20px 0;
+    padding: 20px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #4b6cb7, #182848);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    color: white;
 }
 
 .balance-box::before {
-  content: "";
-  position: absolute;
-  top: 0%;
-  left: -15%;
-  width: 130%;
-  height: 100%;
-  background: linear-gradient(120deg, rgba(255,255,255,0.3), rgba(255,255,255,0));
-  transform: skewX(-25deg);
-  transition: 0.8s;
+    content: "";
+    position: absolute;
+    top: 0%;
+    left: -15%;
+    width: 130%;
+    height: 100%;
+    background: linear-gradient(120deg, rgba(255,255,255,0.3), rgba(255,255,255,0));
+    transform: skewX(-25deg);
+    transition: 0.8s;
 }
 
 .balance-box:hover::before {
-  left: 125%;
+    left: 125%;
 }
 
 .balance-box p {
-  font-size: 16px;
-  font-weight: bold;
-  margin: 20px 0;
-  position: relative;
-  z-index: 1;
+    font-size: 16px;
+    font-weight: bold;
+    margin: 20px 0;
+    position: relative;
+    z-index: 1;
 }
 
 .balance-actions {
@@ -127,8 +127,7 @@
   background: linear-gradient(135deg, #2D9C6B, #6BCB77);
 }
 
-/* ====================== ME MODAL ====================== */
-.modal-me {
+.modal {
   display: none;
   position: fixed;
   z-index: 1000;
@@ -141,7 +140,7 @@
   align-items: center;
 }
 
-.modal-content-me {
+.modal-content {
   background: white;
   padding: 20px;
   border-radius: 12px;
@@ -151,16 +150,16 @@
   box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
-.modal-content-me h3 {
+.modal-content h3 {
   margin-bottom: 10px;
   font-size: 18px;
 }
 
-.modal-content-me p {
+.modal-content p {
   margin: 10px 0;
 }
 
-.modal-content-me input {
+.modal-content input {
   width: 90%;
   padding: 10px;
   margin: 8px 0;
@@ -218,6 +217,59 @@
   background: rgba(0, 123, 255, 0.1);
 }
 
+#logoutModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0,0,0,0.4);
+  z-index: 1000;
+}
+
+#logoutModal .modal-content {
+  background-color: #fff;
+  padding: 15px 20px;
+  border-radius: 8px;
+  width: 260px;
+  text-align: center;
+}
+
+#logoutModal p {
+  margin-bottom: 15px;
+  font-size: 15px;
+}
+
+#logoutModal .modal-content .button-group {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+#logoutModal button {
+  flex: 1;
+  padding: 6px 12px;
+  font-size: 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#logoutModal #cancelLogout {
+  background-color: #ccc;
+  color: #333;
+}
+
+#logoutModal #confirmLogout {
+  background-color: #007bff;
+  color: #fff;
+  margin-top: 15px;
+}
+
 .wallet-address-text {
   word-break: break-all;
   text-align: center;
@@ -226,6 +278,14 @@
 .wallet-label {
   font-weight: 700;
   text-align: center;
+  color: #111;
+  margin-bottom: 6px;
+}
+
+.wallet-label {
+  font-weight: 700;
+  text-align: center;
+  display: block;
   color: #111;
   margin-bottom: 6px;
 }
