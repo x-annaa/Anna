@@ -3,8 +3,8 @@
   justify-content: center;
   align-items: center;
   gap: 15px;
-  width: 140px;
-  margin: 10px auto;
+  width: 95%;
+  margin: 0px;
 }
 
 .qty-btn {
@@ -24,9 +24,8 @@
 }
 
 #buyQuantity {
-  font-size: 20px;
-  font-weight: bold;
-  width: 40px;
+  font-size: 14px;
+  width: 90%;
   text-align: center;
   padding: 5px 10px;
   border: 1px solid #ccc;
