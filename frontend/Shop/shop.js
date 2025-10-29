@@ -156,3 +156,49 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
+let quantity = 1;
+let unitPrice = 0;
+
+const qtyDisplay = document.getElementById("buyQuantity");
+const priceDisplay = document.getElementById("buyProductPrice");
+
+function openBuyModal(product) {
+  unitPrice = product.price; // 商品单价
+  resetQuantity();
+  updateTotalPrice();
+}
+
+function updateTotalPrice() {
+  const totalPrice = unitPrice * quantity;
+  priceDisplay.textContent = `Price: $${totalPrice}`;
+}
+
+function resetQuantity() {
+  quantity = 1;
+  qtyDisplay.textContent = quantity;
+}
+
+document.getElementById("qtyMinus").addEventListener("click", () => {
+  if (quantity > 1) {
+    quantity--;
+    qtyDisplay.textContent = quantity;
+    updateTotalPrice();
+  }
+});
+
+document.getElementById("qtyPlus").addEventListener("click", () => {
+  quantity++;
+  qtyDisplay.textContent = quantity;
+  updateTotalPrice();
+});
+
+document.getElementById("confirmBuy1").addEventListener("click", () => {
+  const totalCost = unitPrice * quantity;
+
+  console.log("✅ Selected Quantity:", quantity);
+  console.log("✅ Total Price:", totalCost);
+
+  // ✅ 提交到数据库时带上数量和总价
+  // TODO: Supabase insert with { productId, quantity, totalCost, ...}
+});
