@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   
   const bottomUnreadEl = document.querySelector("#bottomUnreadCount");
   const chatBtnUnreadEl = document.querySelector("#chatBtnUnreadCount");
+  const aboutBtnUnreadEl = document.querySelector('button[data-page="msgPage"] .bottom-unread-dot');
   
   let chatSubscription = null;
 
@@ -166,7 +167,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const show = unread > 0;
     const text = unread > 99 ? "99+" : unread;
 
-    [bottomUnreadEl, chatBtnUnreadEl, document.querySelector("#openChatBtn .unread-dot")].forEach(el => {
+    [
+      bottomUnreadEl,
+      chatBtnUnreadEl,
+      document.querySelector("#openChatBtn .unread-dot"),
+      aboutBtnUnreadEl // ✅ 加上 About 的红点
+    ].forEach(el => {
       if (!el) return;
       el.textContent = text;
       el.style.display = show ? "inline-block" : "none";
