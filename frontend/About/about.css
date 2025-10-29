@@ -309,3 +309,33 @@
   #chatWindow { width: 100vw !important; height: 100vh !important; left: 0 !important; }
   .telegram-box, #openChatBtn { padding: 10px; }
 }
+
+/* 当聊天窗口打开时禁止页面滚动 */
+body.chat-open {
+  overflow: hidden;
+}
+
+/* 保证聊天窗口固定全屏 */
+#chatWindow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: none; /* JS 控制显示 */
+  flex-direction: column;
+  background-color: var(--card-bg);
+  z-index: 1000;
+}
+
+/* 输入框固定在底部 */
+.chat-input {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  border-top: 1px solid #ddd;
+  background-color: #fafafa;
+  align-items: flex-end;
+  box-sizing: border-box;
+}
