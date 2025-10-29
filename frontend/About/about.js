@@ -43,8 +43,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const userId = getCurrentUserId();
     if (!userId) return alert("请先登录！");
 
-    chatWindow?.classList.remove("hidden");
-    chatMessages && (chatMessages.innerHTML = "");
+     if (chatWindow) {
+       chatWindow.style.display = "flex"; // <-- 关键
+       chatWindow.classList.remove("hidden");
+     }
+  
+     if (chatMessages) chatMessages.innerHTML = "";
 
     await loadMessages();
     listenForMessages();
@@ -57,7 +61,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // 返回按钮
   // =====================
   backBtn?.addEventListener("click", () => {
-    chatWindow?.classList.add("hidden");
+    if (chatWindow) {
+      chatWindow.style.display = "none"; // <-- 关键
+      chatWindow.classList.add("hidden");
+    }
     if (chatSubscription) {
       supabaseClient.removeChannel(chatSubscription);
       chatSubscription = null;
