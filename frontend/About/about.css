@@ -360,25 +360,33 @@ button[data-page="msgPage"] {
   position: relative;
 }
 
+/* 按钮相对定位已经有了 */
+button[data-page="msgPage"] {
+  position: relative;
+}
+
+/* 红点样式 */
+.bottom-unread-dot {
+  position: absolute;
+  top: -4px;         /* 调整到按钮右上角 */
+  right: -4px;       /* 调整到按钮右上角 */
+  width: 12px;
+  height: 12px;
+  background-color: red;
+  border-radius: 50%;
+  display: none;      /* 默认隐藏 */
+  font-size: 10px;
+  color: #fff;
+  text-align: center;
+  line-height: 12px;
+  pointer-events: none;
+  z-index: 10;        /* 保证在按钮上层 */
+}
+
 /* 红点出现时带呼吸闪动效果 */
 .bottom-unread-dot.show {
   display: block;
-  animation: popIn 0.3s ease-out, pulse 1.5s infinite ease-in-out;
-}
-
-@keyframes popIn {
-  0% {
-    transform: scale(0);
-    opacity: 0;
-  }
-  70% {
-    transform: scale(1.2);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+  animation: pulse 1.5s infinite ease-in-out;
 }
 
 @keyframes pulse {
