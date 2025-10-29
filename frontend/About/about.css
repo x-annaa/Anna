@@ -91,22 +91,22 @@
    ===================== */
 #chatWindow {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 100%;
-  max-width: 360px;
-  height: 500px;
-  background-color: var(--card-bg);
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  display: none;
+  top: 0;               /* 顶部铺满 */
+  left: 0;              /* 左侧铺满 */
+  right: 0;             /* 右侧铺满 */
+  width: 100%;          /* 确保宽度铺满 */
+  height: 500px;        /* 保持原来的高度，或你需要的高度 */
+  margin: 0 auto;       /* 水平居中 */
+  display: flex;
   flex-direction: column;
-  overflow: hidden;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  background-color: var(--card-bg);
+  border-radius: 12px;  /* 保留圆角 */
+  box-shadow: 0 6px 20px rgba(0,0,0,0.18);
   z-index: 1000;
-  font-family: "Helvetica", Arial, sans-serif;
+  overflow: hidden;
+  transform: none;      /* 去掉 translate 居中 */
 }
+
 
 /* =====================
    聊天顶部
