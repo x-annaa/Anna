@@ -11,6 +11,7 @@
   width: 35px;
   height: 35px;
   border: 1px solid #ccc;
+  border-radius: 5px;
   
   font-size: 20px;
   font-weight: bold;
@@ -27,9 +28,9 @@
   font-size: 14px;
   width: 90%;
   text-align: center;
-  padding: 5px 10px;
+  padding: 8px;
   border: 1px solid #ccc;
-  border-radius: 8px;
+  border-radius: 5px;
 }
 
 
