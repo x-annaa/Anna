@@ -229,3 +229,34 @@
 #shopSearchBtn:hover {
   background-color: #0056b3;
 }
+
+.quantity-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin: 10px 0;
+  width: 100%;
+}
+
+.qty-btn {
+  width: 36px;
+  height: 36px;
+  font-size: 22px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.qty-btn:hover {
+  background-color: #0056b3;
+}
+
+#buyQuantity {
+  font-size: 20px;
+  font-weight: bold;
+  min-width: 22px;
+  text-align: center;
+}
