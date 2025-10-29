@@ -174,10 +174,14 @@ document.addEventListener("DOMContentLoaded", () => {
       aboutBtnUnreadEl // ✅ 加上 About 的红点
     ].forEach(el => {
       if (!el) return;
-      el.textContent = text;
-      el.style.display = show ? "inline-block" : "none";
-    });
-  }
+      if (show) {
+        el.textContent = text;
+        el.style.display = "inline-block";
+        el.classList.add("show");       // ✅ 添加动画类
+        setTimeout(() => el.classList.remove("show"), 400); // 动画结束后清除，方便下次再弹
+      } else {
+        el.style.display = "none";
+      }
 
   // =====================
   // 监听实时消息
