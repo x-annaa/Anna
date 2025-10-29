@@ -335,7 +335,7 @@
    ===================== */
 @media screen and (max-width: 768px) {
   .about-top-banner { height: 18vh; margin-bottom: 40px; }
-  .about-container { margin: 0 15px 60px 15px; }
+  .about-container { margin: 0px 0px 0px 0px; }
   .about-text { padding: 25px 20px; }
   .about-text h2 { font-size: 24px; }
   .about-text p { font-size: 14px; }
