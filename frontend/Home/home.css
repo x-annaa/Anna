@@ -88,6 +88,10 @@
 .container-h8 {
   display: flex;
   width: 100%;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  height: 100px;
 }
 
 .container-h9.active {
