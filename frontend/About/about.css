@@ -238,7 +238,7 @@
   box-shadow: 0 6px 14px rgba(34, 158, 217, 0.24);
 }
 #openChatBtn {
-  background: linear-gradient(135deg, var(--support-grad-a), var(--support-grad-b));
+  background: linear-gradient(135deg, #0071ff, #077eff);
   box-shadow: 0 2px 8px rgba(255, 123, 0, 0.18);
 }
 #openChatBtn:hover {
