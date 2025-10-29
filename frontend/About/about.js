@@ -249,3 +249,19 @@ document.addEventListener("DOMContentLoaded", () => {
   adjustChatForKeyboard();
   updateUnreadCount();
 });
+
+function updateMsgButtonUnread(unread) {
+  const msgBtn = document.querySelector('button[data-page="msgPage"]');
+  const dot = msgBtn.querySelector(".bottom-unread-dot");
+  
+  if (unread > 0) {
+    dot.textContent = unread > 99 ? "99+" : unread;
+    dot.classList.add("show");
+  } else {
+    dot.classList.remove("show");
+  }
+}
+
+// 调用示例
+updateMsgButtonUnread(5);  // 红点显示 5
+updateMsgButtonUnread(0);  // 红点隐藏
