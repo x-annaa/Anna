@@ -567,8 +567,15 @@ button:disabled {
 
 #orderHistoryList li img {
   width: 100%;
-  display: ;
+  display: block; /* ✅ 补全 */
 }
+
+#autoOrderBtn:disabled {
+  background: #f0e68c;
+  color: #ffffff; /* ✅ 加分号 */
+  cursor: not-allowed;
+}
+
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-20px); }
