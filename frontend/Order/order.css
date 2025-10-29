@@ -1,7 +1,44 @@
-/* ========== ✅ 全局样式 ========== */
-body {
-  margin: 0;
+/*
+  Complete CSS for ORDER page
+  - Cleaned, deduplicated and fully compatible with the provided HTML
+  - Modal centering guaranteed
+  - Responsive adjustments and accessible focus styles
+  - Comments added to help you follow the structure
+*/
+
+:root{
+  --bg-1: #a8e6ff;
+  --bg-2: #d0f0ff;
+  --bg-3: #f5f7fa;
+  --primary: #1976d2;
+  --primary-dark: #1565c0;
+  --success: #33bb0a;
+  --success-dark: #388e3c;
+  --danger: #d32f2f;
+  --muted: #fafafa;
+  --card-border: #a9c2e0;
+  --shadow: 0 10px 25px rgba(0,0,0,0.12);
+  --glass: rgba(255,255,255,0.5);
+  --radius-lg: 16px;
+  --radius-md: 8px;
+  --radius-sm: 4px;
+  --max-page-width: 1100px;
+}
+
+/* =====================================================
+   Global reset / base
+   ===================================================== */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
   font-family: "Segoe UI", Arial, sans-serif;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  color:#333;
+  line-height:1.4;
+  -webkit-tap-highlight-color: transparent;
+  /* Background with layered radial lights and gradient */
   background:
     radial-gradient(circle at 20% 30%, rgba(255,255,255,0.6) 0px, transparent 40px),
     radial-gradient(circle at 70% 20%, rgba(255,255,255,0.5) 0px, transparent 50px),
@@ -11,330 +48,235 @@ body {
     radial-gradient(circle at 60% 85%, rgba(255,255,255,0.2) 0px, transparent 15px),
     radial-gradient(circle at 90% 40%, rgba(255,255,255,0.3) 0px, transparent 18px),
     radial-gradient(circle at 35% 15%, rgba(255,255,255,0.25) 0px, transparent 12px),
-    linear-gradient(135deg, #a8e6ff, #d0f0ff, #f5f7fa);
-  background-repeat: no-repeat;
-  background-size: cover;
-  min-height: 100vh;
-  color: #333;
+    linear-gradient(135deg, var(--bg-1), var(--bg-2), var(--bg-3));
+  background-repeat:no-repeat;
+  background-size:cover;
+  min-height:100vh;
 }
 
-h2, h3 {
-  margin-bottom: 1px;
-  font-weight: 600;
+/* Headings */
+h2,h3{margin:0 0 6px 0;font-weight:600}
+
+/* Utility helpers */
+.hidden{display:none !important}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.container{
+  width:calc(100% - 40px);
+  max-width:var(--max-page-width);
+  margin:0 auto;
 }
 
-button {
-  font-family: inherit;
-  outline: none;
+/* =====================================================
+   Page / layout
+   ===================================================== */
+.page{display:none;padding:20px}
+.page.active{display:block;height:80vh;overflow-y:auto}
+
+/* Center content container inside page */
+#orderPage .container{padding-top:8px;padding-bottom:90px}
+
+/* Fixed image placeholder (left-side image) */
+#fixedImg{width:100%;height:100%;object-fit:contain;display:block}
+
+/* =====================================================
+   Bottom Navigation
+   ===================================================== */
+.bottom-nav{
+  position:fixed;
+  bottom:0;left:0;width:100%;display:flex;justify-content:space-around;align-items:center;
+  border-top:1px solid #ddd;background:#fff;padding:8px 0;z-index:50
+}
+.bottom-nav button{flex:1;border:none;background:none;padding:8px;font-size:15px;cursor:pointer;transition:color .25s}
+.bottom-nav button.active{color:var(--primary);font-weight:700}
+
+/* =====================================================
+   Header area
+   ===================================================== */
+.order-header{display:flex;justify-content:flex-end;align-items:center;margin-bottom:0}
+.coins-box{font-weight:700;color:var(--success);display:flex;align-items:center;gap:8px}
+.coins-box button{margin-left:5px;padding:0 8px;border:none;border-radius:100%;background:var(--success);color:#fff;font-size:16px;cursor:pointer;transition:background .2s;line-height:1}
+.coins-box button:hover{background:var(--success-dark)}
+
+/* =====================================================
+   Image / hero area
+   ===================================================== */
+.imgorder{width:100%;max-width:560px;margin:14px auto}
+.imgorder img{border:1px solid var(--card-border);width:100%;height:auto;object-fit:cover;border-radius:6px}
+
+/* =====================================================
+   Order actions (left + right) - flexible layout
+   ===================================================== */
+.order-actions{display:flex;justify-content:space-between;align-items:center;width:100%;gap:18px;padding:0 20px;box-sizing:border-box}
+.left-side{width:150px;height:150px;position:relative;display:flex;justify-content:center;align-items:center}
+.left-side img{width:150px;height:150px;border-radius:8px;object-fit:cover}
+.matching-gif{display:none}
+.right-side{flex:1;min-width:160px;display:flex;flex-direction:column;justify-content:center;align-items:center}
+
+#autoOrderBtn{padding:10px 28px;font-size:14px;font-weight:700;color:#fff;background:linear-gradient(90deg,#0358f6 0,#007BFF 50%,#00BFFF 100%);border:none;border-radius:12px;cursor:pointer;transition:transform .25s,box-shadow .2s}
+#autoOrderBtn:hover{transform:scale(1.04) rotate(-1deg)}
+#autoOrderBtn:active{transform:scale(.98);box-shadow:0 3px 8px rgba(255,193,7,0.2) inset}
+#autoOrderBtn:disabled{background:#f0e68c;color:#ffffff;cursor:not-allowed;box-shadow:none}
+
+/* Small variant used earlier in file - kept for safety */
+#autoOrderBtn.small{padding:6px 12px;font-size:13px}
+
+/* =====================================================
+   Round / Cooldown area
+   ===================================================== */
+.order-roundandcoldown{display:flex;justify-content:space-between;align-items:center;width:100%;padding:8px 12px;margin:12px 0;border:1px solid var(--card-border);border-radius:10px;background:#f5f5f5}
+#roundProgress{font-weight:700;font-size:13px;color:#8fbbec}
+#cooldownDisplay{font-weight:700;font-size:13px;color:var(--danger)}
+
+/* =====================================================
+   Order result card
+   ===================================================== */
+.order-result{margin-top:8px;padding:15px;border:1px solid var(--card-border);border-radius:10px;background:#f5f5f5;display:flex;align-items:center;gap:20px;font-size:15px;color:#555}
+.order-result img{width:120px;height:120px;object-fit:cover;border-radius:8px;flex-shrink:0}
+.order-result .order-info{line-height:1.4}
+.order-result .order-info p{margin:4px 0}
+.order-result .order-info button{margin-top:8px;padding:6px 12px;border-radius:8px;border:none;background-color:var(--primary);color:#fff;cursor:pointer;transition:background .2s}
+.order-result .order-info button:hover{background-color:var(--primary-dark)}
+
+/* =====================================================
+   Order history list
+   ===================================================== */
+.order-history{width:100%;margin-top:10px}
+.order-history h3{display:flex;justify-content:center;align-items:center;background:var(--muted);padding:6px 12px;font-size:15px;margin:0;border-radius:8px}
+.order-count{font-size:14px;font-weight:600;color:var(--primary);margin-left:10px}
+.order-history ul{list-style:none;padding:0;margin:8px 0}
+.order-history li{padding:10px 12px;background:var(--muted);border-bottom:1px solid #eee;font-size:13px;text-align:center}
+.order-history li:last-child{border-bottom:none}
+
+/* =====================================================
+   Generic buttons
+   ===================================================== */
+button{font-family:inherit;outline:none}
+button:disabled{background:#b1cce2 !important;cursor:not-allowed}
+
+/* =====================================================
+   Modal: overlay + content
+   ===================================================== */
+.modal{
+  display:none; /* default hidden */
+  position:fixed;top:0;left:0;width:100%;height:100%;z-index:1000;
+  background-color:rgba(0,0,0,0.5);
+  /* center children */
+  display:flex;justify-content:center;align-items:center;overflow-y:auto;padding:24px
 }
 
-button:disabled {
-  background: #b1cce2 !important;
-  cursor: not-allowed;
+/* When modal is opened, add .active class in JS (recommended) */
+.modal.active{display:flex}
+
+/* Modal content box */
+.modal-content{
+  width:320px;max-width:95%;background:#fff;padding:25px 30px;border-radius:var(--radius-lg);text-align:center;
+  display:flex;flex-direction:column;position:relative;box-shadow:var(--shadow);animation:fadeInScale .26s ease;
 }
 
-/* ========== ✅ 页面切换页面 .page ========== */
-.page {
-  display: none;
-  padding: 20px;
+/* header / title */
+.modal-content h3{margin-top:0;margin-bottom:12px;font-size:1.25rem;color:#333}
+.modal-content p{margin:0 0 12px;color:#555;font-size:.95rem}
+
+/* form controls inside modal */
+.modal-content input[type="number"],
+.modal-content select,
+.modal-content input[type="text"],
+.modal-content textarea{
+  width:85%;padding:10px 12px;margin:12px 0 18px;border:1px solid #ccc;border-radius:8px;font-size:1rem;text-align:center;transition:border-color .18s,box-shadow .18s
+}
+.modal-content input:focus,.modal-content select:focus,.modal-content textarea:focus{border-color:var(--primary);outline:none;box-shadow:0 0 6px rgba(25,118,210,0.18)}
+
+/* modal actions row */
+.modal-actions{display:flex;gap:12px;justify-content:space-between}
+.modal-actions button{flex:1;padding:10px 0;border:none;border-radius:8px;cursor:pointer;font-size:1rem;font-weight:600;transition:transform .15s}
+
+#cancelAddCoins,#cancelExchange{background:#e0e0e0;color:#333}
+#cancelAddCoins:hover,#cancelExchange:hover{filter:brightness(.98)}
+#confirmAddCoins{background:var(--success);color:#fff}
+#confirmAddCoins:hover{background:var(--success-dark)}
+#confirmExchange{background:var(--primary);color:#fff}
+#confirmExchange:hover{background:var(--primary-dark)}
+
+/* specific modal titles */
+#exchangeModal h3{color:var(--primary)}
+#exchangeNotice{font-size:.86rem;color:var(--danger);margin-top:-6px;margin-bottom:12px}
+
+/* close icon positioned top-right */
+.close{position:absolute;top:10px;right:12px;color:#888;font-size:26px;font-weight:700;cursor:pointer;transition:color .18s}
+.close:hover{color:#000}
+
+/* modal subcomponents */
+.modal-header{display:flex;align-items:center;padding:8px 6px;border-bottom:1px solid #eee}
+.modal-header h3{flex:1;text-align:center;margin:0;font-size:16px}
+.modal-header button{background:none;border:none;font-size:18px;cursor:pointer;color:#333}
+.modal-body{padding:18px 12px;max-height:400px;overflow-y:auto}
+
+#orderHistoryList li{background:#fff;padding:10px;border-radius:8px;margin-bottom:10px;box-shadow:0 2px 5px rgba(0,0,0,0.08);list-style:none;display:flex;gap:8px;align-items:center}
+#orderHistoryList li img{width:40px;height:40px;object-fit:cover;border-radius:6px}
+#orderHistoryList li div{display:flex;flex-direction:column}
+
+/* =====================================================
+   Exchange toggle (Balance <-> Coins)
+   ===================================================== */
+.exchange-toggle{display:flex;justify-content:center;margin-bottom:12px;border-radius:8px;overflow:hidden;border:1px solid var(--primary);width:100%}
+.exchange-btn{flex:1;padding:10px 0;border:none;background:#e0e0e0;color:#555;font-weight:600;cursor:pointer}
+.exchange-btn.active{background:var(--primary);color:#fff}
+.exchange-btn:not(.active):hover{background:#bdbdbd}
+
+/* =====================================================
+   Small components & boxes
+   ===================================================== */
+.dulcontainer{display:flex;justify-content:center;align-items:center;gap:8px;width:100%;margin-top:10px}
+.left-box,.right-box{flex:0 0 auto;width:90px;height:34px;background:rgba(255,255,255,0.3);border-radius:18px;box-shadow:0 6px 16px rgba(0,0,0,0.08);display:flex;justify-content:center;align-items:center;font-size:13px;font-weight:700;color:#333;transition:all .25s;border:1px solid var(--card-border)}
+.left-box:hover,.right-box:hover{transform:translateY(-3px)}
+
+.white-container{width:90%;min-height:100px;margin:10px auto;padding:12px;background:transparent;color:#333;overflow:auto;border-radius:10px}
+
+/* order-result image alternate smaller variant */
+.imgorder .img-small{border:1px solid var(--card-border);width:100%;height:140px;object-fit:cover;border-radius:6px;margin-top:10px}
+
+/* =====================================================
+   Accessibility & focus styles
+   ===================================================== */
+:focus{outline:none}
+button:focus, a:focus, input:focus, select:focus{box-shadow:0 0 0 3px rgba(25,118,210,0.12);border-radius:8px}
+
+/* =====================================================
+   Animations
+   ===================================================== */
+@keyframes fadeInScale{from{opacity:0;transform:scale(.96) translateY(-6px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes slideInUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* =====================================================
+   Responsive tweaks
+   ===================================================== */
+@media (max-width:900px){
+  .order-actions{flex-direction:row;gap:12px;padding:0 12px}
+  .right-side{min-width:120px}
+  .left-side{width:120px;height:120px}
+  .left-side img{width:120px;height:120px}
+  .modal-content{width:380px;padding:20px}
 }
 
-.page.active {
-  display: block;
-  height: 80vh;
-  overflow-y: auto;
+@media (max-width:640px){
+  .container{width:calc(100% - 24px)}
+  .order-actions{flex-direction:column;align-items:center;gap:10px}
+  .order-actions .right-side{width:100%}
+  .left-side{width:120px;height:120px}
+  #autoOrderBtn{width:90%;padding:12px 16px}
+  .modal-content{width:94%;max-width:420px;padding:18px}
+  .exchange-toggle{width:100%}
+  .imgorder{max-width:360px}
+  .bottom-nav{padding:10px 6px}
 }
 
-/* ========== ✅ 底部导航栏 ========== */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  display: flex;
-  justify-content: space-around;
-  border-top: 1px solid #ddd;
-  background: #fff;
-  padding: 8px 0;
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
 }
 
-.bottom-nav button {
-  flex: 1;
-  border: none;
-  background: none;
-  padding: 8px;
-  font-size: 15px;
-  cursor: pointer;
-  transition: color 0.3s;
-}
-
-.bottom-nav button.active {
-  color: #1976d2;
-  font-weight: bold;
-}
-
-/* ========== ✅ 订单头部 / 金币栏 ========== */
-.order-header {
-  display: flex;
-  justify-content: end;
-  align-items: center;
-  margin-bottom: 0px;
-}
-
-.coins-box {
-  font-weight: bold;
-  color: #33bb0a;
-}
-
-.coins-box button {
-  margin-left: 5px;
-  padding: 0px 6px;
-  border: none;
-  border-radius: 100%;
-  background: #33bb0a;
-  color: #fff;
-  font-size: 18px;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.coins-box button:hover {
-  background: #388e3c;
-}
-
-/* ========== ✅ 订单结果 ========== */
-.order-result {
-  margin-top: 2px;
-  padding: 15px;
-  border: 1px solid #a9c2e0;
-  border-radius: 10px;
-  background: #f5f5f5;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  font-size: 15px;
-  color: #555;
-}
-
-.order-result img {
-  width: 120px;
-  height: 120px;
-  object-fit: cover;
-  border-radius: 8px;
-  flex-shrink: 0;
-}
-
-.order-result .order-info p {
-  margin: 4px 0;
-}
-
-.order-result .order-info button {
-  margin-top: 8px;
-  padding: 6px 12px;
-  border-radius: 8px;
-  border: none;
-  background-color: #1976d2;
-  color: #fff;
-  cursor: pointer;
-  font-size: 14px;
-  transition: 0.2s;
-}
-
-.order-result .order-info button:hover {
-  background-color: #1565c0;
-}
-
-/* ========== ✅ 订单主区域按钮 & 动画 ========== */
-.order-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 150px;
-  padding: 0 20px;
-  box-sizing: border-box;
-}
-
-.left-side {
-  width: 150px;
-  height: 150px;
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-#fixedImg, .matching-gif {
-  width: 150px;
-  height: 150px;
-}
-
-.matching-gif {
-  display: none;
-}
-
-.right-side {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-}
-
-/* 按钮 Order */
-#autoOrderBtn {
-  padding: 10px 28px;
-  font-size: 13px;
-  font-weight: bold;
-  color: #fff8dc;
-  background: linear-gradient(to right, #0358f6, #007BFF, #00BFFF);
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  letter-spacing: 1px;
-}
-
-#autoOrderBtn:hover {
-  transform: scale(1.07) rotate(-1deg);
-}
-
-#autoOrderBtn:active {
-  transform: scale(0.93);
-}
-
-/* ========== ✅ 回合 & 冷却提示 ========== */
-.order-roundandcoldown {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  padding: 5px 12px;
-  margin-bottom: 10px;
-  border: 1px solid #a9c2e0;
-  border-radius: 10px;
-  background: #f5f5f5;
-}
-
-#roundProgress {
-  font-weight: bold;
-  font-size: 13px;
-  color: #1976d2;
-}
-
-#cooldownDisplay {
-  font-weight: bold;
-  font-size: 13px;
-  color: red;
-}
-
-/* ========== ✅ modal 遮罩层 ========== */
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 1000;
-  inset: 0;
-  background-color: rgba(0,0,0,0.5);
-  justify-content: center;
-  align-items: center;
-}
-
-/* ✅ 统一一个 modal 内容样式 */
-.modal-content {
-  background: #fff;
-  padding: 25px 30px;
-  border-radius: 16px;
-  width: 320px;
-  max-width: 92%;
-  animation: fadeIn 0.25s ease;
-}
-
-/* ✅ modal 头部 */
-.modal-header {
-  display: flex;
-  align-items: center;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #eee;
-}
-
-.modal-header button {
-  background: none;
-  border: none;
-  font-size: 15px;
-  cursor: pointer;
-  color: #1976d2;
-}
-
-.modal-header h3 {
-  flex: 1;
-  margin: 0;
-  text-align: center;
-}
-
-/* ✅ modal 内容滚动 */
-.modal-body {
-  padding: 15px;
-  max-height: 350px;
-  overflow-y: auto;
-}
-
-/* ✅ 弹窗按钮 */
-.modal-actions {
-  display: flex;
-  gap: 12px;
-}
-
-.modal-actions button {
-  flex: 1;
-  padding: 10px 0;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1em;
-}
-
-#cancelExchange,
-#cancelAddCoins {
-  background-color: #e0e0e0;
-}
-
-#confirmExchange,
-#confirmAddCoins {
-  background-color: #1976d2;
-  color: #fff;
-}
-
-/* ✅ 切换按钮 */
-.exchange-toggle {
-  display: flex;
-  margin-bottom: 15px;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid #1976d2;
-}
-
-.exchange-btn {
-  flex: 1;
-  padding: 10px 0;
-  background: #e0e0e0;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.exchange-btn.active {
-  background: #1976d2;
-  color: #fff;
-}
-
-/* ✅ 动画 */
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-/* ✅ White 空容器 */
-.white-container {
-  width: 90%;
-  min-height: 100px;
-  margin: 10px auto;
-  padding: 10px;
-  background: #ffffff00;
-}
+/* =====================================================
+   Developer notes
+   - Use JS to toggle modal: add/remove "active" class on .modal
+   - Example: document.getElementById('addCoinsModal').classList.add('active')
+   - To close: .classList.remove('active')
+   ===================================================== */
