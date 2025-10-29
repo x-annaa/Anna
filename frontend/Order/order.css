@@ -210,8 +210,8 @@ button:disabled {
 }
 
 .modal-content {
-  width: 80vw;   /* 宽度占视口 80% */
-  height: 80vh;  /* 高度占视口 80% */
+  width: 80vw;
+  height: 80vh;
 
   background: #fff;
   padding: 25px 30px;
@@ -219,9 +219,10 @@ button:disabled {
   text-align: center;
   box-shadow: 0 6px 18px rgba(0,0,0,0.25);
   animation: fadeIn 0.25s ease;
+
+  display: flex;
+  flex-direction: column; /* 让header固定、body可滚动 */
 }
-
-
 
 .modal-content h3 {
   margin-top: 0;
