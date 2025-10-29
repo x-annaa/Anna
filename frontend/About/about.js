@@ -1,7 +1,6 @@
 // =====================
-// frontend/About/about.js
+// ABOUT 页面 JS
 // =====================
-
 document.addEventListener("DOMContentLoaded", () => {
 
   // =====================
@@ -11,11 +10,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const chatWindow = document.getElementById("chatWindow");
   const backBtn = document.getElementById("backBtn");
   const sendBtn = document.getElementById("sendBtn");
-  const chatInput = document.getElementById("chatInput"); // textarea
+  const chatInput = document.getElementById("chatInput");
   const chatMessages = document.getElementById("chatMessages");
 
   const bottomUnreadEl = document.getElementById("bottomUnreadCount");
   const chatBtnUnreadEl = document.getElementById("chatBtnUnreadCount");
+
+  const copyTelegramBtn = document.getElementById("copyTelegramBtn");
+  const telegramAccountEl = document.getElementById("telegramAccount");
 
   let chatSubscription = null;
 
@@ -25,23 +27,6 @@ document.addEventListener("DOMContentLoaded", () => {
   function getCurrentUserId() {
     const id = localStorage.getItem("currentUserId");
     return id ? Number(id) : null;
-  }
-
-  // =====================
-  // 显示消息
-  // =====================
-  function appendMessage(sender, text) {
-    if (!chatMessages) return;
-    const msg = document.createElement("div");
-    msg.classList.add("message-item", sender === "我" ? "me" : "bot");
-    msg.innerHTML = text.replace(/\n/g, "<br>");
-    chatMessages.prepend(msg);
-    scrollToBottom();
-  }
-
-  function scrollToBottom() {
-    if (!chatMessages) return;
-    chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 
   // =====================
@@ -60,9 +45,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const userId = getCurrentUserId();
     if (!userId) return alert("请先登录！");
 
-    if (chatWindow) chatWindow.style.display = "flex";
-    if (chatMessages) chatMessages.innerHTML = "";
+    chatWindow?.classList.remove("hidden");
+    chatMessages && (chatMessages.innerHTML = "");
 
+    // 加载历史消息
     await loadMessages();
     listenForMessages();
     await markMessagesAsRead();
@@ -74,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // 返回按钮
   // =====================
   backBtn?.addEventListener("click", () => {
-    if (chatWindow) chatWindow.style.display = "none";
+    chatWindow?.classList.add("hidden");
     if (chatSubscription) {
       supabaseClient.removeChannel(chatSubscription);
       chatSubscription = null;
@@ -87,7 +73,6 @@ document.addEventListener("DOMContentLoaded", () => {
   sendBtn?.addEventListener("click", async () => {
     const userId = getCurrentUserId();
     if (!userId) return alert("请先登录！");
-    if (!chatInput) return;
 
     const content = chatInput.value.trim();
     if (!content) return;
@@ -103,6 +88,27 @@ document.addEventListener("DOMContentLoaded", () => {
     chatInput.style.height = "auto";
     scrollToBottom();
   });
+
+  // =====================
+  // 显示消息
+  // =====================
+  function appendMessage(sender, text) {
+    if (!chatMessages) return;
+
+    const msg = document.createElement("div");
+    msg.classList.add("message-item", sender === "我" ? "me" : "bot");
+    msg.innerHTML = text.replace(/\n/g, "<br>");
+    chatMessages.appendChild(msg);
+    scrollToBottom();
+  }
+
+  // =====================
+  // 滚动到底部
+  // =====================
+  function scrollToBottom() {
+    if (!chatMessages) return;
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
 
   // =====================
   // 加载历史消息
@@ -181,7 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
         filter: `receiver_id=eq.${userId}`
       }, async payload => {
         const msg = payload.new;
-        if (msg.sender_id === 1 && chatWindow?.style.display === "flex") {
+        if (msg.sender_id === 1 && chatWindow?.style.display !== "none") {
           appendMessage("客服", msg.content);
           await markMessagesAsRead();
         }
@@ -193,8 +199,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // =====================
   // Telegram 一键复制
   // =====================
-  document.getElementById("copyTelegramBtn")?.addEventListener("click", () => {
-    const text = document.getElementById("telegramAccount")?.textContent || "";
+  copyTelegramBtn?.addEventListener("click", () => {
+    const text = telegramAccountEl?.textContent || "";
     if (!text) return;
     navigator.clipboard.writeText(text).then(() =>
       alert("已复制 Telegram 账号：" + text)
@@ -214,12 +220,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const keyboardHeight = initialHeight - vh;
 
       if (keyboardHeight > 100) {
-        // 键盘弹出：窗口底部贴近键盘
         chatWindow.style.top = 'auto';
         chatWindow.style.bottom = '0';
         chatWindow.style.transform = 'translateX(-50%)';
       } else {
-        // 键盘收回：居中
         chatWindow.style.top = '50%';
         chatWindow.style.bottom = 'auto';
         chatWindow.style.transform = 'translate(-50%, -50%)';
@@ -229,10 +233,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // =====================
   // 初始化
-  // =====================
+  adjustChatForKeyboard();
   updateUnreadCount();
   listenForMessages();
-  adjustChatForKeyboard();
+
 });
