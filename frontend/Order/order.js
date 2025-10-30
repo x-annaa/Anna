@@ -734,7 +734,7 @@ document.querySelector(".left-box").addEventListener("click", async () => {
       .order("created_at", { ascending: false });
 
     const headerH3 = document.querySelector("#historyModal .modal-header h3");
-    if (headerH3) headerH3.textContent = `All: ${count || 0}单`;
+    if (headerH3) headerH3.textContent = `All: ${count || 0}`;
 
     if (!error && orders?.length) {
       listEl.innerHTML = orders.map(o => {
