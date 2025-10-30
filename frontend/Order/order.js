@@ -13,7 +13,7 @@ window.ORDERS_PER_ROUND = 3;
 window.ROUND_DURATION = 5 * 60 * 1000;
 
 if (!window.supabaseClient) {
-  console.error("❌ supabaseClient 未初始化！");
+  console.error("❌ supabaseClient Not initialized!");
 }
 
 async function loadRoundConfig() {
