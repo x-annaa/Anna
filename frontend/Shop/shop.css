@@ -33,19 +33,16 @@
   border-radius: 5px;
 }
 
-
-/* ======= Shop 产品容器 ======= */
 #shopProducts {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 每行两列 */
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
   padding: 0px;
-  justify-items: center; /* 居中对齐单元格 */
+  justify-items: center;
 }
 
-/* ======= 产品卡片 ======= */
 .container-s4 {
-  width: 100%; /* 填充单元格 */
+  width: 100%;
   border: 1px solid #ddd;
   border-radius: 10px;
   overflow: hidden;
@@ -71,11 +68,10 @@
   margin: 5px 10px;
   color: #333;
 
-  white-space: nowrap;      /* 不换行 */
-  overflow: hidden;         /* 超出隐藏 */
-  text-overflow: ellipsis;  /* 显示省略号 ... */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-
 
 .container-s4 p {
   margin: 5px 10px;
@@ -98,7 +94,6 @@
   background-color: #0056b3;
 }
 
-/* ======= Buy 弹窗 ======= */
 #buyModal {
   position: fixed;
   top: 0;
@@ -116,7 +111,6 @@
   display: flex;
 }
 
-/* 弹窗主体 */
 .container-s3 {
   background: #fff;
   padding: 20px;
@@ -135,7 +129,6 @@
   font-size: 20px;
 }
 
-/* 三张产品图片 */
 #buyImages {
   display: flex;
   gap: 5px;
@@ -152,14 +145,12 @@
   cursor: pointer;
 }
 
-/* 产品信息文本 */
 .container-s3 p {
   width: 100%;
   font-size: 14px;
   margin: 3px 0;
 }
 
-/* 输入框 */
 .container-s3 input {
   width: 95%;
   padding: 8px;
@@ -169,11 +160,10 @@
   font-size: 14px;
 }
 
-/* Confirm & Cancel 按钮容器 */
 .button-row {
   width: 100%;
   display: flex;
-  justify-content: space-between; /* 桌面左右分开 */
+  justify-content: space-between;
   margin-top: 10px;
   gap: 4%;
 }
@@ -197,20 +187,16 @@
   color: #fff;
 }
 
-/* ======= 响应式 ======= */
 @media (max-width: 600px) {
 
-  /* 产品卡片图片变矮 */
   .container-s4 img.product-image {
     height: 150px;
   }
 
-  /* buyModal 三张图片缩小 */
   #buyImages img {
     height: 80px;
   }
 
-  /* 按钮上下排列 */
   .button-row {
     flex-direction: column;
     gap: 10px;
@@ -232,17 +218,15 @@
   overflow-wrap: break-word;
 }
 
-/* 搜索栏容器固定 */
 .shop-search-container {
-  position: sticky;        /* 粘性定位 */
-  top: 0;                  /* 距离页面顶部0 */
-  z-index: 100;            /* 保证在产品上方 */
+  position: sticky;
+  top: 0;
+  z-index: 100;
   display: flex;
-  margin-bottom: 10px; /* 搜索栏和产品之间留空间 */
+  margin-bottom: 10px;
   gap: 10px;
 }
 
-/* 输入框和按钮样式保持不变 */
 #shopSearchInput {
   flex: 1;
   padding: 8px 12px;
