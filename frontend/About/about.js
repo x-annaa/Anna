@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   openChatBtn?.addEventListener("click", async () => {
     const userId = getCurrentUserId();
-    if (!userId) return alert("请先登录！");
+    if (!userId) return alert("Please log in first!");
 
     chatWindow.style.display = "flex";
     chatWindow.classList.remove("hidden");
@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   sendBtn?.addEventListener("click", async () => {
     const userId = getCurrentUserId();
-    if (!userId) return alert("请先登录！");
+    if (!userId) return alert("Please log in first!");
 
     const content = chatInput.value.trim();
     if (!content) return;
@@ -58,9 +58,9 @@ document.addEventListener("DOMContentLoaded", () => {
       { sender_id: userId, receiver_id: 1, content, is_read: false }
     ]);
 
-    if (error) return alert("发送失败：" + error.message);
+    if (error) return alert("Sending failed：" + error.message);
 
-    appendMessage("我", content);
+    appendMessage("Me", content);
     chatInput.value = "";
     chatInput.style.height = "auto";
     scrollToBottom();
@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function appendMessage(sender, text) {
     if (!chatMessages) return;
     const msg = document.createElement("div");
-    msg.classList.add("message-item", sender === "我" ? "me" : "bot");
+    msg.classList.add("message-item", sender === "Me" ? "me" : "bot");
     msg.innerHTML = text.replace(/\n/g, "<br>");
     chatMessages.appendChild(msg);
     scrollToBottom();
@@ -93,7 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (error) return console.error(error);
 
     data.forEach(msg =>
-      appendMessage(msg.sender_id === userId ? "我" : "客服", msg.content)
+      appendMessage(msg.sender_id === userId ? "Me" : "Customer Service", msg.content)
     );
   }
 
@@ -159,7 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }, async payload => {
         const msg = payload.new;
         if (msg.sender_id === 1 && chatWindow?.style.display !== "none") {
-          appendMessage("客服", msg.content);
+          appendMessage("Customer Service", msg.content);
           await markMessagesAsRead();
         }
         updateUnreadCount();
@@ -171,7 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const text = telegramAccountEl?.textContent || "";
     if (!text) return;
     navigator.clipboard.writeText(text).then(() =>
-      alert("已复制 Telegram 账号：" + text)
+      alert("Copied：" + text)
     );
   });
 
