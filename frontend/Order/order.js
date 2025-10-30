@@ -443,7 +443,7 @@ async function finalizeMatchedOrder(product) {
 
 document.addEventListener("DOMContentLoaded", restoreMatchingIfAny);
 
-function startCooldownTimer(nextAllowed, messagePrefix = "冷却中，请等待") {
+function startCooldownTimer(nextAllowed, messagePrefix = "Cooling down") {
   if (!nextAllowed) return;
 
   const tick = () => {
