@@ -7,8 +7,9 @@ async function loadShopProducts() {
   try {
     const { data: products2, error } = await supabaseClient
       .from("products2")
-      .select("*");
+      .select("*")
       .eq("is_visible", true);
+
 
     if (error) {
       console.error("Failed to load products2:", error.message);
