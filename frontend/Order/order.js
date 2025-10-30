@@ -673,7 +673,7 @@ async function loadRecentOrders() {
       .eq("user_id", window.currentUserId);
 
     const historyTitle = document.querySelector(".order-history h3");
-    if (historyTitle) historyTitle.textContent = `Recent Orders Number of Orders：${totalCount || 0}单`;
+    if (historyTitle) historyTitle.textContent = `Recent Orders Number of Orders：${totalCount || 0}`;
 
     const list = document.getElementById("recentOrders");
     if (list) {
