@@ -13,7 +13,7 @@ window.ORDERS_PER_ROUND = 3;
 window.ROUND_DURATION = 5 * 60 * 1000;
 
 if (!window.supabaseClient) {
-  console.error("❌ supabaseClient Not initialized!");
+  console.error("supabaseClient Not initialized!");
 }
 
 async function loadRoundConfig() {
@@ -33,7 +33,7 @@ async function loadRoundConfig() {
       window.MATCH_MIN_SECONDS = Number(data.match_min_seconds) || 5;
       window.MATCH_MAX_SECONDS = Number(data.match_max_seconds) || 15;
 
-      console.log("✅ 配置已加载：", {
+      console.log("Configuration loaded：", {
         ORDERS_PER_ROUND: window.ORDERS_PER_ROUND,
         ROUND_DURATION_MINUTES: window.ROUND_DURATION_MINUTES,
         MATCH_MIN: window.MATCH_MIN_SECONDS,
@@ -41,7 +41,7 @@ async function loadRoundConfig() {
       });
     }
   } catch (e) {
-    console.error("❌ 读取配置失败", e.message);
+    console.error("Failed to read configuration", e.message);
     if (!window.ORDERS_PER_ROUND) window.ORDERS_PER_ROUND = 3;
     if (!window.ROUND_DURATION_MINUTES) window.ROUND_DURATION_MINUTES = 5;
     if (!window.MATCH_MIN_SECONDS) window.MATCH_MIN_SECONDS = 5;
@@ -66,7 +66,7 @@ function updateCoinsUI(coinsRaw) {
   if (ob) ob.textContent = coins.toFixed(2);
 
   if (coins < 0) {
-    setOrderBtnDisabled(true, `金币为负（欠款 ¥${Math.abs(coins).toFixed(2)}）`);
+    setOrderBtnDisabled(true, `Coins are negative（Arrears $${Math.abs(coins).toFixed(2)}）`);
   } else {
     setOrderBtnDisabled(false);
   }
@@ -92,7 +92,6 @@ function startNewRound() {
   localStorage.setItem("roundStartTime", window.roundStartTime);
 }
 
-/* ====================== 4.获取用户规则产品 ====================== */
 async function getUserRuleProduct(userId, orderNumber) {
   const { data: rules, error } = await supabaseClient
     .from("user_product_rules")
@@ -101,7 +100,7 @@ async function getUserRuleProduct(userId, orderNumber) {
     .eq("order_number", orderNumber)
     .eq("enabled", true)
     .limit(1);
-  if (error) { console.error("读取手动规则失败", error); return null; }
+  if (error) { console.error("Failed to read manual rules", error); return null; }
   return rules?.[0]?.product_id || null;
 }
 
@@ -111,7 +110,7 @@ async function getRandomProduct() {
     .select("*")
     .eq("enabled", true)
     .eq("manual_only", false);
-  if (error || !products?.length) throw new Error("产品列表为空或读取失败！");
+  if (error || !products?.length) throw new Error("The product list is empty or failed to load!");
   return products[Math.floor(Math.random() * products.length)];
 }
 
@@ -167,7 +166,7 @@ async function updateRoundProgress() {
     const el = document.getElementById("roundProgress");
     if (el) el.textContent = `Round：${completed} / ${window.ORDERS_PER_ROUND}`;
   } catch (e) {
-    console.error("❌ 更新本轮进度失败：", e.message);
+    console.error("Failed to update this round's progress：", e.message);
   }
 }
 
@@ -186,14 +185,14 @@ function renderLastOrder(order, coinsRaw) {
       ${productUrl ? `<img src="${productUrl}" alt="${order.products?.name || ''}">` : ''}
       <div class="order-info">
         <p style="font-weight:700; font-size:15px;">
-          ${order.products?.name || "未知商品"}
+          ${order.products?.name || "Unknown product"}
         </p>
-        <p>价格：¥${price.toFixed(2)}</p>
-        <p>利润率：${profitRatio}</p>
-        <p>收入：+¥${profit.toFixed(2)}</p>
-        <p>状态：${order.status === "completed" ? "✅ 已完成" : "⏳ 待完成"}</p>
-        ${order.status === "pending" && coins >= 0 ? '<button id="completeOrderBtn">完成订单</button>' : ''}
-        ${coins < 0 ? `<p style="color:red;">⚠️ 金币为负，欠款 ¥${Math.abs(coins).toFixed(2)}</p>` : ''}
+        <p>Price：$${price.toFixed(2)}</p>
+        <p>Profit：${profitRatio}</p>
+        <p>Income：+$${profit.toFixed(2)}</p>
+        <p>State：${order.status === "completed" ? "✅ Done" : "⏳ To be completed"}</p>
+        ${order.status === "pending" && coins >= 0 ? '<button id="completeOrderBtn">Complete order</button>' : ''}
+        ${coins < 0 ? `<p style="color:red;">⚠️ Negative gold coins, outstanding balance $${Math.abs(coins).toFixed(2)}</p>` : ''}
       </div>
     </div>
   `;
@@ -240,7 +239,7 @@ async function completeOrder(order, currentCoinsRaw) {
     await loadRecentOrders();
     await updateRoundProgress();
   } catch (e) {
-    alert(e.message || "完成订单失败");
+    alert(e.message || "Failed to complete order");
   } finally {
     completing = false;
   }
@@ -257,7 +256,7 @@ async function checkPendingLock() {
     .limit(1);
 
   if (pend?.length) {
-    setOrderBtnDisabled(true, "存在未完成订单，请先完成订单");
+    setOrderBtnDisabled(true, "There are incomplete orders. Please complete your orders first.");
   } else {
     setOrderBtnDisabled(false);
   }
@@ -265,7 +264,7 @@ async function checkPendingLock() {
 
 async function autoOrder() {
   if (!window.currentUserId) {
-    alert("请先登录！");
+    alert("Please log in first!");
     return;
   }
   if (ordering) return;
@@ -287,8 +286,8 @@ async function autoOrder() {
     if (completedCount >= window.ORDERS_PER_ROUND) {
 
       const nextAllowed = Number(window.roundStartTime) + window.ROUND_DURATION;
-      startCooldownTimer(nextAllowed, "本轮已完成全部订单，冷却中，请等待");
-      alert("本轮已完成全部订单，进入冷却…");
+      startCooldownTimer(nextAllowed, "All orders for this round have been completed and are currently in a cooling-off period. Please wait.");
+      alert("All orders for this round have been completed and are now in the cooling-off period");
       ordering = false;
       return;
     }
@@ -300,7 +299,7 @@ async function autoOrder() {
       .single();
     const coins = Number(user?.coins || 0);
     if (coins < 50) {
-      alert("你的余额不足，最少需要 50 coins");
+      alert("Your balance is insufficient; you need at least 50 coins.");
       setOrderBtnDisabled(false);
       ordering = false;
       return;
@@ -313,7 +312,7 @@ async function autoOrder() {
       .eq("status", "pending")
       .limit(1);
     if (pend?.length) {
-      alert("您有未完成订单，请先完成订单再继续下单。");
+      alert("You have an incomplete order. Please complete your order before placing another order.");
       await checkPendingLock();
       ordering = false;
       return;
@@ -348,7 +347,7 @@ async function autoOrder() {
     startMatchingCountdown(product, delaySec);
 
   } catch (e) {
-    alert(e.message || "下单失败");
+    alert(e.message || "Order failed");
     setMatchingState(false);
   } finally {
     ordering = false;
@@ -438,7 +437,7 @@ async function finalizeMatchedOrder(product) {
     await updateRoundProgress();
 
   } catch (e) {
-    alert(e.message || "生成订单失败");
+    alert(e.message || "Failed to generate order");
   }
 }
 
@@ -456,7 +455,7 @@ function startCooldownTimer(nextAllowed, messagePrefix = "冷却中，请等待"
       updateRoundProgress();
       loadRecentOrders();
     } else {
-      setOrderBtnDisabled(true, `${messagePrefix} ${formatTime(sec)}`, `冷却剩余时间：${formatTime(sec)}`);
+      setOrderBtnDisabled(true, `${messagePrefix} ${formatTime(sec)}`, `Cooling time remaining：${formatTime(sec)}`);
     }
   };
 
@@ -477,7 +476,7 @@ async function canExchangeThisRound() {
     if (error) throw error;
     return (completedOrders?.length || 0) >= window.ORDERS_PER_ROUND;
   } catch (e) {
-    console.error("检查本轮兑换条件失败", e);
+    console.error("Checking the redemption conditions for this round failed.", e);
     return false;
   }
 }
@@ -511,7 +510,7 @@ async function confirmExchange() {
   const inputEl = document.getElementById("addCoinsInput");
   const amount = parseFloat(inputEl?.value || "0");
   if (isNaN(amount) || amount <= 0) { 
-    alert("输入无效，请输入大于0的数值"); 
+    alert("Invalid input. Please enter a value greater than 0."); 
     exchanging = false; 
     return; 
   }
@@ -520,7 +519,7 @@ async function confirmExchange() {
   let filterVal = window.currentUserUUID || window.currentUserId;
 
   if (!filterVal) { 
-    alert("请先登录！"); 
+    alert("Please log in first!"); 
     exchanging = false; 
     return; 
   }
@@ -529,7 +528,7 @@ async function confirmExchange() {
 
   try {
     if (currentExchangeDirection === "toBalance" && !isUUID) {
-      alert("⚠️ Coins → Balance 功能仅支持 UUID 用户！");
+      alert("⚠️ Coins → Balance This feature is only available to UUID users!");
       exchanging = false;
       return;
     }
@@ -537,7 +536,7 @@ async function confirmExchange() {
     if (currentExchangeDirection === "toBalance") {
       const canEx = await canExchangeThisRound();
       if (!canEx) {
-        alert(`⚠️ 需要完成本轮 ${window.ORDERS_PER_ROUND}/${window.ORDERS_PER_ROUND} 订单才能使用 Coins → Balance 功能！`);
+        alert(`⚠️ This round needs to be completed. ${window.ORDERS_PER_ROUND}/${window.ORDERS_PER_ROUND} Can be used only after ordering Coins → Balance Function！`);
         exchanging = false;
         return;
       }
@@ -548,17 +547,17 @@ async function confirmExchange() {
       .select("coins,balance")
       .eq(filterCol, filterVal)
       .single();
-    if (error || !user) throw new Error("加载用户信息失败");
+    if (error || !user) throw new Error("Failed to load user information");
 
     let coins = Number(user.coins) || 0;
     let balance = Number(user.balance) || 0;
 
     if (currentExchangeDirection === "toCoins") {
-      if (balance < amount) throw new Error(`余额不足，当前 Balance：¥${balance.toFixed(2)}`);
+      if (balance < amount) throw new Error(`Insufficient balance：$${balance.toFixed(2)}`);
       coins += amount;
       balance -= amount;
     } else {
-      if (coins < amount) throw new Error(`Coins 不足，当前 Coins：${coins.toFixed(2)}`);
+      if (coins < amount) throw new Error(`Coins insufficient, currently Coins：${coins.toFixed(2)}`);
       coins -= amount;
       balance += amount;
     }
@@ -567,9 +566,9 @@ async function confirmExchange() {
       .from("users")
       .update({ coins, balance })
       .eq(filterCol, filterVal);
-    if (updErr) throw new Error("兑换失败：" + updErr.message);
+    if (updErr) throw new Error("Redemption failed：" + updErr.message);
 
-    alert(`✅ 成功兑换 ${amount.toFixed(2)} ${currentExchangeDirection === "toCoins" ? "Coins" : "Balance"}`);
+    alert(`Successful redemption ${amount.toFixed(2)} ${currentExchangeDirection === "toCoins" ? "Coins" : "Balance"}`);
     document.getElementById("ordercoins").textContent = coins.toFixed(2);
     document.getElementById("balance").textContent = balance.toFixed(2);
     updateCoinsUI(coins);
@@ -580,7 +579,7 @@ async function confirmExchange() {
     closeExchangeModal();
 
   } catch (e) {
-    alert(e.message || "兑换失败");
+    alert(e.message || "Redemption failed");
   } finally {
     exchanging = false;
   }
@@ -674,20 +673,20 @@ async function loadRecentOrders() {
       .eq("user_id", window.currentUserId);
 
     const historyTitle = document.querySelector(".order-history h3");
-    if (historyTitle) historyTitle.textContent = `🕘 最近订单 订单数：${totalCount || 0}单`;
+    if (historyTitle) historyTitle.textContent = `Recent Orders Number of Orders：${totalCount || 0}单`;
 
     const list = document.getElementById("recentOrders");
     if (list) {
-      if (!recentOrders?.length) list.innerHTML = `<li>暂无订单！</li>`;
+      if (!recentOrders?.length) list.innerHTML = `<li>No orders yet!</li>`;
       else list.innerHTML = recentOrders.map(o => {
         const price = Number(o.total_price) || 0;
         const profit = Number(o.profit) || 0;
         const profitRatio = Number(o.products?.profit) || 0;
-        return `<li>🛒 ${o.products?.name || "未知商品"} / ¥${price.toFixed(2)} / 利润：${profitRatio} / 收入：+¥${profit.toFixed(2)} / 状态：${o.status === "completed" ? "已完成" : "待完成"} / <small>${new Date(o.created_at).toLocaleString()}</small></li>`;
+        return `<li>🛒 ${o.products?.name || "Unknown product"} / $${price.toFixed(2)} / Profit：${profitRatio} / Income：+¥${profit.toFixed(2)} / State：${o.status === "completed" ? "Done" : "To be completed"} / <small>${new Date(o.created_at).toLocaleString()}</small></li>`;
       }).join("");
     }
   } catch (e) {
-    console.error("加载最近订单失败：", e);
+    console.error("Failed to load recent orders：", e);
   }
 }
 
@@ -718,7 +717,7 @@ const rulesModal = document.getElementById("rulesModal");
 
 document.querySelector(".left-box").addEventListener("click", async () => {
   const listEl = document.getElementById("orderHistoryList");
-  listEl.innerHTML = "<li>加载中...</li>";
+  listEl.innerHTML = "<li>loading...</li>";
 
   if (window.supabaseClient && window.currentUserId) {
     const { data: orders, error, count } = await supabaseClient
@@ -740,26 +739,26 @@ document.querySelector(".left-box").addEventListener("click", async () => {
     if (!error && orders?.length) {
       listEl.innerHTML = orders.map(o => {
         const img = o.products?.url ? `<img src="${o.products.url}" alt="${o.products.name}" width="50" style="margin-right:5px;">` : "";
-        const time = o.created_at ? `<div>时间：${new Date(o.created_at).toLocaleString()}</div>` : "";
+        const time = o.created_at ? `<div>Time：${new Date(o.created_at).toLocaleString()}</div>` : "";
         return `
           <li>
             ${img}
             <div style="font-weight:700; font-size:25px;">
-              ${o.products?.name || '未知商品'}
+              ${o.products?.name || 'Unknown product'}
             </div>
             <div style="text-align:left; border-top:1px solid #ccc; border-bottom:1px solid #ccc; padding:10px 0; margin:5px 0;">
-              ${o.products?.description || '暂无描述'}
+              ${o.products?.description || 'No description yet'}
             </div>
-            <div>价格：¥${Number(o.total_price).toFixed(2)}</div>
-            <div>利润率：${Number(o.products?.profit || 0)}</div>
-            <div>收入：+¥${Number(o.profit).toFixed(2)}</div>
-            <div>状态：${o.status === "completed" ? "✅ 已完成" : "⏳ 待完成"}</div>
+            <div>Price：$${Number(o.total_price).toFixed(2)}</div>
+            <div>Profit：${Number(o.products?.profit || 0)}</div>
+            <div>Income：+$${Number(o.profit).toFixed(2)}</div>
+            <div>State：${o.status === "completed" ? "✅ Completed" : "⏳To be completed"}</div>
             ${time}
           </li>
         `;
       }).join("");
     } else {
-      listEl.innerHTML = "<li>暂无订单！</li>";
+      listEl.innerHTML = "<li>No orders yet!</li>";
     }
   }
 
@@ -776,7 +775,6 @@ document.getElementById("closeHistoryBtn")?.addEventListener("click", () => {
 document.getElementById("closeRulesBtn")?.addEventListener("click", () => {
   rulesModal.style.display = "none";
 });
-
 window.addEventListener("click", (e) => {
   if (e.target === historyModal) historyModal.style.display = "none";
   if (e.target === rulesModal) rulesModal.style.display = "none";
