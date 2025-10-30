@@ -1,24 +1,21 @@
-/* ====================== 1.初始化用户信息 ====================== */
 window.currentUserId = localStorage.getItem("currentUserId");
 window.currentUsername = localStorage.getItem("currentUser");
-window.currentUserUUID = localStorage.getItem("currentUserUUID"); // 新增 UUID
-window.currentRoundId = localStorage.getItem("currentRoundId");   // 当前轮次
-window.roundStartTime = localStorage.getItem("roundStartTime");   // 当前轮次开始时间
+window.currentUserUUID = localStorage.getItem("currentUserUUID");
+window.currentRoundId = localStorage.getItem("currentRoundId");
+window.roundStartTime = localStorage.getItem("roundStartTime");
 
-let ordering = false;      // 下单中的并发保护
-let completing = false;    // 完成订单中的并发保护
-let exchanging = false;    // Balance <-> Coins 兑换中的并发保护
-let cooldownTimer = null;  // 冷却倒计时
+let ordering = false;
+let completing = false;
+let exchanging = false;
+let cooldownTimer = null;
 
-// 默认轮次配置
 window.ORDERS_PER_ROUND = 3;
-window.ROUND_DURATION = 5 * 60 * 1000; // 毫秒
+window.ROUND_DURATION = 5 * 60 * 1000;
 
 if (!window.supabaseClient) {
   console.error("❌ supabaseClient 未初始化！");
 }
 
-/* ====================== 2.读取轮次配置 (每轮单数 & 冷却分钟) ====================== */
 async function loadRoundConfig() {
   try {
     const { data, error } = await supabaseClient
@@ -33,7 +30,6 @@ async function loadRoundConfig() {
       window.ROUND_DURATION_MINUTES = Number(data.round_duration);
       window.ROUND_DURATION = window.ROUND_DURATION_MINUTES * 60 * 1000;
 
-      // 🔥 新增：匹配时间区间
       window.MATCH_MIN_SECONDS = Number(data.match_min_seconds) || 5;
       window.MATCH_MAX_SECONDS = Number(data.match_max_seconds) || 15;
 
@@ -53,7 +49,6 @@ async function loadRoundConfig() {
   }
 }
 
-/* ====================== 3.工具函数 ====================== */
 function setOrderBtnDisabled(disabled, reason = "", cooldownText = "") {
   const btn = document.getElementById("autoOrderBtn");
   if (btn) {
@@ -110,7 +105,6 @@ async function getUserRuleProduct(userId, orderNumber) {
   return rules?.[0]?.product_id || null;
 }
 
-/* ====================== 5.获取随机产品 ====================== */
 async function getRandomProduct() {
   const { data: products, error } = await supabaseClient
     .from("products")
@@ -121,12 +115,10 @@ async function getRandomProduct() {
   return products[Math.floor(Math.random() * products.length)];
 }
 
-/* ====================== 6+.UUID 兼容方法 ====================== */
 function generateUUID() {
   if (crypto.randomUUID) {
-    return crypto.randomUUID(); // ✅ 新浏览器支持
+    return crypto.randomUUID();
   } else {
-    // ✅ 旧浏览器 fallback：UUID v4 简单实现
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
       const r = Math.random() * 16 | 0;
       const v = c === 'x' ? r : (r & 0x3 | 0x8);
@@ -135,39 +127,35 @@ function generateUUID() {
   }
 }
 
-/* ====================== 6.检查冷却 ====================== */
 function isRoundExpired() {
   if (!window.roundStartTime) return true;
   return (Date.now() - Number(window.roundStartTime)) > window.ROUND_DURATION;
 }
 
 function startNewRound() {
-  const uuid = generateUUID(); // ✅ 使用兼容 UUID
+  const uuid = generateUUID();
   window.currentRoundId = uuid;
   window.roundStartTime = Date.now();
   localStorage.setItem("currentRoundId", uuid);
   localStorage.setItem("roundStartTime", window.roundStartTime);
 }
 
-/* ====================== 7.本轮完成订单数显示 ====================== */
 async function updateRoundProgress() {
-  // 确保配置已加载
   if (!window.ORDERS_PER_ROUND || !window.ROUND_DURATION_MINUTES) {
     await loadRoundConfig();
   }
-
+  
   try {
-    // 构造查询
     let query = supabaseClient
       .from("orders")
       .select("id, status")
       .eq("user_id", window.currentUserId);
 
     if (window.currentRoundId) {
-      // 有 roundId → 正常匹配
+
       query = query.eq("round_id", window.currentRoundId);
     } else {
-      // 没有 roundId → 查 round_id IS NULL
+
       query = query.is("round_id", null);
     }
 
@@ -183,8 +171,6 @@ async function updateRoundProgress() {
   }
 }
 
-
-/* ====================== 8.渲染最近订单 ====================== */
 function renderLastOrder(order, coinsRaw) {
   const el = document.getElementById("orderResult");
   if (!el || !order) return;
@@ -195,7 +181,6 @@ function renderLastOrder(order, coinsRaw) {
   const profitRatio = Number(order.products?.profit) || 0; 
   const productUrl = order.products?.url || "";
 
-  // 构建 HTML（去掉标题、时间、当前金币）
   let html = `
     <div style="display:flex; align-items:center; gap:20px;">
       ${productUrl ? `<img src="${productUrl}" alt="${order.products?.name || ''}">` : ''}
@@ -215,7 +200,6 @@ function renderLastOrder(order, coinsRaw) {
 
   el.innerHTML = html;
 
-  // 给“完成订单”按钮绑定事件
   const compBtn = document.getElementById("completeOrderBtn");
   if (compBtn) {
     compBtn.addEventListener("click", async () => {
@@ -225,8 +209,6 @@ function renderLastOrder(order, coinsRaw) {
   }
 }
 
-
-/* ====================== 9.完成订单 ====================== */
 async function completeOrder(order, currentCoinsRaw) {
   if (completing) return;
   completing = true;
@@ -256,7 +238,7 @@ async function completeOrder(order, currentCoinsRaw) {
     updateCoinsUI(finalCoins);
     await checkPendingLock();
     await loadRecentOrders();
-    await updateRoundProgress(); // 更新本轮完成数
+    await updateRoundProgress();
   } catch (e) {
     alert(e.message || "完成订单失败");
   } finally {
@@ -264,7 +246,6 @@ async function completeOrder(order, currentCoinsRaw) {
   }
 }
 
-/* ====================== 10.检查 pending 锁定 ====================== */
 async function checkPendingLock() {
   if (!window.currentUserId) return;
 
@@ -282,7 +263,6 @@ async function checkPendingLock() {
   }
 }
 
-/* ====================== 11.订单 ====================== */
 async function autoOrder() {
   if (!window.currentUserId) {
     alert("请先登录！");
@@ -294,10 +274,8 @@ async function autoOrder() {
   try {
     await loadRoundConfig();
 
-    // 🔹 开启新轮次（如不存在）
     if (!window.currentRoundId) startNewRound();
 
-    // 🔹 检查本轮已完成订单数
     const { data: roundOrders } = await supabaseClient
       .from("orders")
       .select("id,status")
@@ -307,7 +285,7 @@ async function autoOrder() {
     const completedCount = roundOrders?.filter(o => o.status === "completed").length || 0;
 
     if (completedCount >= window.ORDERS_PER_ROUND) {
-      // 直接使用 roundStartTime + ROUND_DURATION 计算下一次可下单时间
+
       const nextAllowed = Number(window.roundStartTime) + window.ROUND_DURATION;
       startCooldownTimer(nextAllowed, "本轮已完成全部订单，冷却中，请等待");
       alert("本轮已完成全部订单，进入冷却…");
@@ -315,7 +293,6 @@ async function autoOrder() {
       return;
     }
 
-    // 🔹 获取用户 Coins
     const { data: user } = await supabaseClient
       .from("users")
       .select("coins")
@@ -329,7 +306,6 @@ async function autoOrder() {
       return;
     }
 
-    // 🔹 检查未完成订单
     const { data: pend } = await supabaseClient
       .from("orders")
       .select("id")
@@ -343,7 +319,6 @@ async function autoOrder() {
       return;
     }
 
-    // 🔹 选择商品（规则或随机）
     let product;
     const totalOrdersRes = await supabaseClient
       .from("orders")
@@ -362,28 +337,25 @@ async function autoOrder() {
     }
     if (!product) product = await getRandomProduct();
 
-    // 🔹 生成随机匹配时间
     let delaySec = Math.floor(
       Math.random() * (window.MATCH_MAX_SECONDS - window.MATCH_MIN_SECONDS + 1)
     ) + window.MATCH_MIN_SECONDS;
 
-    // 🔹 保存匹配结束时间和产品信息（本地存储，刷新保持状态）
     const matchingEndTime = Date.now() + delaySec * 1000;
     localStorage.setItem("matchingEndTime", matchingEndTime);
     localStorage.setItem("matchingProductId", product.id);
 
-    // 🔹 启动匹配倒计时
     startMatchingCountdown(product, delaySec);
 
   } catch (e) {
     alert(e.message || "下单失败");
-    setMatchingState(false); // 出错也隐藏 GIF
+    setMatchingState(false);
   } finally {
     ordering = false;
   }
 }
 
-/* ====================== 12.匹配倒计时函数（刷新保持状态） ====================== */
+
 function startMatchingCountdown(product, delaySec) {
   const endTime = Date.now() + delaySec * 1000;
   const btn = document.getElementById("autoOrderBtn");
@@ -393,14 +365,13 @@ function startMatchingCountdown(product, delaySec) {
     const remaining = Math.ceil((endTime - Date.now()) / 1000);
 
     if (remaining > 0) {
-      setMatchingState(true); // ✅ 使用统一函数显示匹配状态
+      setMatchingState(true);
       requestAnimationFrame(tick);
     } else {
-      setMatchingState(false); // 匹配完成，恢复按钮
+      setMatchingState(false);
       localStorage.removeItem("matchingEndTime");
       localStorage.removeItem("matchingProductId");
 
-      // 下单逻辑
       finalizeMatchedOrder(product);
     }
   };
@@ -408,20 +379,19 @@ function startMatchingCountdown(product, delaySec) {
   tick();
 }
 
-/* ====================== 13.页面刷新恢复匹配状态 ====================== */
 function restoreMatchingIfAny() {
   const endTime = Number(localStorage.getItem("matchingEndTime"));
   const productId = localStorage.getItem("matchingProductId");
 
   if (endTime && productId && endTime > Date.now()) {
     const delaySec = Math.ceil((endTime - Date.now()) / 1000);
-    // 获取产品信息再启动倒计时
+
     supabaseClient.from("products").select("*").eq("id", productId).single()
       .then(({ data, error }) => {
         if (!error && data) startMatchingCountdown(data, delaySec);
       });
   } else if (endTime && productId) {
-    // 匹配已结束但可能未生成订单
+
     supabaseClient.from("products").select("*").eq("id", productId).single()
       .then(({ data, error }) => { if (!error && data) finalizeMatchedOrder(data); });
     localStorage.removeItem("matchingEndTime");
@@ -429,7 +399,6 @@ function restoreMatchingIfAny() {
   }
 }
 
-/* ====================== 14.匹配完成后的订单生成 ====================== */
 async function finalizeMatchedOrder(product) {
   try {
     const { data: user } = await supabaseClient
@@ -473,10 +442,8 @@ async function finalizeMatchedOrder(product) {
   }
 }
 
-// 页面加载时恢复匹配状态
 document.addEventListener("DOMContentLoaded", restoreMatchingIfAny);
 
-/* ====================== 15.冷却倒计时函数 ====================== */
 function startCooldownTimer(nextAllowed, messagePrefix = "冷却中，请等待") {
   if (!nextAllowed) return;
 
@@ -498,7 +465,6 @@ function startCooldownTimer(nextAllowed, messagePrefix = "冷却中，请等待"
   cooldownTimer = setInterval(tick, 1000);
 }
 
-/* ====================== 16.检查本轮 Coins → Balance 是否可用 ====================== */
 async function canExchangeThisRound() {
   if (!window.currentUserId || !window.currentRoundId) return false;
   try {
@@ -516,7 +482,6 @@ async function canExchangeThisRound() {
   }
 }
 
-/* ====================== 17.兑换逻辑 Coins ↔ Balance ====================== */
 let currentExchangeDirection = "toCoins";
 
 function toggleExchangeDirection(dir) {
@@ -621,7 +586,6 @@ async function confirmExchange() {
   }
 }
 
-/* ====================== 18.页面事件绑定 ====================== */
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("autoOrderBtn")?.addEventListener("click", autoOrder);
   document.getElementById("addCoinsBtn")?.addEventListener("click", openExchangeModal);
@@ -641,7 +605,6 @@ document.addEventListener("DOMContentLoaded", () => {
   refreshAll();
 });
 
-/* ====================== 19.页面刷新工具 ====================== */
 async function refreshAll() {
   await loadRoundConfig();
   await loadCoinsOrderPage();
@@ -728,7 +691,6 @@ async function loadRecentOrders() {
   }
 }
 
-/* ====================== 20.显示/隐藏匹配状态 & GIF ====================== */
 function setMatchingState(isMatching) {
   const gifEl = document.getElementById("matchingGif");
   const fixedImg = document.getElementById("fixedImg");
@@ -745,19 +707,15 @@ function setMatchingState(isMatching) {
   }
 }
 
-/* 自动按钮点击示例 */
 document.getElementById("autoOrderBtn").addEventListener("click", function() {
   setMatchingState(true);
 
-  // 模拟匹配完成 5 秒后恢复
   setTimeout(() => setMatchingState(false), 5000);
 });
 
-// 获取元素
 const historyModal = document.getElementById("historyModal");
 const rulesModal = document.getElementById("rulesModal");
 
-// 左盒子点击打开历史弹窗
 document.querySelector(".left-box").addEventListener("click", async () => {
   const listEl = document.getElementById("orderHistoryList");
   listEl.innerHTML = "<li>加载中...</li>";
@@ -776,7 +734,6 @@ document.querySelector(".left-box").addEventListener("click", async () => {
       .eq("user_id", window.currentUserId)
       .order("created_at", { ascending: false });
 
-    // 更新标题显示总订单数
     const headerH3 = document.querySelector("#historyModal .modal-header h3");
     if (headerH3) headerH3.textContent = `All: ${count || 0}单`;
 
@@ -809,13 +766,10 @@ document.querySelector(".left-box").addEventListener("click", async () => {
   historyModal.style.display = "block";
 });
 
-
-// 右盒子点击打开规则弹窗
 document.querySelector(".right-box").addEventListener("click", () => {
   rulesModal.style.display = "block";
 });
 
-// 点击弹窗返回按钮关闭
 document.getElementById("closeHistoryBtn")?.addEventListener("click", () => {
   historyModal.style.display = "none";
 });
@@ -823,7 +777,6 @@ document.getElementById("closeRulesBtn")?.addEventListener("click", () => {
   rulesModal.style.display = "none";
 });
 
-// 点击弹窗外区域关闭
 window.addEventListener("click", (e) => {
   if (e.target === historyModal) historyModal.style.display = "none";
   if (e.target === rulesModal) rulesModal.style.display = "none";
