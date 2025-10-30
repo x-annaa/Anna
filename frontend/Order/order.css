@@ -17,8 +17,8 @@ h2, h3 {
 
 .page.active {
   display: block;
-  height: 80vh; /* 占视窗高度的80%，不依赖父级 */
-  overflow-y: auto; /* 如果内容超过80%，可滚动 */
+  height: 80vh;
+  overflow-y: auto;
 }
 
 .bottom-nav {
@@ -486,11 +486,10 @@ button:disabled {
   height: 100%;
   background-color: rgba(0,0,0,0.5);
   overflow-y: auto;
-  justify-content: center;  /* 居中关键点 */
+  justify-content: center;
   align-items: center;
 }
 
-/* 弹窗主体 */
 .modal-content {
   background-color: #fff;
   margin: 5% auto;
@@ -503,7 +502,6 @@ button:disabled {
   position: relative;
 }
 
-/* 关闭按钮 */
 .close {
   position: absolute;
   top: 10px;
@@ -518,7 +516,6 @@ button:disabled {
   color: #000;
 }
 
-/* 动画 */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-20px); }
   to { opacity: 1; transform: translateY(0); }
