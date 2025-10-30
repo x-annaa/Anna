@@ -32,7 +32,7 @@ async function loadShopProducts() {
         <p><strong>Price:</strong> $${discountedPrice} ${
           item.discount > 0 ? `<span style="color:red;">-${item.discount}%</span>` : ""
         }</p>
-        ${item.rating ? item.rating.toFixed(1) : '5.0'}
+        ${item.rating?.toFixed(1) ?? '5.0'}
 
         <button class="buyBtn"
           data-id="${item.id}"
