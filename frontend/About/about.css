@@ -1,6 +1,3 @@
-/* =====================
-   About 页面整体容器
-   ===================== */
 .about-top-banner {
   width: 100%;
   height: 20vh;
@@ -71,9 +68,6 @@
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* =====================
-   主题色全局变量
-   ===================== */
 :root {
   --primary-blue: #4e9cff;
   --primary-blue-dark: #3d8ce6;
@@ -86,9 +80,6 @@
   --text-dark: #333;
 }
 
-/* =====================
-   聊天窗口
-   ===================== */
 #chatWindow {
   position: fixed;
   top: 50%;
@@ -107,9 +98,6 @@
   font-family: "Helvetica", Arial, sans-serif;
 }
 
-/* =====================
-   聊天顶部
-   ===================== */
 .chat-header {
   display: flex;
   align-items: center;
@@ -130,14 +118,11 @@
   padding: 0 6px;
 }
 
-/* =====================
-   消息列表
-   ===================== */
 #chatMessages {
   flex: 1 1 auto;
   padding: 10px;
   display: flex;
-  flex-direction: column; /* 新消息在底部 */
+  flex-direction: column;
   overflow-y: auto;
   gap: 8px;
   background-color: #f0f0f0;
@@ -150,9 +135,6 @@
   border-radius: 3px;
 }
 
-/* =====================
-   单条消息
-   ===================== */
 .message-item {
   max-width: 70%;
   padding: 8px 12px;
@@ -172,9 +154,6 @@
   align-self: flex-start;
 }
 
-/* =====================
-   输入区域
-   ===================== */
 .chat-input {
   display: flex;
   gap: 8px;
@@ -209,9 +188,6 @@
 .chat-input button:hover { background-color: var(--primary-blue-dark); }
 .chat-input button:active { transform: scale(0.98); }
 
-/* =====================
-   客服 & Telegram 卡片
-   ===================== */
 .telegram-box,
 #openChatBtn {
   display: flex;
@@ -280,9 +256,6 @@
 #copyTelegramBtn:hover { background: rgba(255, 255, 255, 0.28); }
 #copyTelegramBtn:active { transform: scale(0.97); }
 
-/* =====================
-   红点样式
-   ===================== */
 .unread-dot {
   position: absolute;
   top: -6px;
@@ -305,9 +278,6 @@
   50% { transform: scale(1.3); }
 }
 
-/* =====================
-   底部导航红点
-   ===================== */
 .bottom-nav button {
   position: relative;
   z-index: 1;
@@ -329,9 +299,6 @@
   animation: pulse 1.2s infinite;
 }
 
-/* =====================
-   移动端适配
-   ===================== */
 @media screen and (max-width: 768px) {
   .about-top-banner { height: 18vh; margin-bottom: 40px; }
   .about-container { margin: 0 15px 60px 15px; }
@@ -354,12 +321,10 @@
   #openChatBtn { padding: 10px; }
 }
 
-/* 让按钮可以放红点 */
 button[data-page="msgPage"] {
   position: relative;
 }
 
-/* 红点出现时带呼吸闪动效果 */
 .bottom-unread-dot.show {
   display: block;
   animation: popIn 0.3s ease-out, pulse 1.5s infinite ease-in-out;
@@ -391,29 +356,26 @@ button[data-page="msgPage"] {
   }
 }
 
-/* 按钮相对定位已经有了 */
 button[data-page="msgPage"] {
   position: relative;
 }
 
-/* 红点样式 */
 .bottom-unread-dot {
   position: absolute;
-  top: 10px;         /* 调整到按钮右上角 */
+  top: 10px;
   width: 17px;
   height: 16px;
   background-color: red;
   border-radius: 50%;
-  display: none;      /* 默认隐藏 */
+  display: none;
   font-size: 10px;
   color: #fff;
   text-align: center;
   line-height: 15px;
   pointer-events: none;
-  z-index: 10;        /* 保证在按钮上层 */
+  z-index: 10;
 }
 
-/* 红点出现时带呼吸闪动效果 */
 .bottom-unread-dot.show {
   display: block;
   animation: pulse 1.5s infinite ease-in-out;
