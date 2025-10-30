@@ -3,7 +3,6 @@ document.addEventListener("DOMContentLoaded", () => {
   setupSearch();
 });
 
-/* ==================== 加载产品 ==================== */
 async function loadShopProducts() {
   try {
     const { data: products2, error } = await supabaseClient
@@ -11,7 +10,7 @@ async function loadShopProducts() {
       .select("*");
 
     if (error) {
-      console.error("❌ Failed to load products2:", error.message);
+      console.error("Failed to load products2:", error.message);
       return;
     }
 
@@ -53,7 +52,6 @@ async function loadShopProducts() {
   }
 }
 
-/* ==================== 搜索功能 ==================== */
 function setupSearch() {
   const searchInput = document.getElementById("shopSearchInput");
   const searchBtn = document.getElementById("shopSearchBtn");
@@ -73,7 +71,6 @@ function setupSearch() {
   searchInput.addEventListener("keydown", (e) => e.key === "Enter" && doSearch());
 }
 
-/* ==================== 购买逻辑 ==================== */
 const buyModal = document.getElementById("buyModal");
 let quantity = 1;
 let unitPrice = 0;
@@ -106,7 +103,6 @@ function addBuyButtonListeners() {
   });
 }
 
-/* ==================== 数量调整 ==================== */
 function updateTotalPrice() {
   const total = unitPrice * quantity;
   priceDisplay.innerHTML = `<strong>Total:</strong> $${total.toFixed(2)}`;
@@ -126,12 +122,10 @@ document.getElementById("qtyPlus").addEventListener("click", () => {
   updateTotalPrice();
 });
 
-/* ==================== 取消购买 ==================== */
 document.getElementById("cancelBuy1").addEventListener("click", () => {
   buyModal.style.display = "none";
 });
 
-/* ==================== 提交订单 & 扣除余额 ==================== */
 document.getElementById("confirmBuy1").addEventListener("click", async () => {
   const productId = parseInt(buyModal.dataset.id);
   const userId = parseInt(localStorage.getItem("currentUserId"));
@@ -149,7 +143,7 @@ document.getElementById("confirmBuy1").addEventListener("click", async () => {
   const totalCost = unitPrice * quantity;
 
   try {
-    // 查询用户余额
+
     const { data: userData, error: userErr } = await supabaseClient
       .from("users")
       .select("balance")
@@ -157,27 +151,25 @@ document.getElementById("confirmBuy1").addEventListener("click", async () => {
       .single();
 
     if (userErr || !userData) {
-      alert("❌ Failed to fetch user data.");
+      alert("Failed to fetch user data.");
       return;
     }
 
     if (userData.balance < totalCost) {
-      alert("⚠️ Insufficient balance!");
+      alert("Insufficient balance!");
       return;
     }
 
-    // 扣除余额
     const { error: updateErr } = await supabaseClient
       .from("users")
       .update({ balance: userData.balance - totalCost })
       .eq("id", userId);
 
     if (updateErr) {
-      alert("❌ Failed to update balance: " + updateErr.message);
+      alert("Failed to update balance: " + updateErr.message);
       return;
     }
 
-    // 插入订单
     const { error: orderErr } = await supabaseClient
       .from("order_reviews")
       .insert([
@@ -195,13 +187,12 @@ document.getElementById("confirmBuy1").addEventListener("click", async () => {
       ]);
 
     if (orderErr) {
-      alert("❌ Submit order failed: " + orderErr.message);
+      alert("Submit order failed: " + orderErr.message);
       return;
     }
 
-    alert("✅ Order submitted and balance deducted successfully!");
+    alert("Order submitted and balance deducted successfully!");
 
-    // 重置弹窗
     buyModal.style.display = "none";
     document.getElementById("buyAddress").value = "";
     document.getElementById("buyPhone").value = "";
