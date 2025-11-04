@@ -174,6 +174,11 @@ button:disabled {
 }
 
 .modal-content1 {
+  position: fixed;              /* 固定在视窗中间 */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);  /* 精确居中 */
+  
   background: #fff;
   padding: 25px 30px;
   border-radius: 16px;
@@ -182,7 +187,9 @@ button:disabled {
   max-width: 90%;
   box-shadow: 0 6px 18px rgba(0,0,0,0.25);
   animation: fadeIn 0.25s ease;
+  z-index: 1000; /* 确保在最上层 */
 }
+
 .close {
   position: absolute;
   top: 10px;
