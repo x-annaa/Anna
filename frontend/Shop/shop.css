@@ -260,15 +260,16 @@
 #viewOrdersBtn {
   padding: 8px 12px;
   font-size: 16px;
-  border: none;
+  border: 2px solid #007bff; /* 蓝色边框 */
   border-radius: 5px;
-  background-color: #027bff;
-  color: white;
+  background-color: #ffffff; /* 白色背景 */
+  color: #007bff; /* 蓝色文字 */
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 #viewOrdersBtn:hover {
-  background-color: #1e7e34;
+    background-color: #0084ff;
 }
 
 #orderListModal {
