@@ -35,11 +35,18 @@
 
 #shopProducts {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 10px;
-  padding: 0px;
+  padding: 0;
   justify-items: center;
 }
+
+@media (max-width: 600px) {
+  #shopProducts {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 
 .container-s4 {
   width: 100%;
