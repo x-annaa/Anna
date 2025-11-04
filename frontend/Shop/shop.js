@@ -209,7 +209,6 @@ document.getElementById("confirmBuy1").addEventListener("click", async () => {
   }
 });
 
-// 🛒 查看订单按钮逻辑
 document.getElementById("viewOrdersBtn").addEventListener("click", async () => {
   const userId = parseInt(localStorage.getItem("currentUserId"));
   if (!userId) {
