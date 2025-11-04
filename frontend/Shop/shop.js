@@ -208,3 +208,54 @@ document.getElementById("confirmBuy1").addEventListener("click", async () => {
     alert("⚠️ Unexpected error occurred.");
   }
 });
+
+// 🛒 查看订单按钮逻辑
+document.getElementById("viewOrdersBtn").addEventListener("click", async () => {
+  const userId = parseInt(localStorage.getItem("currentUserId"));
+  if (!userId) {
+    alert("Please login first!");
+    return;
+  }
+
+  const modal = document.getElementById("orderListModal");
+  const container = document.getElementById("orderListContainer");
+
+  modal.style.display = "flex";
+  container.innerHTML = "<p>Loading...</p>";
+
+  try {
+    const { data: orders, error } = await supabaseClient
+      .from("order_reviews")
+      .select("id, product2_id, amount, quantity, created_at, status, remark, products2(image1_url, product_code, price)")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      container.innerHTML = `<p style="color:red;">Failed to load orders: ${error.message}</p>`;
+      return;
+    }
+
+    if (!orders || orders.length === 0) {
+      container.innerHTML = "<p>No orders found.</p>";
+      return;
+    }
+
+    container.innerHTML = orders.map(o => `
+      <div style="border-bottom:1px solid #ddd; padding:10px 0;">
+        <img src="${o.products2?.image1_url ?? ''}" alt="Product" style="width:60px; height:60px; object-fit:cover; border-radius:5px; margin-right:10px;">
+        <strong>${o.products2?.product_code ?? 'Unknown Product'}</strong><br>
+        💰 Price: $${o.products2?.price?.toFixed(2) ?? '0.00'}<br>
+        🕒 Time: ${new Date(o.created_at).toLocaleString()}<br>
+        📦 Status: ${o.status ?? 'pending'}<br>
+        📝 Remark: ${o.remark ?? '-'}
+      </div>
+    `).join("");
+  } catch (e) {
+    console.error(e);
+    container.innerHTML = "<p style='color:red;'>Unexpected error occurred.</p>";
+  }
+});
+
+document.getElementById("closeOrderListBtn").addEventListener("click", () => {
+  document.getElementById("orderListModal").style.display = "none";
+});
