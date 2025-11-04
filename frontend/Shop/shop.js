@@ -249,7 +249,7 @@ document.getElementById("viewOrdersBtn").addEventListener("click", async () => {
           <strong>${o.products2?.product_code ?? 'Unknown Product'}</strong><br>
           💰 Amount: $${Number(o.amount).toFixed(2)}<br>
           🔢 Quantity: ${o.quantity}<br>
-          🕒 Time: ${new Date(o.created_at).toLocaleString()}<br>
+          🕒 Date: ${new Date(o.created_at).toLocaleDateString()}<br>
           📝 Remark: ${o.remark && o.remark.trim() !== "" ? o.remark : "Processing"}
         </div>
       </div>
