@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       p_user_id: currentUser.id,
       p_amount: amount,
       p_wallet: address
-    }]);
+    });
     
     if (error) return alert("Withdrawal request failed：" + error.message);
 
