@@ -243,7 +243,7 @@ document.getElementById("viewOrdersBtn").addEventListener("click", async () => {
       <div style="border-bottom:1px solid #ddd; padding:10px 0; display:flex; gap:10px; align-items:center;">
         <img src="${o.products2?.image1_url ?? ''}" 
              alt="Product"
-             style="width:60px; height:60px; object-fit:cover; border-radius:5px; flex-shrink:0;">
+             style="width:100px; height:100px; object-fit:cover; border-radius:5px; flex-shrink:0;">
         <div style="flex:1;">
           <strong>${o.products2?.product_code ?? 'Unknown Product'}</strong><br>
           Amount： $${Number(o.amount).toFixed(2)}<br>
