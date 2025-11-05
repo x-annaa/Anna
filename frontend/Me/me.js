@@ -66,21 +66,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!address) return alert("Please enter wallet address");
     if (amount > Number(currentUser.balance)) return alert("Insufficient balance");
 
-    const { error } = await supabaseClient.from("withdrawals").insert([{
-      user_id: currentUser.id,
-      amount,
-      wallet_address: address,
-      status: "pending"
+    const { error } = await supabaseClient.rpc('request_withdraw', {
+      p_user_id: currentUser.id,
+      p_amount: amount,
+      p_wallet: address
     }]);
+    
     if (error) return alert("Withdrawal request failed：" + error.message);
 
     alert("Withdrawal request submitted");
 
-    withdrawModal.style.display = "none";
-    if (inputPwdField) document.getElementById("confirmPwdModal").style.display = "none";
-
     currentUser.balance -= amount;
     document.getElementById("balance").textContent = currentUser.balance.toFixed(2);
+
+    withdrawModal.style.display = "none";
+    if (inputPwdField) document.getElementById("confirmPwdModal").style.display = "none";
   }
 
   document.getElementById("submitWithdrawFinal").addEventListener("click", submitWithdraw);
