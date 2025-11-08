@@ -1,59 +1,104 @@
+// ===============================
+// 🛒 SHOP PAGE - with Infinite Scroll Pagination
+// ===============================
+
+let currentPage = 0;
+const batchSize = 10;
+let isLoading = false;
+let hasMore = true;
+
 document.addEventListener("DOMContentLoaded", () => {
-  loadShopProducts();
+  loadShopProducts(); // 初次加载
   setupSearch();
+  window.addEventListener("scroll", handleScrollLoadMore);
 });
 
+// ===============================
+// 📦 加载产品（分页）
+// ===============================
 async function loadShopProducts() {
+  if (isLoading || !hasMore) return;
+  isLoading = true;
+
+  const from = currentPage * batchSize;
+  const to = from + batchSize - 1;
+
   try {
     const { data: products2, error } = await supabaseClient
       .from("products2")
       .select("*")
-      .eq("is_visible", true);
-
+      .eq("is_visible", true)
+      .order("id", { ascending: true })
+      .range(from, to);
 
     if (error) {
       console.error("Failed to load products2:", error.message);
+      isLoading = false;
       return;
     }
 
-    const shopContainer = document.getElementById("shopProducts");
-    shopContainer.innerHTML = "";
+    if (!products2 || products2.length === 0) {
+      hasMore = false;
+      isLoading = false;
+      return;
+    }
 
-    products2.forEach(item => {
-      const discountedPrice = item.discount > 0
-        ? (item.price * (1 - item.discount / 100)).toFixed(2)
-        : item.price.toFixed(2);
+    renderMoreProducts(products2);
+    currentPage++;
 
-      const productDiv = document.createElement("div");
-      productDiv.classList.add("container-s4");
-      productDiv.innerHTML = `
-        <img src="${item.image1_url}" class="product-image" alt="${item.product_code}" />
-        <p class="product-name">${item.product_code}</p>
-        <p><strong>Price:</strong> $${discountedPrice} ${
-          item.discount > 0 ? `<span style="color:red;">-${item.discount}%</span>` : ""
-        }</p>
-        <p><strong>Rating:</strong> ⭐ ${item.rating?.toFixed(1) ?? '5.0'}</p>
+    // 若不足一页，说明没有更多
+    if (products2.length < batchSize) {
+      hasMore = false;
+    }
 
-        <button class="buyBtn"
-          data-id="${item.id}"
-          data-name="${item.product_code}"
-          data-desc="${item.description ?? ''}"
-          data-image1="${item.image1_url}"
-          data-image2="${item.image2_url}"
-          data-image3="${item.image3_url}"
-          data-price="${discountedPrice}">
-          Buy
-        </button>
-      `;
-      shopContainer.appendChild(productDiv);
-    });
-
-    addBuyButtonListeners();
   } catch (e) {
     console.error("⚠️ Unexpected error:", e);
+  } finally {
+    isLoading = false;
   }
 }
 
+// ===============================
+// 🧱 渲染产品
+// ===============================
+function renderMoreProducts(products) {
+  const shopContainer = document.getElementById("shopProducts");
+
+  products.forEach(item => {
+    const discountedPrice = item.discount > 0
+      ? (item.price * (1 - item.discount / 100)).toFixed(2)
+      : item.price.toFixed(2);
+
+    const productDiv = document.createElement("div");
+    productDiv.classList.add("container-s4");
+    productDiv.innerHTML = `
+      <img src="${item.image1_url}" class="product-image" alt="${item.product_code}" />
+      <p class="product-name">${item.product_code}</p>
+      <p><strong>Price:</strong> $${discountedPrice} ${
+        item.discount > 0 ? `<span style="color:red;">-${item.discount}%</span>` : ""
+      }</p>
+      <p><strong>Rating:</strong> ⭐ ${item.rating?.toFixed(1) ?? '5.0'}</p>
+
+      <button class="buyBtn"
+        data-id="${item.id}"
+        data-name="${item.product_code}"
+        data-desc="${item.description ?? ''}"
+        data-image1="${item.image1_url}"
+        data-image2="${item.image2_url}"
+        data-image3="${item.image3_url}"
+        data-price="${discountedPrice}">
+        Buy
+      </button>
+    `;
+    shopContainer.appendChild(productDiv);
+  });
+
+  addBuyButtonListeners();
+}
+
+// ===============================
+// 🔍 搜索功能
+// ===============================
 function setupSearch() {
   const searchInput = document.getElementById("shopSearchInput");
   const searchBtn = document.getElementById("shopSearchBtn");
@@ -73,6 +118,23 @@ function setupSearch() {
   searchInput.addEventListener("keydown", (e) => e.key === "Enter" && doSearch());
 }
 
+// ===============================
+// ♻️ 滚动加载更多
+// ===============================
+function handleScrollLoadMore() {
+  if (isLoading || !hasMore) return;
+
+  const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+
+  // 快到底部时加载更多
+  if (scrollTop + clientHeight >= scrollHeight - 100) {
+    loadShopProducts();
+  }
+}
+
+// ===============================
+// 🛒 购买模态框逻辑
+// ===============================
 const buyModal = document.getElementById("buyModal");
 let quantity = 1;
 let unitPrice = 0;
@@ -145,7 +207,6 @@ document.getElementById("confirmBuy1").addEventListener("click", async () => {
   const totalCost = unitPrice * quantity;
 
   try {
-
     const { data: userData, error: userErr } = await supabaseClient
       .from("users")
       .select("balance")
@@ -209,6 +270,9 @@ document.getElementById("confirmBuy1").addEventListener("click", async () => {
   }
 });
 
+// ===============================
+// 📜 查看订单
+// ===============================
 document.getElementById("viewOrdersBtn").addEventListener("click", async () => {
   const userId = parseInt(localStorage.getItem("currentUserId"));
   if (!userId) {
