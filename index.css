@@ -187,3 +187,93 @@ body {
 .alert-box button:hover {
   background: #0056b3;
 }
+
+.telegram-section {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.telegram-icon {
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.telegram-icon:hover {
+  transform: scale(1.1);
+}
+
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.popup-box {
+  background: white;
+  padding: 20px 25px;
+  border-radius: 12px;
+  text-align: center;
+  width: 90%;
+  max-width: 340px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  animation: fadeIn 0.3s ease;
+}
+
+.popup-box h2 {
+  margin-bottom: 10px;
+}
+
+.telegram-account {
+  font-size: 18px;
+  color: #0088cc;
+  margin-bottom: 10px;
+  user-select: all;
+}
+
+.copy-btn {
+  background-color: #0088cc;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 15px;
+}
+
+.copy-btn:hover {
+  background-color: #0077b6;
+}
+
+.qr-container {
+  margin-bottom: 15px;
+}
+
+.telegram-qr {
+  width: 120px;
+  height: 120px;
+  border-radius: 10px;
+}
+
+.close-btn {
+  background-color: #ccc;
+  color: black;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  background-color: #bbb;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
