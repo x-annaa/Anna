@@ -278,20 +278,3 @@ body {
   to { opacity: 1; transform: scale(1); }
 }
 
-.telegram-section {
-  text-align: center;
-  margin-top: 8px; /* 原来是 20px，现在更靠近注册框 */
-}
-
-.telegram-icon {
-  width: 50px;
-  height: 50px;
-  cursor: pointer;
-  transition: transform 0.2s;
-  opacity: 0.9;
-}
-
-.telegram-icon:hover {
-  transform: scale(1.08);
-  opacity: 1;
-}
