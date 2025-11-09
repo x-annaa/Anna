@@ -190,7 +190,7 @@ body {
 
 .telegram-section {
   text-align: center;
-  margin-top: 8px; /* 原来是 20px，现在更靠近注册框 */
+  margin-top: 30px;
 }
 
 .telegram-icon {
