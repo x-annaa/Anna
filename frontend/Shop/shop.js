@@ -262,5 +262,3 @@ document.getElementById("viewOrdersBtn").addEventListener("click", async () => {
 document.getElementById("closeOrderListBtn").addEventListener("click", () => {
   document.getElementById("orderListModal").style.display = "none";
 });
-
-还是你直接帮我写完整的吧
