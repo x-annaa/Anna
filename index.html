@@ -70,7 +70,24 @@
       <button id="alertOk">OK</button>
     </div>
   </div>
-  
+
+  <!-- Telegram 联系图 -->
+  <div class="telegram-section">
+    <img src="telegram-icon.png" alt="Telegram" id="openTelegramPopup" class="telegram-icon" />
+  </div>
+
+  <!-- Telegram 弹窗 -->
+  <div id="telegramPopup" class="popup-overlay" style="display:none;">
+    <div class="popup-box">
+      <h2>Contact us on Telegram</h2>
+      <p class="telegram-account">@yourTelegramName</p>
+      <button id="copyTelegramBtn" class="copy-btn">Copy Username</button>
+      <div class="qr-container">
+        <img src="telegram-qrcode.png" alt="Telegram QR Code" class="telegram-qr" />
+      </div>
+      <button id="closePopupBtn" class="close-btn">Close</button>
+    </div>
+  </div>
   
   <script src="index.js"></script>
 </body>
