@@ -216,7 +216,6 @@ window.alert = function(message) {
   };
 };
 
-// Telegram 弹窗控制
 const telegramPopup = document.getElementById("telegramPopup");
 const openTelegramBtn = document.getElementById("openTelegramPopup");
 const closePopupBtn = document.getElementById("closePopupBtn");
