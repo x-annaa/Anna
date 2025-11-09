@@ -215,3 +215,27 @@ window.alert = function(message) {
     overlay.style.display = "none";
   };
 };
+
+// Telegram 弹窗控制
+const telegramPopup = document.getElementById("telegramPopup");
+const openTelegramBtn = document.getElementById("openTelegramPopup");
+const closePopupBtn = document.getElementById("closePopupBtn");
+const copyTelegramBtn = document.getElementById("copyTelegramBtn");
+
+openTelegramBtn.addEventListener("click", () => {
+  telegramPopup.style.display = "flex";
+});
+
+closePopupBtn.addEventListener("click", () => {
+  telegramPopup.style.display = "none";
+});
+
+copyTelegramBtn.addEventListener("click", async () => {
+  const username = document.querySelector(".telegram-account").textContent;
+  try {
+    await navigator.clipboard.writeText(username);
+    alert("Copied to clipboard!");
+  } catch (err) {
+    alert("Failed to copy: " + err);
+  }
+});
