@@ -51,6 +51,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
+  document.getElementById("cancelConfirmPwd").addEventListener("click", () => {
+    document.getElementById("confirmPwdModal").style.display = "none";
+  });
+
   async function submitWithdraw() {
     const inputPwdField = document.getElementById("inputWithdrawPwd");
     const inputPwd = inputPwdField ? inputPwdField.value : null;
