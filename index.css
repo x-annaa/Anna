@@ -263,8 +263,9 @@ body {
 }
 
 .close-btn {
-  background-color: #ccc;
+  background-color: #3144fd;
   color: black;
+  width: 100%;
   border: none;
   padding: 6px 12px;
   border-radius: 8px;
