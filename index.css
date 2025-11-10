@@ -264,6 +264,7 @@ body {
 
 .close-btn {
   color: white;
+  background-color: #0353ff;
   width: 100%;
   border: none;
   padding: 6px 12px;
@@ -272,7 +273,7 @@ body {
 }
 
 .close-btn:hover {
-  background-color: #0353ff;
+  background-color: white;
 }
 
 @keyframes fadeIn {
