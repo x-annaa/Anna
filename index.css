@@ -273,7 +273,7 @@ body {
 }
 
 .close-btn:hover {
-  background-color: white;
+  background-color: #0c9eff;
 }
 
 @keyframes fadeIn {
