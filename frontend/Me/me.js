@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const amount = parseFloat(document.getElementById("withdrawAmount").value);
     const address = document.getElementById("walletAddress").value;
 
-    if (!amount || amount < 5) return alert("The withdrawal amount must be ≥ 10");
+    if (!amount || amount < 1) return alert("The withdrawal amount must be ≥ 10");
     if (!address) return alert("Please enter wallet address");
     if (amount > Number(currentUser.balance)) return alert("Insufficient balance");
 
