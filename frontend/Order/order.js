@@ -192,7 +192,7 @@ function renderLastOrder(order, coinsRaw) {
         <p>Income：+$${profit.toFixed(2)}</p>
         <p>State：${order.status === "completed" ? "✅ Done" : "⏳ To be completed"}</p>
         ${order.status === "pending" && coins >= 0 ? '<button id="completeOrderBtn">Complete order</button>' : ''}
-        ${coins < 0 ? `<p style="color:red;">⚠️ Negative gold coins, outstanding balance $${Math.abs(coins).toFixed(2)}</p>` : ''}
+        ${coins < 0 ? `<p style="color:red;"Coins not enough $${Math.abs(coins).toFixed(2)}</p>` : ''}
       </div>
     </div>
   `;
