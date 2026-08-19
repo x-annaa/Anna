@@ -18,18 +18,21 @@
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script src="../supabaseClient.js"></script>
 </head>
+
 <body>
 
   <!-- HOME -->
   <div id="homePage" class="page active">
     <div class="container-h1">
-      <img id="adImage" src="" alt="U9" />
+      <img id="adImage" src="" alt="U9">
     </div>
 
     <div class="container-h2">
       <span class="container-h3">🔈</span>
       <div class="container-h4">
-        <span class="container-h5">Welcome to my platform, congratulations on posting!</span>
+        <span class="container-h5">
+          Welcome to my platform, congratulations on posting!
+        </span>
       </div>
     </div>
 
@@ -82,20 +85,21 @@
     </div>
   </div>
 
+
   <!-- SHOP -->
   <div id="infoPage" class="page">
+
     <div class="shop-search-container">
-      <input type="text" id="shopSearchInput" placeholder="Search product..." />
+      <input type="text" id="shopSearchInput" placeholder="Search product...">
       <button id="shopSearchBtn">Search</button>
       <button id="viewOrdersBtn" title="View My Orders">🛒</button>
     </div>
-    
-    <div id="shopProducts" class="container-s1">
-      
-    </div>
+
+    <div id="shopProducts" class="container-s1"></div>
 
     <div id="buyModal" class="container-s2">
       <div class="container-s3">
+
         <h3 id="buyProductName">Buy Product</h3>
 
         <div id="buyImages">
@@ -110,6 +114,7 @@
         <input type="text" id="buyAddress" placeholder="Address">
         <input type="text" id="buyPhone" placeholder="Phone">
         <input type="email" id="buyEmail" placeholder="Email">
+
         <div class="quantity-container">
           <button id="qtyMinus" class="qty-btn">-</button>
           <span id="buyQuantity">1</span>
@@ -120,25 +125,35 @@
           <button id="confirmBuy1">Confirm</button>
           <button id="cancelBuy1">Cancel</button>
         </div>
+
       </div>
     </div>
 
-    <!-- 🛒 订单列表弹窗 -->
     <div id="orderListModal" class="container-s2">
       <div class="container-s3">
+
         <h3>My Orders</h3>
-        <div id="orderListContainer" style="width:100%; max-height:400px; overflow-y:auto; text-align:left;">
+
+        <div
+          id="orderListContainer"
+          style="width:100%; max-height:400px; overflow-y:auto; text-align:left;"
+        >
           <p>Loading...</p>
         </div>
+
         <div class="button-row">
           <button id="closeOrderListBtn">Close</button>
         </div>
+
       </div>
     </div>
+
   </div>
+
 
   <!-- ORDER -->
   <div id="orderPage" class="page">
+
     <div class="order-header">
       <div class="coins-box">
         Coins: <span id="ordercoins">0</span>
@@ -147,17 +162,32 @@
     </div>
 
     <div class="imgorder">
-      <img src="https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Photos/LogoOrder.jpg" alt="U9">
+      <img
+        src="https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Photos/LogoOrder.jpg"
+        alt="U9"
+      >
     </div>
 
     <div class="order-actions">
+
       <div class="left-side">
-        <img id="fixedImg" src="https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Photos/Order.png">
-        <img id="matchingGif" src="https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Photos/box.gif" alt="Ordering..." style="width:150px; height:150px; display:none; margin-top:10px;">
+        <img
+          id="fixedImg"
+          src="https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Photos/Order.png"
+        >
+
+        <img
+          id="matchingGif"
+          src="https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Photos/box.gif"
+          alt="Ordering..."
+          style="width:150px; height:150px; display:none; margin-top:10px;"
+        >
       </div>
+
       <div class="right-side">
         <button id="autoOrderBtn">Order</button>
       </div>
+
     </div>
 
     <div class="order-roundandcoldown">
@@ -172,161 +202,314 @@
       <div class="right-box">ℹ️</div>
     </div>
 
-    <div class="white-container">
-
-    </div>
+    <div class="white-container"></div>
 
     <div id="historyModal" class="modal hidden">
       <div class="modal-content1">
+
         <div class="modal-header">
           <button id="closeHistoryBtn">⬅ Back</button>
           <h3>Order history</h3>
         </div>
+
         <div id="orderHistoryList" class="modal-body">
           <ul>
             <li>
-              <img src="https://dummyimage.com/40x40/ccc/fff.png&text=Photos" alt="Product photos">
+              <img
+                src="https://dummyimage.com/40x40/ccc/fff.png&text=Photos"
+                alt="Product photos"
+              >
               <span>Product Name / $Price / Revenue / Status</span>
             </li>
           </ul>
         </div>
+
       </div>
     </div>
 
     <div id="rulesModal" class="modal hidden">
       <div class="modal-content1">
+
         <div class="modal-header">
           <button id="closeRulesBtn">⬅ Back</button>
           <h3>Rules of Use</h3>
         </div>
+
         <div class="modal-body">
-          <p>Write the rules here, support multiple lines of text, too much content will automatically scroll...</p>
+          <p>
+            Write the rules here, support multiple lines of text,
+            too much content will automatically scroll...
+          </p>
         </div>
+
       </div>
     </div>
-  
+
     <div id="addCoinsModal" class="modal">
       <div class="modal-content">
+
         <h3>Exchange</h3>
+
         <div class="exchange-toggle">
-          <button id="balanceToCoinsBtn" class="exchange-btn active" data-type="toCoins">Balance → Coins</button>
-          <button id="coinsToBalanceBtn" class="exchange-btn" data-type="toBalance">Coins → Balance</button>
+          <button
+            id="balanceToCoinsBtn"
+            class="exchange-btn active"
+            data-type="toCoins"
+          >
+            Balance → Coins
+          </button>
+
+          <button
+            id="coinsToBalanceBtn"
+            class="exchange-btn"
+            data-type="toBalance"
+          >
+            Coins → Balance
+          </button>
         </div>
+
         <p>Please enter the amount to be exchanged</p>
-        <input type="number" id="addCoinsInput" min="1" placeholder="Amount" />
+
+        <input
+          type="number"
+          id="addCoinsInput"
+          min="1"
+          placeholder="Amount"
+        >
+
         <div class="modal-actions">
           <button id="cancelExchange">Cancel</button>
           <button id="confirmExchange">Confirm</button>
         </div>
+
       </div>
     </div>
+
   </div>
 
-  <!-- ABOUT -->
+
+  <!-- ABOUT / CHAT -->
   <div id="msgPage" class="page">
+
     <div id="openChatBtn" class="support-box">
-      <img src="https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Photos/CS.jpg" alt="U9">
+      <img
+        src="https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Photos/CS.jpg"
+        alt="U9"
+      >
       <span>Customer Service</span>
       <span class="unread-dot">0</span>
     </div>
 
     <div class="telegram-box">
-      <img src="https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Photos/TG.jpg" alt="Telegram">
+      <img
+        src="https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Photos/TG.jpg"
+        alt="Telegram"
+      >
+
       <div class="telegram-info">
         <p id="telegramAccount">@U9_support</p>
         <button id="copyTelegramBtn">Copy</button>
       </div>
     </div>
 
-    <!-- Inbox -->
+
+    <!-- INBOX -->
     <div id="openInboxBtn" class="inbox-box">
+
       <img
-        src="https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Photos/TG.jpg" alt="Telegram"
+        src="https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Photos/TG.jpg"
         alt="Inbox"
       >
 
       <div class="inbox-info">
-        <p class="inbox-title">
-          Inbox
-        </p>
+
+        <p class="inbox-title">Inbox</p>
 
         <p class="inbox-subtitle">
           Notifications and messages
         </p>
-        
+
       </div>
 
       <span
         id="inboxUnreadDot"
         class="inbox-unread-dot"
       ></span>
-      
+
     </div>
 
-    <!-- About -->
+
+    <!-- INBOX MODAL -->
+    <div
+      id="inboxModal"
+      class="inbox-modal"
+    >
+
+      <div class="inbox-modal-content">
+
+        <div class="inbox-modal-header">
+
+          <button
+            id="closeInboxBtn"
+            type="button"
+          >
+            ←
+          </button>
+
+          <h3>Inbox</h3>
+
+        </div>
+
+        <div
+          id="inboxList"
+          class="inbox-list"
+        ></div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ABOUT -->
     <div class="about-container">
+
       <div class="about-image">
-        <img src="https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Photos/About.jpg" alt="U9">
+        <img
+          src="https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Photos/About.jpg"
+          alt="U9"
+        >
       </div>
 
       <div class="about-text">
+
         <h2>About</h2>
+
         <p>
-          We are a creative and passionate team focused on creating fun, practical and emotional product experiences.
-          Here, we believe that design is not only a visual art, but also a connection between emotion and inspiration.
+          We are a creative and passionate team focused on creating fun,
+          practical and emotional product experiences.
+          Here, we believe that design is not only a visual art,
+          but also a connection between emotion and inspiration.
         </p>
+
       </div>
+
     </div>
 
-    <div id="chatWindow" style="display:none; flex-direction:column;">
+
+    <!-- CUSTOMER SERVICE CHAT -->
+    <div
+      id="chatWindow"
+      style="display:none; flex-direction:column;"
+    >
+
       <div class="chat-header">
         <button id="backBtn">⬅ Back</button>
         <span>Customer Service</span>
       </div>
-      <div id="chatMessages" class="chat-messages"></div>
+
+      <div
+        id="chatMessages"
+        class="chat-messages"
+      ></div>
+
       <div class="chat-input">
-        <textarea id="chatInput" placeholder="Message"></textarea>
+
+        <textarea
+          id="chatInput"
+          placeholder="Message"
+        ></textarea>
+
         <button id="sendBtn">Send</button>
+
       </div>
+
     </div>
+
   </div>
+
 
   <!-- ME -->
   <div id="myPage" class="page">
+
     <div class="user-info">
-      <img class="avatar" src="https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Photos/ProfileU9.jpg" alt="U9">
+
+      <img
+        class="avatar"
+        src="https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Photos/ProfileU9.jpg"
+        alt="U9"
+      >
+
       <div class="info-text">
-        <p class="username"><strong>Name：</strong><span id="username">loading...</span></p>
-        <p class="platform"><strong>Account：</strong><span id="platformAccount">loading...</span></p>
+
+        <p class="username">
+          <strong>Name：</strong>
+          <span id="username">loading...</span>
+        </p>
+
+        <p class="platform">
+          <strong>Account：</strong>
+          <span id="platformAccount">loading...</span>
+        </p>
+
       </div>
+
     </div>
 
+
     <div class="balance-box">
-      <p><strong>Balance：</strong><span id="balance">0.00</span></p>
+
+      <p>
+        <strong>Balance：</strong>
+        <span id="balance">0.00</span>
+      </p>
+
       <div class="balance-actions">
         <button id="depositBtn">Deposit</button>
         <button id="withdrawBtn">Withdraw</button>
       </div>
+
     </div>
+
 
     <div class="my-buttons">
       <button id="changeLoginPwdBtn">Password</button>
       <button id="logoutBtn">Logout</button>
     </div>
 
+
     <div id="changeLoginPwdModal" class="modal">
       <div class="modal-content">
+
         <h3>Change login password</h3>
-        <input type="password" id="currentLoginPwd" placeholder="Your password" />
-        <input type="password" id="newLoginPwd" placeholder="New password" />
-        <input type="password" id="confirmLoginPwd" placeholder="Confirm password" />
+
+        <input
+          type="password"
+          id="currentLoginPwd"
+          placeholder="Your password"
+        >
+
+        <input
+          type="password"
+          id="newLoginPwd"
+          placeholder="New password"
+        >
+
+        <input
+          type="password"
+          id="confirmLoginPwd"
+          placeholder="Confirm password"
+        >
+
         <div class="modal-actions">
           <button id="cancelChangeLoginPwd">Cancel</button>
           <button id="saveChangeLoginPwd">Save</button>
         </div>
+
       </div>
     </div>
+
   </div>
+
 
   <div id="logoutModal" class="modal">
     <div class="modal-content">
@@ -336,76 +519,196 @@
     </div>
   </div>
 
+
   <div id="withdrawModal" class="modal">
     <div class="modal-content">
+
       <h3>Withdraw</h3>
-      <p>Balance：<span id="withdrawBalance">0.00</span></p>
-      <input type="number" id="withdrawAmount" placeholder="Amount" />
-      <input type="text" id="walletAddress" placeholder="USDT-TRC20 wallet address" />
-      <button id="setPasswordBtn">Add withdrawal password</button>
+
+      <p>
+        Balance：
+        <span id="withdrawBalance">0.00</span>
+      </p>
+
+      <input
+        type="number"
+        id="withdrawAmount"
+        placeholder="Amount"
+      >
+
+      <input
+        type="text"
+        id="withdrawWalletAddress"
+        placeholder="USDT-TRC20 wallet address"
+      >
+
+      <button id="setPasswordBtn">
+        Add withdrawal password
+      </button>
+
       <div class="modal-actions">
         <button id="cancelWithdraw">Cancel</button>
         <button id="confirmWithdraw">Done</button>
       </div>
+
     </div>
   </div>
 
+
   <div id="setPasswordModal" class="modal">
     <div class="modal-content">
+
       <h3>Set withdrawal password</h3>
-      <input type="password" id="withdrawPwd" maxlength="6" inputmode="numeric" placeholder="Enter a 6-digit password" />
-      <input type="password" id="confirmWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="Confirm Password" />
+
+      <input
+        type="password"
+        id="withdrawPwd"
+        maxlength="6"
+        inputmode="numeric"
+        placeholder="Enter a 6-digit password"
+      >
+
+      <input
+        type="password"
+        id="confirmWithdrawPwd"
+        maxlength="6"
+        inputmode="numeric"
+        placeholder="Confirm Password"
+      >
+
       <div class="modal-actions">
         <button id="cancelSetPwd">Cancel</button>
         <button id="saveWithdrawPwd">Save</button>
       </div>
+
     </div>
   </div>
 
+
   <div id="updatePasswordModal" class="modal">
     <div class="modal-content">
+
       <h3>Change withdrawal password</h3>
-      <input type="password" id="oldWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="Enter password" />
-      <input type="password" id="newWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="new password" />
-      <input type="password" id="confirmNewWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="confirm password" />
+
+      <input
+        type="password"
+        id="oldWithdrawPwd"
+        maxlength="6"
+        inputmode="numeric"
+        placeholder="Enter password"
+      >
+
+      <input
+        type="password"
+        id="newWithdrawPwd"
+        maxlength="6"
+        inputmode="numeric"
+        placeholder="new password"
+      >
+
+      <input
+        type="password"
+        id="confirmNewWithdrawPwd"
+        maxlength="6"
+        inputmode="numeric"
+        placeholder="confirm password"
+      >
+
       <div class="modal-actions">
         <button id="cancelUpdatePwd">Cancel</button>
         <button id="saveUpdatePwd">Save</button>
       </div>
+
     </div>
   </div>
 
+
   <div id="confirmPwdModal" class="modal">
     <div class="modal-content">
+
       <h3>Enter withdrawal password</h3>
-      <input type="password" id="inputWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="Please enter password" />
+
+      <input
+        type="password"
+        id="inputWithdrawPwd"
+        maxlength="6"
+        inputmode="numeric"
+        placeholder="Please enter password"
+      >
+
       <div class="modal-actions">
         <button id="cancelConfirmPwd">Cancel</button>
         <button id="submitWithdrawFinal">Done</button>
       </div>
+
     </div>
   </div>
 
+
   <div id="rechargeModal" class="modal">
     <div class="modal-content">
+
       <h3>Recharge</h3>
 
-      <label for="amountInput" class="wallet-label">USDT</label>
-      <input type="number" id="amountInput" placeholder="Amount" min="1" step="0.01" />
+      <label
+        for="amountInput"
+        class="wallet-label"
+      >
+        USDT
+      </label>
+
+      <input
+        type="number"
+        id="amountInput"
+        placeholder="Amount"
+        min="1"
+        step="0.01"
+      >
 
       <div class="wallet-section">
-        <p class="wallet-label"><strong>USDT-TRC20 address</strong></p>
-        <p class="wallet-address-text">TX1v24HLwkxWYskgkcDhp9o3819eJGD6ks</p>
+
+        <p class="wallet-label">
+          <strong>USDT-TRC20 address</strong>
+        </p>
+
+        <p class="wallet-address-text">
+          TX1v24HLwkxWYskgkcDhp9o3819eJGD6ks
+        </p>
+
         <div class="wallet-address">
+
           <span id="walletAddress"></span>
-          <button id="copyAddressBtn" data-wallet="TX1v24HLwkxWYskgkcDhp9o3819eJGD6ks">Copy</button>
+
+          <button
+            id="copyAddressBtn"
+            data-wallet="TX1v24HLwkxWYskgkcDhp9o3819eJGD6ks"
+          >
+            Copy
+          </button>
+
         </div>
-        <img id="qrCode" src="https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Photos/USDT.jpg" alt="U9" width="160" />
+
+        <img
+          id="qrCode"
+          src="https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Photos/USDT.jpg"
+          alt="U9"
+          width="160"
+        >
+
       </div>
 
       <div class="upload-section">
-        <label for="fileInput">Upload Transfer Photo</label>
-        <input type="file" id="fileInput" accept="image/*" />
+
+        <label for="fileInput">
+          Upload Transfer Photo
+        </label>
+
+        <input
+          type="file"
+          id="fileInput"
+          accept="image/*"
+        >
+
       </div>
 
       <p id="status"></p>
@@ -414,19 +717,42 @@
         <button id="cancelRecharge">Cancel</button>
         <button id="uploadBtn">Done</button>
       </div>
+
     </div>
   </div>
 
+
+  <!-- BOTTOM NAV -->
   <div class="bottom-nav">
-    <button data-page="homePage" class="active">Home</button>
-    <button data-page="infoPage">Shop</button>
-    <button data-page="orderPage">Order</button>
-    <button data-page="msgPage">Chat
+
+    <button
+      data-page="homePage"
+      class="active"
+    >
+      Home
+    </button>
+
+    <button data-page="infoPage">
+      Shop
+    </button>
+
+    <button data-page="orderPage">
+      Order
+    </button>
+
+    <button data-page="msgPage">
+      Chat
       <span class="bottom-unread-dot"></span>
     </button>
-    <button data-page="myPage">Me</button>
+
+    <button data-page="myPage">
+      Me
+    </button>
+
   </div>
 
+
+  <!-- JAVASCRIPT -->
   <script src="Home/home.js"></script>
   <script src="Shop/shop.js"></script>
   <script src="Order/order.js"></script>
@@ -436,6 +762,6 @@
   <script src="common/alert.js"></script>
   <script src="Recharge/recharge.js"></script>
   <script src="inbox/inbox.js"></script>
-  
+
 </body>
 </html>
