@@ -2,10 +2,17 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  >
+
   <title>U9</title>
 
-  <!-- Existing CSS -->
+  <!-- =========================
+       PAGE CSS
+  ========================== -->
   <link rel="stylesheet" href="Home/home.css">
   <link rel="stylesheet" href="About/about.css">
   <link rel="stylesheet" href="Order/order.css">
@@ -25,12 +32,15 @@
   <!-- =========================================================
        HOME
   ========================================================== -->
+
   <div id="homePage" class="page active">
 
+    <!-- Home Banner -->
     <div class="container-h1">
       <img id="adImage" src="" alt="U9">
     </div>
 
+    <!-- Announcement -->
     <div class="container-h2">
       <span class="container-h3">🔈</span>
 
@@ -41,30 +51,36 @@
       </div>
     </div>
 
+    <!-- Product Categories -->
     <div class="container-h6">
 
       <div class="container-h7">
 
+        <!-- Phone -->
         <div class="ad-item" data-category="phone"></div>
         <div class="ad-item" data-category="phone"></div>
         <div class="ad-item" data-category="phone"></div>
         <div class="ad-item" data-category="phone"></div>
 
+        <!-- Clothing -->
         <div class="ad-item" data-category="clothes"></div>
         <div class="ad-item" data-category="clothes"></div>
         <div class="ad-item" data-category="clothes"></div>
         <div class="ad-item" data-category="clothes"></div>
 
+        <!-- Watch -->
         <div class="ad-item" data-category="watch"></div>
         <div class="ad-item" data-category="watch"></div>
         <div class="ad-item" data-category="watch"></div>
         <div class="ad-item" data-category="watch"></div>
 
+        <!-- Shoe -->
         <div class="ad-item" data-category="shoe"></div>
         <div class="ad-item" data-category="shoe"></div>
         <div class="ad-item" data-category="shoe"></div>
         <div class="ad-item" data-category="shoe"></div>
 
+        <!-- Backpack -->
         <div class="ad-item" data-category="backpack"></div>
         <div class="ad-item" data-category="backpack"></div>
         <div class="ad-item" data-category="backpack"></div>
@@ -72,30 +88,49 @@
 
       </div>
 
+      <!-- Category Buttons -->
       <div class="container-h8">
-        <button class="container-h9 active" data-category="phone">
+
+        <button
+          class="container-h9 active"
+          data-category="phone"
+        >
           Phone
         </button>
 
-        <button class="container-h9" data-category="clothes">
+        <button
+          class="container-h9"
+          data-category="clothes"
+        >
           Clothing
         </button>
 
-        <button class="container-h9" data-category="watch">
+        <button
+          class="container-h9"
+          data-category="watch"
+        >
           Watch
         </button>
 
-        <button class="container-h9" data-category="shoe">
+        <button
+          class="container-h9"
+          data-category="shoe"
+        >
           Shoe
         </button>
 
-        <button class="container-h9" data-category="backpack">
+        <button
+          class="container-h9"
+          data-category="backpack"
+        >
           Backpack
         </button>
+
       </div>
 
     </div>
 
+    <!-- Ranking -->
     <div class="rank-section">
 
       <h3>🏆 Ranking list</h3>
@@ -142,8 +177,10 @@
   <!-- =========================================================
        SHOP
   ========================================================== -->
+
   <div id="infoPage" class="page">
 
+    <!-- Search -->
     <div class="shop-search-container">
 
       <input
@@ -165,13 +202,18 @@
 
     </div>
 
+    <!-- Products -->
     <div
       id="shopProducts"
       class="container-s1"
-    ></div>
+    >
+    </div>
 
 
-    <!-- Buy Modal -->
+    <!-- =========================
+         BUY PRODUCT MODAL
+    ========================== -->
+
     <div
       id="buyModal"
       class="container-s2"
@@ -266,7 +308,10 @@
     </div>
 
 
-    <!-- Order List Modal -->
+    <!-- =========================
+         ORDER LIST MODAL
+    ========================== -->
+
     <div
       id="orderListModal"
       class="container-s2"
@@ -310,8 +355,10 @@
   <!-- =========================================================
        ORDER
   ========================================================== -->
+
   <div id="orderPage" class="page">
 
+    <!-- Coins -->
     <div class="order-header">
 
       <div class="coins-box">
@@ -333,6 +380,7 @@
     </div>
 
 
+    <!-- Order Logo -->
     <div class="imgorder">
 
       <img
@@ -343,6 +391,7 @@
     </div>
 
 
+    <!-- Order Action -->
     <div class="order-actions">
 
       <div class="left-side">
@@ -350,6 +399,7 @@
         <img
           id="fixedImg"
           src="https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Photos/Order.png"
+          alt="Order"
         >
 
         <img
@@ -377,6 +427,7 @@
     </div>
 
 
+    <!-- Progress -->
     <div class="order-roundandcoldown">
 
       <div id="roundProgress"></div>
@@ -386,12 +437,15 @@
     </div>
 
 
+    <!-- Result -->
     <div
       id="orderResult"
       class="order-result"
-    ></div>
+    >
+    </div>
 
 
+    <!-- History -->
     <div class="dulcontainer">
 
       <div class="left-box">
@@ -405,10 +459,14 @@
     </div>
 
 
-    <div class="white-container"></div>
+    <div class="white-container">
+    </div>
 
 
-    <!-- History Modal -->
+    <!-- =========================
+         ORDER HISTORY MODAL
+    ========================== -->
+
     <div
       id="historyModal"
       class="modal hidden"
@@ -457,7 +515,10 @@
     </div>
 
 
-    <!-- Rules Modal -->
+    <!-- =========================
+         RULES MODAL
+    ========================== -->
+
     <div
       id="rulesModal"
       class="modal hidden"
@@ -481,11 +542,18 @@
 
           <p>
             Lucky Order
-            <br>
+            <br><br>
+
             Place an order to receive a random product.
             Complete more orders to earn profits and unlock
             higher rewards.
+
+            <br><br>
+
             Every 15 orders form one round.
+
+            <br><br>
+
             Random matching takes approximately 15 minutes.
           </p>
 
@@ -496,7 +564,10 @@
     </div>
 
 
-    <!-- Exchange Modal -->
+    <!-- =========================
+         EXCHANGE MODAL
+    ========================== -->
+
     <div
       id="addCoinsModal"
       class="modal"
@@ -559,65 +630,15 @@
 
 
   <!-- =========================================================
-       MESSAGE / CUSTOMER SERVICE
-       新增 Inbox，但不加入 Realtime
+       ABOUT / CHAT
   ========================================================== -->
+
   <div id="msgPage" class="page">
 
-    <!-- =====================================================
-         INBOX SYSTEM MESSAGES
-         独立使用 inbox-* class，避免和其他 CSS 冲突
-    ====================================================== -->
 
-    <section
-      id="inboxSection"
-      class="inbox-section"
-    >
-
-      <div class="inbox-header">
-
-        <div class="inbox-title-area">
-
-          <h2 class="inbox-title">
-            Messages
-          </h2>
-
-          <span
-            id="inboxUnreadCount"
-            class="inbox-unread-count"
-          >
-            0
-          </span>
-
-        </div>
-
-      </div>
-
-
-      <!-- Message list -->
-      <div
-        id="inboxMessageList"
-        class="inbox-message-list"
-      >
-
-        <!-- JS will load inbox_messages here -->
-
-        <div
-          id="inboxLoading"
-          class="inbox-loading"
-        >
-          Loading...
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- =====================================================
+    <!-- =======================================================
          CUSTOMER SERVICE
-         原来的功能完全保留
-    ====================================================== -->
+    ======================================================== -->
 
     <div
       id="openChatBtn"
@@ -626,21 +647,28 @@
 
       <img
         src="https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Photos/CS.jpg"
-        alt="U9"
+        alt="Customer Service"
       >
 
       <span>
         Customer Service
       </span>
 
-      <span class="unread-dot">
+      <!-- Customer Service unread -->
+      <span
+        class="unread-dot"
+        style="display:none;"
+      >
         0
       </span>
 
     </div>
 
 
-    <!-- Telegram -->
+    <!-- =======================================================
+         TELEGRAM
+    ======================================================== -->
+
     <div class="telegram-box">
 
       <img
@@ -663,7 +691,44 @@
     </div>
 
 
-    <!-- About -->
+    <!-- =======================================================
+         INBOX
+    ======================================================== -->
+
+    <div
+      id="openInboxBtn"
+      class="telegram-box inbox-box"
+    >
+
+      <img
+        src="https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Photos/Inbox.jpg"
+        alt="Inbox"
+      >
+
+      <div class="telegram-info">
+
+        <p>
+          Inbox
+        </p>
+
+      </div>
+
+      <!-- Inbox unread count -->
+      <span
+        id="inboxUnreadDot"
+        class="unread-dot"
+        style="display:none;"
+      >
+        0
+      </span>
+
+    </div>
+
+
+    <!-- =======================================================
+         ABOUT
+    ======================================================== -->
+
     <div class="about-container">
 
       <div class="about-image">
@@ -683,8 +748,8 @@
         </h2>
 
         <p>
-          We are a creative and passionate team focused
-          on creating fun, practical and emotional product
+          We are a creative and passionate team focused on
+          creating fun, practical and emotional product
           experiences.
 
           Here, we believe that design is not only a visual art,
@@ -696,9 +761,9 @@
     </div>
 
 
-    <!-- =====================================================
+    <!-- =======================================================
          CUSTOMER SERVICE CHAT WINDOW
-    ====================================================== -->
+    ======================================================== -->
 
     <div
       id="chatWindow"
@@ -724,7 +789,8 @@
       <div
         id="chatMessages"
         class="chat-messages"
-      ></div>
+      >
+      </div>
 
 
       <div class="chat-input">
@@ -742,14 +808,55 @@
 
     </div>
 
+
+    <!-- =======================================================
+         INBOX WINDOW
+    ======================================================== -->
+
+    <div
+      id="inboxWindow"
+      class="inbox-window"
+      style="display:none;"
+    >
+
+      <div class="inbox-header">
+
+        <button id="closeInboxBtn">
+          ⬅ Back
+        </button>
+
+        <span>
+          Inbox
+        </span>
+
+      </div>
+
+
+      <!-- Notification list -->
+      <div
+        id="inboxMessages"
+        class="inbox-messages"
+      >
+
+        <div class="inbox-empty">
+          Loading...
+        </div>
+
+      </div>
+
+    </div>
+
   </div>
 
 
   <!-- =========================================================
        ME
   ========================================================== -->
+
   <div id="myPage" class="page">
 
+
+    <!-- User -->
     <div class="user-info">
 
       <img
@@ -790,6 +897,7 @@
     </div>
 
 
+    <!-- Balance -->
     <div class="balance-box">
 
       <p>
@@ -820,6 +928,7 @@
     </div>
 
 
+    <!-- Buttons -->
     <div class="my-buttons">
 
       <button id="changeLoginPwdBtn">
@@ -833,7 +942,10 @@
     </div>
 
 
-    <!-- Change Login Password -->
+    <!-- =======================================================
+         CHANGE LOGIN PASSWORD
+    ======================================================== -->
+
     <div
       id="changeLoginPwdModal"
       class="modal"
@@ -885,6 +997,7 @@
   <!-- =========================================================
        LOGOUT
   ========================================================== -->
+
   <div
     id="logoutModal"
     class="modal"
@@ -912,6 +1025,7 @@
   <!-- =========================================================
        WITHDRAW
   ========================================================== -->
+
   <div
     id="withdrawModal"
     class="modal"
@@ -924,10 +1038,12 @@
       </h3>
 
       <p>
+
         Balance：
         <span id="withdrawBalance">
           0.00
         </span>
+
       </p>
 
       <input
@@ -966,6 +1082,7 @@
   <!-- =========================================================
        SET WITHDRAWAL PASSWORD
   ========================================================== -->
+
   <div
     id="setPasswordModal"
     class="modal"
@@ -1011,8 +1128,9 @@
 
 
   <!-- =========================================================
-       UPDATE WITHDRAWAL PASSWORD
+       CHANGE WITHDRAWAL PASSWORD
   ========================================================== -->
+
   <div
     id="updatePasswordModal"
     class="modal"
@@ -1068,6 +1186,7 @@
   <!-- =========================================================
        CONFIRM WITHDRAWAL PASSWORD
   ========================================================== -->
+
   <div
     id="confirmPwdModal"
     class="modal"
@@ -1107,6 +1226,7 @@
   <!-- =========================================================
        RECHARGE
   ========================================================== -->
+
   <div
     id="rechargeModal"
     class="modal"
@@ -1138,18 +1258,24 @@
       <div class="wallet-section">
 
         <p class="wallet-label">
+
           <strong>
             USDT-TRC20 address
           </strong>
+
         </p>
+
 
         <p class="wallet-address-text">
           TX1v24HLwkxWYskgkcDhp9o3819eJGD6ks
         </p>
 
+
         <div class="wallet-address">
 
-          <span id="walletAddress"></span>
+          <span id="walletAddressText">
+            TX1v24HLwkxWYskgkcDhp9o3819eJGD6ks
+          </span>
 
           <button
             id="copyAddressBtn"
@@ -1164,7 +1290,7 @@
         <img
           id="qrCode"
           src="https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Photos/USDT.jpg"
-          alt="U9"
+          alt="U9 USDT"
           width="160"
         >
 
@@ -1209,6 +1335,7 @@
   <!-- =========================================================
        BOTTOM NAVIGATION
   ========================================================== -->
+
   <div class="bottom-nav">
 
     <button
@@ -1236,11 +1363,11 @@
     <button
       data-page="msgPage"
     >
+
       Chat
 
-      <span
-        class="bottom-unread-dot"
-      ></span>
+      <!-- Chat unread -->
+      <span class="bottom-unread-dot"></span>
 
     </button>
 
@@ -1264,7 +1391,6 @@
 
   <script src="Order/order.js"></script>
 
-  <!-- Existing customer service -->
   <script src="About/about.js"></script>
 
   <script src="Me/me.js"></script>
@@ -1274,7 +1400,6 @@
   <script src="common/alert.js"></script>
 
   <script src="Recharge/recharge.js"></script>
-
 
 </body>
 </html>
