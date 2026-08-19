@@ -1,234 +1,198 @@
 /* =========================================================
-   INBOX BUTTON
-========================================================= */
+   U9 INBOX
+   frontend/inbox/inbox.css
+   ========================================================= */
+
+:root {
+  --inbox-primary: #4e9cff;
+  --inbox-primary-dark: #3d8ce6;
+  --inbox-bg: #f5f7fa;
+  --inbox-card: #ffffff;
+  --inbox-text: #222;
+  --inbox-muted: #888;
+  --inbox-border: #e5e7eb;
+  --inbox-unread: #ff3b30;
+}
+
+/* =========================================================
+   Inbox Button
+   ========================================================= */
 
 .inbox-box {
-
-  width: 100%;
-  box-sizing: border-box;
-
   display: flex;
   align-items: center;
-
-  gap: 13px;
-
+  width: 100%;
   padding: 12px 16px;
   margin: 10px 0;
-
   border-radius: 12px;
+  box-sizing: border-box;
+  gap: 12px;
 
-  position: relative;
+  background: linear-gradient(
+    135deg,
+    #7b61ff,
+    #6246ea
+  );
+
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
 
   cursor: pointer;
 
-  color: #fff;
-
-  background:
-    linear-gradient(
-      135deg,
-      #6c63ff,
-      #5146d8
-    );
+  position: relative;
 
   box-shadow:
-    0 2px 8px
-    rgba(81, 70, 216, 0.20);
+    0 2px 8px rgba(98, 70, 234, 0.20);
 
   transition:
     transform 0.15s ease,
     box-shadow 0.2s ease;
-
 }
 
-
 .inbox-box:hover {
-
   transform: translateY(-1px);
 
   box-shadow:
-    0 6px 15px
-    rgba(81, 70, 216, 0.28);
-
+    0 6px 14px rgba(98, 70, 234, 0.28);
 }
-
 
 .inbox-box:active {
-
   transform: scale(0.99);
-
 }
 
+/* Inbox icon */
 
-/* =========================================================
-   INBOX ICON
-========================================================= */
-
-.inbox-icon {
-
+.inbox-box img {
   width: 46px;
   height: 46px;
 
-  border-radius: 8px;
+  border-radius: 6px;
 
-  background:
-    rgba(255,255,255,0.18);
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-size: 25px;
+  object-fit: cover;
 
   flex-shrink: 0;
-
 }
 
-
-/* =========================================================
-   INBOX INFO
-========================================================= */
+/* Inbox text */
 
 .inbox-info {
-
-  flex: 1;
-
   display: flex;
   flex-direction: column;
 
-  gap: 3px;
+  justify-content: center;
 
+  flex: 1;
+
+  min-width: 0;
 }
 
-
-.inbox-info strong {
+.inbox-title {
+  margin: 0;
 
   font-size: 15px;
-
   font-weight: 700;
 
   color: #fff;
-
 }
 
-
-.inbox-info span {
+.inbox-subtitle {
+  margin: 3px 0 0;
 
   font-size: 12px;
 
-  color:
-    rgba(255,255,255,0.82);
-
+  color: rgba(255, 255, 255, 0.82);
 }
 
-
 /* =========================================================
-   INBOX UNREAD BADGE
-========================================================= */
+   Inbox unread badge
+   ========================================================= */
 
 .inbox-unread-dot {
-
   position: absolute;
 
   top: -6px;
   right: -6px;
 
-  min-width: 18px;
-  height: 18px;
+  min-width: 20px;
+  height: 20px;
 
   padding: 0 5px;
 
   box-sizing: border-box;
 
-  border-radius: 999px;
+  display: none;
 
-  background: #ff2d2d;
+  align-items: center;
+  justify-content: center;
+
+  background: #ff3b30;
 
   color: #fff;
 
-  font-size: 10px;
+  border-radius: 999px;
 
+  font-size: 11px;
   font-weight: 700;
 
-  line-height: 18px;
+  line-height: 20px;
 
   text-align: center;
 
-  display: none;
+  border: 2px solid #fff;
 
   pointer-events: none;
 
-  z-index: 20;
-
+  z-index: 10;
 }
 
-
 .inbox-unread-dot.show {
-
-  display: block;
+  display: flex;
 
   animation:
     inboxPopIn 0.3s ease-out,
     inboxPulse 1.5s infinite ease-in-out;
-
 }
-
 
 @keyframes inboxPopIn {
 
   0% {
-
     transform: scale(0);
-
     opacity: 0;
-
   }
 
   70% {
-
     transform: scale(1.2);
-
     opacity: 1;
-
   }
 
   100% {
-
     transform: scale(1);
-
     opacity: 1;
-
   }
 
 }
-
 
 @keyframes inboxPulse {
 
-  0%, 100% {
-
+  0%,
+  100% {
     transform: scale(1);
-
     opacity: 1;
-
   }
 
   50% {
-
     transform: scale(1.25);
-
     opacity: 0.85;
-
   }
 
 }
 
-
 /* =========================================================
-   INBOX MODAL
-========================================================= */
+   Inbox Modal
+   ========================================================= */
 
-.inbox-modal {
-
+#inboxModal {
   position: fixed;
 
   inset: 0;
@@ -236,16 +200,9 @@
   width: 100%;
   height: 100%;
 
-  background:
-    rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, 0.45);
 
-  backdrop-filter:
-    blur(4px);
-
-  -webkit-backdrop-filter:
-    blur(4px);
-
-  display: flex;
+  display: none;
 
   align-items: center;
   justify-content: center;
@@ -254,48 +211,40 @@
 
   box-sizing: border-box;
 
-  opacity: 0;
-  visibility: hidden;
+  z-index: 3000;
 
-  pointer-events: none;
-
-  transition:
-    opacity 0.22s ease,
-    visibility 0.22s ease;
-
-  z-index: 2000;
-
+  backdrop-filter: blur(3px);
 }
 
+#inboxModal.show {
+  display: flex;
 
-.inbox-modal.show {
-
-  opacity: 1;
-
-  visibility: visible;
-
-  pointer-events: auto;
-
+  animation: inboxModalFade 0.2s ease;
 }
 
+@keyframes inboxModalFade {
+
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+
+}
 
 /* =========================================================
-   INBOX WINDOW
-========================================================= */
+   Inbox Window
+   ========================================================= */
 
 .inbox-window {
+  width: 100%;
+  max-width: 520px;
 
-  width: min(
-    92vw,
-    520px
-  );
+  height: min(650px, 88vh);
 
-  height: min(
-    650px,
-    82vh
-  );
-
-  background: #f7f8fc;
+  background: var(--inbox-bg);
 
   border-radius: 18px;
 
@@ -305,35 +254,30 @@
   flex-direction: column;
 
   box-shadow:
-    0 15px 45px
-    rgba(0,0,0,0.25);
+    0 15px 45px rgba(0, 0, 0, 0.25);
 
-  transform:
-    translateY(20px)
-    scale(0.96);
-
-  transition:
-    transform 0.25s ease;
-
+  animation: inboxWindowUp 0.25s ease;
 }
 
+@keyframes inboxWindowUp {
 
-.inbox-modal.show
-.inbox-window {
+  from {
+    transform: translateY(25px);
+    opacity: 0;
+  }
 
-  transform:
-    translateY(0)
-    scale(1);
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 
 }
-
 
 /* =========================================================
-   INBOX HEADER
-========================================================= */
+   Inbox Header
+   ========================================================= */
 
 .inbox-header {
-
   height: 58px;
 
   flex-shrink: 0;
@@ -346,83 +290,69 @@
 
   box-sizing: border-box;
 
-  background:
-    linear-gradient(
-      135deg,
-      #6c63ff,
-      #5146d8
-    );
+  background: linear-gradient(
+    135deg,
+    var(--inbox-primary),
+    var(--inbox-primary-dark)
+  );
 
   color: #fff;
 
-  position: relative;
-
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
-
 .inbox-header h3 {
-
   flex: 1;
 
   margin: 0;
 
   text-align: center;
 
-  font-size: 16px;
+  font-size: 17px;
 
   font-weight: 700;
-
 }
 
-
-.inbox-back-btn {
+.inbox-header button {
+  width: 40px;
+  height: 40px;
 
   border: none;
 
-  background:
-    rgba(255,255,255,0.15);
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.14);
 
   color: #fff;
 
-  padding: 7px 11px;
-
-  border-radius: 8px;
+  font-size: 20px;
 
   cursor: pointer;
 
-  font-size: 13px;
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
 
   transition:
-    background 0.18s ease;
-
+    background 0.2s ease,
+    transform 0.1s ease;
 }
 
-
-.inbox-back-btn:hover {
-
-  background:
-    rgba(255,255,255,0.25);
-
+.inbox-header button:hover {
+  background: rgba(255, 255, 255, 0.24);
 }
 
-
-.inbox-header-icon {
-
-  width: 35px;
-
-  text-align: center;
-
-  font-size: 20px;
-
+.inbox-header button:active {
+  transform: scale(0.94);
 }
-
 
 /* =========================================================
-   INBOX LIST
-========================================================= */
+   Inbox List
+   ========================================================= */
 
-.inbox-list {
-
+#inboxList {
   flex: 1;
 
   overflow-y: auto;
@@ -430,308 +360,232 @@
   padding: 12px;
 
   box-sizing: border-box;
-
 }
 
-
-.inbox-list::-webkit-scrollbar {
-
+#inboxList::-webkit-scrollbar {
   width: 6px;
-
 }
 
+#inboxList::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
 
-.inbox-list::-webkit-scrollbar-thumb {
-
-  background:
-    rgba(0,0,0,0.18);
-
-  border-radius: 10px;
-
+  border-radius: 5px;
 }
-
-
-.inbox-list::-webkit-scrollbar-track {
-
-  background: transparent;
-
-}
-
 
 /* =========================================================
-   INBOX ITEM
-========================================================= */
+   Empty State
+   ========================================================= */
+
+.inbox-empty {
+  min-height: 300px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  flex-direction: column;
+
+  text-align: center;
+
+  color: var(--inbox-muted);
+}
+
+.inbox-empty-icon {
+  font-size: 46px;
+
+  margin-bottom: 12px;
+
+  opacity: 0.7;
+}
+
+.inbox-empty p {
+  margin: 0;
+
+  font-size: 14px;
+}
+
+/* =========================================================
+   Loading
+   ========================================================= */
+
+.inbox-loading {
+  min-height: 250px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  color: #888;
+
+  font-size: 14px;
+}
+
+/* =========================================================
+   Notification Item
+   ========================================================= */
 
 .inbox-item {
-
   position: relative;
 
-  background: #fff;
+  background: var(--inbox-card);
 
-  border-radius: 13px;
+  border-radius: 14px;
 
-  padding: 14px 15px;
+  padding: 15px;
 
   margin-bottom: 10px;
 
   box-sizing: border-box;
 
-  border: 1px solid
-    rgba(0,0,0,0.05);
+  border: 1px solid var(--inbox-border);
 
   box-shadow:
-    0 2px 7px
-    rgba(0,0,0,0.06);
+    0 2px 8px rgba(0, 0, 0, 0.05);
 
   transition:
     transform 0.15s ease,
-    box-shadow 0.15s ease;
-
+    box-shadow 0.2s ease;
 }
 
-
 .inbox-item:hover {
-
   transform: translateY(-1px);
 
   box-shadow:
-    0 5px 13px
-    rgba(0,0,0,0.09);
-
+    0 5px 14px rgba(0, 0, 0, 0.08);
 }
 
-
-/* =========================================================
-   UNREAD ITEM
-========================================================= */
+/* Unread notification */
 
 .inbox-item.unread {
-
-  border-left:
-    4px solid #6c63ff;
+  border-left: 4px solid var(--inbox-primary);
 
   background:
     linear-gradient(
-      90deg,
-      rgba(108,99,255,0.08),
-      #fff
+      135deg,
+      #ffffff,
+      #f4f8ff
     );
-
 }
 
+/* Notification title */
+
+.inbox-item-title {
+  margin: 0 25px 6px 0;
+
+  color: var(--inbox-text);
+
+  font-size: 15px;
+
+  font-weight: 700;
+
+  line-height: 1.4;
+}
+
+/* Notification content */
+
+.inbox-item-content {
+  margin: 0;
+
+  color: #555;
+
+  font-size: 14px;
+
+  line-height: 1.6;
+
+  white-space: pre-wrap;
+
+  word-break: break-word;
+}
+
+/* Notification time */
+
+.inbox-item-time {
+  margin-top: 9px;
+
+  color: #999;
+
+  font-size: 11px;
+
+  line-height: 1.4;
+}
+
+/* Unread small dot */
 
 .inbox-item.unread::after {
-
   content: "";
 
   position: absolute;
 
-  top: 14px;
-  right: 14px;
+  top: 16px;
+  right: 15px;
 
   width: 8px;
   height: 8px;
 
   border-radius: 50%;
 
-  background: #ff2d2d;
-
+  background: #ff3b30;
 }
-
 
 /* =========================================================
-   TITLE
-========================================================= */
+   Mobile
+   ========================================================= */
 
-.inbox-item-title {
+@media screen and (max-width: 600px) {
 
-  margin: 0 25px 7px 0;
-
-  font-size: 15px;
-
-  font-weight: 700;
-
-  color: #222;
-
-  line-height: 1.4;
-
-}
-
-
-/* =========================================================
-   CONTENT
-========================================================= */
-
-.inbox-item-content {
-
-  margin: 0;
-
-  font-size: 13px;
-
-  line-height: 1.65;
-
-  color: #555;
-
-  word-break: break-word;
-
-}
-
-
-/* =========================================================
-   TIME
-========================================================= */
-
-.inbox-item-time {
-
-  margin-top: 9px;
-
-  font-size: 11px;
-
-  color: #999;
-
-}
-
-
-/* =========================================================
-   LOADING
-========================================================= */
-
-.inbox-loading {
-
-  min-height: 180px;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  color: #888;
-
-  font-size: 14px;
-
-}
-
-
-/* =========================================================
-   EMPTY
-========================================================= */
-
-.inbox-empty {
-
-  min-height: 260px;
-
-  display: flex;
-
-  flex-direction: column;
-
-  align-items: center;
-
-  justify-content: center;
-
-  color: #888;
-
-  text-align: center;
-
-}
-
-
-.inbox-empty-icon {
-
-  font-size: 48px;
-
-  margin-bottom: 12px;
-
-}
-
-
-.inbox-empty p {
-
-  margin: 0;
-
-  font-size: 14px;
-
-}
-
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
-@media screen and (max-width: 480px) {
-
-  .inbox-modal {
-
+  #inboxModal {
     padding: 10px;
-
-    align-items: center;
-
   }
-
 
   .inbox-window {
+    width: 100%;
 
-    width: 94vw;
-
-    height: 82vh;
+    height: 90vh;
 
     border-radius: 16px;
-
   }
-
 
   .inbox-header {
-
     height: 54px;
-
-    padding: 0 10px;
-
   }
-
 
   .inbox-header h3 {
-
-    font-size: 15px;
-
+    font-size: 16px;
   }
 
-
-  .inbox-back-btn {
-
-    font-size: 12px;
-
-    padding: 6px 9px;
-
+  #inboxList {
+    padding: 10px;
   }
-
-
-  .inbox-list {
-
-    padding: 9px;
-
-  }
-
 
   .inbox-item {
-
-    padding: 12px;
-
-    border-radius: 11px;
-
+    padding: 13px;
   }
-
 
   .inbox-item-title {
-
     font-size: 14px;
-
   }
 
-
   .inbox-item-content {
+    font-size: 13px;
+  }
 
-    font-size: 12px;
+}
 
+@media screen and (max-width: 420px) {
+
+  #inboxModal {
+    padding: 0;
+  }
+
+  .inbox-window {
+    width: 100%;
+    height: 100vh;
+
+    max-width: none;
+
+    border-radius: 0;
   }
 
 }
