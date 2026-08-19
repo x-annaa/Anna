@@ -4,11 +4,21 @@ document.addEventListener("DOMContentLoaded", () => {
      Elements
      ========================================================= */
 
-  const openInboxBtn = document.getElementById("openInboxBtn");
-  const inboxModal = document.getElementById("inboxModal");
-  const closeInboxBtn = document.getElementById("closeInboxBtn");
-  const inboxList = document.getElementById("inboxList");
-  const inboxUnreadDot = document.getElementById("inboxUnreadDot");
+  const openInboxBtn =
+    document.getElementById("openInboxBtn");
+
+  const inboxModal =
+    document.getElementById("inboxModal");
+
+  const closeInboxBtn =
+    document.getElementById("closeInboxBtn");
+
+  const inboxList =
+    document.getElementById("inboxList");
+
+  const inboxUnreadDot =
+    document.getElementById("inboxUnreadDot");
+
 
   let inboxSubscription = null;
 
@@ -19,9 +29,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function getCurrentUserId() {
 
-    const id = localStorage.getItem("currentUserId");
+    const id =
+      localStorage.getItem("currentUserId");
 
     return id ? Number(id) : null;
+
+  }
+
+
+  /* =========================================================
+     Session Token
+     ========================================================= */
+
+  function getSessionToken() {
+
+    return localStorage.getItem("sessionToken");
 
   }
 
@@ -30,44 +52,97 @@ document.addEventListener("DOMContentLoaded", () => {
      Open Inbox
      ========================================================= */
 
-  openInboxBtn?.addEventListener("click", async () => {
+  openInboxBtn?.addEventListener(
+    "click",
+    async () => {
 
-    const userId = getCurrentUserId();
+      const userId =
+        getCurrentUserId();
 
-    if (!userId) {
-      alert("Please log in first!");
-      return;
+      const sessionToken =
+        getSessionToken();
+
+
+      if (!userId || !sessionToken) {
+
+        alert("Please log in first!");
+
+        return;
+
+      }
+
+
+      if (!inboxModal) {
+
+        console.error(
+          "Inbox modal not found."
+        );
+
+        return;
+
+      }
+
+
+      inboxModal.classList.add("show");
+
+      document.body.style.overflow =
+        "hidden";
+
+
+      /*
+       * Load notifications first
+       */
+
+      await loadNotifications();
+
+
+      /*
+       * Mark all notifications as read
+       */
+
+      await markNotificationsAsRead();
+
+
+      /*
+       * Update unread badge
+       */
+
+      await updateInboxUnreadCount();
+
     }
-
-    inboxModal.classList.add("show");
-
-    document.body.style.overflow = "hidden";
-
-    await loadNotifications();
-
-    await markNotificationsAsRead();
-
-    await updateInboxUnreadCount();
-
-  });
+  );
 
 
   /* =========================================================
      Close Inbox
      ========================================================= */
 
-  closeInboxBtn?.addEventListener("click", closeInbox);
+  closeInboxBtn?.addEventListener(
+    "click",
+    closeInbox
+  );
 
-  inboxModal?.addEventListener("click", (event) => {
 
-    if (event.target === inboxModal) {
-      closeInbox();
+  inboxModal?.addEventListener(
+    "click",
+    (event) => {
+
+      if (event.target === inboxModal) {
+
+        closeInbox();
+
+      }
+
     }
-
-  });
+  );
 
 
   function closeInbox() {
+
+    if (!inboxModal) {
+      return;
+    }
+
 
     inboxModal.classList.remove("show");
 
@@ -80,19 +155,21 @@ document.addEventListener("DOMContentLoaded", () => {
      Escape Key
      ========================================================= */
 
-  document.addEventListener("keydown", (event) => {
+  document.addEventListener(
+    "keydown",
+    (event) => {
 
-    if (event.key === "Escape") {
-
-      if (inboxModal?.classList.contains("show")) {
+      if (
+        event.key === "Escape" &&
+        inboxModal?.classList.contains("show")
+      ) {
 
         closeInbox();
 
       }
 
     }
-
-  });
+  );
 
 
   /* =========================================================
@@ -101,11 +178,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function loadNotifications() {
 
-    const userId = getCurrentUserId();
+    const sessionToken =
+      getSessionToken();
 
-    if (!userId || !inboxList) {
+
+    if (!sessionToken || !inboxList) {
+
       return;
+
     }
+
 
     inboxList.innerHTML = `
       <div class="inbox-loading">
@@ -114,13 +196,29 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
 
 
-    const { data, error } = await supabaseClient
-      .from("notifications")
-      .select("*")
-      .eq("user_id", userId)
-      .order("created_at", {
-        ascending: false
-      });
+    /*
+     * IMPORTANT:
+     *
+     * We no longer use:
+     *
+     * .from("notifications")
+     *
+     * because notifications is protected by RLS.
+     *
+     * Instead we use the RPC.
+     */
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.rpc(
+        "get_my_notifications",
+        {
+          p_session_token:
+            sessionToken
+        }
+      );
 
 
     if (error) {
@@ -130,12 +228,19 @@ document.addEventListener("DOMContentLoaded", () => {
         error
       );
 
+
       inboxList.innerHTML = `
         <div class="inbox-empty">
-          <div class="inbox-empty-icon">⚠️</div>
-          <p>Failed to load notifications.</p>
+          <div class="inbox-empty-icon">
+            ⚠️
+          </div>
+
+          <p>
+            Failed to load notifications.
+          </p>
         </div>
       `;
+
 
       return;
 
@@ -146,10 +251,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
       inboxList.innerHTML = `
         <div class="inbox-empty">
-          <div class="inbox-empty-icon">📭</div>
-          <p>No notifications yet.</p>
+          <div class="inbox-empty-icon">
+            📭
+          </div>
+
+          <p>
+            No notifications yet.
+          </p>
         </div>
       `;
+
 
       return;
 
@@ -158,11 +269,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     inboxList.innerHTML = "";
 
-    data.forEach(notification => {
 
-      appendNotification(notification);
+    data.forEach(
+      notification => {
 
-    });
+        appendNotification(
+          notification
+        );
+
+      }
+    );
 
   }
 
@@ -171,21 +287,30 @@ document.addEventListener("DOMContentLoaded", () => {
      Append Notification
      ========================================================= */
 
-  function appendNotification(notification) {
+  function appendNotification(
+    notification
+  ) {
 
     if (!inboxList) {
+
       return;
+
     }
 
 
-    const item = document.createElement("div");
+    const item =
+      document.createElement("div");
 
-    item.className = "inbox-item";
+
+    item.className =
+      "inbox-item";
 
 
     if (!notification.is_read) {
 
-      item.classList.add("unread");
+      item.classList.add(
+        "unread"
+      );
 
     }
 
@@ -223,7 +348,9 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
 
 
-    inboxList.appendChild(item);
+    inboxList.appendChild(
+      item
+    );
 
   }
 
@@ -234,20 +361,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function markNotificationsAsRead() {
 
-    const userId = getCurrentUserId();
+    const sessionToken =
+      getSessionToken();
 
-    if (!userId) {
+
+    if (!sessionToken) {
+
       return;
+
     }
 
 
-    const { error } = await supabaseClient
-      .from("notifications")
-      .update({
-        is_read: true
-      })
-      .eq("user_id", userId)
-      .eq("is_read", false);
+    const {
+      error
+    } =
+      await supabaseClient.rpc(
+        "mark_my_notifications_as_read",
+        {
+          p_session_token:
+            sessionToken
+        }
+      );
 
 
     if (error) {
@@ -262,7 +396,27 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    /* Update badge */
+    /*
+     * Remove unread style from
+     * currently displayed items.
+     */
+
+    if (inboxList) {
+
+      inboxList
+        .querySelectorAll(
+          ".inbox-item.unread"
+        )
+        .forEach(item => {
+
+          item.classList.remove(
+            "unread"
+          );
+
+        });
+
+    }
+
 
     await updateInboxUnreadCount();
 
@@ -275,9 +429,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function updateInboxUnreadCount() {
 
-    const userId = getCurrentUserId();
+    const sessionToken =
+      getSessionToken();
 
-    if (!userId) {
+
+    if (!sessionToken) {
 
       hideUnreadBadge();
 
@@ -286,14 +442,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    const { count, error } = await supabaseClient
-      .from("notifications")
-      .select("id", {
-        count: "exact",
-        head: true
-      })
-      .eq("user_id", userId)
-      .eq("is_read", false);
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.rpc(
+        "get_my_unread_count",
+        {
+          p_session_token:
+            sessionToken
+        }
+      );
 
 
     if (error) {
@@ -308,11 +467,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    const unread = count || 0;
+    const unread =
+      Number(data || 0);
 
 
     if (!inboxUnreadDot) {
+
       return;
+
     }
 
 
@@ -324,13 +486,25 @@ document.addEventListener("DOMContentLoaded", () => {
           : String(unread);
 
 
-      inboxUnreadDot.textContent = text;
+      inboxUnreadDot.textContent =
+        text;
 
-      inboxUnreadDot.classList.remove("show");
+
+      /*
+       * Restart animation
+       */
+
+      inboxUnreadDot.classList.remove(
+        "show"
+      );
+
 
       void inboxUnreadDot.offsetWidth;
 
-      inboxUnreadDot.classList.add("show");
+
+      inboxUnreadDot.classList.add(
+        "show"
+      );
 
     } else {
 
@@ -348,12 +522,19 @@ document.addEventListener("DOMContentLoaded", () => {
   function hideUnreadBadge() {
 
     if (!inboxUnreadDot) {
+
       return;
+
     }
 
-    inboxUnreadDot.textContent = "";
 
-    inboxUnreadDot.classList.remove("show");
+    inboxUnreadDot.textContent =
+      "";
+
+
+    inboxUnreadDot.classList.remove(
+      "show"
+    );
 
   }
 
@@ -364,12 +545,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function listenForNotifications() {
 
-    const userId = getCurrentUserId();
+    const userId =
+      getCurrentUserId();
+
 
     if (!userId) {
+
       return;
+
     }
 
+
+    /*
+     * Remove old channel
+     */
 
     if (inboxSubscription) {
 
@@ -377,7 +566,8 @@ document.addEventListener("DOMContentLoaded", () => {
         inboxSubscription
       );
 
-      inboxSubscription = null;
+      inboxSubscription =
+        null;
 
     }
 
@@ -393,7 +583,8 @@ document.addEventListener("DOMContentLoaded", () => {
             event: "INSERT",
             schema: "public",
             table: "notifications",
-            filter: `user_id=eq.${userId}`
+            filter:
+              `user_id=eq.${userId}`
           },
           async payload => {
 
@@ -408,21 +599,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             /*
-             * If Inbox is currently open,
-             * immediately display the notification
+             * Inbox is open
              */
 
             if (
-              inboxModal?.classList.contains("show")
+              inboxModal?.classList.contains(
+                "show"
+              )
             ) {
 
               /*
-               * New notification is unread.
-               * Put it at the top.
+               * Add new notification
+               * to the top.
                */
 
               const item =
-                document.createElement("div");
+                document.createElement(
+                  "div"
+                );
+
 
               item.className =
                 "inbox-item unread";
@@ -461,39 +656,84 @@ document.addEventListener("DOMContentLoaded", () => {
               `;
 
 
-              if (inboxList.firstChild) {
+              /*
+               * Remove empty state
+               * if it exists.
+               */
+
+              const empty =
+                inboxList?.querySelector(
+                  ".inbox-empty"
+                );
+
+
+              if (empty) {
+
+                inboxList.innerHTML = "";
+
+              }
+
+
+              if (
+                inboxList?.firstChild
+              ) {
 
                 inboxList.insertBefore(
                   item,
                   inboxList.firstChild
                 );
 
-              } else {
+              } else if (inboxList) {
 
-                inboxList.appendChild(item);
+                inboxList.appendChild(
+                  item
+                );
 
               }
 
 
               /*
-               * User is already reading Inbox,
-               * so immediately mark the new notification read.
+               * User is already viewing
+               * the Inbox.
+               *
+               * Mark this notification
+               * as read using RPC.
                */
 
-              await supabaseClient
-                .from("notifications")
-                .update({
-                  is_read: true
-                })
-                .eq(
-                  "id",
-                  notification.id
-                );
+              const sessionToken =
+                getSessionToken();
 
 
-              item.classList.remove(
-                "unread"
-              );
+              if (sessionToken) {
+
+                const {
+                  error
+                } =
+                  await supabaseClient.rpc(
+                    "mark_my_notifications_as_read",
+                    {
+                      p_session_token:
+                        sessionToken
+                    }
+                  );
+
+
+                if (error) {
+
+                  console.error(
+                    "Failed to mark new notification as read:",
+                    error
+                  );
+
+                } else {
+
+                  item.classList.remove(
+                    "unread"
+                  );
+
+                }
+
+              }
 
 
               await updateInboxUnreadCount();
@@ -501,8 +741,12 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
 
               /*
-               * Inbox closed.
-               * Keep notification unread.
+               * Inbox is closed.
+               *
+               * Do NOT mark the notification
+               * as read.
+               *
+               * Just update the badge.
                */
 
               await updateInboxUnreadCount();
@@ -511,14 +755,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
           }
         )
-        .subscribe(status => {
+        .subscribe(
+          status => {
 
-          console.log(
-            "Inbox realtime status:",
-            status
-          );
+            console.log(
+              "Inbox realtime status:",
+              status
+            );
 
-        });
+          }
+        );
 
   }
 
@@ -532,7 +778,9 @@ document.addEventListener("DOMContentLoaded", () => {
   ) {
 
     if (!timestamp) {
+
       return "";
+
     }
 
 
@@ -540,8 +788,14 @@ document.addEventListener("DOMContentLoaded", () => {
       new Date(timestamp);
 
 
-    if (Number.isNaN(date.getTime())) {
+    if (
+      Number.isNaN(
+        date.getTime()
+      )
+    ) {
+
       return "";
+
     }
 
 
@@ -566,12 +820,16 @@ document.addEventListener("DOMContentLoaded", () => {
   function escapeHtml(value) {
 
     const div =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
+
 
     div.textContent =
       value == null
         ? ""
         : String(value);
+
 
     return div.innerHTML;
 
@@ -588,7 +846,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* =========================================================
-     Optional Global Functions
+     Optional Global Function
      ========================================================= */
 
   window.updateInboxUnreadCount =
