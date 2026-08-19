@@ -210,6 +210,3 @@ function updateMsgButtonUnread(unread) {
     dot.classList.remove("show");
   }
 }
-
-updateMsgButtonUnread(5);
-updateMsgButtonUnread(0);
