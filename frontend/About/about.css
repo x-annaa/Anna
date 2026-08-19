@@ -1,1185 +1,393 @@
-/* =========================================================
-   ABOUT PAGE
-========================================================= */
-
-:root {
-
-  --about-blue: #1677ff;
-  --about-blue-dark: #0966d8;
-
-  --telegram-a: #2aabee;
-  --telegram-b: #229ed9;
-
-  --support-a: #006eff;
-  --support-b: #1688ff;
-
-  --inbox-a: #7c4dff;
-  --inbox-b: #9c6cff;
-
-  --about-bg: #f5f8fc;
-
-  --card-white: #ffffff;
-
-  --text-dark: #172033;
-  --text-gray: #667085;
-  --text-light: #98a2b3;
-
-  --border: #e6eaf0;
-
-  --danger: #ff3040;
-}
-
-
-/* =========================================================
-   ABOUT PAGE BACKGROUND
-========================================================= */
-
-#msgPage {
-
-  min-height: 100vh;
-
-  background:
-    linear-gradient(
-      180deg,
-      #eef6ff 0%,
-      #f7f9fc 45%,
-      #ffffff 100%
-    );
-
-  padding: 15px 15px 90px;
-
-  box-sizing: border-box;
-}
-
-
-/* =========================================================
-   COMMON ACTION CARD
-========================================================= */
-
-.about-action-card {
-
+.about-top-banner {
   width: 100%;
-
-  min-height: 72px;
-
-  box-sizing: border-box;
-
-  margin: 10px 0;
-
-  padding: 12px 15px;
-
-  border-radius: 16px;
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 13px;
-
+  height: 20vh;
   position: relative;
-
-  cursor: pointer;
-
-  color: white;
-
-  overflow: visible;
-
-  transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease;
-
-}
-
-
-/* =========================================================
-   CUSTOMER SERVICE
-========================================================= */
-
-#openChatBtn {
-
-  background:
-    linear-gradient(
-      135deg,
-      var(--support-a),
-      var(--support-b)
-    );
-
-  box-shadow:
-    0 7px 20px rgba(0, 110, 255, 0.20);
-
-}
-
-
-#openChatBtn:hover {
-
-  transform: translateY(-2px);
-
-  box-shadow:
-    0 10px 25px rgba(0, 110, 255, 0.28);
-
-}
-
-
-/* =========================================================
-   TELEGRAM
-========================================================= */
-
-.telegram-box {
-
-  background:
-    linear-gradient(
-      135deg,
-      var(--telegram-a),
-      var(--telegram-b)
-    );
-
-  box-shadow:
-    0 7px 20px rgba(34, 158, 217, 0.20);
-
-}
-
-
-.telegram-box:hover {
-
-  transform: translateY(-2px);
-
-  box-shadow:
-    0 10px 25px rgba(34, 158, 217, 0.28);
-
-}
-
-
-/* =========================================================
-   INBOX
-========================================================= */
-
-.inbox-box {
-
-  background:
-    linear-gradient(
-      135deg,
-      var(--inbox-a),
-      var(--inbox-b)
-    );
-
-  box-shadow:
-    0 7px 20px rgba(124, 77, 255, 0.20);
-
-}
-
-
-.inbox-box:hover {
-
-  transform: translateY(-2px);
-
-  box-shadow:
-    0 10px 25px rgba(124, 77, 255, 0.28);
-
-}
-
-
-/* =========================================================
-   CARD IMAGE
-========================================================= */
-
-.about-action-card > img {
-
-  width: 48px;
-
-  height: 48px;
-
-  object-fit: cover;
-
-  border-radius: 12px;
-
-  flex-shrink: 0;
-
-  background: rgba(255,255,255,0.18);
-
-}
-
-
-/* =========================================================
-   INBOX ICON
-========================================================= */
-
-.inbox-icon {
-
-  width: 48px;
-
-  height: 48px;
-
-  flex-shrink: 0;
-
-  border-radius: 12px;
-
-  background:
-    rgba(255,255,255,0.20);
-
+  overflow: hidden;
   display: flex;
-
-  align-items: center;
-
   justify-content: center;
-
-  font-size: 25px;
-
-}
-
-
-/* =========================================================
-   CARD TEXT
-========================================================= */
-
-.action-card-info {
-
-  display: flex;
-
-  flex-direction: column;
-
-  justify-content: center;
-
-  gap: 4px;
-
-  flex: 1;
-
-  min-width: 0;
-
-}
-
-
-.action-card-info strong {
-
-  font-size: 15px;
-
-  font-weight: 700;
-
-  color: #ffffff;
-
-}
-
-
-.action-card-info span {
-
-  font-size: 12px;
-
-  color: rgba(255,255,255,0.82);
-
-}
-
-
-/* =========================================================
-   TELEGRAM INFO
-========================================================= */
-
-.telegram-info {
-
-  flex: 1;
-
-  display: flex;
-
   align-items: center;
-
-  gap: 9px;
-
-  min-width: 0;
-
+  margin-bottom: 20px;
 }
 
-
-.telegram-info strong {
-
-  font-size: 15px;
-
-  font-weight: 700;
-
+.about-top-banner img:hover {
+  transform: scale(1.05);
+  filter: brightness(1);
 }
-
-
-.telegram-info p {
-
-  margin: 0;
-
-  font-size: 12px;
-
-  color: rgba(255,255,255,0.88);
-
-}
-
-
-#copyTelegramBtn {
-
-  border: none;
-
-  border-radius: 7px;
-
-  padding: 5px 10px;
-
-  background: rgba(255,255,255,0.18);
-
-  color: white;
-
-  font-size: 11px;
-
-  cursor: pointer;
-
-}
-
-
-#copyTelegramBtn:hover {
-
-  background: rgba(255,255,255,0.30);
-
-}
-
-
-/* =========================================================
-   ARROW
-========================================================= */
-
-.card-arrow {
-
-  font-size: 28px;
-
-  line-height: 1;
-
-  color: rgba(255,255,255,0.85);
-
-  margin-left: auto;
-
-}
-
-
-/* =========================================================
-   UNREAD BADGE
-========================================================= */
-
-.unread-dot {
-
-  position: absolute;
-
-  top: -7px;
-
-  right: -5px;
-
-  min-width: 19px;
-
-  height: 19px;
-
-  padding: 0 5px;
-
-  box-sizing: border-box;
-
-  border-radius: 999px;
-
-  background: #ff3040;
-
-  border: 2px solid #ffffff;
-
-  color: #ffffff;
-
-  font-size: 10px;
-
-  font-weight: 700;
-
-  line-height: 15px;
-
-  text-align: center;
-
-  display: none;
-
-  z-index: 20;
-
-}
-
-
-.unread-dot.show {
-
-  display: block;
-
-  animation:
-    inboxPop 0.3s ease,
-    inboxPulse 1.5s infinite;
-
-}
-
-
-@keyframes inboxPop {
-
-  0% {
-
-    transform: scale(0);
-
-    opacity: 0;
-
-  }
-
-  70% {
-
-    transform: scale(1.2);
-
-    opacity: 1;
-
-  }
-
-  100% {
-
-    transform: scale(1);
-
-    opacity: 1;
-
-  }
-
-}
-
-
-@keyframes inboxPulse {
-
-  0%,
-  100% {
-
-    transform: scale(1);
-
-  }
-
-  50% {
-
-    transform: scale(1.18);
-
-  }
-
-}
-
-
-/* =========================================================
-   ABOUT CARD
-========================================================= */
 
 .about-container {
-
-  width: 100%;
-
   max-width: 900px;
-
-  margin: 25px auto 30px;
-
-  background: rgba(255,255,255,0.96);
-
+  margin: 0 auto 80px auto;
+  background: #ffffffee;
   border-radius: 20px;
-
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   overflow: hidden;
-
-  box-shadow:
-    0 8px 30px rgba(20, 40, 80, 0.10);
-
-  animation: fadeUp 0.6s ease;
-
+  animation: fadeUp 0.8s ease;
+  backdrop-filter: blur(6px);
 }
-
 
 .about-image {
-
-  width: 100%;
-
-  overflow: hidden;
-
+  margin-bottom: 25px;
 }
-
 
 .about-image img {
-
   width: 100%;
-
   height: auto;
-
   display: block;
-
   object-fit: cover;
-
+  border-bottom: 2px solid rgba(0, 0, 0, 0.05);
   transition: transform 0.3s ease;
-
 }
-
 
 .about-image img:hover {
-
   transform: scale(1.02);
-
 }
-
 
 .about-text {
-
-  padding: 30px 35px;
-
+  padding: 35px 45px;
   text-align: center;
-
 }
-
 
 .about-text h2 {
-
-  margin: 0 0 15px;
-
-  color: #001f3f;
-
-  font-size: 27px;
-
+  font-size: 28px;
   font-weight: 700;
-
+  color: #001F3F;
+  margin-bottom: 18px;
+  letter-spacing: 1px;
 }
-
 
 .about-text p {
-
-  margin: 0;
-
-  color: #555;
-
-  font-size: 15px;
-
+  font-size: 16px;
+  color: #444;
   line-height: 1.8;
-
   text-align: justify;
-
+  text-justify: inter-word;
 }
-
-
-/* =========================================================
-   MODAL COMMON
-========================================================= */
-
-.about-modal {
-
-  position: fixed;
-
-  top: 50%;
-
-  left: 50%;
-
-  transform: translate(-50%, -50%);
-
-  width: min(92%, 560px);
-
-  height: 520px;
-
-  max-height: calc(100vh - 40px);
-
-  background: #ffffff;
-
-  border-radius: 18px;
-
-  overflow: hidden;
-
-  display: none;
-
-  flex-direction: column;
-
-  box-shadow:
-    0 20px 60px rgba(0,0,0,0.25);
-
-  z-index: 10000;
-
-}
-
-
-/* =========================================================
-   CHAT HEADER
-========================================================= */
-
-.chat-header {
-
-  height: 58px;
-
-  flex-shrink: 0;
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 12px;
-
-  padding: 0 15px;
-
-  background:
-    linear-gradient(
-      135deg,
-      #006eff,
-      #1688ff
-    );
-
-  color: white;
-
-  font-size: 16px;
-
-  font-weight: 700;
-
-  box-sizing: border-box;
-
-}
-
-
-.chat-header button {
-
-  width: 35px;
-
-  height: 35px;
-
-  border: none;
-
-  border-radius: 50%;
-
-  background: rgba(255,255,255,0.16);
-
-  color: white;
-
-  font-size: 18px;
-
-  cursor: pointer;
-
-}
-
-
-/* =========================================================
-   CHAT MESSAGES
-========================================================= */
-
-#chatMessages {
-
-  flex: 1;
-
-  padding: 14px;
-
-  overflow-y: auto;
-
-  display: flex;
-
-  flex-direction: column;
-
-  gap: 9px;
-
-  background:
-    #f2f5f9;
-
-  box-sizing: border-box;
-
-}
-
-
-.message-item {
-
-  max-width: 75%;
-
-  padding: 9px 13px;
-
-  border-radius: 16px;
-
-  font-size: 14px;
-
-  line-height: 1.5;
-
-  word-break: break-word;
-
-}
-
-
-.message-item.me {
-
-  align-self: flex-end;
-
-  background:
-    linear-gradient(
-      135deg,
-      #1677ff,
-      #4e9cff
-    );
-
-  color: white;
-
-  border-bottom-right-radius: 5px;
-
-}
-
-
-.message-item.bot {
-
-  align-self: flex-start;
-
-  background: white;
-
-  color: #333;
-
-  border-bottom-left-radius: 5px;
-
-  box-shadow:
-    0 2px 6px rgba(0,0,0,0.06);
-
-}
-
-
-/* =========================================================
-   CHAT INPUT
-========================================================= */
-
-.chat-input {
-
-  display: flex;
-
-  align-items: flex-end;
-
-  gap: 8px;
-
-  padding: 10px;
-
-  background: #ffffff;
-
-  border-top: 1px solid #e5e7eb;
-
-}
-
-
-.chat-input textarea {
-
-  flex: 1;
-
-  min-height: 40px;
-
-  max-height: 110px;
-
-  resize: none;
-
-  border: 1px solid #d9dee7;
-
-  border-radius: 20px;
-
-  padding: 9px 13px;
-
-  box-sizing: border-box;
-
-  outline: none;
-
-  font-size: 14px;
-
-  background: #f8fafc;
-
-}
-
-
-.chat-input textarea:focus {
-
-  border-color: var(--about-blue);
-
-  background: white;
-
-}
-
-
-.chat-input button {
-
-  height: 40px;
-
-  padding: 0 15px;
-
-  border: none;
-
-  border-radius: 20px;
-
-  background:
-    linear-gradient(
-      135deg,
-      #1677ff,
-      #4e9cff
-    );
-
-  color: white;
-
-  font-weight: 700;
-
-  cursor: pointer;
-
-}
-
-
-/* =========================================================
-   INBOX HEADER
-========================================================= */
-
-.inbox-header {
-
-  height: 58px;
-
-  flex-shrink: 0;
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 12px;
-
-  padding: 0 15px;
-
-  background:
-    linear-gradient(
-      135deg,
-      #7c4dff,
-      #9c6cff
-    );
-
-  color: white;
-
-  font-size: 16px;
-
-  font-weight: 700;
-
-}
-
-
-.inbox-header button {
-
-  width: 35px;
-
-  height: 35px;
-
-  border: none;
-
-  border-radius: 50%;
-
-  background: rgba(255,255,255,0.17);
-
-  color: white;
-
-  font-size: 18px;
-
-  cursor: pointer;
-
-}
-
-
-/* =========================================================
-   INBOX LIST
-========================================================= */
-
-.inbox-messages {
-
-  flex: 1;
-
-  overflow-y: auto;
-
-  padding: 12px;
-
-  background: #f5f7fb;
-
-}
-
-
-.inbox-item {
-
-  background: #ffffff;
-
-  border-radius: 14px;
-
-  padding: 15px;
-
-  margin-bottom: 10px;
-
-  box-shadow:
-    0 3px 10px rgba(0,0,0,0.06);
-
-  border-left: 4px solid #7c4dff;
-
-}
-
-
-.inbox-item.unread {
-
-  background:
-    linear-gradient(
-      135deg,
-      #ffffff,
-      #f4efff
-    );
-
-  border-left-color: #7c4dff;
-
-}
-
-
-.inbox-item-title {
-
-  display: flex;
-
-  justify-content: space-between;
-
-  align-items: flex-start;
-
-  gap: 10px;
-
-  margin-bottom: 7px;
-
-}
-
-
-.inbox-item-title strong {
-
-  color: #202939;
-
-  font-size: 14px;
-
-}
-
-
-.inbox-item-date {
-
-  color: #98a2b3;
-
-  font-size: 10px;
-
-  white-space: nowrap;
-
-}
-
-
-.inbox-item-content {
-
-  color: #667085;
-
-  font-size: 13px;
-
-  line-height: 1.6;
-
-  white-space: pre-wrap;
-
-}
-
-
-.inbox-unread-label {
-
-  display: inline-block;
-
-  padding: 2px 6px;
-
-  margin-left: 5px;
-
-  border-radius: 5px;
-
-  background: #ff3040;
-
-  color: white;
-
-  font-size: 9px;
-
-}
-
-
-.inbox-loading,
-.inbox-empty {
-
-  text-align: center;
-
-  padding: 50px 20px;
-
-  color: #98a2b3;
-
-  font-size: 13px;
-
-}
-
-
-/* =========================================================
-   BOTTOM NAV UNREAD
-========================================================= */
-
-button[data-page="msgPage"] {
-
-  position: relative;
-
-}
-
-
-.bottom-unread-dot {
-
-  position: absolute;
-
-  top: 5px;
-
-  right: 20%;
-
-  min-width: 17px;
-
-  height: 17px;
-
-  padding: 0 4px;
-
-  border-radius: 999px;
-
-  background: #ff3040;
-
-  color: white;
-
-  font-size: 9px;
-
-  line-height: 17px;
-
-  text-align: center;
-
-  display: none;
-
-  border: 2px solid white;
-
-  box-sizing: border-box;
-
-  z-index: 20;
-
-}
-
-
-.bottom-unread-dot.show {
-
-  display: block;
-
-  animation: inboxPulse 1.5s infinite;
-
-}
-
-
-/* =========================================================
-   ANIMATION
-========================================================= */
 
 @keyframes fadeUp {
-
-  from {
-
-    transform: translateY(20px);
-
-    opacity: 0;
-
-  }
-
-  to {
-
-    transform: translateY(0);
-
-    opacity: 1;
-
-  }
-
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
-@media screen and (max-width: 600px) {
-
-  #msgPage {
-
-    padding: 10px 10px 90px;
-
-  }
-
-
-  .about-action-card {
-
-    min-height: 68px;
-
-    padding: 10px 12px;
-
-    border-radius: 14px;
-
-  }
-
-
-  .about-action-card > img,
-  .inbox-icon {
-
-    width: 44px;
-
-    height: 44px;
-
-  }
-
-
-  .action-card-info strong,
-  .telegram-info strong {
-
-    font-size: 14px;
-
-  }
-
-
-  .about-container {
-
-    margin-top: 20px;
-
-    border-radius: 16px;
-
-  }
-
-
-  .about-text {
-
-    padding: 24px 18px;
-
-  }
-
-
-  .about-text h2 {
-
-    font-size: 22px;
-
-  }
-
-
-  .about-text p {
-
-    font-size: 13px;
-
-  }
-
-
-  .about-modal {
-
-    width: 94%;
-
-    height: 500px;
-
-    max-height: calc(100vh - 25px);
-
-    border-radius: 16px;
-
-  }
-
+:root {
+  --primary-blue: #4e9cff;
+  --primary-blue-dark: #3d8ce6;
+  --telegram-grad-a: #2aabee;
+  --telegram-grad-b: #229ed9;
+  --support-grad-a: #ff7b00;
+  --support-grad-b: #ff9a3d;
+  --card-bg: #f8f8f8;
+  --muted: #e0e0e0;
+  --text-dark: #333;
 }
 
+#chatWindow {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  height: 500px;
+  background-color: var(--card-bg);
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  z-index: 1000;
+  font-family: "Helvetica", Arial, sans-serif;
+}
 
-/* =========================================================
-   VERY SMALL SCREEN
-========================================================= */
+.chat-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--primary-blue);
+  color: white;
+  padding: 14px 12px;
+  font-weight: 700;
+  font-size: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+.chat-header button {
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0 6px;
+}
+
+#chatMessages {
+  flex: 1 1 auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  gap: 8px;
+  background-color: #f0f0f0;
+}
+#chatMessages::-webkit-scrollbar {
+  width: 6px;
+}
+#chatMessages::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 3px;
+}
+
+.message-item {
+  max-width: 70%;
+  padding: 8px 12px;
+  border-radius: 16px;
+  word-wrap: break-word;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.message-item.me {
+  background-color: var(--primary-blue);
+  color: #fff;
+  align-self: flex-end;
+}
+.message-item.bot {
+  background-color: var(--muted);
+  color: var(--text-dark);
+  align-self: flex-start;
+}
+
+.chat-input {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  border-top: 1px solid #ddd;
+  background-color: #fafafa;
+  align-items: flex-end;
+}
+.chat-input textarea {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  outline: none;
+  font-size: 14px;
+  background: white;
+  resize: none;
+  min-height: 40px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+.chat-input button {
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: none;
+  background-color: var(--primary-blue);
+  color: white;
+  cursor: pointer;
+  font-weight: 700;
+  transition: background 0.2s, transform 0.06s;
+}
+.chat-input button:hover { background-color: var(--primary-blue-dark); }
+.chat-input button:active { transform: scale(0.98); }
+
+.telegram-box,
+#openChatBtn {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 12px 16px;
+  margin: 10px 0;
+  border-radius: 12px;
+  box-sizing: border-box;
+  gap: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  position: relative;
+}
+.telegram-box {
+  background: linear-gradient(135deg, var(--telegram-grad-a), var(--telegram-grad-b));
+  box-shadow: 0 2px 8px rgba(34, 158, 217, 0.18);
+}
+.telegram-box:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(34, 158, 217, 0.24);
+}
+#openChatBtn {
+  background: linear-gradient(135deg, #0071ff, #077eff);
+  box-shadow: 0 2px 8px rgba(255, 123, 0, 0.18);
+}
+#openChatBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(255, 123, 0, 0.26);
+}
+.telegram-box img,
+#openChatBtn img {
+  width: 46px;
+  height: 46px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.telegram-info {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  justify-content: flex-start;
+}
+.telegram-info p {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0;
+  color: #fff;
+}
+#copyTelegramBtn {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.18);
+  color: white;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.18s, transform 0.06s;
+}
+#copyTelegramBtn:hover { background: rgba(255, 255, 255, 0.28); }
+#copyTelegramBtn:active { transform: scale(0.97); }
+
+.unread-dot {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: red;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 12px;
+  line-height: 1;
+  display: none;
+  pointer-events: none;
+  animation: pulse 1.2s infinite;
+}
+.unread-dot.show {
+  display: inline-block;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+}
+
+.bottom-nav button {
+  position: relative;
+  z-index: 1;
+}
+#bottomUnreadCount {
+  position: absolute;
+  top: 8px;
+  right: 16px;
+  transform: translateY(-50%);
+  background: red;
+  color: #fff;
+  border-radius: 999px;
+  padding: 2px 6px;
+  font-size: 11px;
+  line-height: 1;
+  display: none;
+  pointer-events: none;
+  z-index: 9999;
+  animation: pulse 1.2s infinite;
+}
+
+@media screen and (max-width: 768px) {
+  .about-top-banner { height: 18vh; margin-bottom: 40px; }
+  .about-container { margin: 0 15px 60px 15px; }
+  .about-text { padding: 25px 20px; }
+  .about-text h2 { font-size: 24px; }
+  .about-text p { font-size: 14px; }
+}
+
+@media screen and (max-width: 480px) {
+  .about-top-banner { height: 16vh; margin-bottom: 30px; }
+  .about-container { margin: 20px 0px 20px 0px; }
+  .about-text { padding: 0px 12px; }
+  .about-text h2 { font-size: 20px; }
+  .about-text p { font-size: 13px; }
+}
 
 @media screen and (max-width: 420px) {
+  #chatWindow { width: 90%; height: 500px; }
+  .telegram-box,
+  #openChatBtn { padding: 10px; }
+}
 
-  .telegram-info {
+button[data-page="msgPage"] {
+  position: relative;
+}
 
-    flex-wrap: wrap;
+.bottom-unread-dot.show {
+  display: block;
+  animation: popIn 0.3s ease-out, pulse 1.5s infinite ease-in-out;
+}
 
+@keyframes popIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
   }
-
-
-  .telegram-info strong {
-
-    width: 100%;
-
+  70% {
+    transform: scale(1.2);
+    opacity: 1;
   }
-
-
-  .about-modal {
-
-    width: 96%;
-
-    height: 480px;
-
+  100% {
+    transform: scale(1);
+    opacity: 1;
   }
+}
 
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0.85;
+  }
+}
+
+button[data-page="msgPage"] {
+  position: relative;
+}
+
+.bottom-unread-dot {
+  position: absolute;
+  top: 10px;
+  width: 17px;
+  height: 16px;
+  background-color: red;
+  border-radius: 50%;
+  display: none;
+  font-size: 10px;
+  color: #fff;
+  text-align: center;
+  line-height: 15px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.bottom-unread-dot.show {
+  display: block;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0.85;
+  }
 }
