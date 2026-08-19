@@ -1,534 +1,1121 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // =========================================================
-  // Elements
-  // =========================================================
 
-  const openChatBtn = document.getElementById("openChatBtn");
-  const chatWindow = document.getElementById("chatWindow");
-  const backBtn = document.getElementById("backBtn");
-  const sendBtn = document.getElementById("sendBtn");
-  const chatInput = document.getElementById("chatInput");
-  const chatMessages = document.getElementById("chatMessages");
+  /* =====================================================
+     ELEMENTS
+  ===================================================== */
 
-  const copyTelegramBtn = document.getElementById("copyTelegramBtn");
-  const telegramAccountEl = document.getElementById("telegramAccount");
+  const openChatBtn =
+    document.getElementById("openChatBtn");
 
-  // Customer Service button unread
-  const chatUnreadEl = document.querySelector("#openChatBtn .unread-dot");
+  const chatWindow =
+    document.getElementById("chatWindow");
 
-  // Bottom navigation Chat unread
-  const bottomUnreadEl = document.querySelector(
-    'button[data-page="msgPage"] .bottom-unread-dot'
+  const backBtn =
+    document.getElementById("backBtn");
+
+  const sendBtn =
+    document.getElementById("sendBtn");
+
+  const chatInput =
+    document.getElementById("chatInput");
+
+  const chatMessages =
+    document.getElementById("chatMessages");
+
+
+  const copyTelegramBtn =
+    document.getElementById("copyTelegramBtn");
+
+  const telegramAccountEl =
+    document.getElementById("telegramAccount");
+
+
+  const openInboxBtn =
+    document.getElementById("openInboxBtn");
+
+  const inboxWindow =
+    document.getElementById("inboxWindow");
+
+  const closeInboxBtn =
+    document.getElementById("closeInboxBtn");
+
+  const inboxMessages =
+    document.getElementById("inboxMessages");
+
+  const inboxUnreadDot =
+    document.getElementById("inboxUnreadDot");
+
+
+  const bottomUnreadDot =
+    document.querySelector(
+      'button[data-page="msgPage"] .bottom-unread-dot'
+    );
+
+
+  const chatUnreadDot =
+    document.querySelector(
+      "#openChatBtn .unread-dot"
+    );
+
+
+  let chatSubscription = null;
+  let inboxSubscription = null;
+
+
+  /* =====================================================
+     USER
+  ===================================================== */
+
+  function getCurrentUserId() {
+
+    const id =
+      localStorage.getItem("currentUserId");
+
+    return id ? Number(id) : null;
+
+  }
+
+
+  /* =====================================================
+     CHAT - OPEN
+  ===================================================== */
+
+  openChatBtn?.addEventListener(
+    "click",
+    async () => {
+
+      const userId =
+        getCurrentUserId();
+
+      if (!userId) {
+
+        alert("Please log in first!");
+
+        return;
+
+      }
+
+
+      chatWindow.style.display = "flex";
+
+      chatMessages.innerHTML = "";
+
+
+      await loadMessages();
+
+      await markChatMessagesAsRead();
+
+      await updateChatUnreadCount();
+
+      listenForMessages();
+
+      scrollChatToBottom();
+
+    }
   );
 
 
-  // =========================================================
-  // Current User
-  // =========================================================
+  /* =====================================================
+     CHAT - CLOSE
+  ===================================================== */
 
-  function getCurrentUserId() {
-    const id = localStorage.getItem("currentUserId");
+  backBtn?.addEventListener(
+    "click",
+    () => {
 
-    if (!id) return null;
-
-    const userId = Number(id);
-
-    if (!Number.isInteger(userId) || userId <= 0) {
-      return null;
-    }
-
-    return userId;
-  }
+      chatWindow.style.display = "none";
 
 
-  // =========================================================
-  // Scroll Chat To Bottom
-  // =========================================================
+      if (chatSubscription) {
 
-  function scrollToBottom() {
-    if (!chatMessages) return;
+        supabaseClient.removeChannel(
+          chatSubscription
+        );
 
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  }
+        chatSubscription = null;
 
-
-  // =========================================================
-  // Add Message To Chat
-  // =========================================================
-
-  function appendMessage(sender, text) {
-    if (!chatMessages) return;
-
-    const msg = document.createElement("div");
-
-    msg.classList.add(
-      "message-item",
-      sender === "Me" ? "me" : "bot"
-    );
-
-    // Use textContent instead of innerHTML
-    // to prevent message content from being interpreted as HTML.
-    const safeText = String(text ?? "");
-
-    const lines = safeText.split("\n");
-
-    lines.forEach((line, index) => {
-      msg.appendChild(document.createTextNode(line));
-
-      if (index < lines.length - 1) {
-        msg.appendChild(document.createElement("br"));
       }
-    });
 
-    chatMessages.appendChild(msg);
-
-    scrollToBottom();
-  }
-
-
-  // =========================================================
-  // Load Customer Service Messages
-  // =========================================================
-
-  async function loadMessages() {
-    const userId = getCurrentUserId();
-
-    if (!userId) {
-      return;
     }
+  );
 
-    if (!supabaseClient) {
-      console.error("supabaseClient is not available.");
-      return;
+
+  /* =====================================================
+     CHAT INPUT
+  ===================================================== */
+
+  chatInput?.addEventListener(
+    "input",
+    () => {
+
+      chatInput.style.height = "auto";
+
+      chatInput.style.height =
+        Math.min(
+          chatInput.scrollHeight,
+          110
+        ) + "px";
+
     }
-
-    const { data, error } = await supabaseClient
-      .from("messages")
-      .select("*")
-      .or(
-        `and(sender_id.eq.${userId},receiver_id.eq.1),and(sender_id.eq.1,receiver_id.eq.${userId})`
-      )
-      .order("created_at", {
-        ascending: true
-      });
-
-    if (error) {
-      console.error("Failed to load messages:", error);
-      return;
-    }
-
-    if (!data || data.length === 0) {
-      return;
-    }
-
-    data.forEach((msg) => {
-      const sender =
-        Number(msg.sender_id) === userId
-          ? "Me"
-          : "Customer Service";
-
-      appendMessage(sender, msg.content);
-    });
-  }
+  );
 
 
-  // =========================================================
-  // Mark Customer Service Messages As Read
-  // =========================================================
+  /* =====================================================
+     SEND MESSAGE
+  ===================================================== */
 
-  async function markMessagesAsRead() {
-    const userId = getCurrentUserId();
+  sendBtn?.addEventListener(
+    "click",
+    async () => {
 
-    if (!userId) {
-      return;
-    }
+      const userId =
+        getCurrentUserId();
 
-    if (!supabaseClient) {
-      return;
-    }
+      if (!userId) {
 
-    const { error } = await supabaseClient
-      .from("messages")
-      .update({
-        is_read: true
-      })
-      .eq("receiver_id", userId)
-      .eq("is_read", false);
+        alert("Please log in first!");
 
-    if (error) {
-      console.error(
-        "Failed to mark messages as read:",
+        return;
+
+      }
+
+
+      const content =
+        chatInput.value.trim();
+
+
+      if (!content) return;
+
+
+      const {
         error
-      );
-    }
-  }
-
-
-  // =========================================================
-  // Update Unread Count
-  // =========================================================
-
-  async function updateUnreadCount() {
-    const userId = getCurrentUserId();
-
-    if (!userId) {
-      hideUnreadIndicators();
-      return;
-    }
-
-    if (!supabaseClient) {
-      return;
-    }
-
-    const { count, error } = await supabaseClient
-      .from("messages")
-      .select("id", {
-        count: "exact",
-        head: true
-      })
-      .eq("receiver_id", userId)
-      .eq("is_read", false);
-
-    if (error) {
-      console.error(
-        "Failed to get unread message count:",
-        error
-      );
-      return;
-    }
-
-    const unread = Number(count || 0);
-
-    updateUnreadIndicators(unread);
-  }
-
-
-  // =========================================================
-  // Update Red Notification Indicators
-  // =========================================================
-
-  function updateUnreadIndicators(unread) {
-    const count = Number(unread || 0);
-
-    if (count <= 0) {
-      hideUnreadIndicators();
-      return;
-    }
-
-    const text = count > 99 ? "99+" : String(count);
-
-    // Customer Service button
-    if (chatUnreadEl) {
-      chatUnreadEl.textContent = text;
-      chatUnreadEl.style.display = "inline-block";
-      chatUnreadEl.classList.add("show");
-    }
-
-    // Bottom Chat button
-    if (bottomUnreadEl) {
-      bottomUnreadEl.textContent = text;
-      bottomUnreadEl.style.display = "block";
-      bottomUnreadEl.classList.add("show");
-    }
-  }
-
-
-  // =========================================================
-  // Hide Red Notification Indicators
-  // =========================================================
-
-  function hideUnreadIndicators() {
-    if (chatUnreadEl) {
-      chatUnreadEl.textContent = "";
-      chatUnreadEl.style.display = "none";
-      chatUnreadEl.classList.remove("show");
-    }
-
-    if (bottomUnreadEl) {
-      bottomUnreadEl.textContent = "";
-      bottomUnreadEl.style.display = "none";
-      bottomUnreadEl.classList.remove("show");
-    }
-  }
-
-
-  // =========================================================
-  // Open Customer Service Chat
-  // =========================================================
-
-  openChatBtn?.addEventListener("click", async () => {
-    const userId = getCurrentUserId();
-
-    if (!userId) {
-      alert("Please log in first!");
-      return;
-    }
-
-    if (!chatWindow) {
-      return;
-    }
-
-    // Show chat
-    chatWindow.style.display = "flex";
-    chatWindow.classList.remove("hidden");
-
-    // Clear previous messages
-    if (chatMessages) {
-      chatMessages.innerHTML = "";
-    }
-
-    // Load conversation
-    await loadMessages();
-
-    // Mark received messages as read
-    await markMessagesAsRead();
-
-    // Update notification
-    await updateUnreadCount();
-
-    // Scroll to latest message
-    scrollToBottom();
-  });
-
-
-  // =========================================================
-  // Close Customer Service Chat
-  // =========================================================
-
-  backBtn?.addEventListener("click", () => {
-    if (!chatWindow) {
-      return;
-    }
-
-    chatWindow.style.display = "none";
-    chatWindow.classList.add("hidden");
-
-    // No Realtime subscription here.
-    // Nothing needs to be removed.
-  });
-
-
-  // =========================================================
-  // Send Message
-  // =========================================================
-
-  sendBtn?.addEventListener("click", async () => {
-    const userId = getCurrentUserId();
-
-    if (!userId) {
-      alert("Please log in first!");
-      return;
-    }
-
-    if (!chatInput) {
-      return;
-    }
-
-    const content = chatInput.value.trim();
-
-    if (!content) {
-      return;
-    }
-
-    if (!supabaseClient) {
-      alert("Database connection is unavailable.");
-      return;
-    }
-
-    // Prevent duplicate clicks while sending
-    sendBtn.disabled = true;
-
-    try {
-      const { data, error } = await supabaseClient
+      } = await supabaseClient
         .from("messages")
         .insert([
           {
             sender_id: userId,
+
             receiver_id: 1,
+
             content: content,
+
             is_read: false
           }
-        ])
-        .select()
-        .single();
+        ]);
+
 
       if (error) {
-        console.error("Sending failed:", error);
+
+        console.error(error);
 
         alert(
-          "Sending failed: " + error.message
+          "Sending failed: " +
+          error.message
         );
 
         return;
+
       }
 
-      // Display sent message immediately
-      appendMessage("Me", data?.content ?? content);
 
-      // Clear input
+      appendChatMessage(
+        "Me",
+        content
+      );
+
+
       chatInput.value = "";
 
-      chatInput.style.height = "auto";
+      chatInput.style.height =
+        "40px";
 
-      scrollToBottom();
 
-    } catch (err) {
-      console.error("Unexpected send error:", err);
+      scrollChatToBottom();
 
-      alert(
-        "Sending failed. Please try again."
-      );
-
-    } finally {
-      sendBtn.disabled = false;
     }
-  });
+  );
 
 
-  // =========================================================
-  // Textarea Auto Height
-  // =========================================================
+  /* =====================================================
+     ENTER SEND
+  ===================================================== */
 
-  chatInput?.addEventListener("input", () => {
-    chatInput.style.height = "auto";
+  chatInput?.addEventListener(
+    "keydown",
+    (event) => {
 
-    chatInput.style.height =
-      Math.min(chatInput.scrollHeight, 120) + "px";
+      if (
+        event.key === "Enter" &&
+        !event.shiftKey
+      ) {
 
-    scrollToBottom();
-  });
+        event.preventDefault();
 
+        sendBtn.click();
 
-  // =========================================================
-  // Send Message With Enter
-  // =========================================================
-
-  chatInput?.addEventListener("keydown", (event) => {
-    // Desktop:
-    // Enter = send
-    // Shift + Enter = new line
-
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
-
-      sendBtn?.click();
-    }
-  });
-
-
-  // =========================================================
-  // Telegram Copy
-  // =========================================================
-
-  copyTelegramBtn?.addEventListener("click", async () => {
-    const text =
-      telegramAccountEl?.textContent?.trim() || "";
-
-    if (!text) {
-      return;
-    }
-
-    try {
-      await navigator.clipboard.writeText(text);
-
-      alert("Copied: " + text);
-
-    } catch (error) {
-      console.error(
-        "Clipboard failed:",
-        error
-      );
-
-      // Fallback for browsers that don't support
-      // navigator.clipboard
-      const textarea =
-        document.createElement("textarea");
-
-      textarea.value = text;
-
-      textarea.style.position = "fixed";
-      textarea.style.opacity = "0";
-
-      document.body.appendChild(textarea);
-
-      textarea.select();
-
-      try {
-        document.execCommand("copy");
-
-        alert("Copied: " + text);
-
-      } catch (fallbackError) {
-        console.error(
-          "Fallback clipboard failed:",
-          fallbackError
-        );
-
-        alert(
-          "Unable to copy. Please copy it manually: " +
-          text
-        );
       }
 
-      document.body.removeChild(textarea);
     }
-  });
+  );
 
 
-  // =========================================================
-  // Mobile Keyboard Adjustment
-  // =========================================================
+  /* =====================================================
+     APPEND CHAT
+  ===================================================== */
 
-  function adjustChatForKeyboard() {
-    if (!chatWindow) {
-      return;
-    }
+  function appendChatMessage(
+    sender,
+    text
+  ) {
 
-    let initialHeight = window.innerHeight;
+    if (!chatMessages) return;
 
-    window.addEventListener("resize", () => {
-      const currentHeight = window.innerHeight;
 
-      const keyboardHeight =
-        initialHeight - currentHeight;
+    const msg =
+      document.createElement("div");
 
-      if (keyboardHeight > 100) {
-        // Keyboard opened
-        chatWindow.style.top = "auto";
-        chatWindow.style.bottom = "0";
-        chatWindow.style.transform =
-          "translateX(-50%)";
-      } else {
-        // Keyboard closed
-        chatWindow.style.top = "50%";
-        chatWindow.style.bottom = "auto";
-        chatWindow.style.transform =
-          "translate(-50%, -50%)";
-      }
 
-      setTimeout(() => {
-        scrollToBottom();
-      }, 50);
-    });
+    msg.className =
+      "message-item " +
+      (
+        sender === "Me"
+          ? "me"
+          : "bot"
+      );
+
+
+    msg.textContent = text;
+
+
+    chatMessages.appendChild(msg);
+
+
+    scrollChatToBottom();
+
   }
 
 
-  // =========================================================
-  // Detect Page Returning To Foreground
-  // =========================================================
+  /* =====================================================
+     LOAD CHAT
+  ===================================================== */
 
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) {
-      updateUnreadCount();
+  async function loadMessages() {
+
+    const userId =
+      getCurrentUserId();
+
+    if (!userId) return;
+
+
+    const {
+      data,
+      error
+    } = await supabaseClient
+
+      .from("messages")
+
+      .select("*")
+
+      .or(
+        `and(sender_id.eq.${userId},receiver_id.eq.1),` +
+        `and(sender_id.eq.1,receiver_id.eq.${userId})`
+      )
+
+      .order(
+        "created_at",
+        {
+          ascending: true
+        }
+      );
+
+
+    if (error) {
+
+      console.error(
+        "Load messages error:",
+        error
+      );
+
+      return;
+
     }
-  });
 
 
-  // =========================================================
-  // Initial Setup
-  // =========================================================
+    chatMessages.innerHTML = "";
 
-  adjustChatForKeyboard();
 
-  updateUnreadCount();
+    (data || []).forEach(
+      msg => {
+
+        appendChatMessage(
+
+          msg.sender_id === userId
+            ? "Me"
+            : "Customer Service",
+
+          msg.content
+
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =====================================================
+     MARK CHAT READ
+  ===================================================== */
+
+  async function markChatMessagesAsRead() {
+
+    const userId =
+      getCurrentUserId();
+
+    if (!userId) return;
+
+
+    const {
+      error
+    } = await supabaseClient
+
+      .from("messages")
+
+      .update({
+        is_read: true
+      })
+
+      .eq(
+        "receiver_id",
+        userId
+      )
+
+      .eq(
+        "is_read",
+        false
+      );
+
+
+    if (error) {
+
+      console.error(
+        "Mark chat read error:",
+        error
+      );
+
+    }
+
+  }
+
+
+  /* =====================================================
+     CHAT UNREAD
+  ===================================================== */
+
+  async function updateChatUnreadCount() {
+
+    const userId =
+      getCurrentUserId();
+
+    if (!userId) return;
+
+
+    const {
+      count,
+      error
+    } = await supabaseClient
+
+      .from("messages")
+
+      .select(
+        "id",
+        {
+          count: "exact",
+          head: true
+        }
+      )
+
+      .eq(
+        "receiver_id",
+        userId
+      )
+
+      .eq(
+        "is_read",
+        false
+      );
+
+
+    if (error) {
+
+      console.error(error);
+
+      return;
+
+    }
+
+
+    const unread =
+      count || 0;
+
+
+    setUnreadBadge(
+      chatUnreadDot,
+      unread
+    );
+
+
+    /*
+      Bottom Chat badge
+    */
+
+    setUnreadBadge(
+      bottomUnreadDot,
+      unread
+    );
+
+  }
+
+
+  /* =====================================================
+     CHAT REALTIME
+  ===================================================== */
+
+  function listenForMessages() {
+
+    const userId =
+      getCurrentUserId();
+
+    if (!userId) return;
+
+
+    if (chatSubscription) {
+
+      supabaseClient.removeChannel(
+        chatSubscription
+      );
+
+    }
+
+
+    chatSubscription =
+      supabaseClient
+
+        .channel(
+          "u9-chat-" + userId
+        )
+
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+
+            schema: "public",
+
+            table: "messages",
+
+            filter:
+              `receiver_id=eq.${userId}`
+
+          },
+
+          async payload => {
+
+            const msg =
+              payload.new;
+
+
+            if (
+              msg.sender_id === 1
+            ) {
+
+              if (
+                chatWindow.style.display !==
+                "none"
+              ) {
+
+                appendChatMessage(
+                  "Customer Service",
+                  msg.content
+                );
+
+
+                await markChatMessagesAsRead();
+
+              }
+
+            }
+
+
+            await updateChatUnreadCount();
+
+          }
+
+        )
+
+        .subscribe();
+
+  }
+
+
+  /* =====================================================
+     INBOX OPEN
+  ===================================================== */
+
+  openInboxBtn?.addEventListener(
+    "click",
+    async () => {
+
+      const userId =
+        getCurrentUserId();
+
+
+      if (!userId) {
+
+        alert("Please log in first!");
+
+        return;
+
+      }
+
+
+      inboxWindow.style.display =
+        "flex";
+
+
+      inboxMessages.innerHTML =
+        `<div class="inbox-loading">
+           Loading...
+         </div>`;
+
+
+      await loadInbox();
+
+
+      await markInboxAsRead();
+
+
+      await updateInboxUnreadCount();
+
+    }
+  );
+
+
+  /* =====================================================
+     INBOX CLOSE
+  ===================================================== */
+
+  closeInboxBtn?.addEventListener(
+    "click",
+    () => {
+
+      inboxWindow.style.display =
+        "none";
+
+    }
+  );
+
+
+  /* =====================================================
+     LOAD INBOX
+  ===================================================== */
+
+  async function loadInbox() {
+
+    const userId =
+      getCurrentUserId();
+
+    if (!userId) return;
+
+
+    const {
+      data,
+      error
+    } = await supabaseClient
+
+      .from("notifications")
+
+      .select(
+        "id,user_id,title,content,is_read,created_at"
+      )
+
+      .eq(
+        "user_id",
+        userId
+      )
+
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
+      );
+
+
+    if (error) {
+
+      console.error(
+        "Load inbox error:",
+        error
+      );
+
+
+      inboxMessages.innerHTML = `
+        <div class="inbox-empty">
+          Failed to load messages.
+        </div>
+      `;
+
+      return;
+
+    }
+
+
+    if (!data || data.length === 0) {
+
+      inboxMessages.innerHTML = `
+        <div class="inbox-empty">
+          📭<br><br>
+          No notifications
+        </div>
+      `;
+
+      return;
+
+    }
+
+
+    inboxMessages.innerHTML = "";
+
+
+    data.forEach(
+      notification => {
+
+        const item =
+          document.createElement("div");
+
+
+        item.className =
+          "inbox-item" +
+          (
+            notification.is_read
+              ? ""
+              : " unread"
+          );
+
+
+        const date =
+          formatDate(
+            notification.created_at
+          );
+
+
+        item.innerHTML = `
+
+          <div class="inbox-item-title">
+
+            <strong>
+
+              ${escapeHtml(
+                notification.title ||
+                "Notification"
+              )}
+
+              ${
+                !notification.is_read
+                  ? `<span class="inbox-unread-label">
+                       NEW
+                     </span>`
+                  : ""
+              }
+
+            </strong>
+
+            <span class="inbox-item-date">
+              ${date}
+            </span>
+
+          </div>
+
+
+          <div class="inbox-item-content">
+
+            ${escapeHtml(
+              notification.content || ""
+            )}
+
+          </div>
+
+        `;
+
+
+        inboxMessages.appendChild(
+          item
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =====================================================
+     MARK INBOX READ
+  ===================================================== */
+
+  async function markInboxAsRead() {
+
+    const userId =
+      getCurrentUserId();
+
+    if (!userId) return;
+
+
+    const {
+      error
+    } = await supabaseClient
+
+      .from("notifications")
+
+      .update({
+        is_read: true
+      })
+
+      .eq(
+        "user_id",
+        userId
+      )
+
+      .eq(
+        "is_read",
+        false
+      );
+
+
+    if (error) {
+
+      console.error(
+        "Mark inbox read error:",
+        error
+      );
+
+    }
+
+  }
+
+
+  /* =====================================================
+     INBOX UNREAD
+  ===================================================== */
+
+  async function updateInboxUnreadCount() {
+
+    const userId =
+      getCurrentUserId();
+
+    if (!userId) return;
+
+
+    const {
+      count,
+      error
+    } = await supabaseClient
+
+      .from("notifications")
+
+      .select(
+        "id",
+        {
+          count: "exact",
+          head: true
+        }
+      )
+
+      .eq(
+        "user_id",
+        userId
+      )
+
+      .eq(
+        "is_read",
+        false
+      );
+
+
+    if (error) {
+
+      console.error(
+        "Inbox unread error:",
+        error
+      );
+
+      return;
+
+    }
+
+
+    setUnreadBadge(
+      inboxUnreadDot,
+      count || 0
+    );
+
+  }
+
+
+  /* =====================================================
+     INBOX REALTIME
+  ===================================================== */
+
+  function listenForInbox() {
+
+    const userId =
+      getCurrentUserId();
+
+    if (!userId) return;
+
+
+    if (inboxSubscription) {
+
+      supabaseClient.removeChannel(
+        inboxSubscription
+      );
+
+    }
+
+
+    inboxSubscription =
+      supabaseClient
+
+        .channel(
+          "u9-inbox-" + userId
+        )
+
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+
+            schema: "public",
+
+            table: "notifications",
+
+            filter:
+              `user_id=eq.${userId}`
+
+          },
+
+          async () => {
+
+            await updateInboxUnreadCount();
+
+
+            /*
+              如果 Inbox 正在打开，
+              自动刷新
+            */
+
+            if (
+              inboxWindow.style.display !==
+              "none"
+            ) {
+
+              await loadInbox();
+
+            }
+
+          }
+
+        )
+
+        .subscribe();
+
+  }
+
+
+  /* =====================================================
+     TELEGRAM COPY
+  ===================================================== */
+
+  copyTelegramBtn?.addEventListener(
+    "click",
+    async () => {
+
+      const text =
+        telegramAccountEl?.textContent
+        ?.trim();
+
+
+      if (!text) return;
+
+
+      try {
+
+        await navigator.clipboard.writeText(
+          text
+        );
+
+        alert(
+          "Copied: " + text
+        );
+
+      } catch (error) {
+
+        console.error(error);
+
+        alert(
+          "Copy failed"
+        );
+
+      }
+
+    }
+  );
+
+
+  /* =====================================================
+     UNREAD BADGE
+  ===================================================== */
+
+  function setUnreadBadge(
+    element,
+    unread
+  ) {
+
+    if (!element) return;
+
+
+    if (unread > 0) {
+
+      element.textContent =
+        unread > 99
+          ? "99+"
+          : unread;
+
+
+      element.classList.add(
+        "show"
+      );
+
+    } else {
+
+      element.textContent = "";
+
+      element.classList.remove(
+        "show"
+      );
+
+    }
+
+  }
+
+
+  /* =====================================================
+     DATE
+  ===================================================== */
+
+  function formatDate(
+    dateString
+  ) {
+
+    if (!dateString) return "";
+
+
+    const date =
+      new Date(dateString);
+
+
+    if (Number.isNaN(
+      date.getTime()
+    )) {
+
+      return "";
+
+    }
+
+
+    return date.toLocaleString(
+      undefined,
+      {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit"
+      }
+    );
+
+  }
+
+
+  /* =====================================================
+     HTML ESCAPE
+  ===================================================== */
+
+  function escapeHtml(
+    value
+  ) {
+
+    return String(value)
+
+      .replace(
+        /&/g,
+        "&amp;"
+      )
+
+      .replace(
+        /</g,
+        "&lt;"
+      )
+
+      .replace(
+        />/g,
+        "&gt;"
+      )
+
+      .replace(
+        /"/g,
+        "&quot;"
+      )
+
+      .replace(
+        /'/g,
+        "&#039;"
+      );
+
+  }
+
+
+  /* =====================================================
+     CHAT SCROLL
+  ===================================================== */
+
+  function scrollChatToBottom() {
+
+    if (!chatMessages) return;
+
+
+    requestAnimationFrame(
+      () => {
+
+        chatMessages.scrollTop =
+          chatMessages.scrollHeight;
+
+      }
+    );
+
+  }
+
+
+  /* =====================================================
+     INITIAL
+  ===================================================== */
+
+  updateChatUnreadCount();
+
+  updateInboxUnreadCount();
+
+  listenForMessages();
+
+  listenForInbox();
+
 });
