@@ -2,24 +2,55 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* =========================================================
      Elements
-     ========================================================= */
+  ========================================================= */
 
-  const openInboxBtn = document.getElementById("openInboxBtn");
-  const inboxModal = document.getElementById("inboxModal");
-  const closeInboxBtn = document.getElementById("closeInboxBtn");
-  const inboxList = document.getElementById("inboxList");
-  const inboxUnreadDot = document.getElementById("inboxUnreadDot");
+  const openInboxBtn =
+    document.getElementById("openInboxBtn");
+
+  const inboxModal =
+    document.getElementById("inboxModal");
+
+  const closeInboxBtn =
+    document.getElementById("closeInboxBtn");
+
+  const inboxList =
+    document.getElementById("inboxList");
+
+  const inboxUnreadDot =
+    document.getElementById("inboxUnreadDot");
 
   let inboxSubscription = null;
 
 
   /* =========================================================
+     Check Elements
+  ========================================================= */
+
+  if (!openInboxBtn) {
+    console.warn("Inbox: #openInboxBtn not found");
+  }
+
+  if (!inboxModal) {
+    console.warn("Inbox: #inboxModal not found");
+  }
+
+  if (!inboxList) {
+    console.warn("Inbox: #inboxList not found");
+  }
+
+  if (!inboxUnreadDot) {
+    console.warn("Inbox: #inboxUnreadDot not found");
+  }
+
+
+  /* =========================================================
      Current User
-     ========================================================= */
+  ========================================================= */
 
   function getCurrentUserId() {
 
-    const id = localStorage.getItem("currentUserId");
+    const id =
+      localStorage.getItem("currentUserId");
 
     return id ? Number(id) : null;
 
@@ -28,46 +59,87 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* =========================================================
      Open Inbox
-     ========================================================= */
+  ========================================================= */
 
-  openInboxBtn?.addEventListener("click", async () => {
+  openInboxBtn?.addEventListener(
+    "click",
+    async () => {
 
-    const userId = getCurrentUserId();
+      const userId =
+        getCurrentUserId();
 
-    if (!userId) {
-      alert("Please log in first!");
-      return;
+      if (!userId) {
+
+        alert("Please log in first!");
+
+        return;
+
+      }
+
+
+      /*
+       * Prevent null.classList error
+       */
+
+      if (!inboxModal) {
+
+        console.error(
+          "Inbox modal #inboxModal does not exist in HTML."
+        );
+
+        return;
+
+      }
+
+
+      inboxModal.classList.add("show");
+
+      document.body.style.overflow =
+        "hidden";
+
+
+      await loadNotifications();
+
+      await markNotificationsAsRead();
+
+      await updateInboxUnreadCount();
+
     }
-
-    inboxModal.classList.add("show");
-
-    document.body.style.overflow = "hidden";
-
-    await loadNotifications();
-
-    await markNotificationsAsRead();
-
-    await updateInboxUnreadCount();
-
-  });
+  );
 
 
   /* =========================================================
      Close Inbox
-     ========================================================= */
+  ========================================================= */
 
-  closeInboxBtn?.addEventListener("click", closeInbox);
+  closeInboxBtn?.addEventListener(
+    "click",
+    closeInbox
+  );
 
-  inboxModal?.addEventListener("click", (event) => {
 
-    if (event.target === inboxModal) {
-      closeInbox();
+  inboxModal?.addEventListener(
+    "click",
+    event => {
+
+      if (
+        event.target === inboxModal
+      ) {
+
+        closeInbox();
+
+      }
+
     }
-
-  });
+  );
 
 
   function closeInbox() {
+
+    if (!inboxModal) {
+      return;
+    }
+
 
     inboxModal.classList.remove("show");
 
@@ -78,34 +150,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* =========================================================
      Escape Key
-     ========================================================= */
+  ========================================================= */
 
-  document.addEventListener("keydown", (event) => {
+  document.addEventListener(
+    "keydown",
+    event => {
 
-    if (event.key === "Escape") {
-
-      if (inboxModal?.classList.contains("show")) {
+      if (
+        event.key === "Escape" &&
+        inboxModal?.classList.contains("show")
+      ) {
 
         closeInbox();
 
       }
 
     }
-
-  });
+  );
 
 
   /* =========================================================
      Load Notifications
-     ========================================================= */
+  ========================================================= */
 
   async function loadNotifications() {
 
-    const userId = getCurrentUserId();
+    const userId =
+      getCurrentUserId();
 
-    if (!userId || !inboxList) {
+    if (
+      !userId ||
+      !inboxList
+    ) {
+
       return;
+
     }
+
 
     inboxList.innerHTML = `
       <div class="inbox-loading">
@@ -114,13 +195,19 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
 
 
-    const { data, error } = await supabaseClient
+    const {
+      data,
+      error
+    } = await supabaseClient
       .from("notifications")
       .select("*")
       .eq("user_id", userId)
-      .order("created_at", {
-        ascending: false
-      });
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
+      );
 
 
     if (error) {
@@ -130,10 +217,18 @@ document.addEventListener("DOMContentLoaded", () => {
         error
       );
 
+
       inboxList.innerHTML = `
         <div class="inbox-empty">
-          <div class="inbox-empty-icon">⚠️</div>
-          <p>Failed to load notifications.</p>
+
+          <div class="inbox-empty-icon">
+            ⚠️
+          </div>
+
+          <p>
+            Failed to load notifications.
+          </p>
+
         </div>
       `;
 
@@ -142,12 +237,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    if (!data || data.length === 0) {
+    if (
+      !data ||
+      data.length === 0
+    ) {
 
       inboxList.innerHTML = `
         <div class="inbox-empty">
-          <div class="inbox-empty-icon">📭</div>
-          <p>No notifications yet.</p>
+
+          <div class="inbox-empty-icon">
+            📭
+          </div>
+
+          <p>
+            No notifications yet.
+          </p>
+
         </div>
       `;
 
@@ -158,34 +263,48 @@ document.addEventListener("DOMContentLoaded", () => {
 
     inboxList.innerHTML = "";
 
-    data.forEach(notification => {
 
-      appendNotification(notification);
+    data.forEach(
+      notification => {
 
-    });
+        appendNotification(
+          notification
+        );
+
+      }
+    );
 
   }
 
 
   /* =========================================================
      Append Notification
-     ========================================================= */
+  ========================================================= */
 
-  function appendNotification(notification) {
+  function appendNotification(
+    notification
+  ) {
 
     if (!inboxList) {
       return;
     }
 
 
-    const item = document.createElement("div");
+    const item =
+      document.createElement("div");
 
-    item.className = "inbox-item";
+
+    item.className =
+      "inbox-item";
 
 
-    if (!notification.is_read) {
+    if (
+      !notification.is_read
+    ) {
 
-      item.classList.add("unread");
+      item.classList.add(
+        "unread"
+      );
 
     }
 
@@ -208,16 +327,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     item.innerHTML = `
 
-      <h4 class="inbox-item-title">
-        ${escapeHtml(title)}
-      </h4>
+      <div class="inbox-item-main">
 
-      <p class="inbox-item-content">
-        ${escapeHtml(content)}
-      </p>
+        <h4 class="inbox-item-title">
+          ${escapeHtml(title)}
+        </h4>
 
-      <div class="inbox-item-time">
-        ${time}
+        <p class="inbox-item-content">
+          ${escapeHtml(content)}
+        </p>
+
+        <div class="inbox-item-time">
+          ${time}
+        </div>
+
       </div>
 
     `;
@@ -230,24 +353,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* =========================================================
      Mark Notifications As Read
-     ========================================================= */
+  ========================================================= */
 
   async function markNotificationsAsRead() {
 
-    const userId = getCurrentUserId();
+    const userId =
+      getCurrentUserId();
 
     if (!userId) {
       return;
     }
 
 
-    const { error } = await supabaseClient
+    const {
+      error
+    } = await supabaseClient
       .from("notifications")
       .update({
         is_read: true
       })
-      .eq("user_id", userId)
-      .eq("is_read", false);
+      .eq(
+        "user_id",
+        userId
+      )
+      .eq(
+        "is_read",
+        false
+      );
 
 
     if (error) {
@@ -262,8 +394,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    /* Update badge */
-
     await updateInboxUnreadCount();
 
   }
@@ -271,11 +401,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* =========================================================
      Unread Count
-     ========================================================= */
+  ========================================================= */
 
   async function updateInboxUnreadCount() {
 
-    const userId = getCurrentUserId();
+    const userId =
+      getCurrentUserId();
+
 
     if (!userId) {
 
@@ -286,14 +418,26 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    const { count, error } = await supabaseClient
+    const {
+      count,
+      error
+    } = await supabaseClient
       .from("notifications")
-      .select("id", {
-        count: "exact",
-        head: true
-      })
-      .eq("user_id", userId)
-      .eq("is_read", false);
+      .select(
+        "id",
+        {
+          count: "exact",
+          head: true
+        }
+      )
+      .eq(
+        "user_id",
+        userId
+      )
+      .eq(
+        "is_read",
+        false
+      );
 
 
     if (error) {
@@ -308,7 +452,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    const unread = count || 0;
+    const unread =
+      count || 0;
 
 
     if (!inboxUnreadDot) {
@@ -324,13 +469,21 @@ document.addEventListener("DOMContentLoaded", () => {
           : String(unread);
 
 
-      inboxUnreadDot.textContent = text;
+      inboxUnreadDot.textContent =
+        text;
 
-      inboxUnreadDot.classList.remove("show");
+
+      inboxUnreadDot.classList.remove(
+        "show"
+      );
+
 
       void inboxUnreadDot.offsetWidth;
 
-      inboxUnreadDot.classList.add("show");
+
+      inboxUnreadDot.classList.add(
+        "show"
+      );
 
     } else {
 
@@ -343,7 +496,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* =========================================================
      Hide Badge
-     ========================================================= */
+  ========================================================= */
 
   function hideUnreadBadge() {
 
@@ -351,20 +504,25 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+
     inboxUnreadDot.textContent = "";
 
-    inboxUnreadDot.classList.remove("show");
+    inboxUnreadDot.classList.remove(
+      "show"
+    );
 
   }
 
 
   /* =========================================================
      Supabase Realtime
-     ========================================================= */
+  ========================================================= */
 
   function listenForNotifications() {
 
-    const userId = getCurrentUserId();
+    const userId =
+      getCurrentUserId();
+
 
     if (!userId) {
       return;
@@ -393,7 +551,8 @@ document.addEventListener("DOMContentLoaded", () => {
             event: "INSERT",
             schema: "public",
             table: "notifications",
-            filter: `user_id=eq.${userId}`
+            filter:
+              `user_id=eq.${userId}`
           },
           async payload => {
 
@@ -408,21 +567,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             /*
-             * If Inbox is currently open,
-             * immediately display the notification
+             * Inbox is open
              */
 
             if (
-              inboxModal?.classList.contains("show")
+              inboxModal &&
+              inboxModal.classList.contains(
+                "show"
+              )
             ) {
 
-              /*
-               * New notification is unread.
-               * Put it at the top.
-               */
-
               const item =
-                document.createElement("div");
+                document.createElement(
+                  "div"
+                );
+
 
               item.className =
                 "inbox-item unread";
@@ -446,41 +605,51 @@ document.addEventListener("DOMContentLoaded", () => {
 
               item.innerHTML = `
 
-                <h4 class="inbox-item-title">
-                  ${escapeHtml(title)}
-                </h4>
+                <div class="inbox-item-main">
 
-                <p class="inbox-item-content">
-                  ${escapeHtml(content)}
-                </p>
+                  <h4 class="inbox-item-title">
+                    ${escapeHtml(title)}
+                  </h4>
 
-                <div class="inbox-item-time">
-                  ${time}
+                  <p class="inbox-item-content">
+                    ${escapeHtml(content)}
+                  </p>
+
+                  <div class="inbox-item-time">
+                    ${time}
+                  </div>
+
                 </div>
 
               `;
 
 
-              if (inboxList.firstChild) {
+              if (
+                inboxList?.firstChild
+              ) {
 
                 inboxList.insertBefore(
                   item,
                   inboxList.firstChild
                 );
 
-              } else {
+              } else if (inboxList) {
 
-                inboxList.appendChild(item);
+                inboxList.appendChild(
+                  item
+                );
 
               }
 
 
               /*
-               * User is already reading Inbox,
-               * so immediately mark the new notification read.
+               * User is reading Inbox,
+               * mark new message as read
                */
 
-              await supabaseClient
+              const {
+                error
+              } = await supabaseClient
                 .from("notifications")
                 .update({
                   is_read: true
@@ -489,6 +658,16 @@ document.addEventListener("DOMContentLoaded", () => {
                   "id",
                   notification.id
                 );
+
+
+              if (error) {
+
+                console.error(
+                  "Failed to mark realtime notification as read:",
+                  error
+                );
+
+              }
 
 
               item.classList.remove(
@@ -502,7 +681,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
               /*
                * Inbox closed.
-               * Keep notification unread.
+               * Notification remains unread.
                */
 
               await updateInboxUnreadCount();
@@ -511,21 +690,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
           }
         )
-        .subscribe(status => {
+        .subscribe(
+          status => {
 
-          console.log(
-            "Inbox realtime status:",
-            status
-          );
+            console.log(
+              "Inbox realtime status:",
+              status
+            );
 
-        });
+          }
+        );
 
   }
 
 
   /* =========================================================
      Date Formatting
-     ========================================================= */
+  ========================================================= */
 
   function formatNotificationTime(
     timestamp
@@ -540,8 +721,14 @@ document.addEventListener("DOMContentLoaded", () => {
       new Date(timestamp);
 
 
-    if (Number.isNaN(date.getTime())) {
+    if (
+      Number.isNaN(
+        date.getTime()
+      )
+    ) {
+
       return "";
+
     }
 
 
@@ -561,17 +748,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* =========================================================
      HTML Escape
-     ========================================================= */
+  ========================================================= */
 
   function escapeHtml(value) {
 
     const div =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
+
 
     div.textContent =
       value == null
         ? ""
         : String(value);
+
 
     return div.innerHTML;
 
@@ -580,7 +771,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* =========================================================
      Start
-     ========================================================= */
+  ========================================================= */
 
   updateInboxUnreadCount();
 
@@ -588,8 +779,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* =========================================================
-     Optional Global Functions
-     ========================================================= */
+     Global Function
+  ========================================================= */
 
   window.updateInboxUnreadCount =
     updateInboxUnreadCount;
