@@ -391,33 +391,26 @@
     </div>
   </div>
 
-  <div id="setPasswordModal" class="modal">
-    <div class="modal-content">
-      <h3>Set withdrawal password</h3>
-      <input type="password" id="withdrawPwd" maxlength="6" inputmode="numeric" placeholder="Enter a 6-digit password" />
-      <input type="password" id="confirmWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="Confirm Password" />
-      <div class="modal-actions">
-        <button id="cancelSetPwd">Cancel</button>
-        <button id="saveWithdrawPwd">Save</button>
+  <div id="transactionModal" class="modal">
+    <div class="modal-content transaction-box">
+      <div class="history-header">
+        <button id="closeTransaction">
+          ⬅
+        </button>
+
+        <h3>
+          Transaction
+        </h3>
+
+        <div class="header-space"></div>
+      </div>
+
+      <div id="transactionList">
+        Loading...
       </div>
     </div>
   </div>
 
-  <div id="transactionModal" class="modal">
-    <div class="modal-content transaction-box">
-      <h3>
-        Transaction History
-      </h3>
-      <div id="transactionList">
-        Loading...
-      </div>
-      <div class="modal-actions">
-        <button id="closeTransaction">
-          Close
-        </button>
-      </div>
-    </div>
-  </div>
 
   <div id="updatePasswordModal" class="modal">
     <div class="modal-content">
