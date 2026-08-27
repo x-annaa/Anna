@@ -349,3 +349,51 @@
   margin-top:5px;
 
 }
+
+/* Transaction History Button */
+
+#transactionHistoryBtn {
+
+  width: 100%;
+
+  padding: 12px;
+
+  margin-top: 10px;
+
+  margin-bottom: 10px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  background: linear-gradient(135deg, #667eea, #764ba2);
+
+  color: white;
+
+  font-size: 15px;
+
+  font-weight: bold;
+
+  cursor: pointer;
+
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+
+  transition: all 0.3s ease;
+
+}
+
+
+#transactionHistoryBtn:hover {
+
+  transform: translateY(-2px);
+
+  opacity: 0.9;
+
+}
+
+
+#transactionHistoryBtn:active {
+
+  transform: scale(0.97);
+
+}
