@@ -194,7 +194,7 @@ async function loadUserInfo(username) {
   try {
     const { data, error } = await supabaseClient
       .from("users")
-      .select("id, username, platform_account, balance, withdraw_password, password")
+      .select("id, uuid, username, platform_account, balance, withdraw_password, password")
       .eq("username", username)
       .single();
     if (error || !data) throw new Error(error?.message || "User does not exist");
