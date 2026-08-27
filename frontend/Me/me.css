@@ -90,7 +90,7 @@
 }
 
 .my-buttons {
-  margin-top: 30px;
+  margin-top: 1px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -366,17 +366,13 @@
 
   border-radius: 10px;
 
-  background: linear-gradient(135deg, #667eea, #764ba2);
-
-  color: white;
+  color: #000000;
 
   font-size: 15px;
 
   font-weight: bold;
 
   cursor: pointer;
-
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 
   transition: all 0.3s ease;
 
