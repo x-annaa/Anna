@@ -477,6 +477,43 @@
     <button data-page="myPage">Me</button>
   </div>
 
+
+  <div id="setPasswordModal" class="modal">
+    <div class="modal-content">
+  
+      <h3>Set withdrawal password</h3>
+  
+      <input
+        type="password"
+        id="withdrawPwd"
+        maxlength="6"
+        inputmode="numeric"
+        placeholder="Enter 6-digit password"
+      />
+  
+      <input
+        type="password"
+        id="confirmWithdrawPwd"
+        maxlength="6"
+        inputmode="numeric"
+        placeholder="Confirm 6-digit password"
+      />
+  
+      <div class="modal-actions">
+  
+        <button id="cancelSetPwd">
+          Cancel
+        </button>
+  
+        <button id="saveWithdrawPwd">
+          Save
+        </button>
+  
+      </div>
+  
+    </div>
+  </div>
+
   <script src="Home/home.js"></script>
   <script src="Shop/shop.js"></script>
   <script src="Order/order.js"></script>
