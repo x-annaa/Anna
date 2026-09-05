@@ -557,3 +557,43 @@ button:disabled {
   color: #333;           
   overflow: auto;      
 }
+
+
+
+
+
+
+
+
+
+
+.rule-item{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  margin-bottom:18px;
+  padding-bottom:12px;
+  border-bottom:1px solid #eee;
+}
+
+
+.rule-icon{
+  width:35px;
+  height:35px;
+  flex-shrink:0;
+}
+
+
+.rule-item h4{
+  margin:0 0 6px;
+  font-size:15px;
+  color:#1976d2;
+}
+
+
+.rule-item p{
+  margin:0;
+  line-height:1.5;
+  font-size:13px;
+  color:#555;
+}
