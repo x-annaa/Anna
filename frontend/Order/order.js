@@ -706,191 +706,68 @@ function setMatchingState(isMatching) {
   }
 }
 
-document.getElementById("autoOrderBtn").addEventListener("click", function() {
-  setMatchingState(true);
+document.addEventListener("DOMContentLoaded", () => {
 
-  setTimeout(() => setMatchingState(false), 5000);
-});
 
-document.addEventListener("DOMContentLoaded",()=>{
+  // History 按钮
+  const historyBtn = document.querySelector(".left-box");
+  const historyModal = document.getElementById("historyModal");
 
 
-const historyModal = document.getElementById("historyModal");
-const rulesModal = document.getElementById("rulesModal");
+  if(historyBtn && historyModal){
 
+    historyBtn.onclick = async () => {
 
-const historyBtn = document.querySelector(".left-box");
-const rulesBtn = document.querySelector(".right-box");
+      historyModal.style.display = "flex";
 
+      const listEl = document.getElementById("orderHistoryList");
 
+      if(listEl){
+        listEl.innerHTML = "<li>Loading...</li>";
+      }
 
-// =====================
-// History 按钮
-// =====================
+    };
 
-if(historyBtn){
+  }
 
-historyBtn.addEventListener("click", async()=>{
 
 
-const listEl=document.getElementById("orderHistoryList");
+  // Rules 按钮
+  const rulesBtn = document.querySelector(".right-box");
+  const rulesModal = document.getElementById("rulesModal");
 
-listEl.innerHTML="<li>Loading...</li>";
 
+  if(rulesBtn && rulesModal){
 
+    rulesBtn.onclick = () => {
 
-const {data:orders,error,count}=await supabaseClient
-.from("orders")
-.select(`
-id,
-total_price,
-profit,
-status,
-created_at,
-products(
-name,
-url,
-description,
-profit
-)
-`,
-{
-count:"exact"
-})
-.eq("user_id",window.currentUserId)
-.order("created_at",{ascending:false});
+      rulesModal.style.display = "flex";
 
+    };
 
+  }
 
-const title=document.querySelector("#historyModal h3");
 
-if(title){
-title.textContent=`All: ${count||0}`;
-}
 
+  // 关闭 History
+  document.getElementById("closeHistoryBtn")?.addEventListener("click",()=>{
 
+    if(historyModal){
+      historyModal.style.display="none";
+    }
 
-if(error){
+  });
 
-listEl.innerHTML="<li>Load failed</li>";
 
-}
 
-else if(orders && orders.length){
+  // 关闭 Rules
+  document.getElementById("closeRulesBtn")?.addEventListener("click",()=>{
 
+    if(rulesModal){
+      rulesModal.style.display="none";
+    }
 
-listEl.innerHTML=orders.map(o=>{
-
-
-return `
-
-<li>
-
-
-<img src="${o.products?.url || ''}" width="60">
-
-
-<div>
-<b>
-${o.products?.name || "Unknown"}
-</b>
-</div>
-
-
-<div>
-Price:
-$${Number(o.total_price).toFixed(2)}
-</div>
-
-
-<div>
-Profit:
-${o.products?.profit || 0}
-</div>
-
-
-<div>
-Income:
-+$${Number(o.profit).toFixed(2)}
-</div>
-
-
-<div>
-Status:
-${o.status}
-</div>
-
-
-</li>
-
-
-`;
-
-}).join("");
-
-}
-
-else{
-
-listEl.innerHTML="<li>No orders</li>";
-
-}
-
-
-
-historyModal.style.display="flex";
-
-
-});
-
-
-}
-
-
-
-// =====================
-// ℹ️ Rules按钮
-// =====================
-
-
-if(rulesBtn){
-
-rulesBtn.addEventListener("click",()=>{
-
-
-rulesModal.style.display="flex";
-
-
-});
-
-
-}
-
-
-
-// =====================
-// 关闭 History
-// =====================
-
-document.getElementById("closeHistoryBtn")
-?.addEventListener("click",()=>{
-
-historyModal.style.display="none";
-
-});
-
-
-
-// =====================
-// 关闭 Rules
-// =====================
-
-document.getElementById("closeRulesBtn")
-?.addEventListener("click",()=>{
-
-rulesModal.style.display="none";
-
-});
+  });
 
 
 
