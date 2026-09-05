@@ -1,0 +1,870 @@
+/* =========================================================
+   BODY
+========================================================= */
+
+body {
+
+  position: relative;
+
+  overflow: hidden;
+
+  background:
+    #f5f7fb;
+
+}
+
+
+/* =========================================================
+   BACKGROUND ANIMATION
+========================================================= */
+
+.background-animation {
+
+  position: fixed;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  overflow: hidden;
+
+  pointer-events: none;
+
+  z-index: 0;
+
+}
+
+
+/* =========================================================
+   LARGE GLOWING ORBS
+========================================================= */
+
+.bg-orb {
+
+  position: absolute;
+
+  border-radius: 50%;
+
+  pointer-events: none;
+
+  filter: blur(55px);
+
+  will-change: transform;
+
+}
+
+
+/* =========================================================
+   ORB 1
+========================================================= */
+
+.bg-orb-1 {
+
+  width: 420px;
+  height: 420px;
+
+  top: -210px;
+  left: -160px;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(59, 130, 246, 0.30) 0%,
+      rgba(59, 130, 246, 0.13) 40%,
+      transparent 72%
+    );
+
+  animation:
+    orbMove1 10s ease-in-out infinite alternate;
+
+}
+
+
+/* =========================================================
+   ORB 2
+========================================================= */
+
+.bg-orb-2 {
+
+  width: 500px;
+  height: 500px;
+
+  right: -230px;
+  bottom: -240px;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(0, 174, 255, 0.28) 0%,
+      rgba(0, 136, 204, 0.11) 42%,
+      transparent 72%
+    );
+
+  animation:
+    orbMove2 13s ease-in-out infinite alternate;
+
+}
+
+
+/* =========================================================
+   ORB 3
+========================================================= */
+
+.bg-orb-3 {
+
+  width: 350px;
+  height: 350px;
+
+  left: 50%;
+  top: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(99, 102, 241, 0.16) 0%,
+      rgba(99, 102, 241, 0.07) 42%,
+      transparent 72%
+    );
+
+  animation:
+    orbMove3 16s ease-in-out infinite alternate;
+
+}
+
+
+/* =========================================================
+   ORB ANIMATION 1
+========================================================= */
+
+@keyframes orbMove1 {
+
+  0% {
+
+    transform:
+      translate3d(0, 0, 0)
+      scale(0.85);
+
+  }
+
+  50% {
+
+    transform:
+      translate3d(120px, 100px, 0)
+      scale(1.15);
+
+  }
+
+  100% {
+
+    transform:
+      translate3d(220px, 40px, 0)
+      scale(0.95);
+
+  }
+
+}
+
+
+/* =========================================================
+   ORB ANIMATION 2
+========================================================= */
+
+@keyframes orbMove2 {
+
+  0% {
+
+    transform:
+      translate3d(0, 0, 0)
+      scale(0.90);
+
+  }
+
+  50% {
+
+    transform:
+      translate3d(-150px, -100px, 0)
+      scale(1.15);
+
+  }
+
+  100% {
+
+    transform:
+      translate3d(-40px, -200px, 0)
+      scale(0.95);
+
+  }
+
+}
+
+
+/* =========================================================
+   ORB ANIMATION 3
+========================================================= */
+
+@keyframes orbMove3 {
+
+  0% {
+
+    transform:
+      translate(-50%, -50%)
+      scale(0.70);
+
+  }
+
+  50% {
+
+    transform:
+      translate(-35%, -60%)
+      scale(1.15);
+
+  }
+
+  100% {
+
+    transform:
+      translate(-65%, -40%)
+      scale(0.85);
+
+  }
+
+}
+
+
+/* =========================================================
+   MOVING LIGHT WAVE
+========================================================= */
+
+.bg-wave {
+
+  position: absolute;
+
+  width: 900px;
+  height: 260px;
+
+  left: 50%;
+  top: 50%;
+
+  border-radius: 50%;
+
+  pointer-events: none;
+
+  filter: blur(35px);
+
+  opacity: 0.35;
+
+  will-change: transform;
+
+}
+
+
+/* =========================================================
+   WAVE 1
+========================================================= */
+
+.bg-wave-1 {
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(59, 130, 246, 0.12),
+      rgba(0, 174, 255, 0.22),
+      rgba(59, 130, 246, 0.08),
+      transparent
+    );
+
+  transform:
+    translate(-50%, -50%)
+    rotate(-25deg);
+
+  animation:
+    waveMove1 12s ease-in-out infinite alternate;
+
+}
+
+
+/* =========================================================
+   WAVE 2
+========================================================= */
+
+.bg-wave-2 {
+
+  width: 750px;
+  height: 180px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(99, 102, 241, 0.10),
+      rgba(59, 130, 246, 0.18),
+      transparent
+    );
+
+  transform:
+    translate(-50%, -50%)
+    rotate(25deg);
+
+  animation:
+    waveMove2 15s ease-in-out infinite alternate;
+
+}
+
+
+/* =========================================================
+   WAVE ANIMATION 1
+========================================================= */
+
+@keyframes waveMove1 {
+
+  0% {
+
+    transform:
+      translate(-70%, -60%)
+      rotate(-25deg)
+      scale(0.80);
+
+    opacity: 0.12;
+
+  }
+
+  50% {
+
+    transform:
+      translate(-30%, -40%)
+      rotate(-15deg)
+      scale(1.15);
+
+    opacity: 0.42;
+
+  }
+
+  100% {
+
+    transform:
+      translate(-20%, -65%)
+      rotate(-30deg)
+      scale(0.95);
+
+    opacity: 0.20;
+
+  }
+
+}
+
+
+/* =========================================================
+   WAVE ANIMATION 2
+========================================================= */
+
+@keyframes waveMove2 {
+
+  0% {
+
+    transform:
+      translate(-30%, -30%)
+      rotate(25deg)
+      scale(0.80);
+
+    opacity: 0.10;
+
+  }
+
+  50% {
+
+    transform:
+      translate(-65%, -55%)
+      rotate(10deg)
+      scale(1.20);
+
+    opacity: 0.32;
+
+  }
+
+  100% {
+
+    transform:
+      translate(-40%, -25%)
+      rotate(30deg)
+      scale(0.90);
+
+    opacity: 0.15;
+
+  }
+
+}
+
+
+/* =========================================================
+   PARTICLES
+========================================================= */
+
+.particles {
+
+  position: absolute;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+}
+
+
+/* =========================================================
+   PARTICLE BASE
+========================================================= */
+
+.particles span {
+
+  position: absolute;
+
+  display: block;
+
+  border-radius: 50%;
+
+  pointer-events: none;
+
+  width: 7px;
+  height: 7px;
+
+  background:
+    rgba(59, 130, 246, 0.45);
+
+  box-shadow:
+    0 0 8px
+    rgba(59, 130, 246, 0.30),
+
+    0 0 18px
+    rgba(59, 130, 246, 0.15);
+
+  will-change:
+    transform,
+    opacity,
+    width,
+    height;
+
+  animation:
+    particleFloat
+    var(--duration)
+    ease-in-out
+    infinite;
+
+}
+
+
+/* =========================================================
+   BIG / SMALL
+========================================================= */
+
+/* 大圆点 */
+
+.particles span:nth-child(odd) {
+
+  width: 10px;
+  height: 10px;
+
+}
+
+
+/* 小圆点 */
+
+.particles span:nth-child(even) {
+
+  width: 5px;
+  height: 5px;
+
+}
+
+
+/* =========================================================
+   EXTRA BIG PARTICLES
+========================================================= */
+
+.particles span:nth-child(5),
+.particles span:nth-child(13) {
+
+  width: 14px;
+  height: 14px;
+
+  background:
+    rgba(59, 130, 246, 0.60);
+
+  box-shadow:
+
+    0 0 12px
+    rgba(59, 130, 246, 0.50),
+
+    0 0 28px
+    rgba(59, 130, 246, 0.25);
+
+}
+
+
+/* =========================================================
+   PARTICLE POSITIONS
+========================================================= */
+
+.particles span:nth-child(1) {
+
+  left: 8%;
+  top: 20%;
+
+  --duration: 9s;
+
+}
+
+
+.particles span:nth-child(2) {
+
+  left: 18%;
+  top: 72%;
+
+  --duration: 12s;
+
+}
+
+
+.particles span:nth-child(3) {
+
+  left: 27%;
+  top: 35%;
+
+  --duration: 10s;
+
+}
+
+
+.particles span:nth-child(4) {
+
+  left: 36%;
+  top: 82%;
+
+  --duration: 14s;
+
+}
+
+
+.particles span:nth-child(5) {
+
+  left: 45%;
+  top: 18%;
+
+  --duration: 11s;
+
+}
+
+
+.particles span:nth-child(6) {
+
+  left: 54%;
+  top: 68%;
+
+  --duration: 13s;
+
+}
+
+
+.particles span:nth-child(7) {
+
+  left: 63%;
+  top: 30%;
+
+  --duration: 10s;
+
+}
+
+
+.particles span:nth-child(8) {
+
+  left: 72%;
+  top: 78%;
+
+  --duration: 15s;
+
+}
+
+
+.particles span:nth-child(9) {
+
+  left: 82%;
+  top: 22%;
+
+  --duration: 11s;
+
+}
+
+
+.particles span:nth-child(10) {
+
+  left: 91%;
+  top: 55%;
+
+  --duration: 13s;
+
+}
+
+
+.particles span:nth-child(11) {
+
+  left: 13%;
+  top: 48%;
+
+  --duration: 16s;
+
+}
+
+
+.particles span:nth-child(12) {
+
+  left: 32%;
+  top: 12%;
+
+  --duration: 12s;
+
+}
+
+
+.particles span:nth-child(13) {
+
+  left: 68%;
+  top: 52%;
+
+  --duration: 14s;
+
+}
+
+
+.particles span:nth-child(14) {
+
+  left: 77%;
+  top: 88%;
+
+  --duration: 10s;
+
+}
+
+
+.particles span:nth-child(15) {
+
+  left: 88%;
+  top: 38%;
+
+  --duration: 15s;
+
+}
+
+
+.particles span:nth-child(16) {
+
+  left: 22%;
+  top: 90%;
+
+  --duration: 11s;
+
+}
+
+
+/* =========================================================
+   PARTICLE ANIMATION
+   SMALL → BIG → SMALL
+   DARK → BRIGHT → DARK
+========================================================= */
+
+@keyframes particleFloat {
+
+  /* 开始：小 + 暗 */
+
+  0% {
+
+    transform:
+      translate3d(0, 0, 0)
+      scale(0.45);
+
+    opacity: 0.10;
+
+  }
+
+
+  /* 开始变亮 */
+
+  20% {
+
+    opacity: 0.45;
+
+  }
+
+
+  /* 中间：变大 + 变亮 */
+
+  45% {
+
+    transform:
+      translate3d(
+        var(--move-x-1, 25px),
+        var(--move-y-1, -35px),
+        0
+      )
+      scale(1.45);
+
+    opacity: 0.90;
+
+  }
+
+
+  /* 最亮 */
+
+  55% {
+
+    opacity: 1;
+
+  }
+
+
+  /* 开始变小 */
+
+  75% {
+
+    transform:
+      translate3d(
+        var(--move-x-2, -20px),
+        var(--move-y-2, -60px),
+        0
+      )
+      scale(0.90);
+
+    opacity: 0.45;
+
+  }
+
+
+  /* 最后：小 + 暗 */
+
+  100% {
+
+    transform:
+      translate3d(
+        var(--move-x-3, 15px),
+        var(--move-y-3, -90px),
+        0
+      )
+      scale(0.40);
+
+    opacity: 0.08;
+
+  }
+
+}
+
+
+/* =========================================================
+   DIFFERENT MOVEMENT DIRECTIONS
+========================================================= */
+
+
+/* 左上方向 */
+
+.particles span:nth-child(1),
+.particles span:nth-child(5),
+.particles span:nth-child(9),
+.particles span:nth-child(13) {
+
+  --move-x-1: -35px;
+  --move-y-1: -45px;
+
+  --move-x-2: -65px;
+  --move-y-2: -75px;
+
+  --move-x-3: -20px;
+  --move-y-3: -110px;
+
+}
+
+
+/* 右上方向 */
+
+.particles span:nth-child(2),
+.particles span:nth-child(6),
+.particles span:nth-child(10),
+.particles span:nth-child(14) {
+
+  --move-x-1: 40px;
+  --move-y-1: -35px;
+
+  --move-x-2: 75px;
+  --move-y-2: -65px;
+
+  --move-x-3: 30px;
+  --move-y-3: -100px;
+
+}
+
+
+/* 左下 / 横向 */
+
+.particles span:nth-child(3),
+.particles span:nth-child(7),
+.particles span:nth-child(11),
+.particles span:nth-child(15) {
+
+  --move-x-1: -30px;
+  --move-y-1: 25px;
+
+  --move-x-2: -60px;
+  --move-y-2: -10px;
+
+  --move-x-3: -25px;
+  --move-y-3: -50px;
+
+}
+
+
+/* 右下 / 横向 */
+
+.particles span:nth-child(4),
+.particles span:nth-child(8),
+.particles span:nth-child(12),
+.particles span:nth-child(16) {
+
+  --move-x-1: 35px;
+  --move-y-1: 20px;
+
+  --move-x-2: 70px;
+  --move-y-2: -20px;
+
+  --move-x-3: 30px;
+  --move-y-3: -65px;
+
+}
+
+
+/* =========================================================
+   KEEP MAIN CONTENT ABOVE BACKGROUND
+========================================================= */
+
+.container {
+
+  position: relative;
+
+  z-index: 2;
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .bg-orb,
+  .bg-wave,
+  .particles span {
+
+    animation: none;
+
+  }
+
+}
