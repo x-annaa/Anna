@@ -1,39 +1,343 @@
-.container-h1 {
-  margin: 5px auto;
-  max-width: 100%;
-  text-align: center;
+/* =========================================================
+   HOME
+========================================================= */
+
+
+/* =========================================================
+   HOME HEADER FIXED
+   ========================================================= */
+
+#home-header {
+
+    position: fixed;
+
+    top:0;
+    left:0;
+    right:0;
+
+    width:100%;
+
+    height:56px;
+
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+
+    padding:0 16px;
+
+    box-sizing:border-box;
+
+
+    background:
+    rgba(255,255,255,0.65);
+
+
+    backdrop-filter:
+    blur(10px);
+
+    -webkit-backdrop-filter:
+    blur(10px);
+
+
+    border-bottom:
+    1px solid rgba(255,255,255,0.5);
+
+
+    z-index:999;
+
 }
 
-.container-h1 img {
-  width: 100%;
-  max-width: 100%;
-  height: auto;
-  border-radius: 2px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-  transition: opacity 0.5s ease;
+
+/* =========================================================
+   BRAND
+   ========================================================= */
+
+.home-brand {
+
+    font-size:22px;
+
+    font-weight:800;
+
+    color:#0071ff;
+
+    line-height:1;
+
 }
+
+
+
+/* =========================================================
+   RIGHT USERNAME
+   ========================================================= */
+
+.home-actions {
+
+    display:flex;
+
+    align-items:center;
+
+}
+
+
+
+/* username pill */
+
+#homeUsername {
+
+    max-width:140px;
+
+
+    overflow:hidden;
+
+    text-overflow:ellipsis;
+
+    white-space:nowrap;
+
+
+    padding:
+    6px 12px;
+
+
+    border-radius:20px;
+
+
+    background:
+    rgba(0,113,255,0.1);
+
+
+    color:#0071ff;
+
+
+    font-size:14px;
+
+    font-weight:700;
+
+
+}
+
+
+
+/* =========================================================
+   HOME CONTENT OFFSET
+   ========================================================= */
+
+
+/*
+ 防止 fixed header 遮挡 banner
+*/
+
+#homePage {
+
+    padding-top:70px;
+
+}
+
+
+/* =========================================================
+   1. BANNER
+========================================================= */
+
+.container-h1 {
+  width: 100%;
+  margin: 5px auto;
+  overflow: hidden;
+}
+
+
+/* =========================================================
+   BANNER WRAPPER
+========================================================= */
+
+.banner-wrapper {
+  width: 100%;
+  display: flex;
+  gap: 8px;
+}
+
+
+/* =========================================================
+   BANNER ITEM
+========================================================= */
+
+.banner-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+  background: #f1f3f7;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+
+/* =========================================================
+   BANNER IMAGE
+========================================================= */
+
+.banner-item img {
+  display: none;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  opacity: 0;
+
+  transition: opacity 0.4s ease;
+}
+
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+.banner-loading {
+  position: absolute;
+
+  inset: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  color: #9ca3af;
+
+  font-size: 12px;
+
+  background: #f1f3f7;
+}
+
+
+/* =========================================================
+   SPINNER
+========================================================= */
+
+.ad-spinner {
+  width: 20px;
+  height: 20px;
+
+  border: 2px solid #dfe3e8;
+
+  border-top-color: #00a0fd;
+
+  border-radius: 50%;
+
+  animation: homeSpin 0.8s linear infinite;
+}
+
+
+/* =========================================================
+   MOBILE
+   ONE IMAGE
+========================================================= */
+
+@media (max-width: 767px) {
+
+  .banner-wrapper {
+    width: 100%;
+  }
+
+  .banner-item {
+    display: none;
+
+    width: 100%;
+    min-width: 100%;
+
+    aspect-ratio: 16 / 7;
+  }
+
+}
+
+
+/* =========================================================
+   DESKTOP
+   THREE IMAGES
+========================================================= */
+
+@media (min-width: 768px) {
+
+  .banner-wrapper {
+    display: flex;
+    width: 100%;
+  }
+
+  .banner-item {
+    display: block;
+
+    flex: 1;
+
+    min-width: 0;
+
+    aspect-ratio: 16 / 7;
+  }
+
+}
+
+
+/* =========================================================
+   SPINNER ANIMATION
+========================================================= */
+
+@keyframes homeSpin {
+
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+
+}
+
+
+/* =========================================================
+   2. ANNOUNCEMENT
+========================================================= */
 
 .container-h2 {
   display: flex;
   align-items: center;
-  margin: 0 auto;
+  margin: 10px auto;
   max-width: 100%;
   height: 30px;
   background: #ffffff;
   border-radius: 15px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   padding: 0 10px;
 }
 
+
+/* Volume Icon */
+
 .container-h3 {
   flex-shrink: 0;
-  font-size: 18px;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-right: 8px;
+  color: #1976d2;
 }
+
+.volume-icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+
+/* Marquee Area */
 
 .container-h4 {
   flex: 1;
@@ -44,8 +348,12 @@
   align-items: center;
 }
 
+
+/* Marquee Text */
+
 .container-h5 {
   position: absolute;
+  left: 0;
   white-space: nowrap;
   transform: translateX(100%);
   font-size: 12px;
@@ -54,10 +362,18 @@
   color: #7b0101;
 }
 
+
+/* =========================================================
+   3. PRODUCT AREA
+========================================================= */
+
 .container-h6 {
   margin-top: 10px;
   width: 100%;
 }
+
+
+/* Product Images */
 
 .container-h7 {
   display: flex;
@@ -66,10 +382,13 @@
   margin-top: 10px;
 }
 
+
+/* Product Item */
+
 .ad-item {
   flex: 1;
   max-width: 24%;
-  aspect-ratio: 1;               
+  aspect-ratio: 1;
   background-color: #f0f0f0;
   border-radius: 5px;
   overflow: hidden;
@@ -79,21 +398,89 @@
   cursor: pointer;
 }
 
+
+/* Product Image */
+
 .ad-item img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
+
+
+/* =========================================================
+   4. PRODUCT LOADING
+========================================================= */
+
+.product-loading {
+  width: 100%;
+  height: 100%;
+  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #9ca3af;
+  font-size: 10px;
+}
+
+
+/* Product Spinner */
+
+.product-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #dfe3e8;
+  border-top-color: #00a0fd;
+  border-radius: 50%;
+  animation: homeSpin 0.8s linear infinite;
+}
+
+
+/* Product Error */
+
+.product-error {
+  width: 100%;
+  height: 100%;
+  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  color: #9ca3af;
+  font-size: 9px;
+  text-align: center;
+}
+
+
+/* Error Icon */
+
+.product-error-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #d1d5db;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+
+/* =========================================================
+   5. CATEGORY BUTTONS
+========================================================= */
 
 .container-h8 {
   display: flex;
   width: 100%;
 }
 
-.container-h9.active {
-  background-color: #00a0fd;
-  color: #ffffff;
-}
 
 .container-h9 {
   flex: 1;
@@ -102,33 +489,76 @@
   border: 1px solid #ffffff;
   border-radius: 0;
   background-color: #ecebeb;
-  color: #333;
+  color: #333333;
   cursor: pointer;
   padding: 8px 9px;
   font-size: 10px;
-  transition: 0.2s;
+  transition: background-color 0.2s,
+              color 0.2s;
 }
+
 
 .container-h9 + .container-h9 {
   border-left: none;
 }
 
+
+/* Active */
+
+.container-h9.active {
+  background-color: #00a0fd;
+  color: #ffffff;
+}
+
+
+/* Hover */
+
 .container-h9:not(.active):hover {
   background-color: #bdbdbd;
 }
 
+
+/* =========================================================
+   6. HIDDEN
+========================================================= */
+
 .hidden {
-  display: none;
+  display: none !important;
 }
+
+
+/* =========================================================
+   7. RANKING
+========================================================= */
 
 .rank-section {
   margin-top: 13px;
 }
 
+
+/* Ranking Title */
+
 .rank-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
   font-size: 15px;
-  margin-bottom: 10px;
+  margin: 0 0 10px 0;
 }
+
+
+/* Ranking SVG */
+
+.ranking-icon {
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
+  color: #f5b301;
+  display: block;
+}
+
+
+/* Ranking List */
 
 .rank-list {
   list-style: none;
@@ -136,27 +566,51 @@
   margin: 0;
 }
 
+
+/* Ranking Item */
+
 .rank-list li {
   display: flex;
   align-items: center;
-  background: #fff;
+  background: #ffffff;
   margin-bottom: 6px;
   padding: 8px 12px;
   border-radius: 20px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
   justify-content: space-between;
   font-size: 14px;
 }
 
+
+/* Ranking Number */
+
 .rank-num {
   background: #1976d2;
-  color: #fff;
+  color: #ffffff;
   font-weight: bold;
   border-radius: 50%;
   width: 22px;
   height: 22px;
+  min-width: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-right: 8px;
+}
+
+
+/* =========================================================
+   8. ANIMATIONS
+========================================================= */
+
+@keyframes homeSpin {
+
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+
 }
