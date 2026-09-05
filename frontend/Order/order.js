@@ -712,70 +712,186 @@ document.getElementById("autoOrderBtn").addEventListener("click", function() {
   setTimeout(() => setMatchingState(false), 5000);
 });
 
+document.addEventListener("DOMContentLoaded",()=>{
+
+
 const historyModal = document.getElementById("historyModal");
 const rulesModal = document.getElementById("rulesModal");
 
-document.querySelector(".left-box").addEventListener("click", async () => {
-  const listEl = document.getElementById("orderHistoryList");
-  listEl.innerHTML = "<li>loading...</li>";
 
-  if (window.supabaseClient && window.currentUserId) {
-    const { data: orders, error, count } = await supabaseClient
-      .from("orders")
-      .select(`
-        id,
-        total_price,
-        profit,
-        status,
-        created_at,
-        products(name, url, description, profit)
-      `, { count: "exact" })
-      .eq("user_id", window.currentUserId)
-      .order("created_at", { ascending: false });
+const historyBtn = document.querySelector(".left-box");
+const rulesBtn = document.querySelector(".right-box");
 
-    const headerH3 = document.querySelector("#historyModal .modal-header h3");
-    if (headerH3) headerH3.textContent = `All: ${count || 0}`;
 
-    if (!error && orders?.length) {
-      listEl.innerHTML = orders.map(o => {
-        const img = o.products?.url ? `<img src="${o.products.url}" alt="${o.products.name}" width="50" style="margin-right:5px;">` : "";
-        const time = o.created_at ? `<div>Time：${new Date(o.created_at).toLocaleString()}</div>` : "";
-        return `
-          <li>
-            ${img}
-            <div style="font-weight:700; font-size:25px;">
-              ${o.products?.name || 'Unknown product'}
-            </div>
-            <div style="text-align:left; border-top:1px solid #ccc; border-bottom:1px solid #ccc; padding:10px 0; margin:5px 0;">
-              ${o.products?.description || 'No description yet'}
-            </div>
-            <div>Price：$${Number(o.total_price).toFixed(2)}</div>
-            <div>Profit：${Number(o.products?.profit || 0)}</div>
-            <div>Income：+$${Number(o.profit).toFixed(2)}</div>
-            <div>State：${o.status === "completed" ? "✅ Completed" : "⏳To be completed"}</div>
-            ${time}
-          </li>
-        `;
-      }).join("");
-    } else {
-      listEl.innerHTML = "<li>No orders yet!</li>";
-    }
-  }
 
-  historyModal.style.display = "block";
+// =====================
+// History 按钮
+// =====================
+
+if(historyBtn){
+
+historyBtn.addEventListener("click", async()=>{
+
+
+const listEl=document.getElementById("orderHistoryList");
+
+listEl.innerHTML="<li>Loading...</li>";
+
+
+
+const {data:orders,error,count}=await supabaseClient
+.from("orders")
+.select(`
+id,
+total_price,
+profit,
+status,
+created_at,
+products(
+name,
+url,
+description,
+profit
+)
+`,
+{
+count:"exact"
+})
+.eq("user_id",window.currentUserId)
+.order("created_at",{ascending:false});
+
+
+
+const title=document.querySelector("#historyModal h3");
+
+if(title){
+title.textContent=`All: ${count||0}`;
+}
+
+
+
+if(error){
+
+listEl.innerHTML="<li>Load failed</li>";
+
+}
+
+else if(orders && orders.length){
+
+
+listEl.innerHTML=orders.map(o=>{
+
+
+return `
+
+<li>
+
+
+<img src="${o.products?.url || ''}" width="60">
+
+
+<div>
+<b>
+${o.products?.name || "Unknown"}
+</b>
+</div>
+
+
+<div>
+Price:
+$${Number(o.total_price).toFixed(2)}
+</div>
+
+
+<div>
+Profit:
+${o.products?.profit || 0}
+</div>
+
+
+<div>
+Income:
++$${Number(o.profit).toFixed(2)}
+</div>
+
+
+<div>
+Status:
+${o.status}
+</div>
+
+
+</li>
+
+
+`;
+
+}).join("");
+
+}
+
+else{
+
+listEl.innerHTML="<li>No orders</li>";
+
+}
+
+
+
+historyModal.style.display="flex";
+
+
 });
 
-document.querySelector(".right-box").addEventListener("click", () => {
-  rulesModal.style.display = "block";
+
+}
+
+
+
+// =====================
+// ℹ️ Rules按钮
+// =====================
+
+
+if(rulesBtn){
+
+rulesBtn.addEventListener("click",()=>{
+
+
+rulesModal.style.display="flex";
+
+
 });
 
-document.getElementById("closeHistoryBtn")?.addEventListener("click", () => {
-  historyModal.style.display = "none";
+
+}
+
+
+
+// =====================
+// 关闭 History
+// =====================
+
+document.getElementById("closeHistoryBtn")
+?.addEventListener("click",()=>{
+
+historyModal.style.display="none";
+
 });
-document.getElementById("closeRulesBtn")?.addEventListener("click", () => {
-  rulesModal.style.display = "none";
+
+
+
+// =====================
+// 关闭 Rules
+// =====================
+
+document.getElementById("closeRulesBtn")
+?.addEventListener("click",()=>{
+
+rulesModal.style.display="none";
+
 });
-window.addEventListener("click", (e) => {
-  if (e.target === historyModal) historyModal.style.display = "none";
-  if (e.target === rulesModal) rulesModal.style.display = "none";
+
+
+
 });
