@@ -1,393 +1,568 @@
-.about-top-banner {
-  width: 100%;
-  height: 20vh;
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.about-top-banner img:hover {
-  transform: scale(1.05);
-  filter: brightness(1);
-}
-
-.about-container {
-  max-width: 900px;
-  margin: 0 auto 80px auto;
-  background: #ffffffee;
-  border-radius: 20px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  overflow: hidden;
-  animation: fadeUp 0.8s ease;
-  backdrop-filter: blur(6px);
-}
-
-.about-image {
-  margin-bottom: 25px;
-}
-
-.about-image img {
-  width: 100%;
-  height: auto;
-  display: block;
-  object-fit: cover;
-  border-bottom: 2px solid rgba(0, 0, 0, 0.05);
-  transition: transform 0.3s ease;
-}
-
-.about-image img:hover {
-  transform: scale(1.02);
-}
-
-.about-text {
-  padding: 35px 45px;
-  text-align: center;
-}
-
-.about-text h2 {
-  font-size: 28px;
-  font-weight: 700;
-  color: #001F3F;
-  margin-bottom: 18px;
-  letter-spacing: 1px;
-}
-
-.about-text p {
-  font-size: 16px;
-  color: #444;
-  line-height: 1.8;
-  text-align: justify;
-  text-justify: inter-word;
-}
-
-@keyframes fadeUp {
-  from { transform: translateY(30px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
+/* =========================================================
+   CUSTOMER SERVICE
+   ========================================================= */
 
 :root {
   --primary-blue: #4e9cff;
   --primary-blue-dark: #3d8ce6;
-  --telegram-grad-a: #2aabee;
-  --telegram-grad-b: #229ed9;
-  --support-grad-a: #ff7b00;
-  --support-grad-b: #ff9a3d;
+
   --card-bg: #f8f8f8;
   --muted: #e0e0e0;
+
   --text-dark: #333;
 }
 
-#chatWindow {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 90%;
-  height: 500px;
-  background-color: var(--card-bg);
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  display: none;
-  flex-direction: column;
-  overflow: hidden;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
-  z-index: 1000;
-  font-family: "Helvetica", Arial, sans-serif;
-}
 
-.chat-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background-color: var(--primary-blue);
-  color: white;
-  padding: 14px 12px;
-  font-weight: 700;
-  font-size: 15px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-}
-.chat-header button {
-  background: transparent;
-  border: none;
-  color: white;
-  cursor: pointer;
-  font-size: 16px;
-  padding: 0 6px;
-}
+/* =========================================================
+   CUSTOMER SERVICE BUTTON
+   ========================================================= */
 
-#chatMessages {
-  flex: 1 1 auto;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  gap: 8px;
-  background-color: #f0f0f0;
-}
-#chatMessages::-webkit-scrollbar {
-  width: 6px;
-}
-#chatMessages::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.18);
-  border-radius: 3px;
-}
-
-.message-item {
-  max-width: 70%;
-  padding: 8px 12px;
-  border-radius: 16px;
-  word-wrap: break-word;
-  font-size: 14px;
-  line-height: 1.4;
-}
-.message-item.me {
-  background-color: var(--primary-blue);
-  color: #fff;
-  align-self: flex-end;
-}
-.message-item.bot {
-  background-color: var(--muted);
-  color: var(--text-dark);
-  align-self: flex-start;
-}
-
-.chat-input {
-  display: flex;
-  gap: 8px;
-  padding: 8px;
-  border-top: 1px solid #ddd;
-  background-color: #fafafa;
-  align-items: flex-end;
-}
-.chat-input textarea {
-  flex: 1;
-  padding: 8px 12px;
-  border-radius: 20px;
-  border: 1px solid #ccc;
-  outline: none;
-  font-size: 14px;
-  background: white;
-  resize: none;
-  min-height: 40px;
-  max-height: 120px;
-  overflow-y: auto;
-}
-.chat-input button {
-  padding: 8px 12px;
-  border-radius: 20px;
-  border: none;
-  background-color: var(--primary-blue);
-  color: white;
-  cursor: pointer;
-  font-weight: 700;
-  transition: background 0.2s, transform 0.06s;
-}
-.chat-input button:hover { background-color: var(--primary-blue-dark); }
-.chat-input button:active { transform: scale(0.98); }
-
-.telegram-box,
 #openChatBtn {
+  position: relative;
+
   display: flex;
   align-items: center;
+
   width: 100%;
+  box-sizing: border-box;
+
   padding: 12px 16px;
   margin: 10px 0;
-  border-radius: 12px;
-  box-sizing: border-box;
+
   gap: 12px;
-  font-weight: 600;
-  font-size: 14px;
+
+  border-radius: 12px;
+  border: none;
+
+  background: linear-gradient(
+    135deg,
+    #0071ff,
+    #077eff
+  );
+
   color: white;
+
+  font-size: 14px;
+  font-weight: 600;
+
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.2s ease;
-  position: relative;
+
+  box-shadow:
+    0 2px 8px rgba(255, 123, 0, 0.18);
+
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
 }
-.telegram-box {
-  background: linear-gradient(135deg, var(--telegram-grad-a), var(--telegram-grad-b));
-  box-shadow: 0 2px 8px rgba(34, 158, 217, 0.18);
-}
-.telegram-box:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(34, 158, 217, 0.24);
-}
-#openChatBtn {
-  background: linear-gradient(135deg, #0071ff, #077eff);
-  box-shadow: 0 2px 8px rgba(255, 123, 0, 0.18);
-}
+
+
 #openChatBtn:hover {
+
   transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(255, 123, 0, 0.26);
+
+  box-shadow:
+    0 6px 14px rgba(255, 123, 0, 0.26);
+
 }
-.telegram-box img,
+
+
+/* Customer Service image */
+
 #openChatBtn img {
+
   width: 46px;
   height: 46px;
+
   border-radius: 6px;
+
   object-fit: cover;
+
+  flex-shrink: 0;
+
+}
+
+
+/* =========================================================
+   CHAT WINDOW
+   ========================================================= */
+
+#chatWindow {
+
+  position: fixed;
+
+  top: 50%;
+  left: 50%;
+
+  transform:
+    translate(-50%, -50%);
+
+  width: 90%;
+  height: 500px;
+
+  display: none;
+
+  flex-direction: column;
+
+  background-color: var(--card-bg);
+
+  border: 1px solid #ddd;
+
+  border-radius: 12px;
+
+  overflow: hidden;
+
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.18);
+
+  z-index: 1000;
+
+  font-family:
+    "Helvetica",
+    Arial,
+    sans-serif;
+}
+
+
+/* =========================================================
+   CHAT HEADER
+   ========================================================= */
+
+.chat-header {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 52px;
+  padding: 0 16px;
+
+  background-color: var(--primary-blue);
+  color: white;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+
   flex-shrink: 0;
 }
-.telegram-info {
+
+
+/* Back button */
+
+.chat-header button {
+  position: absolute;
+  left: 12px;
+
+  width: 36px;
+  height: 36px;
+
   display: flex;
-  flex-direction: row;
   align-items: center;
-  gap: 8px;
-  flex: 1;
-  justify-content: flex-start;
-}
-.telegram-info p {
-  font-size: 13px;
-  font-weight: 600;
-  margin: 0;
-  color: #fff;
-}
-#copyTelegramBtn {
-  padding: 4px 10px;
+  justify-content: center;
+
+  padding: 0;
+
   border: none;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+
+  background: transparent;
+
   color: white;
+
   cursor: pointer;
-  font-size: 12px;
-  transition: background 0.18s, transform 0.06s;
+
+  transition:
+    background 0.2s ease,
+    transform 0.15s ease;
 }
-#copyTelegramBtn:hover { background: rgba(255, 255, 255, 0.28); }
-#copyTelegramBtn:active { transform: scale(0.97); }
+
+
+.chat-header button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+
+.chat-header button:active {
+  transform: scale(0.92);
+}
+
+
+/* Back SVG */
+
+.chat-header button svg {
+  width: 22px;
+  height: 22px;
+
+  display: block;
+}
+
+
+/* Header title */
+
+.chat-header-title {
+  font-size: 15px;
+  font-weight: 700;
+
+  line-height: 1;
+
+  text-align: center;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   CHAT MESSAGES
+   ========================================================= */
+
+#chatMessages {
+
+  flex: 1 1 auto;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+
+  padding: 10px;
+
+  overflow-y: auto;
+
+  background-color: #f0f0f0;
+}
+
+
+/* Scrollbar */
+
+#chatMessages::-webkit-scrollbar {
+
+  width: 6px;
+
+}
+
+
+#chatMessages::-webkit-scrollbar-thumb {
+
+  background:
+    rgba(0, 0, 0, 0.18);
+
+  border-radius: 3px;
+
+}
+
+
+/* =========================================================
+   MESSAGE BUBBLE
+   ========================================================= */
+
+.message-item {
+
+  max-width: 70%;
+
+  padding: 8px 12px;
+
+  border-radius: 16px;
+
+  word-wrap: break-word;
+
+  overflow-wrap: anywhere;
+
+  white-space: pre-wrap;
+
+  font-size: 14px;
+
+  line-height: 1.4;
+
+}
+
+
+/* My message */
+
+.message-item.me {
+
+  align-self: flex-end;
+
+  background-color:
+    var(--primary-blue);
+
+  color: white;
+
+}
+
+
+/* Customer Service message */
+
+.message-item.bot {
+
+  align-self: flex-start;
+
+  background-color:
+    var(--muted);
+
+  color:
+    var(--text-dark);
+
+}
+
+
+/* =========================================================
+   CHAT INPUT
+   ========================================================= */
+
+.chat-input {
+
+  display: flex;
+
+  align-items: flex-end;
+
+  gap: 8px;
+
+  padding: 8px;
+
+  border-top:
+    1px solid #ddd;
+
+  background-color: #fafafa;
+
+}
+
+
+/* Textarea */
+
+.chat-input textarea {
+
+  flex: 1;
+
+  min-height: 40px;
+  max-height: 120px;
+
+  padding: 8px 12px;
+
+  border: 1px solid #ccc;
+
+  border-radius: 20px;
+
+  outline: none;
+
+  background: white;
+
+  resize: none;
+
+  overflow-y: auto;
+
+  font-size: 14px;
+
+}
+
+
+/* Send button */
+
+.chat-input button {
+
+  padding: 8px 12px;
+
+  border: none;
+
+  border-radius: 20px;
+
+  background-color:
+    var(--primary-blue);
+
+  color: white;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s,
+    transform 0.06s;
+
+}
+
+
+.chat-input button:hover {
+
+  background-color:
+    var(--primary-blue-dark);
+
+}
+
+
+.chat-input button:active {
+
+  transform: scale(0.98);
+
+}
+
+
+/* =========================================================
+   UNREAD DOT
+   ========================================================= */
 
 .unread-dot {
+
   position: absolute;
+
   top: -6px;
   right: -6px;
-  background: red;
-  color: white;
+
+  display: none;
+
+  padding: 2px 6px;
+
   border-radius: 50%;
-  padding: 2px 6px;
-  font-size: 12px;
-  line-height: 1;
-  display: none;
-  pointer-events: none;
-  animation: pulse 1.2s infinite;
-}
-.unread-dot.show {
-  display: inline-block;
-}
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.3); }
-}
 
-.bottom-nav button {
-  position: relative;
-  z-index: 1;
-}
-#bottomUnreadCount {
-  position: absolute;
-  top: 8px;
-  right: 16px;
-  transform: translateY(-50%);
   background: red;
-  color: #fff;
-  border-radius: 999px;
-  padding: 2px 6px;
-  font-size: 11px;
+
+  color: white;
+
+  font-size: 12px;
+
   line-height: 1;
-  display: none;
+
   pointer-events: none;
-  z-index: 9999;
-  animation: pulse 1.2s infinite;
+
 }
 
-@media screen and (max-width: 768px) {
-  .about-top-banner { height: 18vh; margin-bottom: 40px; }
-  .about-container { margin: 0 15px 60px 15px; }
-  .about-text { padding: 25px 20px; }
-  .about-text h2 { font-size: 24px; }
-  .about-text p { font-size: 14px; }
+
+.unread-dot.show {
+
+  display: inline-block;
+
+  animation:
+    pulse 1.2s infinite;
+
 }
 
-@media screen and (max-width: 480px) {
-  .about-top-banner { height: 16vh; margin-bottom: 30px; }
-  .about-container { margin: 20px 0px 20px 0px; }
-  .about-text { padding: 0px 12px; }
-  .about-text h2 { font-size: 20px; }
-  .about-text p { font-size: 13px; }
-}
 
-@media screen and (max-width: 420px) {
-  #chatWindow { width: 90%; height: 500px; }
-  .telegram-box,
-  #openChatBtn { padding: 10px; }
-}
+/* =========================================================
+   BOTTOM NAV UNREAD DOT
+   ========================================================= */
 
 button[data-page="msgPage"] {
+
   position: relative;
+
+  z-index: 1;
+
 }
 
-.bottom-unread-dot.show {
-  display: block;
-  animation: popIn 0.3s ease-out, pulse 1.5s infinite ease-in-out;
-}
-
-@keyframes popIn {
-  0% {
-    transform: scale(0);
-    opacity: 0;
-  }
-  70% {
-    transform: scale(1.2);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.3);
-    opacity: 0.85;
-  }
-}
-
-button[data-page="msgPage"] {
-  position: relative;
-}
 
 .bottom-unread-dot {
+
   position: absolute;
+
   top: 10px;
+
   width: 17px;
   height: 16px;
-  background-color: red;
-  border-radius: 50%;
+
   display: none;
+
+  border-radius: 50%;
+
+  background-color: red;
+
+  color: white;
+
   font-size: 10px;
-  color: #fff;
+
   text-align: center;
+
   line-height: 15px;
+
   pointer-events: none;
+
   z-index: 10;
+
 }
+
 
 .bottom-unread-dot.show {
+
   display: block;
-  animation: pulse 1.5s infinite ease-in-out;
+
+  animation:
+    popIn 0.3s ease-out,
+    pulse 1.5s infinite ease-in-out;
+
 }
 
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
+
+/* =========================================================
+   ANIMATIONS
+   ========================================================= */
+
+@keyframes popIn {
+
+  0% {
+
+    transform: scale(0);
+
+    opacity: 0;
+
+  }
+
+  70% {
+
+    transform: scale(1.2);
+
     opacity: 1;
+
   }
+
+  100% {
+
+    transform: scale(1);
+
+    opacity: 1;
+
+  }
+
+}
+
+
+@keyframes pulse {
+
+  0%,
+  100% {
+
+    transform: scale(1);
+
+    opacity: 1;
+
+  }
+
   50% {
+
     transform: scale(1.3);
+
     opacity: 0.85;
+
   }
+
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media screen and (max-width: 420px) {
+
+  #chatWindow {
+
+    width: 90%;
+
+    height: 500px;
+
+  }
+
+
+  #openChatBtn {
+
+    padding: 10px;
+
+  }
+
 }
