@@ -546,9 +546,9 @@ button[data-page="msgPage"] {
 
   #chatWindow {
 
-    width: 90%;
+    width: 100%;
 
-    height: 500px;
+    height: 100%;
 
   }
 
