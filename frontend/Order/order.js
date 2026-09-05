@@ -718,13 +718,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     historyBtn.onclick = async () => {
 
-      historyModal.style.display = "flex";
+    historyModal.style.display="flex";
 
-      const listEl = document.getElementById("orderHistoryList");
-
-      if(listEl){
-        listEl.innerHTML = "<li>Loading...</li>";
-      }
+    await loadHistoryOrders();
 
     };
 
@@ -772,3 +768,181 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 });
+
+async function loadHistoryOrders(){
+
+  const listEl = document.getElementById("orderHistoryList");
+
+  if(!listEl) return;
+
+
+  listEl.innerHTML = "<li>Loading...</li>";
+
+
+  try{
+
+    const {data:orders,error}=await supabaseClient
+      .from("orders")
+      .select(`
+        id,
+        total_price,
+        profit,
+        status,
+        created_at,
+        products(
+          name,
+          profit,
+          url
+        )
+      `)
+      .eq("user_id",window.currentUserId)
+      .order("created_at",{ascending:false})
+      .limit(50);
+
+
+
+    if(error) throw error;
+
+
+
+    if(!orders || orders.length===0){
+
+      listEl.innerHTML="<li>No orders yet!</li>";
+      return;
+
+    }
+
+
+
+    listEl.innerHTML = orders.map(o => {
+
+
+      return `
+
+      <li class="history-item" 
+          style="
+          display:flex;
+          align-items:center;
+          gap:20px;
+          padding:15px;
+          border-bottom:1px solid #ddd;
+          ">
+
+
+        <!-- 商品图片 -->
+        <div class="history-image">
+
+          ${
+            o.products?.url
+            ?
+            `
+            <img 
+              src="${o.products.url}"
+              alt="${o.products?.name || ''}"
+              style="
+                width:80px;
+                height:80px;
+                object-fit:cover;
+                border-radius:12px;
+              "
+            >
+            `
+            :
+            `
+            <div
+              style="
+              width:80px;
+              height:80px;
+              background:#eee;
+              border-radius:12px;
+              display:flex;
+              align-items:center;
+              justify-content:center;
+              "
+            >
+            🛒
+            </div>
+            `
+          }
+
+        </div>
+
+
+
+        <!-- 订单信息 -->
+        <div class="history-info">
+
+
+          <div style="font-weight:bold;font-size:16px;">
+            🛒 ${o.products?.name || "Unknown"}
+          </div>
+
+
+
+          <div>
+            Price:
+            $${Number(o.total_price || 0).toFixed(2)}
+          </div>
+
+
+
+          <div>
+            Profit:
+            ${o.products?.profit || 0}
+          </div>
+
+
+
+          <div>
+            Income:
+            +$${Number(o.profit || 0).toFixed(2)}
+          </div>
+
+
+
+          <div>
+            Status:
+            ${
+              o.status==="completed"
+              ?
+              "✅ Completed"
+              :
+              "⏳ Pending"
+            }
+          </div>
+
+
+
+          <small style="color:#888;">
+            ${new Date(o.created_at).toLocaleString()}
+          </small>
+
+
+
+        </div>
+
+
+
+      </li>
+
+      `;
+
+
+    }).join("");
+
+
+
+  }catch(e){
+
+    console.error(
+      "History loading failed:",
+      e
+    );
+
+
+    listEl.innerHTML=
+    "<li>Failed loading history</li>";
+
+  }
+
+}
