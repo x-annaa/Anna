@@ -1,17 +1,61 @@
-const buttons = document.querySelectorAll(".bottom-nav button");
-const pages = document.querySelectorAll(".page");
+document.addEventListener("DOMContentLoaded", () => {
 
-buttons.forEach(btn => {
-  btn.addEventListener("click", () => {
- 
-    buttons.forEach(b => b.classList.remove("active"));
+  const pages =
+    document.querySelectorAll(".page");
 
-    btn.classList.add("active");
+  const navButtons =
+    document.querySelectorAll("#Menu-button .nav-button");
 
-    const pageId = btn.dataset.page;
- 
-    pages.forEach(p => p.classList.remove("active"));
-  
-    document.getElementById(pageId).classList.add("active");
+
+  function showPage(pageId) {
+
+    // Hide all pages
+    pages.forEach(page => {
+      page.classList.remove("active");
+    });
+
+
+    // Show target page
+    const target =
+      document.getElementById(pageId);
+
+    if (target) {
+      target.classList.add("active");
+    }
+
+
+    // Update active navigation button
+    navButtons.forEach(button => {
+
+      button.classList.remove("active");
+
+      if (button.dataset.page === pageId) {
+        button.classList.add("active");
+      }
+
+    });
+
+  }
+
+
+  // Navigation click
+  navButtons.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+      const pageId =
+        button.dataset.page;
+
+      if (!pageId) return;
+
+      showPage(pageId);
+
+    });
+
   });
+
+
+  // Make sure Home is active on startup
+  showPage("homePage");
+
 });
