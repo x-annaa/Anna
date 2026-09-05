@@ -3,89 +3,456 @@
 <head>
   <meta charset="UTF-8" />
   <title>U9</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  />
+
   <link rel="stylesheet" href="index.css" />
+  <link rel="stylesheet" href="body.css" />
 
   <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- SupabaseClien -->
+
+  <!-- Supabase Client -->
   <script src="supabaseClient.js"></script>
 </head>
-<body>
-  <div class="container">
-    <h1 class="title">Welcome</h1>
-    <p class="desc">Please register or login below</p>
 
-    <!-- Tab -->
-    <div class="tab-container">
-      <button id="showLogin" class="tab-btn active">Login</button>
-      <button id="showRegister" class="tab-btn">Register</button>
+<body>
+
+  <!-- ==================== BACKGROUND ANIMATION ==================== -->
+
+  <div class="background-animation" aria-hidden="true">
+
+    <!-- Large glowing blobs -->
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+    <div class="bg-orb bg-orb-3"></div>
+
+    <!-- Moving light waves -->
+    <div class="bg-wave bg-wave-1"></div>
+    <div class="bg-wave bg-wave-2"></div>
+
+    <!-- Floating particles -->
+    <div class="particles">
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
     </div>
 
-    <!-- login -->
+  </div>
+
+  
+  <div class="container">
+
+    <h1 class="title">Unine</h1>
+    <p class="desc">Authentication</p>
+
+
+    <!-- ==================== TAB ==================== -->
+
+    <div class="tab-container">
+      <button id="showLogin" class="tab-btn active">
+        Login
+      </button>
+
+      <button id="showRegister" class="tab-btn">
+        Register
+      </button>
+    </div>
+
+
+    <!-- ==================== LOGIN ==================== -->
+
     <div id="loginForm" class="form-container">
-      <div class="field">
-        <input type="text" id="loginUsername" placeholder="Username" autocomplete="username" />
+
+      <!-- Username -->
+      <div class="field input-with-icon">
+
+        <svg
+          class="input-icon"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="8" r="4"></circle>
+
+          <path
+            d="M4 21c0-4 3.5-7 8-7s8 3 8 7"
+          ></path>
+        </svg>
+
+        <input
+          type="text"
+          id="loginUsername"
+          placeholder="Username"
+          autocomplete="username"
+        />
+
       </div>
 
-      <div class="field password-wrapper">
-        <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" />
-        <button type="button" class="toggle-password" data-target="loginPassword" aria-label="toggle password">👁️</button>
+
+      <!-- Password -->
+      <div class="field password-wrapper input-with-icon">
+
+        <svg
+          class="input-icon"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <rect
+            x="5"
+            y="10"
+            width="14"
+            height="10"
+            rx="2"
+          ></rect>
+
+          <path
+            d="M8 10V7a4 4 0 018 0v3"
+          ></path>
+        </svg>
+
+
+        <input
+          type="password"
+          id="loginPassword"
+          placeholder="Password"
+          autocomplete="current-password"
+        />
+
+
+        <!-- Eye -->
+        <button
+          type="button"
+          class="toggle-password"
+          data-target="loginPassword"
+          aria-label="Show password"
+        >
+
+          <svg
+            class="eye-icon"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+
+            <path
+              d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"
+            ></path>
+
+            <circle
+              cx="12"
+              cy="12"
+              r="3"
+            ></circle>
+
+          </svg>
+
+        </button>
+
       </div>
+
 
       <div id="loginMsg" class="form-msg"></div>
-      <button id="loginBtn" class="primary-btn">Login</button>
+
+      <button id="loginBtn" class="primary-btn">
+        Login
+      </button>
+
     </div>
 
-    <!-- register -->
+
+    <!-- ==================== REGISTER ==================== -->
+
     <div id="registerForm" class="form-container hidden">
-      <div class="field">
-        <input type="text" id="regUsername" placeholder="Username" autocomplete="username" />
+
+      <!-- Username -->
+      <div class="field input-with-icon">
+
+        <svg
+          class="input-icon"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+
+          <circle
+            cx="12"
+            cy="8"
+            r="4"
+          ></circle>
+
+          <path
+            d="M4 21c0-4 3.5-7 8-7s8 3 8 7"
+          ></path>
+
+        </svg>
+
+
+        <input
+          type="text"
+          id="regUsername"
+          placeholder="Username"
+          autocomplete="username"
+        />
+
       </div>
 
-      <div class="field password-wrapper">
-        <input type="password" id="regPassword" placeholder="Password" autocomplete="new-password" />
-        <button type="button" class="toggle-password" data-target="regPassword" aria-label="toggle password">👁️</button>
+
+      <!-- Password -->
+      <div class="field password-wrapper input-with-icon">
+
+        <svg
+          class="input-icon"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+
+          <rect
+            x="5"
+            y="10"
+            width="14"
+            height="10"
+            rx="2"
+          ></rect>
+
+          <path
+            d="M8 10V7a4 4 0 018 0v3"
+          ></path>
+
+        </svg>
+
+
+        <input
+          type="password"
+          id="regPassword"
+          placeholder="Password"
+          autocomplete="new-password"
+        />
+
+
+        <!-- Eye -->
+        <button
+          type="button"
+          class="toggle-password"
+          data-target="regPassword"
+          aria-label="Show password"
+        >
+
+          <svg
+            class="eye-icon"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+
+            <path
+              d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"
+            ></path>
+
+            <circle
+              cx="12"
+              cy="12"
+              r="3"
+            ></circle>
+
+          </svg>
+
+        </button>
+
       </div>
 
-      <div class="field password-wrapper">
-        <input type="password" id="regConfirmPassword" placeholder="Confirm Password" autocomplete="new-password" />
-        <button type="button" class="toggle-password" data-target="regConfirmPassword" aria-label="toggle password">👁️</button>
+
+      <!-- Confirm Password -->
+      <div class="field password-wrapper input-with-icon">
+
+        <svg
+          class="input-icon"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+
+          <rect
+            x="5"
+            y="10"
+            width="14"
+            height="10"
+            rx="2"
+          ></rect>
+
+          <path
+            d="M8 10V7a4 4 0 018 0v3"
+          ></path>
+
+        </svg>
+
+
+        <input
+          type="password"
+          id="regConfirmPassword"
+          placeholder="Confirm Password"
+          autocomplete="new-password"
+        />
+
+
+        <!-- Eye -->
+        <button
+          type="button"
+          class="toggle-password"
+          data-target="regConfirmPassword"
+          aria-label="Show password"
+        >
+
+          <svg
+            class="eye-icon"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+
+            <path
+              d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"
+            ></path>
+
+            <circle
+              cx="12"
+              cy="12"
+              r="3"
+            ></circle>
+
+          </svg>
+
+        </button>
+
       </div>
 
-      <label class="agreement">
-        <input type="checkbox" id="agreeTerms" />
-        <span>I agree to the terms</span>
-      </label>
+      <div
+        id="registerMsg"
+        class="form-msg"
+      ></div>
 
-      <div id="registerMsg" class="form-msg"></div>
-      <button id="registerBtn" class="primary-btn">Register</button>
+
+      <button
+        id="registerBtn"
+        class="primary-btn"
+      >
+        Register
+      </button>
+
     </div>
+
+
+    <!-- ==================== TELEGRAM ==================== -->
 
     <div class="telegram-section">
-      <button id="openTelegramPopup" class="telegram-btn">Telegram</button>
+
+      <button
+        id="openTelegramPopup"
+        class="telegram-btn"
+      >
+        Telegram
+      </button>
+
     </div>
+
   </div>
 
-  <div id="customAlert" class="alert-overlay" style="display:none;">
+
+  <!-- ==================== CUSTOM ALERT ==================== -->
+
+  <div
+    id="customAlert"
+    class="alert-overlay"
+    style="display:none;"
+  >
+
     <div class="alert-box">
+
       <p id="alertText"></p>
-      <button id="alertOk">OK</button>
+
+      <button id="alertOk">
+        OK
+      </button>
+
     </div>
+
   </div>
 
-  <div id="telegramPopup" class="popup-overlay" style="display:none;">
+
+  <!-- ==================== TELEGRAM POPUP ==================== -->
+
+  <div
+    id="telegramPopup"
+    class="popup-overlay"
+    style="display:none;"
+  >
+
     <div class="popup-box">
-      <h2>Contact us on Telegram</h2>
-      <p class="telegram-account">@U9support</p>
-      <button id="copyTelegramBtn" class="copy-btn">Copy</button>
-      <div class="qr-container">
-        <img src="https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Photos/Layer%201.jpg" alt="Telegram QR Code" class="telegram-qr" />
+
+      <h2>
+        Contact us on Telegram
+      </h2>
+
+
+      <p class="telegram-account">
+        @U9support
+      </p>
+
+
+      <button
+        id="copyTelegramBtn"
+        class="copy-btn"
+      >
+        Copy
+      </button>
+
+
+    <div class="qr-container">
+
+      <!-- QR Code -->
+      <img
+        src="https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Photos/Layer%201.jpg"
+        alt="Telegram QR Code"
+        class="telegram-qr"
+        style="display: none;"
+      />
+
+      <!-- Loading / Network Error -->
+      <div
+        class="qr-loading"
+        style="display: flex;"
+      >
+        <div class="loading-spinner"></div>
+        <span>Loading...</span>
       </div>
-      <button id="closePopupBtn" class="close-btn">Close</button>
+
     </div>
+
+
+      <button
+        id="closePopupBtn"
+        class="close-btn"
+      >
+        Close
+      </button>
+
+    </div>
+
   </div>
-  
+
+
+  <!-- JS -->
   <script src="index.js"></script>
+
 </body>
 </html>
