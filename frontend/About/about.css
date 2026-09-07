@@ -36,8 +36,8 @@
 
   background: linear-gradient(
     135deg,
-    #0071ff,
-    #077eff
+    #4282d0,
+    #4e9df1
   );
 
   color: white;
@@ -563,5 +563,89 @@ button[data-page="msgPage"] {
 
 
 
+/* =========================================================
+   MESSAGE ITEM
+   ========================================================= */
+
+.message-item {
+  display: flex;
+  flex-direction: column;
+
+  max-width: 75%;
+
+  padding: 8px 12px;
+
+  margin-bottom: 10px;
+
+  border-radius: 12px;
+
+  box-sizing: border-box;
+
+  position: relative;
+}
 
 
+/* =========================================================
+   MY MESSAGE
+   ========================================================= */
+
+.message-item.me {
+  margin-left: auto;
+
+  align-items: flex-end;
+}
+
+
+/* =========================================================
+   CUSTOMER SERVICE MESSAGE
+   ========================================================= */
+
+.message-item.bot {
+  margin-right: auto;
+
+  align-items: flex-start;
+}
+
+
+/* =========================================================
+   MESSAGE TEXT
+   ========================================================= */
+
+.message-text {
+  font-size: 14px;
+
+  line-height: 1.5;
+
+  word-break: break-word;
+
+  overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   MESSAGE TIME
+   ========================================================= */
+
+.message-time {
+  width: 100%;
+
+  margin-top: 4px;
+
+  font-size: 10px;
+
+  line-height: 1.2;
+
+  color: #ffffffe6;
+
+  text-align: right;
+
+  white-space: nowrap;
+
+  box-sizing: border-box;
+}
+
+
+#inboxBtn svg{
+    width:40px;
+    height:40px;
+}
