@@ -1,69 +1,61 @@
 /* =========================================================
-   U9 INBOX
-   frontend/inbox/inbox.css
+   INBOX BUTTON
    ========================================================= */
 
-:root {
-  --inbox-primary: #4e9cff;
-  --inbox-primary-dark: #3d8ce6;
-  --inbox-bg: #f5f7fa;
-  --inbox-card: #ffffff;
-  --inbox-text: #222;
-  --inbox-muted: #888;
-  --inbox-border: #e5e7eb;
-  --inbox-unread: #ff3b30;
-}
-
-/* =========================================================
-   Inbox Button
-   ========================================================= */
-
-.inbox-box {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  padding: 12px 16px;
-  margin: 10px 0;
-  border-radius: 12px;
-  box-sizing: border-box;
-  gap: 12px;
-
-  background: linear-gradient(
-    135deg,
-    #23b3f5,
-    #2a9aea
-  );
-
-  color: #fff;
-  font-weight: 600;
-  font-size: 14px;
-
-  cursor: pointer;
+#openInboxBtn {
 
   position: relative;
 
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+  box-sizing: border-box;
+
+  padding: 12px 16px;
+  margin: 10px 0;
+
+  gap: 12px;
+
+  border-radius: 12px;
+  border: none;
+
+  background: linear-gradient(
+    135deg,
+    #6ea6e7,
+    #66a5ea
+  );
+
+  color: white;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
   box-shadow:
-    0 2px 8px rgba(98, 70, 234, 0.20);
+    0 2px 8px rgba(255, 123, 0, 0.18);
 
   transition:
     transform 0.15s ease,
     box-shadow 0.2s ease;
 }
 
-.inbox-box:hover {
+
+#openInboxBtn:hover {
+
   transform: translateY(-1px);
 
   box-shadow:
-    0 6px 14px rgba(98, 70, 234, 0.28);
+    0 6px 14px rgba(255, 123, 0, 0.26);
+
 }
 
-.inbox-box:active {
-  transform: scale(0.99);
-}
 
-/* Inbox icon */
+/* Inbox image */
 
-.inbox-box img {
+#openInboxBtn img {
+
   width: 46px;
   height: 46px;
 
@@ -72,520 +64,265 @@
   object-fit: cover;
 
   flex-shrink: 0;
+
 }
 
-/* Inbox text */
-
-.inbox-info {
-  display: flex;
-  flex-direction: column;
-
-  justify-content: center;
-
-  flex: 1;
-
-  min-width: 0;
-}
-
-.inbox-title {
-  margin: 0;
-
-  font-size: 15px;
-  font-weight: 700;
-
-  color: #fff;
-}
-
-.inbox-subtitle {
-  margin: 3px 0 0;
-
-  font-size: 12px;
-
-  color: rgba(255, 255, 255, 0.82);
-}
 
 /* =========================================================
-   Inbox unread badge
+   INBOX WINDOW
    ========================================================= */
 
-.inbox-unread-dot {
-  position: absolute;
+#inboxWindow {
 
-  top: -6px;
-  right: -6px;
-
-  min-width: 20px;
-  height: 20px;
-
-  padding: 0 5px;
-
-  box-sizing: border-box;
-
-  display: none;
-
-  align-items: center;
-  justify-content: center;
-
-  background: #ff3b30;
-
-  color: #fff;
-
-  border-radius: 999px;
-
-  font-size: 11px;
-  font-weight: 700;
-
-  line-height: 20px;
-
-  text-align: center;
-
-  border: 2px solid #fff;
-
-  pointer-events: none;
-
-  z-index: 10;
-}
-
-.inbox-unread-dot.show {
-  display: flex;
-
-  animation:
-    inboxPopIn 0.3s ease-out,
-    inboxPulse 1.5s infinite ease-in-out;
-}
-
-@keyframes inboxPopIn {
-
-  0% {
-    transform: scale(0);
-    opacity: 0;
-  }
-
-  70% {
-    transform: scale(1.2);
-    opacity: 1;
-  }
-
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-
-}
-
-@keyframes inboxPulse {
-
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-
-  50% {
-    transform: scale(1.25);
-    opacity: 0.85;
-  }
-
-}
-
-/* =========================================================
-   Inbox Modal
-   ========================================================= */
-
-#inboxModal {
   position: fixed;
 
-  inset: 0;
+  top: 50%;
+  left: 50%;
+
+  transform:
+    translate(-50%, -50%);
 
   width: 100%;
   height: 100%;
 
-  background: rgba(0, 0, 0, 0.45);
-
   display: none;
 
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
 
-  padding: 20px;
+  background-color: #f8f8f8;
 
-  box-sizing: border-box;
-
-  z-index: 3000;
-
-  backdrop-filter: blur(3px);
-}
-
-#inboxModal.show {
-  display: flex;
-
-  animation: inboxModalFade 0.2s ease;
-}
-
-@keyframes inboxModalFade {
-
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-
-}
-
-/* =========================================================
-   Inbox Window
-   ========================================================= */
-
-.inbox-window {
-  width: 100%;
-  max-width: 520px;
-
-  height: min(650px, 88vh);
-
-  background: var(--inbox-bg);
-
-  border-radius: 18px;
+  border: 1px solid #ddd;
 
   overflow: hidden;
 
-  display: flex;
-  flex-direction: column;
-
   box-shadow:
-    0 15px 45px rgba(0, 0, 0, 0.25);
+    0 6px 20px rgba(0, 0, 0, 0.18);
 
-  animation: inboxWindowUp 0.25s ease;
+  z-index: 1000;
+
+  font-family:
+    "Helvetica",
+    Arial,
+    sans-serif;
 }
 
-@keyframes inboxWindowUp {
-
-  from {
-    transform: translateY(25px);
-    opacity: 0;
-  }
-
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-
-}
 
 /* =========================================================
-   Inbox Header
+   INBOX HEADER
    ========================================================= */
 
 .inbox-header {
-  height: 58px;
 
-  flex-shrink: 0;
+  position: relative;
 
   display: flex;
-
   align-items: center;
+  justify-content: center;
 
-  padding: 0 14px;
+  height: 52px;
+  padding: 0 16px;
 
-  box-sizing: border-box;
+  background-color: var(--primary-blue);
 
-  background: linear-gradient(
-    135deg,
-    var(--inbox-primary),
-    var(--inbox-primary-dark)
-  );
+  color: white;
 
-  color: #fff;
+  border-bottom:
+    1px solid rgba(255, 255, 255, 0.12);
 
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
 }
 
-.inbox-header h3 {
-  flex: 1;
 
-  margin: 0;
+/* Back button */
 
-  text-align: center;
+#inboxBackBtn {
 
-  font-size: 17px;
+  position: absolute;
 
-  font-weight: 700;
-}
+  left: 12px;
 
-.inbox-header button {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
 
   border: none;
-
   border-radius: 50%;
 
-  background: rgba(255, 255, 255, 0.14);
+  background: transparent;
 
-  color: #fff;
-
-  font-size: 20px;
+  color: white;
 
   cursor: pointer;
 
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
   transition:
     background 0.2s ease,
-    transform 0.1s ease;
+    transform 0.15s ease;
 }
 
-.inbox-header button:hover {
-  background: rgba(255, 255, 255, 0.24);
-}
 
-.inbox-header button:active {
-  transform: scale(0.94);
-}
-
-/* =========================================================
-   Inbox List
-   ========================================================= */
-
-#inboxList {
-  flex: 1;
-
-  overflow-y: auto;
-
-  padding: 12px;
-
-  box-sizing: border-box;
-}
-
-#inboxList::-webkit-scrollbar {
-  width: 6px;
-}
-
-#inboxList::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.18);
-
-  border-radius: 5px;
-}
-
-/* =========================================================
-   Empty State
-   ========================================================= */
-
-.inbox-empty {
-  min-height: 300px;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  flex-direction: column;
-
-  text-align: center;
-
-  color: var(--inbox-muted);
-}
-
-.inbox-empty-icon {
-  font-size: 46px;
-
-  margin-bottom: 12px;
-
-  opacity: 0.7;
-}
-
-.inbox-empty p {
-  margin: 0;
-
-  font-size: 14px;
-}
-
-/* =========================================================
-   Loading
-   ========================================================= */
-
-.inbox-loading {
-  min-height: 250px;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  color: #888;
-
-  font-size: 14px;
-}
-
-/* =========================================================
-   Notification Item
-   ========================================================= */
-
-.inbox-item {
-  position: relative;
-
-  background: var(--inbox-card);
-
-  border-radius: 14px;
-
-  padding: 15px;
-
-  margin-bottom: 10px;
-
-  box-sizing: border-box;
-
-  border: 1px solid var(--inbox-border);
-
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.05);
-
-  transition:
-    transform 0.15s ease,
-    box-shadow 0.2s ease;
-}
-
-.inbox-item:hover {
-  transform: translateY(-1px);
-
-  box-shadow:
-    0 5px 14px rgba(0, 0, 0, 0.08);
-}
-
-/* Unread notification */
-
-.inbox-item.unread {
-  border-left: 4px solid var(--inbox-primary);
+#inboxBackBtn:hover {
 
   background:
-    linear-gradient(
-      135deg,
-      #ffffff,
-      #f4f8ff
-    );
+    rgba(255, 255, 255, 0.12);
+
 }
 
-/* Notification title */
 
-.inbox-item-title {
-  margin: 0 25px 6px 0;
+#inboxBackBtn:active {
 
-  color: var(--inbox-text);
+  transform: scale(0.92);
+
+}
+
+
+#inboxBackBtn svg {
+
+  width: 22px;
+  height: 22px;
+
+  display: block;
+
+}
+
+
+/* Title */
+
+.inbox-header-title {
 
   font-size: 15px;
 
   font-weight: 700;
 
-  line-height: 1.4;
+  line-height: 1;
+
+  text-align: center;
+
+  white-space: nowrap;
+
 }
 
-/* Notification content */
+
+/* =========================================================
+   INBOX MESSAGE LIST
+   ========================================================= */
+
+#inboxMessages {
+
+  flex: 1 1 auto;
+
+  padding: 12px;
+
+  overflow-y: auto;
+
+  background-color: #f0f0f0;
+
+}
+
+
+/* =========================================================
+   INBOX ITEM
+   ========================================================= */
+
+.inbox-item {
+
+  width: 100%;
+
+  box-sizing: border-box;
+
+  margin-bottom: 10px;
+
+  padding: 14px;
+
+  background: white;
+
+  border-radius: 12px;
+
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.08);
+
+}
+
+
+.inbox-item.unread {
+
+  border-left:
+    4px solid var(--primary-blue);
+
+}
+
+
+/* =========================================================
+   INBOX TITLE
+   ========================================================= */
+
+.inbox-item-title {
+
+  font-size: 15px;
+
+  font-weight: 700;
+
+  color: #333;
+
+  margin-bottom: 8px;
+
+}
+
+
+/* =========================================================
+   INBOX CONTENT
+   ========================================================= */
 
 .inbox-item-content {
-  margin: 0;
-
-  color: #555;
 
   font-size: 14px;
 
-  line-height: 1.6;
+  line-height: 1.5;
+
+  color: #555;
 
   white-space: pre-wrap;
 
   word-break: break-word;
+
 }
 
-/* Notification time */
+
+/* =========================================================
+   INBOX TIME
+   ========================================================= */
 
 .inbox-item-time {
-  margin-top: 9px;
 
-  color: #999;
+  margin-top: 10px;
 
   font-size: 11px;
 
-  line-height: 1.4;
+  color: #999;
+
+  text-align: right;
+
 }
 
-/* Unread small dot */
-
-.inbox-item.unread::after {
-  content: "";
-
-  position: absolute;
-
-  top: 16px;
-  right: 15px;
-
-  width: 8px;
-  height: 8px;
-
-  border-radius: 50%;
-
-  background: #ff3b30;
-}
 
 /* =========================================================
-   Mobile
+   INBOX EMPTY / LOADING
    ========================================================= */
 
-@media screen and (max-width: 600px) {
+.inbox-empty,
+.inbox-loading,
+.inbox-error {
 
-  #inboxModal {
-    padding: 10px;
-  }
+  padding: 40px 20px;
 
-  .inbox-window {
-    width: 100%;
+  text-align: center;
 
-    height: 90vh;
+  color: #999;
 
-    border-radius: 16px;
-  }
-
-  .inbox-header {
-    height: 54px;
-  }
-
-  .inbox-header h3 {
-    font-size: 16px;
-  }
-
-  #inboxList {
-    padding: 10px;
-  }
-
-  .inbox-item {
-    padding: 13px;
-  }
-
-  .inbox-item-title {
-    font-size: 14px;
-  }
-
-  .inbox-item-content {
-    font-size: 13px;
-  }
-
-}
-
-@media screen and (max-width: 420px) {
-
-  #inboxModal {
-    padding: 0;
-  }
-
-  .inbox-window {
-    width: 100%;
-    height: 100vh;
-
-    max-width: none;
-
-    border-radius: 0;
-  }
+  font-size: 14px;
 
 }
