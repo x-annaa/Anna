@@ -1,448 +1,917 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+
   // =========================================================
   // ELEMENTS
   // =========================================================
 
-  const openChatBtn = document.getElementById("openChatBtn");
-  const chatWindow = document.getElementById("chatWindow");
-  const backBtn = document.getElementById("backBtn");
-  const sendBtn = document.getElementById("sendBtn");
-  const chatInput = document.getElementById("chatInput");
-  const chatMessages = document.getElementById("chatMessages");
 
-  const bottomUnreadDot =
-    document.querySelector('button[data-page="msgPage"] .bottom-unread-dot');
+  const openChatBtn =
+    document.getElementById("openChatBtn");
+
+
+  const chatWindow =
+    document.getElementById("chatWindow");
+
+
+  const backBtn =
+    document.getElementById("backBtn");
+
+
+  const sendBtn =
+    document.getElementById("sendBtn");
+
+
+  const chatInput =
+    document.getElementById("chatInput");
+
+
+  const chatMessages =
+    document.getElementById("chatMessages");
+
+
 
   let chatSubscription = null;
+
 
 
   // =========================================================
   // CURRENT USER
   // =========================================================
 
-  function getCurrentUserId() {
-    const id = localStorage.getItem("currentUserId");
-    return id ? Number(id) : null;
+
+  function getCurrentUserId(){
+
+    const id =
+      localStorage.getItem(
+        "currentUserId"
+      );
+
+
+    return id
+      ? Number(id)
+      : null;
+
   }
+
+
+
+
+  // =========================================================
+  // FORMAT TIME
+  // =========================================================
+
+
+  function formatMessageTime(
+    createdAt
+  ){
+
+    if(!createdAt)
+      return "";
+
+
+    const date =
+      new Date(createdAt);
+
+
+    if(isNaN(date.getTime()))
+      return "";
+
+
+    return date.toLocaleString([],{
+
+      year:"numeric",
+      month:"numeric",
+      day:"numeric",
+      hour:"numeric",
+      minute:"2-digit",
+      hour12:true
+
+    });
+
+  }
+
+
+
 
 
   // =========================================================
   // INPUT HEIGHT
   // =========================================================
 
-  chatInput?.addEventListener("input", () => {
 
-    chatInput.style.height = "auto";
-    chatInput.style.height = chatInput.scrollHeight + "px";
-
-    scrollToBottom();
-
-  });
+  chatInput?.addEventListener(
+    "input",
+    ()=>{
 
 
-  // =========================================================
-  // OPEN CUSTOMER SERVICE
-  // =========================================================
-
-  openChatBtn?.addEventListener("click", async () => {
-
-    const userId = getCurrentUserId();
-
-    if (!userId) {
-      alert("Please log in first!");
-      return;
-    }
-
-    chatWindow.style.display = "flex";
-    chatWindow.classList.remove("hidden");
-
-    chatMessages.innerHTML = "";
-
-    await loadMessages();
-
-    listenForMessages();
-
-    await markMessagesAsRead();
-
-    updateUnreadCount();
-
-    scrollToBottom();
-
-  });
+      chatInput.style.height =
+        "auto";
 
 
-  // =========================================================
-  // CLOSE CUSTOMER SERVICE
-  // =========================================================
+      chatInput.style.height =
+        chatInput.scrollHeight +
+        "px";
 
-  backBtn?.addEventListener("click", () => {
 
-    chatWindow.style.display = "none";
-    chatWindow.classList.add("hidden");
+      scrollToBottom();
 
-    if (chatSubscription) {
-
-      supabaseClient.removeChannel(chatSubscription);
-
-      chatSubscription = null;
 
     }
+  );
 
-  });
+
+
+
+
+
+  // =========================================================
+  // OPEN CHAT
+  // =========================================================
+
+
+  openChatBtn?.addEventListener(
+    "click",
+    async ()=>{
+
+
+      const userId =
+        getCurrentUserId();
+
+
+
+      if(!userId){
+
+        alert(
+          "Please log in first!"
+        );
+
+        return;
+
+      }
+
+
+
+      chatWindow.style.display =
+        "flex";
+
+
+      chatWindow.classList.remove(
+        "hidden"
+      );
+
+
+
+      chatMessages.innerHTML =
+        "";
+
+
+
+      await loadMessages();
+
+
+
+      listenForMessages();
+
+
+
+      await markMessagesAsRead();
+
+
+
+      // 更新 Customer Service + Inbox + Bottom Chat
+
+      await updateAllUnread();
+
+
+
+      scrollToBottom();
+
+
+    }
+  );
+
+
+
+
+
+
+
+  // =========================================================
+  // CLOSE CHAT
+  // =========================================================
+
+
+  backBtn?.addEventListener(
+    "click",
+    ()=>{
+
+
+      chatWindow.style.display =
+        "none";
+
+
+      chatWindow.classList.add(
+        "hidden"
+      );
+
+
+
+      if(chatSubscription){
+
+
+        supabaseClient.removeChannel(
+          chatSubscription
+        );
+
+
+        chatSubscription =
+          null;
+
+      }
+
+
+    }
+  );
+
+
+
+
+
 
 
   // =========================================================
   // SEND MESSAGE
   // =========================================================
 
-  sendBtn?.addEventListener("click", async () => {
 
-    const userId = getCurrentUserId();
+  sendBtn?.addEventListener(
+    "click",
+    async ()=>{
 
-    if (!userId) {
-      alert("Please log in first!");
-      return;
-    }
 
-    const content = chatInput.value.trim();
+      const userId =
+        getCurrentUserId();
 
-    if (!content) return;
 
 
-    const { error } = await supabaseClient
-      .from("messages")
-      .insert([
-        {
-          sender_id: userId,
-          receiver_id: 1,
-          content: content,
-          is_read: false
-        }
-      ]);
+      if(!userId){
 
+        alert(
+          "Please log in first!"
+        );
 
-    if (error) {
-
-      alert("Sending failed：" + error.message);
-
-      return;
-
-    }
-
-
-    appendMessage("Me", content);
-
-    chatInput.value = "";
-
-    chatInput.style.height = "auto";
-
-    scrollToBottom();
-
-  });
-
-
-  // =========================================================
-  // ADD MESSAGE TO CHAT
-  // =========================================================
-
-  function appendMessage(sender, text) {
-
-    if (!chatMessages) return;
-
-
-    const message = document.createElement("div");
-
-    message.classList.add(
-      "message-item",
-      sender === "Me" ? "me" : "bot"
-    );
-
-
-    // Keep message text safe
-    message.textContent = text;
-
-
-    chatMessages.appendChild(message);
-
-    scrollToBottom();
-
-  }
-
-
-  // =========================================================
-  // SCROLL TO BOTTOM
-  // =========================================================
-
-  function scrollToBottom() {
-
-    if (!chatMessages) return;
-
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-
-  }
-
-
-  // =========================================================
-  // LOAD MESSAGE HISTORY
-  // =========================================================
-
-  async function loadMessages() {
-
-    const userId = getCurrentUserId();
-
-    if (!userId) return;
-
-
-    const { data, error } = await supabaseClient
-      .from("messages")
-      .select("*")
-      .or(
-        `and(sender_id.eq.${userId},receiver_id.eq.1),and(sender_id.eq.1,receiver_id.eq.${userId})`
-      )
-      .order("created_at", {
-        ascending: true
-      });
-
-
-    if (error) {
-
-      console.error("Failed to load messages:", error);
-
-      return;
-
-    }
-
-
-    data.forEach((msg) => {
-
-      appendMessage(
-        msg.sender_id === userId
-          ? "Me"
-          : "Customer Service",
-        msg.content
-      );
-
-    });
-
-  }
-
-
-  // =========================================================
-  // MARK CUSTOMER SERVICE MESSAGES AS READ
-  // =========================================================
-
-  async function markMessagesAsRead() {
-
-    const userId = getCurrentUserId();
-
-    if (!userId) return;
-
-
-    await supabaseClient
-      .from("messages")
-      .update({
-        is_read: true
-      })
-      .eq("receiver_id", userId)
-      .eq("is_read", false);
-
-  }
-
-
-  // =========================================================
-  // UPDATE UNREAD COUNT
-  // =========================================================
-
-  async function updateUnreadCount() {
-
-    const userId = getCurrentUserId();
-
-    if (!userId) return;
-
-
-    const { count, error } = await supabaseClient
-      .from("messages")
-      .select("id", {
-        count: "exact",
-        head: true
-      })
-      .eq("receiver_id", userId)
-      .eq("is_read", false);
-
-
-    if (error) {
-
-      console.error("Failed to get unread count:", error);
-
-      return;
-
-    }
-
-
-    const unread = count || 0;
-
-    const show = unread > 0;
-
-    const text = unread > 99
-      ? "99+"
-      : unread;
-
-
-    const unreadElements = [
-
-      document.querySelector("#openChatBtn .unread-dot"),
-
-      bottomUnreadDot
-
-    ];
-
-
-    unreadElements.forEach((element) => {
-
-      if (!element) return;
-
-
-      if (show) {
-
-        element.textContent = text;
-
-        element.style.display = "inline-block";
-
-        element.classList.remove("show");
-
-        void element.offsetWidth;
-
-        element.classList.add("show");
-
-      } else {
-
-        element.style.display = "none";
-
-        element.classList.remove("show");
+        return;
 
       }
 
-    });
+
+
+
+      const content =
+        chatInput.value.trim();
+
+
+
+      if(!content)
+        return;
+
+
+
+
+      sendBtn.disabled =
+        true;
+
+
+
+      const {
+
+        data:newMessage,
+
+        error
+
+      }
+      =
+      await supabaseClient
+      .from("messages")
+      .insert([{
+
+
+        sender_id:userId,
+
+        receiver_id:1,
+
+        content:content,
+
+        is_read:false
+
+
+      }])
+      .select(
+        "id,sender_id,receiver_id,content,created_at"
+      )
+      .single();
+
+
+
+
+      sendBtn.disabled =
+        false;
+
+
+
+      if(error){
+
+
+        console.error(
+          error
+        );
+
+
+        alert(
+          "Sending failed: " +
+          error.message
+        );
+
+
+        return;
+
+      }
+
+
+
+
+
+      appendMessage(
+
+        "Me",
+
+        newMessage.content,
+
+        newMessage.created_at
+
+      );
+
+
+
+      chatInput.value =
+        "";
+
+
+      chatInput.style.height =
+        "auto";
+
+
+
+      scrollToBottom();
+
+
+
+    }
+  );
+
+
+
+
+
+
+
+
+  // =========================================================
+  // APPEND MESSAGE
+  // =========================================================
+
+
+  function appendMessage(
+
+    sender,
+
+    text,
+
+    createdAt
+
+  ){
+
+
+
+    if(!chatMessages)
+      return;
+
+
+
+
+    const item =
+      document.createElement(
+        "div"
+      );
+
+
+
+    item.classList.add(
+
+      "message-item",
+
+      sender==="Me"
+      ? "me"
+      : "bot"
+
+    );
+
+
+
+
+
+    const messageText =
+      document.createElement(
+        "div"
+      );
+
+
+    messageText.className =
+      "message-text";
+
+
+    messageText.textContent =
+      text || "";
+
+
+
+
+
+    const time =
+      document.createElement(
+        "div"
+      );
+
+
+    time.className =
+      "message-time";
+
+
+
+    time.textContent =
+      formatMessageTime(
+        createdAt
+      );
+
+
+
+
+
+    item.appendChild(
+      messageText
+    );
+
+
+    item.appendChild(
+      time
+    );
+
+
+
+    chatMessages.appendChild(
+      item
+    );
+
+
+
+    scrollToBottom();
+
+
 
   }
 
 
+
+
+
+
+
   // =========================================================
-  // REALTIME MESSAGES
+  // SCROLL
   // =========================================================
 
-  function listenForMessages() {
 
-    const userId = getCurrentUserId();
-
-    if (!userId) return;
+  function scrollToBottom(){
 
 
-    if (chatSubscription) {
+    if(!chatMessages)
+      return;
 
-      supabaseClient.removeChannel(chatSubscription);
+
+    chatMessages.scrollTop =
+      chatMessages.scrollHeight;
+
+
+  }
+
+
+
+
+
+
+
+
+  // =========================================================
+  // LOAD HISTORY
+  // =========================================================
+
+
+  async function loadMessages(){
+
+
+
+    const userId =
+      getCurrentUserId();
+
+
+
+    if(!userId)
+      return;
+
+
+
+
+
+    const {
+
+      data,
+
+      error
+
+    }
+
+    =
+    await supabaseClient
+    .from("messages")
+    .select(
+      "id,sender_id,receiver_id,content,created_at,is_read"
+    )
+    .or(
+
+      `and(sender_id.eq.${userId},receiver_id.eq.1),and(sender_id.eq.1,receiver_id.eq.${userId})`
+
+    )
+    .order(
+
+      "created_at",
+
+      {
+        ascending:true
+      }
+
+    );
+
+
+
+
+
+    if(error){
+
+
+      console.error(
+        error
+      );
+
+
+      return;
 
     }
 
 
-    chatSubscription = supabaseClient
-      .channel("realtime-messages")
-
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-          filter: `receiver_id=eq.${userId}`
-        },
-
-        async (payload) => {
-
-          const msg = payload.new;
 
 
-          if (
-            msg.sender_id === 1 &&
-            chatWindow?.style.display !== "none"
-          ) {
+
+    if(!data || data.length===0){
+
+
+      chatMessages.innerHTML =
+      `
+      <div style="
+      text-align:center;
+      color:#999;
+      padding:20px;">
+      No messages
+      </div>
+      `;
+
+
+      return;
+
+    }
+
+
+
+
+
+    data.forEach(
+      msg=>{
+
+
+        appendMessage(
+
+          msg.sender_id===userId
+          ? "Me"
+          : "Customer Service",
+
+          msg.content,
+
+          msg.created_at
+
+        );
+
+
+      }
+    );
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+  // =========================================================
+  // MARK CUSTOMER SERVICE READ
+  // =========================================================
+
+
+  async function markMessagesAsRead(){
+
+
+    const userId =
+      getCurrentUserId();
+
+
+
+    if(!userId)
+      return;
+
+
+
+
+
+    await supabaseClient
+    .from("messages")
+    .update({
+
+      is_read:true
+
+    })
+    .eq(
+
+      "receiver_id",
+
+      userId
+
+    )
+    .eq(
+
+      "is_read",
+
+      false
+
+    );
+
+
+
+  }
+
+
+
+
+
+
+
+
+
+  // =========================================================
+  // REALTIME
+  // =========================================================
+
+
+  function listenForMessages(){
+
+
+    const userId =
+      getCurrentUserId();
+
+
+
+    if(!userId)
+      return;
+
+
+
+
+
+    if(chatSubscription){
+
+
+      supabaseClient.removeChannel(
+        chatSubscription
+      );
+
+
+    }
+
+
+
+
+
+    chatSubscription =
+
+    supabaseClient
+
+    .channel(
+      "customer-service-" + userId
+    )
+
+    .on(
+
+      "postgres_changes",
+
+      {
+
+        event:"INSERT",
+
+        schema:"public",
+
+        table:"messages",
+
+        filter:
+        `receiver_id=eq.${userId}`
+
+
+      },
+
+      async(payload)=>{
+
+
+        const msg =
+          payload.new;
+
+
+
+        if(
+
+          msg.sender_id===1
+
+        ){
+
+
+
+          if(
+
+            chatWindow.style.display
+            !==
+            "none"
+
+          ){
+
+
 
             appendMessage(
+
               "Customer Service",
-              msg.content
+
+              msg.content,
+
+              msg.created_at
+
             );
 
+
+
             await markMessagesAsRead();
+
+
 
           }
 
 
-          updateUnreadCount();
-
         }
 
-      )
 
-      .subscribe();
+
+        await updateAllUnread();
+
+
+
+      }
+
+    )
+
+    .subscribe();
+
+
 
   }
+
+
+
+
+
+
+
 
 
   // =========================================================
   // MOBILE KEYBOARD
   // =========================================================
 
-  function adjustChatForKeyboard() {
 
-    if (!chatWindow) return;
-
-
-    const initialHeight = window.innerHeight;
+  function adjustChatForKeyboard(){
 
 
-    window.addEventListener("resize", () => {
-
-      const currentHeight = window.innerHeight;
-
-      const keyboardHeight =
-        initialHeight - currentHeight;
+    if(!chatWindow)
+      return;
 
 
-      if (keyboardHeight > 100) {
 
-        chatWindow.style.top = "auto";
 
-        chatWindow.style.bottom = "0";
+    const initialHeight =
+      window.innerHeight;
 
-        chatWindow.style.transform =
-          "translateX(-50%)";
 
-      } else {
 
-        chatWindow.style.top = "50%";
 
-        chatWindow.style.bottom = "auto";
+    window.addEventListener(
+      "resize",
+      ()=>{
 
-        chatWindow.style.transform =
-          "translate(-50%, -50%)";
+
+        const current =
+          window.innerHeight;
+
+
+
+        const keyboard =
+          initialHeight-current;
+
+
+
+
+        if(keyboard>100){
+
+
+          chatWindow.style.bottom =
+            "0";
+
+
+          chatWindow.style.top =
+            "auto";
+
+
+
+        }
+        else{
+
+
+          chatWindow.style.top =
+            "50%";
+
+
+          chatWindow.style.bottom =
+            "auto";
+
+
+        }
+
+
+
+        scrollToBottom();
+
+
 
       }
+    );
 
-
-      scrollToBottom();
-
-    });
 
   }
 
 
+
+
+
+
+
+
   // =========================================================
-  // INITIALIZE
+  // INIT
   // =========================================================
+
 
   adjustChatForKeyboard();
 
-  updateUnreadCount();
+
+  updateAllUnread();
+
+
 
 });
