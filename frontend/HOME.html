@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>U9</title>
 
+  <!-- CSS -->
   <link rel="stylesheet" href="Home/home.css">
   <link rel="stylesheet" href="About/about.css">
   <link rel="stylesheet" href="Order/order.css">
@@ -14,20 +15,24 @@
   <link rel="stylesheet" href="common/alert.css">
   <link rel="stylesheet" href="Body/body.css">
   <link rel="stylesheet" href="inbox/inbox.css">
-
+  <link rel="stylesheet" href="Me/wdhistory.css">
+  <link rel="stylesheet" href="Me/password.css">
+  <link rel="stylesheet" href="Me/logout/logout.css">
+  
+  <!-- SupabaseClient -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script src="../supabaseClient.js"></script>
+
 </head>
 <body>
 
-  <!-- =====================================================
-      HOME
-  ===================================================== -->
+  <!-- ===========  HOME PAGE =========== -->
+  <!-- ===========  HOME PAGE =========== -->
+  <!-- ===========  HOME PAGE =========== -->
 
   <div id="homePage" class="page active">
 
-    <!-- ======= hoem header ======= -->
-
+    <!--  hoem header  -->
     <header id="home-header">
 
 
@@ -47,8 +52,7 @@
 
     </header>
 
-    <!-- ==================== BANNER ==================== -->
-
+    <!--  3-PHOTO  -->
     <div class="container-h1">
 
       <div class="banner-wrapper">
@@ -116,9 +120,7 @@
 
     </div>
 
-
-    <!-- ==================== ANNOUNCEMENT ==================== -->
-
+    <!--  BELL  -->
     <div class="container-h2">
 
       <!-- Volume SVG -->
@@ -156,16 +158,14 @@
       <div class="container-h4">
 
         <span class="container-h5">
-          Welcome to my platform, congratulations on posting!
+          Welcome! Explore products, join events, and enjoy special deals.
         </span>
 
       </div>
 
     </div>
 
-
-    <!-- ==================== PRODUCTS ==================== -->
-
+    <!--  PRODUCTS  -->
     <div class="container-h6">
 
       <!-- Product Images -->
@@ -327,9 +327,7 @@
 
     </div>
 
-
-    <!-- ==================== RANKING ==================== -->
-
+    <!--  RANKING  -->
     <div class="rank-section">
 
       <h3>
@@ -422,7 +420,10 @@
 
   </div>
 
-  <!-- SHOP -->
+  <!-- ===========  SHOP PAGE =========== -->
+  <!-- ===========  SHOP PAGE =========== -->
+  <!-- ===========  SHOP PAGE =========== -->
+
   <div id="infoPage" class="page">
     <div class="shop-search-container">
       <input type="text" id="shopSearchInput" placeholder="Search product..." />
@@ -459,10 +460,15 @@
       </button>
     </div>
     
-    <div id="shopProducts" class="container-s1">
-      
+    <!--  Shop Products  -->
+    <div id="shopProducts" class="container-s1"> 
     </div>
 
+  </div>
+
+    <!-- //  SHOP MODAL-2 // -->
+
+    <!--   SHOP BTN  -->
     <div id="buyModal" class="container-s2">
       <div class="container-s3">
         <h3 id="buyProductName">Buy Product</h3>
@@ -492,7 +498,7 @@
       </div>
     </div>
 
-    <!-- 🛒 订单列表弹窗 -->
+    <!--   SHOP HISTORY  -->
     <div id="orderListModal" class="container-s2">
       <div class="container-s3">
         <h3>My Orders</h3>
@@ -504,9 +510,12 @@
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- ORDER -->
+
+  <!-- ===========  ORDER PAGE =========== -->
+  <!-- ===========  ORDER PAGE =========== -->
+  <!-- ===========  ORDER PAGE =========== -->
+
   <div id="orderPage" class="page">
     <div class="order-header">
       <div class="coins-box">
@@ -544,269 +553,278 @@
     <div class="white-container">
 
     </div>
+  </div>
 
-    <div id="historyModal" class="modal">
-      <div class="modal-content1">
-        <div class="modal-header">
-          <button id="closeHistoryBtn">⬅ Back</button>
-          <h3>Order history</h3>
-        </div>
-        <div id="orderHistoryList" class="modal-body">
-          <ul>
-            <li>
-              <img src="https://dummyimage.com/40x40/ccc/fff.png&text=Photos" alt="Product photos">
-              <span>Product Name / $Price / Revenue / Status</span>
-            </li>
-          </ul>
-        </div>
+  <!-- //  ORDER MODAL-3 // -->
+
+  <!-- HISTORY -->
+  <div id="historyModal" class="modal">
+    <div class="modal-content1">
+      <div class="modal-header">
+        <button id="closeHistoryBtn">⬅ Back</button>
+        <h3>Order history</h3>
+      </div>
+      <div id="orderHistoryList" class="modal-body">
+        <ul>
+          <li>
+            <img src="https://dummyimage.com/40x40/ccc/fff.png&text=Photos" alt="Product photos">
+            <span>Product Name / $Price / Revenue / Status</span>
+          </li>
+        </ul>
       </div>
     </div>
-
-    <div id="rulesModal" class="modal">
-      <div class="modal-content1">
-        <div class="modal-header">
-          <button id="closeRulesBtn">⬅ Back</button>
-          <h3>Rules of Use</h3>
-        </div>
-        <div class="modal-body">
-        
-          <div class="rule-item">
-        
-            <!-- 🎁 Gift SVG -->
-            <svg class="rule-icon" viewBox="0 0 64 64">
-              <path d="M10 25h44v30H10z" fill="#ffca28"/>
-              <path d="M32 25v30" stroke="#fff" stroke-width="5"/>
-              <path d="M8 20h48v10H8z" fill="#f44336"/>
-              <path d="M32 20c-8-14-20-8-15 0 4 5 15 0 15 0z" fill="#ff7043"/>
-              <path d="M32 20c8-14 20-8 15 0-4 5-15 0-15 0z" fill="#ff7043"/>
-            </svg>
-        
-            <div>
-              <h4>Lucky Order Rules</h4>
-              <p>
-                Welcome to Lucky Order. Complete orders to earn profits and enjoy rewards.
-                Follow the rules below to ensure a smooth ordering experience.
-              </p>
-            </div>
-        
-          </div>
-        
-          <div class="rule-item">
-        
-            <!-- 🛒 Cart SVG -->
-            <svg class="rule-icon" viewBox="0 0 64 64">
-              <path d="M10 12h8l6 30h28l6-22H22"
-              fill="none" stroke="#2196f3" stroke-width="5"/>
-              <circle cx="28" cy="52" r="4" fill="#333"/>
-              <circle cx="50" cy="52" r="4" fill="#333"/>
-            </svg>
-        
-            <div>
-              <h4>Order Matching</h4>
-              <p>
-                Click the Order button to start automatic matching.
-                The system will randomly match available products.
-                Matching time depends on the system settings.
-              </p>
-            </div>
-        
-          </div>
-        
-          <div class="rule-item">
-        
-            <!-- 💰 Coin SVG -->
-            <svg class="rule-icon" viewBox="0 0 64 64">
-              <circle cx="32" cy="32" r="25" fill="#ffd54f"/>
-              <circle cx="32" cy="32" r="18" fill="#ffb300"/>
-              <text x="32" y="42"
-              text-anchor="middle"
-              font-size="28"
-              font-weight="bold"
-              fill="#fff">$</text>
-            </svg>
-        
-            <div>
-              <h4>Coins Requirements</h4>
-              <p>
-                Sufficient Coins are required before placing orders.
-                If your Coins balance is insufficient, please exchange Balance
-                into Coins before continuing.
-              </p>
-            </div>
-        
-          </div>
-        
-          <div class="rule-item">
-        
-            <!-- 📦 Box SVG -->
-            <svg class="rule-icon" viewBox="0 0 64 64">
-              <path d="M8 20L32 8l24 12-24 12z"
-              fill="#ff9800"/>
-              <path d="M8 20v28l24 12V32z"
-              fill="#ffb74d"/>
-              <path d="M56 20v28L32 60V32z"
-              fill="#fb8c00"/>
-            </svg>
-        
-            <div>
-              <h4>Order Completion</h4>
-              <p>
-                After matching a product, the product price will be deducted
-                from your Coins. Complete the pending order to receive the
-                order amount and profit.
-                A new order cannot be created while another order is pending.
-              </p>
-            </div>
-        
-          </div>
-
-          <div class="rule-item">
-        
-            <!-- ✨ Profit SVG -->
-            <svg class="rule-icon" viewBox="0 0 64 64">
-              <path d="M32 5l8 18 20 2-15 13
-              5 20-18-10-18 10
-              5-20L4 25l20-2z"
-              fill="#ffd700"/>
-            </svg>
-        
-            <div>
-              <h4>Profit Rules</h4>
-              <p>
-                Each product has a different profit ratio.
-                Profit is calculated according to the product price
-                and the configured profit percentage.
-              </p>
-            </div>
-        
-          </div>
-
-          <div class="rule-item">
-        
-            <!-- 🎯 Target SVG -->
-            <svg class="rule-icon" viewBox="0 0 64 64">
-              <circle cx="32" cy="32" r="25" fill="#e53935"/>
-              <circle cx="32" cy="32" r="14" fill="#fff"/>
-              <circle cx="32" cy="32" r="6" fill="#e53935"/>
-            </svg>
-        
-            <div>
-              <h4>Round Rules</h4>
-              <p>
-                Orders are completed by rounds.
-                Each round requires completing the configured number of orders.
-                After finishing the round, the system will enter a cooling period.
-              </p>
-            </div>
-        
-          </div>
-
-          <div class="rule-item">
-        
-            <!-- 🔄 Exchange SVG -->
-            <svg class="rule-icon" viewBox="0 0 64 64">
-              <path d="M15 20h35l-8-8"
-              fill="none"
-              stroke="#4caf50"
-              stroke-width="6"/>
-              <path d="M49 44H14l8 8"
-              fill="none"
-              stroke="#2196f3"
-              stroke-width="6"/>
-            </svg>
-        
-            <div>
-              <h4>Balance & Coins Exchange</h4>
-              <p>
-                Balance can be exchanged into Coins anytime.
-                Coins can be exchanged back into Balance after completing
-                the required round conditions.
-              </p>
-            </div>
-        
-          </div>
-
-          <div class="rule-item">
-        
-            <!-- 📜 History SVG -->
-            <svg class="rule-icon" viewBox="0 0 64 64">
-              <rect x="15" y="8"
-              width="34"
-              height="48"
-              rx="4"
-              fill="#64b5f6"/>
-              <line x1="22" y1="22"
-              x2="42"
-              y2="22"
-              stroke="#fff"
-              stroke-width="4"/>
-              <line x1="22" y1="34"
-              x2="42"
-              y2="34"
-              stroke="#fff"
-              stroke-width="4"/>
-            </svg>
-        
-            <div>
-              <h4>Order History</h4>
-              <p>
-                All completed and pending orders can be viewed in History.
-                Records include product information, price, profit,
-                status and order time.
-              </p>
-            </div>
-        
-          </div>
-
-          <div class="rule-item">
-        
-            <!-- ⚠ Warning SVG -->
-            <svg class="rule-icon" viewBox="0 0 64 64">
-              <path d="M32 5L60 55H4z"
-              fill="#ff9800"/>
-              <line x1="32" y1="20"
-              x2="32"
-              y2="38"
-              stroke="#fff"
-              stroke-width="6"/>
-              <circle cx="32" cy="46" r="3" fill="#fff"/>
-            </svg>
-        
-            <div>
-              <h4>Important Notice</h4>
-              <p>
-                Please keep your network connection stable during matching.
-                Do not create new orders before completing pending orders.
-                The platform may adjust system settings when necessary.
-              </p>
-            </div>
-        
-          </div>
-        </div>
+  </div>
+    
+  <!-- RULE -->
+  <div id="rulesModal" class="modal">
+    <div class="modal-content1">
+      <div class="modal-header">
+        <button id="closeRulesBtn">⬅ Back</button>
+        <h3>Rules of Use</h3>
       </div>
-    </div>
-  
-    <div id="addCoinsModal" class="modal">
-      <div class="modal-content">
-        <h3>Exchange</h3>
-        <div class="exchange-toggle">
-          <button id="balanceToCoinsBtn" class="exchange-btn active" data-type="toCoins">Balance → Coins</button>
-          <button id="coinsToBalanceBtn" class="exchange-btn" data-type="toBalance">Coins → Balance</button>
+      <div class="modal-body">
+      
+        <div class="rule-item">
+      
+          <!-- 🎁 Gift SVG -->
+          <svg class="rule-icon" viewBox="0 0 64 64">
+            <path d="M10 25h44v30H10z" fill="#ffca28"/>
+            <path d="M32 25v30" stroke="#fff" stroke-width="5"/>
+            <path d="M8 20h48v10H8z" fill="#f44336"/>
+            <path d="M32 20c-8-14-20-8-15 0 4 5 15 0 15 0z" fill="#ff7043"/>
+            <path d="M32 20c8-14 20-8 15 0-4 5-15 0-15 0z" fill="#ff7043"/>
+          </svg>
+      
+          <div>
+            <h4>Lucky Order Rules</h4>
+            <p>
+              Welcome to Lucky Order. Complete orders to earn profits and enjoy rewards.
+              Follow the rules below to ensure a smooth ordering experience.
+            </p>
+          </div>
+      
         </div>
-        <p>Please enter the amount to be exchanged</p>
-        <input type="number" id="addCoinsInput" min="1" placeholder="Amount" />
-        <div class="modal-actions">
-          <button id="cancelExchange">Cancel</button>
-          <button id="confirmExchange">Confirm</button>
+      
+        <div class="rule-item">
+      
+          <!-- 🛒 Cart SVG -->
+          <svg class="rule-icon" viewBox="0 0 64 64">
+            <path d="M10 12h8l6 30h28l6-22H22"
+            fill="none" stroke="#2196f3" stroke-width="5"/>
+            <circle cx="28" cy="52" r="4" fill="#333"/>
+            <circle cx="50" cy="52" r="4" fill="#333"/>
+          </svg>
+      
+          <div>
+            <h4>Order Matching</h4>
+            <p>
+              Click the Order button to start automatic matching.
+              The system will randomly match available products.
+              Matching time depends on the system settings.
+            </p>
+          </div>
+      
+        </div>
+      
+        <div class="rule-item">
+      
+          <!-- 💰 Coin SVG -->
+          <svg class="rule-icon" viewBox="0 0 64 64">
+            <circle cx="32" cy="32" r="25" fill="#ffd54f"/>
+            <circle cx="32" cy="32" r="18" fill="#ffb300"/>
+            <text x="32" y="42"
+            text-anchor="middle"
+            font-size="28"
+            font-weight="bold"
+            fill="#fff">$</text>
+          </svg>
+      
+          <div>
+            <h4>Coins Requirements</h4>
+            <p>
+              Sufficient Coins are required before placing orders.
+              If your Coins balance is insufficient, please exchange Balance
+              into Coins before continuing.
+            </p>
+          </div>
+      
+        </div>
+      
+        <div class="rule-item">
+      
+          <!-- 📦 Box SVG -->
+          <svg class="rule-icon" viewBox="0 0 64 64">
+            <path d="M8 20L32 8l24 12-24 12z"
+            fill="#ff9800"/>
+            <path d="M8 20v28l24 12V32z"
+            fill="#ffb74d"/>
+            <path d="M56 20v28L32 60V32z"
+            fill="#fb8c00"/>
+          </svg>
+      
+          <div>
+            <h4>Order Completion</h4>
+            <p>
+              After matching a product, the product price will be deducted
+              from your Coins. Complete the pending order to receive the
+              order amount and profit.
+              A new order cannot be created while another order is pending.
+            </p>
+          </div>
+      
+        </div>
+
+        <div class="rule-item">
+      
+          <!-- ✨ Profit SVG -->
+          <svg class="rule-icon" viewBox="0 0 64 64">
+            <path d="M32 5l8 18 20 2-15 13
+            5 20-18-10-18 10
+            5-20L4 25l20-2z"
+            fill="#ffd700"/>
+          </svg>
+      
+          <div>
+            <h4>Profit Rules</h4>
+            <p>
+              Each product has a different profit ratio.
+              Profit is calculated according to the product price
+              and the configured profit percentage.
+            </p>
+          </div>
+      
+        </div>
+
+        <div class="rule-item">
+      
+          <!-- 🎯 Target SVG -->
+          <svg class="rule-icon" viewBox="0 0 64 64">
+            <circle cx="32" cy="32" r="25" fill="#e53935"/>
+            <circle cx="32" cy="32" r="14" fill="#fff"/>
+            <circle cx="32" cy="32" r="6" fill="#e53935"/>
+          </svg>
+      
+          <div>
+            <h4>Round Rules</h4>
+            <p>
+              Orders are completed by rounds.
+              Each round requires completing the configured number of orders.
+              After finishing the round, the system will enter a cooling period.
+            </p>
+          </div>
+      
+        </div>
+
+        <div class="rule-item">
+      
+          <!-- 🔄 Exchange SVG -->
+          <svg class="rule-icon" viewBox="0 0 64 64">
+            <path d="M15 20h35l-8-8"
+            fill="none"
+            stroke="#4caf50"
+            stroke-width="6"/>
+            <path d="M49 44H14l8 8"
+            fill="none"
+            stroke="#2196f3"
+            stroke-width="6"/>
+          </svg>
+      
+          <div>
+            <h4>Balance & Coins Exchange</h4>
+            <p>
+              Balance can be exchanged into Coins anytime.
+              Coins can be exchanged back into Balance after completing
+              the required round conditions.
+            </p>
+          </div>
+      
+        </div>
+
+        <div class="rule-item">
+      
+          <!-- 📜 History SVG -->
+          <svg class="rule-icon" viewBox="0 0 64 64">
+            <rect x="15" y="8"
+            width="34"
+            height="48"
+            rx="4"
+            fill="#64b5f6"/>
+            <line x1="22" y1="22"
+            x2="42"
+            y2="22"
+            stroke="#fff"
+            stroke-width="4"/>
+            <line x1="22" y1="34"
+            x2="42"
+            y2="34"
+            stroke="#fff"
+            stroke-width="4"/>
+          </svg>
+      
+          <div>
+            <h4>Order History</h4>
+            <p>
+              All completed and pending orders can be viewed in History.
+              Records include product information, price, profit,
+              status and order time.
+            </p>
+          </div>
+      
+        </div>
+
+        <div class="rule-item">
+      
+          <!-- ⚠ Warning SVG -->
+          <svg class="rule-icon" viewBox="0 0 64 64">
+            <path d="M32 5L60 55H4z"
+            fill="#ff9800"/>
+            <line x1="32" y1="20"
+            x2="32"
+            y2="38"
+            stroke="#fff"
+            stroke-width="6"/>
+            <circle cx="32" cy="46" r="3" fill="#fff"/>
+          </svg>
+      
+          <div>
+            <h4>Important Notice</h4>
+            <p>
+              Please keep your network connection stable during matching.
+              Do not create new orders before completing pending orders.
+              The platform may adjust system settings when necessary.
+            </p>
+          </div>
+      
         </div>
       </div>
     </div>
   </div>
+  
+  <!-- EXCHANGE -->
+  <div id="addCoinsModal" class="modal">
+    <div class="modal-content">
+      <h3>Exchange</h3>
+      <div class="exchange-toggle">
+        <button id="balanceToCoinsBtn" class="exchange-btn active" data-type="toCoins">Balance → Coins</button>
+        <button id="coinsToBalanceBtn" class="exchange-btn" data-type="toBalance">Coins → Balance</button>
+      </div>
+      <p>Please enter the amount to be exchanged</p>
+      <input type="number" id="addCoinsInput" min="1" placeholder="Amount" />
+      <div class="modal-actions">
+        <button id="cancelExchange">Cancel</button>
+        <button id="confirmExchange">Confirm</button>
+      </div>
+    </div>
+  </div>
 
-  <!-- CUSTOMER SERVICE -->
+
+  <!-- ===========  MESSAGE PAGE =========== -->
+  <!-- ===========  MESSAGE PAGE =========== -->
+  <!-- ===========  MESSAGE PAGE =========== -->
+
   <div id="msgPage" class="page">
 
-    <!-- Customer Service Entry -->
+
     <div id="openChatBtn">
 
       <img
@@ -819,11 +837,6 @@
       <span class="unread-dot"></span>
 
     </div>
-
-
-    <!-- =====================================================
-        INBOX
-    ===================================================== -->
 
     <div id="openInboxBtn">
 
@@ -838,8 +851,11 @@
 
     </div>
 
+  </div>
 
-    <!-- Chat Window -->
+    <!-- //  MESSAGE MODAL-2 // -->
+
+    <!-- MESSAGE Chat Window -->
     <div id="chatWindow">
 
       <div class="chat-header">
@@ -888,8 +904,7 @@
 
     </div>
 
-    <!-- =======   NBOX WINDOW  ========= -->
-
+    <!-- MESSAGE Inbox Window -->
     <div id="inboxWindow">
 
       <!-- Inbox Header -->
@@ -935,10 +950,11 @@
       </div>
 
     </div>
+    
+  <!-- ===========  ME PAGE =========== -->
+  <!-- ===========  ME PAGE =========== -->
+  <!-- ===========  ME PAGE =========== -->
 
-  </div>
-
-  <!-- ME -->
   <div id="myPage" class="page">
     <div class="user-info">
       <img class="avatar" src="https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Photos/ProfileU9.jpg" alt="U9">
@@ -957,117 +973,533 @@
     </div>
 
     <div class="my-buttons">
+      <button id="me-history-Btn">History</button>
       <button id="changeLoginPwdBtn">Password</button>
       <button id="logoutBtn">Logout</button>
     </div>
+  </div>
 
-    <div id="changeLoginPwdModal" class="modal">
+
+    <!-- //  ME MODAL-8 // -->
+
+    <!--   ME HISTORY  -->
+    <div id="me-history" class="me-history-modal">
+
+        <div class="me-history-modal-content">
+
+
+            <!-- =================================================
+                HISTORY HEADER
+            ================================================= -->
+
+            <div class="me-history-header">
+
+                <button
+                    id="closeMeHistory"
+                    class="me-history-back"
+                    type="button"
+                    aria-label="Back"
+                >
+
+                    <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+
+                        <path
+                            d="M19 12H5M11 6L5 12L11 18"
+                            stroke="currentColor"
+                            stroke-width="2.2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        />
+
+                    </svg>
+
+                </button>
+
+
+                <h3 id="meHistoryHeaderTitle">
+                    History
+                </h3>
+
+
+                <div class="me-history-header-space"></div>
+
+            </div>
+
+
+            <!-- =================================================
+                HISTORY LIST
+            ================================================= -->
+
+            <div
+                id="meHistoryList"
+                class="me-history-list"
+            >
+
+                <div class="me-history-loading">
+                    Loading...
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                HISTORY DETAIL
+            ================================================= -->
+
+            <div
+                id="meHistoryDetail"
+                class="me-history-detail"
+            >
+
+                <!-- DETAIL CONTENT WILL BE GENERATED BY JS -->
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+    <!--   ME PASSWORD  -->
+    <div id="me-password" class="me-password-modal">
+
+
+        <div class="me-password-modal-content">
+
+
+
+            <!-- ================= HEADER ================= -->
+
+            <div class="me-password-header">
+
+
+                <button
+                    id="closeMePassword"
+                    class="me-password-back"
+                    type="button"
+                    aria-label="Back"
+                >
+
+
+                    <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                    >
+
+                        <path
+                            d="M19 12H5M11 6L5 12L11 18"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        />
+
+                    </svg>
+
+
+                </button>
+
+
+
+                <h3>
+                    Change Password
+                </h3>
+
+
+
+                <div class="me-password-header-space"></div>
+
+
+
+            </div>
+
+
+
+
+
+            <!-- ================= BODY ================= -->
+
+
+            <div class="me-password-body">
+
+
+
+
+
+                <!-- NOTICE -->
+
+                <div class="password-notice">
+
+
+                    <div>
+                        ⚠️ Enter your current password first,
+                        then create a new password.
+                    </div>
+
+
+                    <div>
+                        ⚠️ Please remember your new password.
+                    </div>
+
+
+                    <div>
+                        Forgot password?
+                        <a 
+                        href="https://t.me/U9support"
+                        target="_blank"
+                        >
+                            Telegram Support
+                        </a>
+                    </div>
+
+
+                </div>
+
+
+
+
+
+
+
+                <!-- CURRENT PASSWORD -->
+
+                <div class="password-input-box">
+
+
+                    <input
+                        id="currentLoginPwd"
+                        type="password"
+                        placeholder="Your password"
+                    >
+
+
+
+                    <button
+                        type="button"
+                        class="toggle-password"
+                        data-target="currentLoginPwd"
+                        aria-label="Show password"
+                    >
+
+
+                        <svg
+                            class="eye-icon"
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                        >
+
+
+                            <path 
+                            d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z">
+                            </path>
+
+
+                            <circle
+                            cx="12"
+                            cy="12"
+                            r="3">
+                            </circle>
+
+
+                        </svg>
+
+
+                    </button>
+
+
+                </div>
+
+
+
+
+
+
+
+
+                <!-- NEW PASSWORD -->
+
+                <div class="password-input-box">
+
+
+                    <input
+                        id="newLoginPwd"
+                        type="password"
+                        placeholder="New password"
+                    >
+
+
+
+                    <button
+                        type="button"
+                        class="toggle-password"
+                        data-target="newLoginPwd"
+                        aria-label="Show password"
+                    >
+
+
+                        <svg
+                            class="eye-icon"
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                        >
+
+
+                            <path 
+                            d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z">
+                            </path>
+
+
+                            <circle
+                            cx="12"
+                            cy="12"
+                            r="3">
+                            </circle>
+
+
+                        </svg>
+
+
+                    </button>
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+                <!-- CONFIRM PASSWORD -->
+
+                <div class="password-input-box">
+
+
+                    <input
+                        id="confirmLoginPwd"
+                        type="password"
+                        placeholder="Confirm password"
+                    >
+
+
+
+                    <button
+                        type="button"
+                        class="toggle-password"
+                        data-target="confirmLoginPwd"
+                        aria-label="Show password"
+                    >
+
+
+                        <svg
+                            class="eye-icon"
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                        >
+
+
+                            <path 
+                            d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z">
+                            </path>
+
+
+                            <circle
+                            cx="12"
+                            cy="12"
+                            r="3">
+                            </circle>
+
+
+                        </svg>
+
+
+                    </button>
+
+
+                </div>
+
+
+
+
+
+
+
+
+                <!-- SAVE -->
+
+
+                <button
+                    id="saveChangeLoginPwd"
+                    class="me-password-save"
+                    type="button"
+                >
+
+                    Save
+
+                </button>
+
+
+
+
+
+            </div>
+
+
+
+        </div>
+
+
+
+    </div>
+
+    <!--   ME LOGOUT  -->
+    <div id="me-logout" class="me-logoutModal-modal">
+
+      <div class="me-logoutModal-modal-content">
+
+
+        <p class="logout-title">
+          Are you sure you want to exit?
+        </p>
+
+
+
+        <div id="logoutCountdown">
+          Please wait 5 seconds...
+        </div>
+
+
+
+        <label class="logout-confirm-check">
+
+          <input 
+          type="checkbox" 
+          id="logoutAgree"
+          disabled>
+
+          I understand, I may need to login again
+
+        </label>
+
+
+
+        <div class="logout-buttons">
+
+          <button id="cancelLogout">
+            NO
+          </button>
+
+
+          <button id="confirmLogout" disabled>
+            YES
+          </button>
+
+        </div>
+
+
+      </div>
+
+    </div>
+
+    <!--   ME WITHDRAW W1  -->
+    <div id="withdrawModal" class="modal">
       <div class="modal-content">
-        <h3>Change login password</h3>
-        <input type="password" id="currentLoginPwd" placeholder="Your password" />
-        <input type="password" id="newLoginPwd" placeholder="New password" />
-        <input type="password" id="confirmLoginPwd" placeholder="Confirm password" />
+        <h3>Withdraw</h3>
+        <p>Balance：<span id="withdrawBalance">0.00</span></p>
+        <input type="number" id="withdrawAmount" placeholder="Amount" />
+        <input type="text" id="walletAddress" placeholder="USDT-TRC20 wallet address" />
+        <button id="setPasswordBtn">Add withdrawal password</button>
         <div class="modal-actions">
-          <button id="cancelChangeLoginPwd">Cancel</button>
-          <button id="saveChangeLoginPwd">Save</button>
+          <button id="cancelWithdraw">Cancel</button>
+          <button id="confirmWithdraw">Done</button>
         </div>
       </div>
     </div>
-  </div>
 
-  <div id="logoutModal" class="modal">
-    <div class="modal-content">
-      <p>Are you sure you want to exit?</p>
-      <button id="cancelLogout">NO</button>
-      <button id="confirmLogout">YES</button>
-    </div>
-  </div>
-
-  <div id="withdrawModal" class="modal">
-    <div class="modal-content">
-      <h3>Withdraw</h3>
-      <p>Balance：<span id="withdrawBalance">0.00</span></p>
-      <input type="number" id="withdrawAmount" placeholder="Amount" />
-      <input type="text" id="walletAddress" placeholder="USDT-TRC20 wallet address" />
-      <button id="setPasswordBtn">Add withdrawal password</button>
-      <div class="modal-actions">
-        <button id="cancelWithdraw">Cancel</button>
-        <button id="confirmWithdraw">Done</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="setPasswordModal" class="modal">
-    <div class="modal-content">
-      <h3>Set withdrawal password</h3>
-      <input type="password" id="withdrawPwd" maxlength="6" inputmode="numeric" placeholder="Enter a 6-digit password" />
-      <input type="password" id="confirmWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="Confirm Password" />
-      <div class="modal-actions">
-        <button id="cancelSetPwd">Cancel</button>
-        <button id="saveWithdrawPwd">Save</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="updatePasswordModal" class="modal">
-    <div class="modal-content">
-      <h3>Change withdrawal password</h3>
-      <input type="password" id="oldWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="Enter password" />
-      <input type="password" id="newWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="new password" />
-      <input type="password" id="confirmNewWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="confirm password" />
-      <div class="modal-actions">
-        <button id="cancelUpdatePwd">Cancel</button>
-        <button id="saveUpdatePwd">Save</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="confirmPwdModal" class="modal">
-    <div class="modal-content">
-      <h3>Enter withdrawal password</h3>
-      <input type="password" id="inputWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="Please enter password" />
-      <div class="modal-actions">
-        <button id="cancelConfirmPwd">Cancel</button>
-        <button id="submitWithdrawFinal">Done</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="rechargeModal" class="modal">
-    <div class="modal-content">
-      <h3>Recharge</h3>
-
-      <label for="amountInput" class="wallet-label">USDT</label>
-      <input type="number" id="amountInput" placeholder="Amount" min="1" step="0.01" />
-
-      <div class="wallet-section">
-        <p class="wallet-label"><strong>USDT-TRC20 address</strong></p>
-        <p class="wallet-address-text">TX1v24HLwkxWYskgkcDhp9o3819eJGD6ks</p>
-        <div class="wallet-address">
-          <span id="walletAddress"></span>
-          <button id="copyAddressBtn" data-wallet="TX1v24HLwkxWYskgkcDhp9o3819eJGD6ks">Copy</button>
+    <!--   ME SET PASS W2  -->
+    <div id="setPasswordModal" class="modal">
+      <div class="modal-content">
+        <h3>Set withdrawal password</h3>
+        <input type="password" id="withdrawPwd" maxlength="6" inputmode="numeric" placeholder="Enter a 6-digit password" />
+        <input type="password" id="confirmWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="Confirm Password" />
+        <div class="modal-actions">
+          <button id="cancelSetPwd">Cancel</button>
+          <button id="saveWithdrawPwd">Save</button>
         </div>
-        <img id="qrCode" src="https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Photos/USDT.jpg" alt="U9" width="160" />
-      </div>
-
-      <div class="upload-section">
-        <label for="fileInput">Upload Transfer Photo</label>
-        <input type="file" id="fileInput" accept="image/*" />
-      </div>
-
-      <p id="status"></p>
-
-      <div class="modal-actions">
-        <button id="cancelRecharge">Cancel</button>
-        <button id="uploadBtn">Done</button>
       </div>
     </div>
-  </div>
 
+    <!--   ME UPDATE PASS W3  -->
+    <div id="updatePasswordModal" class="modal">
+      <div class="modal-content">
+        <h3>Change withdrawal password</h3>
+        <input type="password" id="oldWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="Enter password" />
+        <input type="password" id="newWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="new password" />
+        <input type="password" id="confirmNewWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="confirm password" />
+        <div class="modal-actions">
+          <button id="cancelUpdatePwd">Cancel</button>
+          <button id="saveUpdatePwd">Save</button>
+        </div>
+      </div>
+    </div>
 
-  <!-- =====================================================
-      BOTTOM MENU
-  ===================================================== -->
+    <!--   ME CONFIRM PASS W4  -->
+    <div id="confirmPwdModal" class="modal">
+      <div class="modal-content">
+        <h3>Enter withdrawal password</h3>
+        <input type="password" id="inputWithdrawPwd" maxlength="6" inputmode="numeric" placeholder="Please enter password" />
+        <div class="modal-actions">
+          <button id="cancelConfirmPwd">Cancel</button>
+          <button id="submitWithdrawFinal">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <!--   ME RECHARGE  -->
+    <div id="rechargeModal" class="modal">
+      <div class="modal-content">
+        <h3>Recharge</h3>
+
+        <label for="amountInput" class="wallet-label">USDT</label>
+        <input type="number" id="amountInput" placeholder="Amount" min="1" step="0.01" />
+
+        <div class="wallet-section">
+          <p class="wallet-label"><strong>USDT-TRC20 address</strong></p>
+          <p class="wallet-address-text">TX1v24HLwkxWYskgkcDhp9o3819eJGD6ks</p>
+          <div class="wallet-address">
+            <span id="walletAddress"></span>
+            <button id="copyAddressBtn" data-wallet="TX1v24HLwkxWYskgkcDhp9o3819eJGD6ks">Copy</button>
+          </div>
+          <img id="qrCode" src="https://uiwttxqdoplttyrfqcbb.supabase.co/storage/v1/object/public/Photos/Photos/USDT.jpg" alt="U9" width="160" />
+        </div>
+
+        <div class="upload-section">
+          <label for="fileInput">Upload Transfer Photo</label>
+          <input type="file" id="fileInput" accept="image/*" />
+        </div>
+
+        <p id="status"></p>
+
+        <div class="modal-actions">
+          <button id="cancelRecharge">Cancel</button>
+          <button id="uploadBtn">Done</button>
+        </div>
+      </div>
+    </div>
+
+  <!-- ===========  BOTTOM MENU =========== -->
+  <!-- ===========  BOTTOM MENU =========== -->
+  <!-- ===========  BOTTOM MENU =========== -->
 
   <nav id="Menu-button">
 
@@ -1097,7 +1529,6 @@
 
     </button>
 
-
     <!-- SHOP -->
     <button
       id="shopButton"
@@ -1123,7 +1554,6 @@
       <span>Shop</span>
 
     </button>
-
 
     <!-- ORDER -->
     <div id="orderArea">
@@ -1165,8 +1595,7 @@
 
     </div>
 
-
-    <!-- CHAT -->
+    <!-- MESSAGE -->
     <button
       id="inboxButton"
       class="nav-button"
@@ -1195,7 +1624,6 @@
       </span>
 
     </button>
-
 
     <!-- ME -->
     <button
@@ -1231,6 +1659,7 @@
 
   </nav>
 
+  <!-- JS -->
   <script src="Home/home.js"></script>
   <script src="Shop/shop.js"></script>
   <script src="Order/order.js"></script>
@@ -1241,6 +1670,9 @@
   <script src="common/unread.js"></script>
   <script src="Recharge/recharge.js"></script>
   <script src="inbox/inbox.js"></script>
+  <script src="Me/wdhistory.js"></script>
+  <script src="Me/password.js"></script>
+  <script src="Me/logout/logout.js"></script>
   
 </body>
 </html>
