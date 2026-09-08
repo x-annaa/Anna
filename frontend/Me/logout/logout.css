@@ -1,0 +1,188 @@
+/* =====================================================
+   ME LOGOUT MODAL
+===================================================== */
+
+
+.me-logoutModal-modal {
+
+  display:none;
+
+  position:fixed;
+
+  top:0;
+
+  left:0;
+
+  width:100%;
+
+  height:100%;
+
+  background:rgba(0,0,0,0.4);
+
+  justify-content:center;
+
+  align-items:center;
+
+  z-index:1000;
+
+}
+
+
+
+.me-logoutModal-modal-content {
+
+  background:#fff;
+
+  width:80%;
+
+  max-width:400px;
+
+  padding:20px;
+
+  border-radius:12px;
+
+  text-align:center;
+
+  box-shadow:0 5px 20px rgba(0,0,0,.25);
+
+}
+
+
+
+.me-logoutModal-modal-content p {
+
+  margin:0 0 20px;
+
+  font-size:15px;
+
+  color:#333;
+
+}
+
+
+
+.me-logoutModal-modal-content button {
+
+
+  width:45%;
+
+  padding:8px;
+
+  border:none;
+
+  border-radius:8px;
+
+  cursor:pointer;
+
+  font-size:14px;
+
+}
+
+
+
+#cancelLogout {
+
+  background:#ddd;
+
+  color:#333;
+
+}
+
+
+
+#confirmLogout {
+
+  background:#007bff;
+
+  color:white;
+
+}
+
+
+
+#cancelLogout:hover {
+
+  background:#ccc;
+
+}
+
+
+
+#confirmLogout:hover {
+
+  background:#0056b3;
+
+}
+
+.logout-confirm-check {
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  gap:8px;
+
+  margin:15px 0;
+
+  font-size:13px;
+
+  color:#555;
+
+}
+
+
+.logout-confirm-check input {
+
+  width:16px;
+
+  height:16px;
+
+}
+
+
+
+#logoutCountdown {
+
+  font-size:14px;
+
+  color:#777;
+
+  margin-bottom:15px;
+
+}
+
+
+.logout-buttons {
+
+  display:flex;
+
+  justify-content:center;
+
+  gap:15px;
+
+}
+
+
+
+.logout-buttons button:disabled {
+
+  opacity:0.5;
+
+  cursor:not-allowed;
+
+}
+
+.logout-title {
+
+  font-size:20px;
+
+  font-weight:bold;
+
+  margin-bottom:15px;
+
+  color:#222;
+
+}
+
