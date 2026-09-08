@@ -1,1 +1,1264 @@
+/* =====================================================
+   ME HISTORY MODAL
+===================================================== */
 
+.me-history-modal {
+
+    position: fixed;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    /*
+       背景稍微变暗
+       可以看到下面的 Me 页面
+    */
+    background: rgba(0, 0, 0, 0.18);
+
+    /*
+       背景模糊
+    */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+
+    z-index: 9999;
+
+    box-sizing: border-box;
+
+    /*
+       初始状态
+    */
+    opacity: 0;
+
+    visibility: hidden;
+
+    pointer-events: none;
+
+    transition:
+        opacity 0.28s ease,
+        visibility 0.28s ease;
+
+}
+
+
+/* =====================================================
+   OPEN STATE
+===================================================== */
+
+.me-history-modal.show {
+
+    opacity: 1;
+
+    visibility: visible;
+
+    pointer-events: auto;
+
+}
+
+
+/* =====================================================
+   MODAL CONTENT
+===================================================== */
+
+.me-history-modal-content {
+
+    width: 100%;
+    height: 100%;
+
+    background: transparent;
+
+    box-sizing: border-box;
+
+    overflow: hidden;
+
+    display: flex;
+
+    flex-direction: column;
+
+    /*
+       顶部保留 10vh
+       可以看到下面的 Me 页面
+    */
+    padding-top: 10vh;
+
+    /*
+       初始从底部开始
+    */
+    transform: translateY(100%);
+
+    transition:
+        transform 0.42s cubic-bezier(
+            0.22,
+            1,
+            0.36,
+            1
+        );
+
+}
+
+
+/* =====================================================
+   CONTENT OPEN ANIMATION
+===================================================== */
+
+.me-history-modal.show
+.me-history-modal-content {
+
+    transform: translateY(0);
+
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.me-history-header {
+
+    position: relative;
+
+    flex-shrink: 0;
+
+    width: 100%;
+
+    height: 60px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background: #4e9cff;
+
+    border-bottom: 1px solid #ddd;
+
+    box-sizing: border-box;
+
+}
+
+
+/* =====================================================
+   HEADER TITLE
+===================================================== */
+
+.me-history-header h3 {
+
+    margin: 0;
+
+    padding: 0;
+
+    font-size: 18px;
+
+    font-weight: 600;
+
+    color: #ffffff;
+
+    line-height: 1;
+
+    white-space: nowrap;
+
+}
+
+
+/* =====================================================
+   BACK BUTTON
+===================================================== */
+
+.me-history-back {
+
+    position: absolute;
+
+    left: 15px;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    width: 40px;
+    height: 38px;
+
+    padding: 0;
+
+    border: none;
+
+    background: transparent;
+
+    color: #ffffff;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    cursor: pointer;
+
+    border-radius: 8px;
+
+    transition:
+        background 0.18s ease,
+        transform 0.15s ease;
+
+}
+
+
+
+.me-history-back:active {
+
+    transform:
+        translateY(-50%)
+        scale(0.94);
+
+}
+
+
+.me-history-back svg {
+
+    width: 24px;
+    height: 24px;
+
+    display: block;
+
+}
+
+
+/* =====================================================
+   HEADER RIGHT SPACE
+===================================================== */
+
+.me-history-header-space {
+
+    position: absolute;
+
+    right: 15px;
+
+    width: 40px;
+    height: 38px;
+
+}
+
+
+/* =====================================================
+   HISTORY LIST
+===================================================== */
+
+.me-history-list {
+
+    flex: 1;
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 15px;
+
+    background: #ffffff;
+
+    overflow-y: auto;
+
+    overflow-x: hidden;
+
+    -webkit-overflow-scrolling: touch;
+
+    scrollbar-width: thin;
+
+}
+
+
+/* =====================================================
+   HISTORY ITEM
+===================================================== */
+
+.me-history-item {
+
+    width: 100%;
+
+    min-height: 78px;
+
+    box-sizing: border-box;
+
+    padding: 12px 15px;
+
+    margin-bottom: 10px;
+
+    background: #ffffff;
+
+    border: 1px solid #eeeeee;
+
+    border-radius: 14px;
+
+    display: flex;
+
+    align-items: center;
+
+    cursor: pointer;
+
+    /*
+       点击反馈
+    */
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease;
+
+}
+
+
+/* =====================================================
+   LAST ITEM
+===================================================== */
+
+.me-history-item:last-child {
+
+    margin-bottom: 0;
+
+}
+
+
+/* =====================================================
+   ITEM HOVER
+===================================================== */
+
+.me-history-item:hover {
+
+    background: #fafafa;
+
+    box-shadow:
+        0 5px 18px rgba(0, 0, 0, 0.07);
+
+}
+
+
+/* =====================================================
+   ITEM ACTIVE
+===================================================== */
+
+.me-history-item:active {
+
+    transform: scale(0.985);
+
+}
+
+
+/* =====================================================
+   LIST ICON
+===================================================== */
+
+.me-history-list-icon {
+
+    width: 52px;
+    height: 52px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    margin-right: 13px;
+
+}
+
+
+/* =====================================================
+   LIST ICON SVG
+===================================================== */
+
+.me-history-list-icon svg {
+
+    width: 46px;
+    height: 46px;
+
+    display: block;
+
+}
+
+
+/* =====================================================
+   RECHARGE ICON
+===================================================== */
+
+.recharge-list-icon {
+
+    width: 52px;
+    height: 52px;
+
+}
+
+
+/* =====================================================
+   WITHDRAW ICON
+===================================================== */
+
+.withdraw-list-icon {
+
+    color: #4e9cff;
+
+}
+
+
+/* =====================================================
+   WITHDRAW SVG
+===================================================== */
+
+.withdraw-list-icon svg {
+
+    width: 30px;
+    height: 30px;
+
+}
+
+
+/* =====================================================
+   ITEM CENTER
+===================================================== */
+
+.me-history-list-center {
+
+    min-width: 0;
+
+    flex: 1;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+}
+
+
+/* =====================================================
+   ITEM TYPE
+===================================================== */
+
+.me-history-list-type {
+
+    font-size: 16px;
+
+    font-weight: 650;
+
+    color: #171717;
+
+    line-height: 1.3;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+}
+
+
+/* =====================================================
+   ITEM TIME
+===================================================== */
+
+.me-history-list-time {
+
+    margin-top: 6px;
+
+    font-size: 12px;
+
+    font-weight: 400;
+
+    color: #888888;
+
+    line-height: 1.3;
+
+    white-space: nowrap;
+
+}
+
+
+/* =====================================================
+   ITEM AMOUNT
+===================================================== */
+
+.me-history-list-amount {
+
+    flex-shrink: 0;
+
+    margin-left: 10px;
+
+    font-size: 16px;
+
+    font-weight: 700;
+
+    line-height: 1.3;
+
+    white-space: nowrap;
+
+}
+
+
+/* =====================================================
+   RECHARGE AMOUNT
+===================================================== */
+
+.recharge-list-amount {
+
+    color: #18a960;
+
+}
+
+
+/* =====================================================
+   WITHDRAW AMOUNT
+===================================================== */
+
+.withdraw-list-amount {
+
+    color: #ff0000;
+
+}
+
+
+/* =====================================================
+   HISTORY DETAIL
+===================================================== */
+
+.me-history-detail {
+
+    display: none;
+
+    flex: 1;
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    background: #ffffff;
+
+    overflow-y: auto;
+
+    overflow-x: hidden;
+
+    -webkit-overflow-scrolling: touch;
+
+    padding: 20px 18px 40px;
+
+}
+
+
+
+/* =====================================================
+   DETAIL TOP
+===================================================== */
+
+.me-history-detail-top {
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    text-align: center;
+
+    /*
+       内部间距
+    */
+    padding:
+        24px
+        15px
+        28px;
+
+    /*
+       白色卡片
+    */
+    background: #ffffff;
+
+    /*
+       圆角
+    */
+    border-radius: 16px;
+
+    /*
+       边框
+    */
+    border: 1px solid #eeeeee;
+
+    /*
+       轻微阴影
+    */
+    box-shadow:
+        0 4px 18px
+        rgba(0, 0, 0, 0.06);
+
+    /*
+       防止内容溢出圆角
+    */
+    overflow: hidden;
+
+    /*
+       与下面的信息区域保持距离
+    */
+    margin-bottom: 18px;
+
+}
+
+
+/* =====================================================
+   DETAIL ICON
+===================================================== */
+
+.me-history-detail-icon {
+
+    width: 90px;
+    height: 90px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 15px;
+
+}
+
+
+/* =====================================================
+   DETAIL ICON SVG
+===================================================== */
+
+.me-history-detail-icon svg {
+
+    width: 82px;
+    height: 82px;
+
+    display: block;
+
+}
+
+
+/* =====================================================
+   WITHDRAW DETAIL ICON
+===================================================== */
+
+.withdraw-detail-icon {
+
+    color: #4e9cff;
+
+}
+
+
+/* =====================================================
+   DETAIL STATUS
+===================================================== */
+
+.me-history-detail-status {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 7px;
+
+    font-size: 15px;
+
+    font-weight: 650;
+
+    line-height: 1.3;
+
+}
+
+
+/* =====================================================
+   DETAIL STATUS SVG
+===================================================== */
+
+.me-history-detail-status svg {
+
+    width: 21px;
+    height: 21px;
+
+    flex-shrink: 0;
+
+    display: block;
+
+}
+
+
+/* =====================================================
+   DETAIL AMOUNT
+===================================================== */
+
+.me-history-detail-amount {
+
+    margin-top: 9px;
+
+    font-size: 28px;
+
+    font-weight: 750;
+
+    line-height: 1.2;
+
+    letter-spacing: -0.4px;
+
+}
+
+
+/* =====================================================
+   RECHARGE DETAIL AMOUNT
+===================================================== */
+
+.detail-recharge-amount {
+
+    color: #18a960;
+
+}
+
+
+/* =====================================================
+   WITHDRAW DETAIL AMOUNT
+===================================================== */
+
+.detail-withdraw-amount {
+
+    color: #ff0000;
+
+}
+
+
+/* =====================================================
+   DETAIL INFORMATION
+===================================================== */
+
+.me-history-detail-info {
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    border-top: 1px solid #eeeeee;
+
+}
+
+
+/* =====================================================
+   DETAIL ROW
+===================================================== */
+
+.me-history-detail-row {
+
+    width: 100%;
+
+    min-height: 50px;
+
+    box-sizing: border-box;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+    border-bottom: 1px solid #eeeeee;
+
+    font-size: 13px;
+
+}
+
+
+/* =====================================================
+   DETAIL LABEL
+===================================================== */
+
+.me-history-detail-label {
+
+    flex-shrink: 0;
+
+    color: #888888;
+
+    font-weight: 400;
+
+}
+
+
+/* =====================================================
+   DETAIL VALUE
+===================================================== */
+
+.me-history-detail-value {
+
+    min-width: 0;
+
+    max-width: 70%;
+
+    color: #222222;
+
+    font-weight: 500;
+
+    text-align: right;
+
+    word-break: break-word;
+
+    overflow-wrap: anywhere;
+
+}
+
+
+/* =====================================================
+   DETAIL STATUS — DONE
+===================================================== */
+
+.detail-status-done {
+
+    color: #18a960;
+
+}
+
+
+/* =====================================================
+   DETAIL STATUS — CANCEL
+===================================================== */
+
+.detail-status-cancel {
+
+    color: #e74c3c;
+
+}
+
+
+/* =====================================================
+   DETAIL STATUS — PENDING
+===================================================== */
+
+.detail-status-pending {
+
+    color: #f39c12;
+
+}
+
+
+/* =====================================================
+   LOADING
+===================================================== */
+
+.me-history-loading {
+
+    width: 100%;
+
+    padding:
+        40px
+        10px;
+
+    box-sizing: border-box;
+
+    text-align: center;
+
+    color: #888888;
+
+    font-size: 14px;
+
+}
+
+
+/* =====================================================
+   EMPTY
+===================================================== */
+
+.me-history-empty {
+
+    width: 100%;
+
+    padding:
+        40px
+        10px;
+
+    box-sizing: border-box;
+
+    text-align: center;
+
+    color: #888888;
+
+    font-size: 14px;
+
+}
+
+
+/* =====================================================
+   ERROR
+===================================================== */
+
+.me-history-error {
+
+    width: 100%;
+
+    padding:
+        40px
+        10px;
+
+    box-sizing: border-box;
+
+    text-align: center;
+
+    color: #e74c3c;
+
+    font-size: 14px;
+
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 600px) {
+
+
+    /* -----------------------------------------------
+       HEADER
+    ----------------------------------------------- */
+
+    .me-history-header {
+
+        height: 55px;
+
+    }
+
+
+    .me-history-header h3 {
+
+        font-size: 16px;
+
+    }
+
+
+    .me-history-back {
+
+        left: 10px;
+
+        width: 36px;
+        height: 36px;
+
+    }
+
+
+    .me-history-header-space {
+
+        right: 10px;
+
+        width: 36px;
+        height: 36px;
+
+    }
+
+
+    /* -----------------------------------------------
+       LIST
+    ----------------------------------------------- */
+
+    .me-history-list {
+
+        padding: 12px;
+
+    }
+
+
+    /* -----------------------------------------------
+       ITEM
+    ----------------------------------------------- */
+
+    .me-history-item {
+
+        min-height: 70px;
+
+        padding:
+            10px
+            12px;
+
+        border-radius: 12px;
+
+    }
+
+
+    /* -----------------------------------------------
+       ICON
+    ----------------------------------------------- */
+
+    .me-history-list-icon {
+
+        width: 45px;
+        height: 45px;
+
+        margin-right: 10px;
+
+    }
+
+
+    .me-history-list-icon svg {
+
+        width: 40px;
+        height: 40px;
+
+        pointer-events:none;
+
+    }
+
+
+    /* -----------------------------------------------
+       TYPE
+    ----------------------------------------------- */
+
+    .me-history-list-type {
+
+        font-size: 15px;
+
+    }
+
+
+    /* -----------------------------------------------
+       TIME
+    ----------------------------------------------- */
+
+    .me-history-list-time {
+
+        margin-top: 5px;
+
+        font-size: 11px;
+
+    }
+
+
+    /* -----------------------------------------------
+       AMOUNT
+    ----------------------------------------------- */
+
+    .me-history-list-amount {
+
+        font-size: 14px;
+
+        margin-left: 7px;
+
+    }
+
+
+    /* -----------------------------------------------
+       DETAIL
+    ----------------------------------------------- */
+
+    .me-history-detail {
+
+        padding:
+            18px
+            14px
+            35px;
+
+    }
+
+
+    /* -----------------------------------------------
+       DETAIL ICON
+    ----------------------------------------------- */
+
+    .me-history-detail-icon {
+
+        width: 78px;
+        height: 78px;
+
+        margin-bottom: 13px;
+
+    }
+
+
+    .me-history-detail-icon svg {
+
+        width: 70px;
+        height: 70px;
+
+    }
+
+
+    /* -----------------------------------------------
+       DETAIL STATUS
+    ----------------------------------------------- */
+
+    .me-history-detail-status {
+
+        font-size: 14px;
+
+    }
+
+
+    /* -----------------------------------------------
+       DETAIL AMOUNT
+    ----------------------------------------------- */
+
+    .me-history-detail-amount {
+
+        font-size: 24px;
+
+    }
+
+
+    /* -----------------------------------------------
+       DETAIL ROW
+    ----------------------------------------------- */
+
+    .me-history-detail-row {
+
+        min-height: 47px;
+
+        gap: 15px;
+
+        font-size: 12px;
+
+    }
+
+
+    /* -----------------------------------------------
+       DETAIL VALUE
+    ----------------------------------------------- */
+
+    .me-history-detail-value {
+
+        max-width: 68%;
+
+    }
+
+}
+
+
+/* =====================================================
+   VERY SMALL SCREEN
+===================================================== */
+
+@media (max-width: 400px) {
+
+
+    /* -----------------------------------------------
+       LIST
+    ----------------------------------------------- */
+
+    .me-history-list {
+
+        padding: 10px;
+
+    }
+
+
+    /* -----------------------------------------------
+       ITEM
+    ----------------------------------------------- */
+
+    .me-history-item {
+
+        min-height: 66px;
+
+        padding:
+            9px
+            10px;
+
+        border-radius: 10px;
+
+    }
+
+
+    /* -----------------------------------------------
+       ICON
+    ----------------------------------------------- */
+
+    .me-history-list-icon {
+
+        width: 40px;
+        height: 40px;
+
+        margin-right: 8px;
+
+    }
+
+
+    .me-history-list-icon svg {
+
+        width: 36px;
+        height: 36px;
+
+    }
+
+
+    /* -----------------------------------------------
+       TYPE
+    ----------------------------------------------- */
+
+    .me-history-list-type {
+
+        font-size: 14px;
+
+    }
+
+
+    /* -----------------------------------------------
+       TIME
+    ----------------------------------------------- */
+
+    .me-history-list-time {
+
+        font-size: 10px;
+
+    }
+
+
+    /* -----------------------------------------------
+       AMOUNT
+    ----------------------------------------------- */
+
+    .me-history-list-amount {
+
+        font-size: 13px;
+
+    }
+
+
+    /* -----------------------------------------------
+       DETAIL
+    ----------------------------------------------- */
+
+    .me-history-detail {
+
+        padding:
+            15px
+            12px
+            30px;
+
+    }
+
+
+    /* -----------------------------------------------
+       DETAIL AMOUNT
+    ----------------------------------------------- */
+
+    .me-history-detail-amount {
+
+        font-size: 22px;
+
+    }
+
+
+    /* -----------------------------------------------
+       DETAIL ROW
+    ----------------------------------------------- */
+
+    .me-history-detail-row {
+
+        min-height: 44px;
+
+        font-size: 11px;
+
+    }
+
+}
